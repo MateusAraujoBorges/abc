@@ -29,7 +29,9 @@ public interface Configuration {
 		 * and verification. See <a
 		 * href="http://vsl.cis.udel.edu/civl">http://vsl.cis.udel.edu/civl</a>.
 		 */
-		CIVL_C
+		CIVL_C,
+		/** The programming language FORTRAN, as specified in the FORTRAn77 Standard */
+		FORTRAN77,
 	};
 
 	/**
