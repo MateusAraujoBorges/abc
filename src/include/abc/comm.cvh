@@ -84,7 +84,7 @@ $gcomm $gcomm_create($scope scope, int size);
 void $gcomm_destroy($gcomm gcomm);
 
 /* Returns $true iff gcomm points to a valid object. */
-_Bool $gcomm_defined($gcomm gcomm);
+//_Bool $gcomm_defined($gcomm gcomm);
 
 void $gcomm_dup($comm comm, $comm newcomm);
 
@@ -133,6 +133,6 @@ $message $comm_seek($comm comm, int source, int tag);
 $message $comm_dequeue($comm comm, int source, int tag);
 
 /* Returns $true iff comm points to a valid object. */
-_Bool $comm_defined($comm comm);
+//_Bool $comm_defined($comm comm);
 
 #endif
