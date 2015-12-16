@@ -208,9 +208,11 @@ public class PreprocessorTokenSource implements CTokenSource {
 
 			if (!tmpFile && (config != null && config.svcomp())) {
 				CommonToken svcomp = new CommonToken(tree.getToken()
-						.getInputStream(), 80, 0, -1, -1);
+						.getInputStream(), PreprocessorLexer.HEADER_NAME, 0,
+						-1, -1);
 				CommonToken include = new CommonToken(tree.getToken()
-						.getInputStream(), 136, 0, -1, -1);
+						.getInputStream(), PreprocessorLexer.PINCLUDE, 0, -1,
+						-1);
 
 				svcomp.setText("<svcomp.h>");
 				include.setText("#include");
@@ -379,6 +381,8 @@ public class PreprocessorTokenSource implements CTokenSource {
 	private void processNextNode() throws PreprocessorException {
 		CommonTree node = (CommonTree) getNextInputNode();
 
+		if (node != null)
+			System.out.println(node.getText());
 		if (inTextBlock()) {
 			// If you are in a TEXT_BLOCK, you don't have to check for any
 			// directives.
