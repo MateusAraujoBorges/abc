@@ -154,7 +154,7 @@ public class CommonBasicType extends CommonObjectType implements
 		case UNSIGNED:
 			return "unsigned";
 		case UNSIGNED_CHAR:
-			return "usigned char";
+			return "unsigned char";
 		case UNSIGNED_LONG:
 			return "unsigned long";
 		case UNSIGNED_LONG_LONG:
