@@ -381,8 +381,6 @@ public class PreprocessorTokenSource implements CTokenSource {
 	private void processNextNode() throws PreprocessorException {
 		CommonTree node = (CommonTree) getNextInputNode();
 
-		if (node != null)
-			System.out.println(node.getText());
 		if (inTextBlock()) {
 			// If you are in a TEXT_BLOCK, you don't have to check for any
 			// directives.
