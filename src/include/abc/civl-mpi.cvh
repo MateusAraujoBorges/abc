@@ -200,9 +200,12 @@ void $mpi_assertConsistentType(void * buf, MPI_Datatype datatype);
    datatypes: the datatype array stores datatypes enumerators involved in 
               the message.
 */
-$bundle $mpi_createCoroutineEntries(int routineTag, int root, 
+$bundle $mpi_createCoroutineEntry(int routineTag, int root, 
 				    int op, int numDatatypes, int * datatypes);
 
+/* Compare two collective routine entries, report errors if there is
+*  unmatched informations in these entries. */
+void $mpi_diffCoroutineEntries($bundle specEntry, $bundle mineEntry, int rank);
 
 
 /* Checking a boolean expression in a collective way. Participating

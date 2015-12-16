@@ -61,8 +61,9 @@ typedef struct $collect_checker * $collect_checker;
 /* Creates and initializes the global collective operation checker */
 $gcollect_checker $gcollect_checker_create($scope scope);
 
-/* Destroy a global collective operation checker */
-void $gcollect_checker_destroy($gcollect_checker checker);
+/* Destroy a global collective operation checker.  Returns number of
+   junk records remaining in the checker. */
+int $gcollect_checker_destroy($gcollect_checker checker);
 
 /* Creates and initializes the local collective operation checker */
 $collect_checker $collect_checker_create($scope scope, 
@@ -72,7 +73,7 @@ $collect_checker $collect_checker_create($scope scope,
 void $collect_checker_destroy($collect_checker checker);
 
 /* Do a check for a collecive operation of one process */
-_Bool $collect_check($collect_checker checker, int place, int nprocs,
+$bundle $collect_check($collect_checker checker, int place, int nprocs,
 		    $bundle entries);
 
 #endif
