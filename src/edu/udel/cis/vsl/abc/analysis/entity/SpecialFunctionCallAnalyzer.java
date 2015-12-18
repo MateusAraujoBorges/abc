@@ -14,7 +14,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * This class maintains the hard-coded information of analyzes the variable

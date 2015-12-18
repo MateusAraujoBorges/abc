@@ -6,8 +6,8 @@ import edu.udel.cis.vsl.abc.ast.type.IF.ArrayType;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.StructureOrUnionType;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.token.IF.Source;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * A designation is specifies (or "designates") a point in a compound literal

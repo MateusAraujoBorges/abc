@@ -7,7 +7,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonOmpWorkshareNode extends CommonOmpStatementNode implements
 		OmpWorksharingNode {

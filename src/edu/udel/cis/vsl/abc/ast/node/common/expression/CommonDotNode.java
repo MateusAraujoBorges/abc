@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonDotNode extends CommonExpressionNode implements DotNode {
 

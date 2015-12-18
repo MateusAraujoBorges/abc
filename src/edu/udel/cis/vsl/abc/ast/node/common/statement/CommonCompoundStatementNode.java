@@ -5,7 +5,7 @@ import java.util.List;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.common.CommonSequenceNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonCompoundStatementNode extends
 		CommonSequenceNode<BlockItemNode> implements CompoundStatementNode {

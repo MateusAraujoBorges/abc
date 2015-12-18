@@ -24,7 +24,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.IfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * Given an AST, determines and sets scope of every node.

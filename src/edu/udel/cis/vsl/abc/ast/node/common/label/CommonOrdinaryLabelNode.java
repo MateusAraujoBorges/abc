@@ -8,7 +8,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonDeclarationNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonOrdinaryLabelNode extends CommonDeclarationNode implements
 		OrdinaryLabelNode {

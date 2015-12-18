@@ -10,7 +10,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 /**
  * This implements the OpenMP loop construct. The loop construct specifies that

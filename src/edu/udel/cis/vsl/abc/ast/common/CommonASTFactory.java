@@ -8,9 +8,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
-import edu.udel.cis.vsl.abc.token.IF.SourceFile;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
 
 //TODO improve the printing of variable declarations when array type is involved.
 

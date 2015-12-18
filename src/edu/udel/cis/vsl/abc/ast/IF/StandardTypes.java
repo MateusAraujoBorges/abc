@@ -10,7 +10,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Typedef;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
-import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
+import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
 
 /**
  * The class collects together the standard type definitions, e.g., size_t,

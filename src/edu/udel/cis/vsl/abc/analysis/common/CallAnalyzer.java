@@ -20,7 +20,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.PointerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType.SignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * Given an AST, determines caller/callee relationships among functions.

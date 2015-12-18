@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonIntegerConstantNode extends CommonConstantNode implements
 		IntegerConstantNode {

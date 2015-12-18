@@ -60,17 +60,17 @@
 	-->
 
 	<target name="CPreprocessorLexerDependencies">
-		<uptodate property="CPreprocessorLexerUpToDate" srcfile="${c.grammar.dir}/PreprocessorLexer.g" targetfile="${c.real.src.dir}/preproc/common/PreprocessorLexer.java" />
+		<uptodate property="CPreprocessorLexerUpToDate" srcfile="${c.grammar.dir}/PreprocessorLexer.g" targetfile="${c.real.src.dir}/preproc/PreprocessorLexer.java" />
 	</target>
 
 	<target name="CPreprocessorLexer" depends="CPreprocessorLexerDependencies" unless="CPreprocessorLexerUpToDate">
 		<delete file="${c.grammar.dir}/PreprocessorParser.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/PreprocessorLexer.java" />
+		<delete file="${c.real.src.dir}/preproc/PreprocessorLexer.java" />
 		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${c.grammar.dir}">
 			<arg value="-verbose" />
 			<arg value="PreprocessorLexer.g" />
 		</java>
-		<move file="${c.grammar.dir}/PreprocessorLexer.java" todir="${c.real.src.dir}/preproc/common" />
+		<move file="${c.grammar.dir}/PreprocessorLexer.java" todir="${c.real.src.dir}/preproc/" />
 	</target>
 
 	<!--
@@ -83,8 +83,8 @@
 	-->
 
 	<target name="CPreprocessorParserDependencies" depends="CPreprocessorLexer">
-		<uptodate property="unchangedCPreprocessorParserGrammar" srcfile="${c.grammar.dir}/PreprocessorParser.g" targetfile="${c.real.src.dir}/preproc/common/PreprocessorParser.java" />
-		<uptodate property="CPreprocessorLexerBeforePreprocessorParser" srcfile="${c.real.src.dir}/preproc/common/PreprocessorLexer.java" targetfile="${c.real.src.dir}/preproc/common/PreprocessorParser.java" />
+		<uptodate property="unchangedCPreprocessorParserGrammar" srcfile="${c.grammar.dir}/PreprocessorParser.g" targetfile="${c.real.src.dir}/preproc/PreprocessorParser.java" />
+		<uptodate property="CPreprocessorLexerBeforePreprocessorParser" srcfile="${c.real.src.dir}/preproc/PreprocessorLexer.java" targetfile="${c.real.src.dir}/preproc/PreprocessorParser.java" />
 		<condition property="CPreprocessorParserUpToDate">
 			<and>
 				<isset property="unchangedCPreprocessorParserGrammar" />
@@ -95,12 +95,12 @@
 
 	<target name="CPreprocessorParser" depends="CPreprocessorParserDependencies" unless="CPreprocessorParserUpToDate">
 		<delete file="${c.grammar.dir}/PreprocessorParser.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/PreprocessorParser.java" />
+		<delete file="${c.real.src.dir}/preproc/PreprocessorParser.java" />
 		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${c.grammar.dir}">
 			<arg value="-verbose" />
 			<arg value="PreprocessorParser.g" />
 		</java>
-		<move file="${c.grammar.dir}/PreprocessorParser.java" todir="${c.real.src.dir}/preproc/common" />
+		<move file="${c.grammar.dir}/PreprocessorParser.java" todir="${c.real.src.dir}/preproc" />
 	</target>
 
 	<!--
@@ -110,8 +110,8 @@
 	-->
 
 	<target name="CPreprocessorExpressionParserDependencies" depends="CPreprocessorLexer">
-		<uptodate property="unchangedCPreprocessorExpressionParserGrammar" srcfile="${c.grammar.dir}/PreprocessorExpressionParser.g" targetfile="${c.real.src.dir}/preproc/common/PreprocessorExpressionParser.java" />
-		<uptodate property="CPreprocessorLexerBeforePreprocessorExpressionParser" srcfile="${c.real.src.dir}/preproc/common/PreprocessorLexer.java" targetfile="${c.real.src.dir}/preproc/common/PreprocessorExpressionParser.java" />
+		<uptodate property="unchangedCPreprocessorExpressionParserGrammar" srcfile="${c.grammar.dir}/PreprocessorExpressionParser.g" targetfile="${c.real.src.dir}/preproc/PreprocessorExpressionParser.java" />
+		<uptodate property="CPreprocessorLexerBeforePreprocessorExpressionParser" srcfile="${c.real.src.dir}/preproc/PreprocessorLexer.java" targetfile="${c.real.src.dir}/preproc/PreprocessorExpressionParser.java" />
 		<condition property="CPreprocessorExpressionParserUpToDate">
 			<and>
 				<isset property="unchangedCPreprocessorExpressionParserGrammar" />
@@ -122,12 +122,12 @@
 
 	<target name="CPreprocessorExpressionParser" depends="CPreprocessorExpressionParserDependencies" unless="CPreprocessorExpressionParserUpToDate">
 		<delete file="${c.grammar.dir}/PreprocessorExpressionParser.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/PreprocessorExpressionParser.java" />
+		<delete file="${c.real.src.dir}/preproc/PreprocessorExpressionParser.java" />
 		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${c.grammar.dir}">
 			<arg value="-verbose" />
 			<arg value="PreprocessorExpressionParser.g" />
 		</java>
-		<move file="${c.grammar.dir}/PreprocessorExpressionParser.java" todir="${c.real.src.dir}/preproc/common" />
+		<move file="${c.grammar.dir}/PreprocessorExpressionParser.java" todir="${c.real.src.dir}/preproc" />
 	</target>
 
 
@@ -136,8 +136,8 @@
 	-->
 
 	<target name="CivlCParserDependencies" depends="CPreprocessorParser">
-		<uptodate property="unchangedCivlCParserGrammar" srcfile="${c.grammar.dir}/CivlCParser.g" targetfile="${c.real.src.dir}/parse/common/CivlCParser.java" />
-		<uptodate property="PreprocessorParserBeforeCivlCParser" srcfile="${c.real.src.dir}/preproc/common/PreprocessorParser.java" targetfile="${c.real.src.dir}/parse/common/CivlCParser.java" />
+		<uptodate property="unchangedCivlCParserGrammar" srcfile="${c.grammar.dir}/CivlCParser.g" targetfile="${c.real.src.dir}/parse/CivlCParser.java" />
+		<uptodate property="PreprocessorParserBeforeCivlCParser" srcfile="${c.real.src.dir}/preproc/PreprocessorParser.java" targetfile="${c.real.src.dir}/parse/CivlCParser.java" />
 		<condition property="CivlCParserUpToDate">
 			<and>
 				<isset property="unchangedCivlCParserGrammar" />
@@ -148,12 +148,12 @@
 
 	<target name="CivlCParser" depends="CivlCParserDependencies" unless="CivlCParserUpToDate">
 		<delete file="${c.grammar.dir}/CivlCParser.tokens" />
-		<delete file="${c.real.src.dir}/parse/common/CivlCParser.java" />
+		<delete file="${c.real.src.dir}/parse/CivlCParser.java" />
 		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${c.grammar.dir}">
 			<arg value="-verbose" />
 			<arg value="CivlCParser.g" />
 		</java>
-		<move file="${c.grammar.dir}/CivlCParser.java" todir="${c.real.src.dir}/parse/common" />
+		<move file="${c.grammar.dir}/CivlCParser.java" todir="${c.real.src.dir}/parse" />
 	</target>
 
 
@@ -166,7 +166,7 @@
 
 	<target name="OmpLexerDependencies" depends="CivlCParser">
 		<uptodate property="unchangedOmpLexerGrammar" srcfile="${c.grammar.dir}/OmpLexer.g" targetfile="${c.grammar.dir}/OmpLexer.tokens" />
-		<uptodate property="CivlCParserTokensBeforeOmpLexer" srcfile="${c.real.src.dir}/parse/common/CivlCParser.java" targetfile="${c.grammar.dir}/OmpLexer.tokens" />
+		<uptodate property="CivlCParserTokensBeforeOmpLexer" srcfile="${c.real.src.dir}/parse/CivlCParser.java" targetfile="${c.grammar.dir}/OmpLexer.tokens" />
 		<condition property="OmpLexerUpToDate">
 			<and>
 				<isset property="unchangedOmpLexerGrammar" />
@@ -192,9 +192,9 @@
 	-->
 
 	<target name="OmpParserDependencies" depends="OmpLexer,CivlCParser">
-		<uptodate property="unchangedOmpParserGrammar" srcfile="${c.grammar.dir}/OmpParser.g" targetfile="${c.real.src.dir}/parse/common/OmpParser.java" />
-		<uptodate property="OmpLexerBeforeOmpParser" srcfile="${c.grammar.dir}/OmpLexer.tokens" targetfile="${c.real.src.dir}/parse/common/OmpParser.java" />
-		<uptodate property="CivlCParserBeforeOmpParser" srcfile="${c.real.src.dir}/parse/common/CivlCParser.java" targetfile="${c.real.src.dir}/parse/common/OmpParser.java" />
+		<uptodate property="unchangedOmpParserGrammar" srcfile="${c.grammar.dir}/OmpParser.g" targetfile="${c.real.src.dir}/parse/OmpParser.java" />
+		<uptodate property="OmpLexerBeforeOmpParser" srcfile="${c.grammar.dir}/OmpLexer.tokens" targetfile="${c.real.src.dir}/parse/OmpParser.java" />
+		<uptodate property="CivlCParserBeforeOmpParser" srcfile="${c.real.src.dir}/parse/CivlCParser.java" targetfile="${c.real.src.dir}/parse/OmpParser.java" />
 		<condition property="OmpParserUpToDate">
 			<and>
 				<isset property="unchangedOmpParserGrammar" />
@@ -210,13 +210,13 @@
 			<arg value="OmpParser.g" />
 		</java>
 		<move file="${c.grammar.dir}/OmpParser.java" tofile="${c.grammar.dir}/OmpParser2.java" />
-		<echo message="package edu.udel.cis.vsl.abc.front.c.parse.common;${line.separator}import edu.udel.cis.vsl.abc.front.c.parse.IF.RuntimeParseException;${line.separator}import edu.udel.cis.vsl.abc.front.c.preproc.common.*;${line.separator}${line.separator}" file="${c.grammar.dir}/OmpParser.java" />
+		<echo message="package edu.udel.cis.vsl.abc.front.c.parse;${line.separator}import edu.udel.cis.vsl.abc.front.IF.parse.RuntimeParseException;${line.separator}import edu.udel.cis.vsl.abc.front.c.preproc.*;${line.separator}${line.separator}" file="${c.grammar.dir}/OmpParser.java" />
 		<concat destfile="${c.grammar.dir}/OmpParser.java" append="true">
 			<filelist dir="${c.grammar.dir}" files="OmpParser2.java" />
 		</concat>
 		<delete file="${c.grammar.dir}/OmpParser2.java" />
-		<move file="${c.grammar.dir}/OmpParser.java" todir="${c.real.src.dir}/parse/common" />
-		<move file="${c.grammar.dir}/OmpParser_CivlCParser.java" todir="${c.real.src.dir}/parse/common" />
+		<move file="${c.grammar.dir}/OmpParser.java" todir="${c.real.src.dir}/parse" />
+		<move file="${c.grammar.dir}/OmpParser_CivlCParser.java" todir="${c.real.src.dir}/parse" />
 
 	</target>
 
@@ -346,11 +346,11 @@
 
 	<target name="cleanOmp" description="Delete all generated files.">
 		<delete file="${c.grammar.dir}/OmpLexer.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/OmpLexer.java" />
-		<delete file="${c.real.src.dir}/preproc/common/OmpLexer_PreprocessorLexer.java" />
+		<delete file="${c.real.src.dir}/preproc/OmpLexer.java" />
+		<delete file="${c.real.src.dir}/preproc/OmpLexer_PreprocessorLexer.java" />
 		<delete file="${c.grammar.dir}/OmpParser.tokens" />
-		<delete file="${c.real.src.dir}/parse/common/OmpParser.java" />
-		<delete file="${c.real.src.dir}/parse/common/OmpParser_CivlCParser.java" />
+		<delete file="${c.real.src.dir}/parse/OmpParser.java" />
+		<delete file="${c.real.src.dir}/parse/OmpParser_CivlCParser.java" />
 	</target>
 
 	<target name="clean" description="Delete all generated files.">
@@ -363,19 +363,19 @@
 		<delete file="${basedir}/jacoco.exec" />
 		<delete file="${manifest-file}" />
 		<delete file="${c.grammar.dir}/PreprocessorLexer.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/PreprocessorLexer.java" />
+		<delete file="${c.real.src.dir}/preproc/PreprocessorLexer.java" />
 		<delete file="${c.grammar.dir}/PreprocessorParser.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/PreprocessorParser.java" />
+		<delete file="${c.real.src.dir}/preproc/PreprocessorParser.java" />
 		<delete file="${c.grammar.dir}/PreprocessorExpressionParser.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/PreprocessorExpressionParser.java" />
+		<delete file="${c.real.src.dir}/preproc/PreprocessorExpressionParser.java" />
 		<delete file="${c.grammar.dir}/CivlCParser.tokens" />
-		<delete file="${c.real.src.dir}/parse/common/CivlCParser.java" />
+		<delete file="${c.real.src.dir}/parse/CivlCParser.java" />
 		<delete file="${c.grammar.dir}/OmpLexer.tokens" />
-		<delete file="${c.real.src.dir}/preproc/common/OmpLexer.java" />
-		<delete file="${c.real.src.dir}/preproc/common/OmpLexer_PreprocessorLexer.java" />
+		<delete file="${c.real.src.dir}/preproc/OmpLexer.java" />
+		<delete file="${c.real.src.dir}/preproc/OmpLexer_PreprocessorLexer.java" />
 		<delete file="${c.grammar.dir}/OmpParser.tokens" />
-		<delete file="${c.real.src.dir}/parse/common/OmpParser.java" />
-		<delete file="${c.real.src.dir}/parse/common/OmpParser_CivlCParser.java" />
+		<delete file="${c.real.src.dir}/parse/OmpParser.java" />
+		<delete file="${c.real.src.dir}/parse/OmpParser_CivlCParser.java" />
 	</target>
 
 	<!-- Do everything -->

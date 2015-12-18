@@ -13,7 +13,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.UnqualifiedObjectType;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
+import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
 
 /**
  * A factory for producing instances of {@link Conversion}.

@@ -7,7 +7,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Field;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonFieldDeclarationNode extends CommonDeclarationNode implements
 		FieldDeclarationNode {

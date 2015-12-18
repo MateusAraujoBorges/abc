@@ -8,14 +8,14 @@ import java.util.Map;
 import org.antlr.runtime.tree.CommonTree;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.front.c.parse.IF.CParser;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.Parse;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.ParseTree;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.Preprocess;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.Preprocessor;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.PreprocessorException;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
+import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
+import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
+import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocess;
+import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
+import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.token.Macro;
+import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 
 public class CParserTest {
@@ -40,7 +40,7 @@ public class CParserTest {
 			ParseException {
 		File file = new File(root, filenameRoot + ".c");
 		CParser parser = Parse.newCParser();
-		ParseTree parseTree = parser.parse(preprocessor.outputTokenSource(
+		CParseTree parseTree = parser.parse(preprocessor.outputTokenSource(
 				systemIncludes, userIncludes, implicitMacros, file));
 		CommonTree tree = parseTree.getRoot();
 

@@ -16,7 +16,7 @@ tokens {
 
 @header
 {
-package edu.udel.cis.vsl.abc.front.c.preproc.common;
+package edu.udel.cis.vsl.abc.front.c.preproc;
 }
 
 // TODO: add bit-wise operators.  See Cpp manual.

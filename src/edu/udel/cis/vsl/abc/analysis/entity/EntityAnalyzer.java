@@ -44,9 +44,9 @@ import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
-import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
+import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
 
 /**
  * Performs standard analysis of a translation unit, creating the following

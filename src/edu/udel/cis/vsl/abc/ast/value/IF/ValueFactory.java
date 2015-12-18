@@ -10,9 +10,9 @@ import edu.udel.cis.vsl.abc.ast.type.IF.FloatingType;
 import edu.udel.cis.vsl.abc.ast.type.IF.IntegerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.StructureOrUnionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
-import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
-import edu.udel.cis.vsl.abc.token.IF.StringLiteral;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.ExecutionCharacter;
+import edu.udel.cis.vsl.abc.front.IF.token.StringLiteral;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * 

@@ -5,7 +5,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 /**
  * An abstract function definition contains the information for an abstract

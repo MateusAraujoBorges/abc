@@ -1,6 +1,6 @@
 package edu.udel.cis.vsl.abc.analysis.entity;
 
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 /**
  * A Navigator is a reference to an immediate member of compound literal object.

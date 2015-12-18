@@ -3,7 +3,7 @@ package edu.udel.cis.vsl.abc.ast.value.common;
 import edu.udel.cis.vsl.abc.ast.type.IF.ArrayType;
 import edu.udel.cis.vsl.abc.ast.value.IF.StringValue;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
-import edu.udel.cis.vsl.abc.token.IF.StringLiteral;
+import edu.udel.cis.vsl.abc.front.IF.token.StringLiteral;
 
 public class CommonStringValue extends CommonValue implements StringValue {
 

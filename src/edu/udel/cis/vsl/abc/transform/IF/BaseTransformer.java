@@ -4,13 +4,13 @@ import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.CParser;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.Formation;
-import edu.udel.cis.vsl.abc.token.IF.Source;
-import edu.udel.cis.vsl.abc.token.IF.StringToken;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
+import edu.udel.cis.vsl.abc.front.IF.token.CToken;
+import edu.udel.cis.vsl.abc.front.IF.token.Formation;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.StringToken;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
 
 /**
  * A very basic partial implementation of {@link Transformer}. Implements the

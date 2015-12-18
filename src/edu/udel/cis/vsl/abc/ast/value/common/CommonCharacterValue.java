@@ -3,7 +3,7 @@ package edu.udel.cis.vsl.abc.ast.value.common;
 import edu.udel.cis.vsl.abc.ast.type.IF.IntegerType;
 import edu.udel.cis.vsl.abc.ast.value.IF.CharacterValue;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
-import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
+import edu.udel.cis.vsl.abc.front.IF.token.ExecutionCharacter;
 
 public class CommonCharacterValue extends CommonValue implements CharacterValue {
 

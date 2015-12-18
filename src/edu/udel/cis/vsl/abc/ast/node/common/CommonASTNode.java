@@ -21,7 +21,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodePredicate;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public abstract class CommonASTNode implements ASTNode {
 

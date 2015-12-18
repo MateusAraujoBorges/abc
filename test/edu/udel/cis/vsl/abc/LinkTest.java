@@ -13,9 +13,9 @@ import org.junit.Test;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.PreprocessorException;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * Tests compilation of multiple translation units. All tests have the following

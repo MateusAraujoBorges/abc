@@ -10,7 +10,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
-import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
 
 /**
  * <p>

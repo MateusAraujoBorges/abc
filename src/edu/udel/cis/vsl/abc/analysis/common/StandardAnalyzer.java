@@ -7,7 +7,7 @@ import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.ConversionFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * Performs all standard analyses of a Translation Unit: determines and sets

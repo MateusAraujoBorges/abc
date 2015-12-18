@@ -90,8 +90,8 @@ import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.token.IF.Source;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
 
 // add extra parameter to all the expression translation methods

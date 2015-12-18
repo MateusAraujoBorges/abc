@@ -23,15 +23,15 @@ import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Values;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.Formation;
-import edu.udel.cis.vsl.abc.token.IF.Source;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
-import edu.udel.cis.vsl.abc.token.IF.Tokens;
-import edu.udel.cis.vsl.abc.token.common.CommonCToken;
-import edu.udel.cis.vsl.abc.token.common.CommonSource;
-import edu.udel.cis.vsl.abc.token.common.SystemFormation;
+import edu.udel.cis.vsl.abc.front.IF.token.CToken;
+import edu.udel.cis.vsl.abc.front.IF.token.Formation;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
+import edu.udel.cis.vsl.abc.front.IF.token.Tokens;
+import edu.udel.cis.vsl.abc.front.common.token.CommonCToken;
+import edu.udel.cis.vsl.abc.front.common.token.CommonSource;
+import edu.udel.cis.vsl.abc.front.common.token.SystemFormation;
 
 public class SimpleCudaAST {
 

@@ -50,8 +50,8 @@ import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
 
 /**
  * Analyzes types nodes in the AST, sets the type of the type node and processes

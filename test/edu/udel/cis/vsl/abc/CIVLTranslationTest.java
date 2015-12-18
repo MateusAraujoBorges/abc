@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 public class CIVLTranslationTest {
 

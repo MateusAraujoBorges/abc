@@ -16,7 +16,7 @@ lexer grammar PreprocessorLexer;
 
 @header
 {
-package edu.udel.cis.vsl.abc.front.c.preproc.common;
+package edu.udel.cis.vsl.abc.front.c.preproc;
 }
 
 @members

@@ -32,28 +32,28 @@ import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.Types;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Values;
+import edu.udel.cis.vsl.abc.astgen.IF.ASTBuilder;
 import edu.udel.cis.vsl.abc.astgen.IF.ASTGenerator;
-import edu.udel.cis.vsl.abc.astgen.c.IF.ASTBuilder;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.CParser;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.Parse;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.ParseTree;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.Preprocess;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.Preprocessor;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.PreprocessorFactory;
-import edu.udel.cis.vsl.abc.front.c.preproc.common.PreprocessorParser;
+import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
+import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
+import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocess;
+import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
+import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorFactory;
+import edu.udel.cis.vsl.abc.front.IF.token.CTokenSource;
+import edu.udel.cis.vsl.abc.front.IF.token.Macro;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
+import edu.udel.cis.vsl.abc.front.IF.token.Tokens;
+import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
+import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.program.IF.ProgramFactory;
 import edu.udel.cis.vsl.abc.program.IF.Programs;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
-import edu.udel.cis.vsl.abc.token.IF.Tokens;
 import edu.udel.cis.vsl.abc.transform.IF.Transform;
 import edu.udel.cis.vsl.abc.transform.IF.Transformer;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
@@ -136,7 +136,7 @@ public class FrontEnd {
 
 	/**
 	 * Returns the parser used by this front end. The parser is used to parse a
-	 * token stream and produce a {@link ParseTree}. The parser can be used
+	 * token stream and produce a {@link CParseTree}. The parser can be used
 	 * repeatedly.
 	 * 
 	 * @return the parser
@@ -158,7 +158,7 @@ public class FrontEnd {
 
 	/**
 	 * Returns the {@link ASTBuilder} used by this front end. The builder is
-	 * used convert a {@link ParseTree} to an {@link AST}. The builder can be
+	 * used convert a {@link CParseTree} to an {@link AST}. The builder can be
 	 * used repeatedly.
 	 * 
 	 * @return the builder used to translate parse trees to ASTs
@@ -240,7 +240,7 @@ public class FrontEnd {
 			throws PreprocessorException, SyntaxException, ParseException {
 		Preprocessor preprocessor;
 		CTokenSource tokens;
-		ParseTree parseTree;
+		CParseTree parseTree;
 		AST ast;
 
 		this.configuration.setLanguage(language);
@@ -401,7 +401,7 @@ public class FrontEnd {
 			CTokenSource tokens = preprocessor.outputTokenSource(
 					systemIncludePaths, userIncludePaths, implicitMacros,
 					files[i]);
-			ParseTree parseTree = parser.parse(tokens);
+			CParseTree parseTree = parser.parse(tokens);
 
 			asts[i] = builder.getTranslationUnit(configuration, parseTree);
 		}
@@ -550,7 +550,7 @@ public class FrontEnd {
 					timer.markTime("preprocess and write " + filename);
 				}
 			} else { // not preproc only
-				ParseTree parseTree;
+				CParseTree parseTree;
 
 				parseTree = parser.parse(tokens);
 				timer.markTime("preprocess, parse, and build ANTLR tree");

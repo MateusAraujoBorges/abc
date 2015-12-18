@@ -9,7 +9,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entities;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * Simple factory class providing static methods for creating new instances of

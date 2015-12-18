@@ -8,7 +8,7 @@ import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonOperatorNode extends CommonExpressionNode implements
 		OperatorNode {

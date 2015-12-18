@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonPairNode<S extends ASTNode, T extends ASTNode> extends
 		CommonASTNode implements PairNode<S, T> {

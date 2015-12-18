@@ -14,10 +14,10 @@ import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.PreprocessorException;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.token.Macro;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * Tests the "copy" method in nodes, which performs deep cloning.

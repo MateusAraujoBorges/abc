@@ -8,7 +8,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonFunctionDefinitionNode extends CommonFunctionDeclarationNode
 		implements FunctionDefinitionNode {

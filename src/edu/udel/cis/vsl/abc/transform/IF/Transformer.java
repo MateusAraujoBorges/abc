@@ -2,8 +2,8 @@ package edu.udel.cis.vsl.abc.transform.IF;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
-import edu.udel.cis.vsl.abc.token.IF.Formation;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.Formation;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 /**
  * A {@link Transformer} is a tool used to transform an {@link AST} in some way,

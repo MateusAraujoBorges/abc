@@ -7,10 +7,10 @@ import java.io.File;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
-import edu.udel.cis.vsl.abc.front.c.parse.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.c.preproc.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 import edu.udel.cis.vsl.abc.program.IF.Program;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Tests linkage issues: internal, external, or "none".

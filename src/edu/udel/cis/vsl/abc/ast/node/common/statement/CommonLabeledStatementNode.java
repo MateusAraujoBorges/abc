@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.LabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonLabeledStatementNode extends CommonStatementNode implements
 		LabeledStatementNode {

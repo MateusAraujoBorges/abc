@@ -8,8 +8,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.front.IF.token.CToken;
+import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
 
 /**
  * Factory class providing static method to produce a new {@link ASTFactory}.

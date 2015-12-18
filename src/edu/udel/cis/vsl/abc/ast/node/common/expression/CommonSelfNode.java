@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SelfNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonSelfNode extends CommonConstantNode implements SelfNode {
 

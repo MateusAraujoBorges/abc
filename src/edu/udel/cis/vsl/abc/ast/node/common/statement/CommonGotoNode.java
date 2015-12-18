@@ -2,7 +2,7 @@ package edu.udel.cis.vsl.abc.ast.node.common.statement;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.GotoNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public class CommonGotoNode extends CommonJumpNode implements GotoNode {
 

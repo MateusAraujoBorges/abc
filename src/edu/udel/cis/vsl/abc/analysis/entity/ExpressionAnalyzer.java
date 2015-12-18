@@ -76,8 +76,8 @@ import edu.udel.cis.vsl.abc.ast.type.IF.UnqualifiedObjectType;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
 
 /**
  * Analyzes expressions in an AST.

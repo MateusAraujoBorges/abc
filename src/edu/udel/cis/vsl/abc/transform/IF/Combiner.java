@@ -1,7 +1,7 @@
 package edu.udel.cis.vsl.abc.transform.IF;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 
 public interface Combiner {
 

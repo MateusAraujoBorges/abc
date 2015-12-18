@@ -4,7 +4,7 @@ import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpNode;
 import edu.udel.cis.vsl.abc.ast.node.common.CommonASTNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.front.IF.token.Source;
 
 public abstract class CommonOmpNode extends CommonASTNode implements OmpNode {
 
