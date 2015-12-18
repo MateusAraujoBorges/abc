@@ -4,6 +4,7 @@ import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
 import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 
@@ -16,7 +17,7 @@ import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 public interface ASTBuilder {
 
 	/**
-	 * Builds the AST specified by a {@link CParseTree} which represents a
+	 * Builds the AST specified by a {@link ParseTree} which represents a
 	 * translation unit.
 	 * 
 	 * @param config
@@ -27,12 +28,12 @@ public interface ASTBuilder {
 	 *             if something is wrong with the object being translated into
 	 *             an ABC
 	 */
-	AST getTranslationUnit(Configuration config, CParseTree tree)
+	AST getTranslationUnit(Configuration config, ParseTree tree)
 			throws SyntaxException;
 
 	/**
 	 * Creates a worker which can be used to perform more specific translation
-	 * tasks related to a single {@link CParseTree}. The worker can be used to
+	 * tasks related to a single {@link ParseTree}. The worker can be used to
 	 * translate a single expression, a single block item, etc.
 	 * 
 	 * @param tree
@@ -40,7 +41,7 @@ public interface ASTBuilder {
 	 * @return a worker for performing specific translation tasks related to
 	 *         that parse tree
 	 */
-	ASTBuilderWorker getWorker(CParseTree tree);
+	ASTBuilderWorker getWorker(ParseTree tree);
 
 	/**
 	 * Gets the {@link ASTFactory} used by this builder to create new

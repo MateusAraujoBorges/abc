@@ -10,6 +10,7 @@ import edu.udel.cis.vsl.abc.astgen.IF.PragmaFactory;
 import edu.udel.cis.vsl.abc.astgen.common.CommonPragmaFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
+import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
 import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 
@@ -27,20 +28,21 @@ public class CASTBuilder implements ASTBuilder {
 	}
 
 	@Override
-	public AST getTranslationUnit(Configuration config, CParseTree tree)
+	public AST getTranslationUnit(Configuration config, ParseTree tree)
 			throws SyntaxException {
 		this.config = config;
 
 		ASTBuilderWorker worker = getWorker(tree);
 		SequenceNode<BlockItemNode> rootNode = worker.translateRoot();
-		AST ast = astFactory.newAST(rootNode, tree.getSourceFiles());
+		AST ast = astFactory.newAST(rootNode,
+				((CParseTree) tree).getSourceFiles());
 
 		return ast;
 	}
 
 	@Override
-	public ASTBuilderWorker getWorker(CParseTree tree) {
-		return new CASTBuilderWorker(config, tree, astFactory,
+	public ASTBuilderWorker getWorker(ParseTree tree) {
+		return new CASTBuilderWorker(config, (CParseTree) tree, astFactory,
 				pragmaFactory);
 	}
 
