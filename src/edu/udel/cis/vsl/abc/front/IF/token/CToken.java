@@ -83,5 +83,17 @@ public interface CToken extends Token {
 	 * Sets this token's expandable bit to false.
 	 */
 	void makeNonExpandable();
+	
+	/**
+	 * Return this token's white text, which is used for Fortran lexer
+	 * @return the white text of this token.
+	 */
+	String getWhiteText();
+
+	/**
+	 * Set this token's white text, which is used for Fortran lexer
+	 * @param text
+	 */
+	void setWhiteText(String text);
 
 }
