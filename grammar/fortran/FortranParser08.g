@@ -42,7 +42,8 @@ options {
 // rerunning make will build the OFP jar file correctly.
 //
 @header {
-package fortran.ofp.parser.java;
+package edu.udel.cis.vsl.abc.front.fortran.parse;
+import edu.udel.cis.vsl.abc.front.IF.token.CToken;
 }
 
 @members {
@@ -5811,7 +5812,7 @@ stmt_function_stmt
 end_of_stmt returns [Token tk]
     : T_EOS			
         {
-            FortranToken eos = (FortranToken)$T_EOS;
+            CToken eos = (CToken)$T_EOS;
             tk = $T_EOS; 
             action.end_of_stmt($T_EOS);
         }

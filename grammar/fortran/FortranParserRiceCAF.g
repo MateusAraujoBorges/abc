@@ -22,8 +22,8 @@ import FortranParser08;
 Our solution for this is: add the header (package, imported package)
 to the generated java file in ant.
 @header {
-  package fortran.ofp.parser.java;
-  import fortran.ofp.parser.java.IActionEnums;
+  package edu.udel.cis.vsl.abc.front.fortran.parse;
+  import edu.udel.cis.vsl.abc.front.fortran.parse.IActionEnums;
 }*/
 
 @members {
