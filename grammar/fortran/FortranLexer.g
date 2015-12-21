@@ -29,250 +29,288 @@ options {
  * @author Craig E Rasmussen, Christopher D. Rickett, Jeffrey Overbey
  */
  
-package fortran.ofp.parser.java;
+ 
+package edu.udel.cis.vsl.abc.front.fortran.preproc;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Stack;
 
-import fortran.ofp.parser.java.FortranToken;
+import edu.udel.cis.vsl.abc.front.IF.token.CToken;
+import edu.udel.cis.vsl.abc.front.IF.token.Formation;
+import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
+import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
+import edu.udel.cis.vsl.abc.front.IF.token.Tokens;
 }
 
 @members {
-    private Token prevToken;
-    private int sourceForm;
-    private boolean continueFlag;
-    private boolean includeLine;
-    private boolean inFormat;
-    private ArrayList<String> includeDirs;
-    private Stack<FortranStream> oldStreams;
+	//Fields:
+	private Token prevToken;
+	private int sourceForm;
+	private boolean continueFlag;
+	private boolean includeLine;
+	private boolean inFormat;
+	private ArrayList<String> includeDirs;
+	private Stack<FortranStream> oldStreams;
 
-    protected StringBuilder whiteText = new StringBuilder();
+		//OFP_ABC
+	private Stack<Integer> oldFileIndexes;
+	private int fileCounter = 0;
+	private Integer fileIndex = Integer.valueOf(fileCounter);
+	private TokenFactory tokenFactory = Tokens.newTokenFactory();
+	private Formation inclusionFormation;
+		//OFP_ABC
 
-    public Token emit() {
-        int start = state.tokenStartCharIndex;
-        int stop = getCharIndex() - 1;
-        // TODO - this is a start at fixing the line:column information in tokens inserted
-        // by the lexer.  In future the stop should at least be the length of token text.
-        // TODO translate it to CommonCToken
-        if (stop < 0) {
-           stop = start; // for now
-        }
-        FortranToken t = new FortranToken(input, state.type, state.channel, start, stop);
-        t.setLine(state.tokenStartLine);
-        t.setText(state.text);
-        t.setCharPositionInLine(state.tokenStartCharPositionInLine);
+	protected StringBuilder whiteText = new StringBuilder();
 
-        if (state.channel == HIDDEN) {
-            whiteText.append(getText());
-        } else {
-            t.setWhiteText(whiteText.toString());
-            whiteText.delete(0, whiteText.length());
-        }
+	//Methods: 
+	public Token emit() {
+		int start = state.tokenStartCharIndex;
+		int stop = getCharIndex() - 1;
+		// TODO - this is a start at fixing the line:column information in tokens inserted
+		// by the lexer.  In future the stop should at least be the length of token text.
+		if (stop < 0) {
+			stop = start; // for now
+		}
+		this.inclusionFormation = tokenFactory.newInclusion(new SourceFile(new File(this.input.getSourceName()), this.fileIndex.intValue()));
+		CToken t = tokenFactory.newCToken(input, state.type, state.channel, start, stop, inclusionFormation);
+		t.setLine(state.tokenStartLine);
+		t.setText(state.text);
+		t.setCharPositionInLine(state.tokenStartCharPositionInLine);
 
-        emit(t);
-        return t;
-    }
+		if (state.channel == HIDDEN) {
+			whiteText.append(getText());
+		} else {
+			t.setWhiteText(whiteText.toString());
+			whiteText.delete(0, whiteText.length());
+		}
 
-    public boolean isKeyword(Token tk) {
-       return isKeyword(tk.getType());
-    } // end isKeyword()
+		emit(t);
+		return t;
+	}
+	
+	public boolean isKeyword(Token tk) {
+		return isKeyword(tk.getType());
+	} // end isKeyword()
 
-    public boolean isKeyword(int tokenType) {
-        if (tokenType > T_BEGIN_KEYWORDS && tokenType < T_END_KEYWORDS) {
-            return true;
-        } else {
-            return false;
-        }
-    } // end isKeyword()
+	public boolean isKeyword(int tokenType) {
+		if (tokenType > T_BEGIN_KEYWORDS && tokenType < T_END_KEYWORDS) {
+			return true;
+		} else {
+			return false;
+		}
+	} // end isKeyword()
 
+	/**
+	 * This is necessary because the lexer class caches some values from the
+	 * input stream. Here we reset them to what the current input stream values
+	 * are. This is done when we switch streams for including files.
+	 */
+	private void resetLexerState() {
+		state.tokenStartCharIndex = input.index();
+		state.tokenStartCharPositionInLine = input.getCharPositionInLine();
+		state.tokenStartLine = input.getLine();
+		state.token = null;
+		state.text = null;
+	}// end resetLexerState()
+	
+	// overrides nextToken in superclass
+	public Token nextToken() {
+		CToken tk = tokenFactory.newCToken(super.nextToken(),
+				inclusionFormation);
 
-    /**
-     * This is necessary because the lexer class caches some values from 
-     * the input stream.  Here we reset them to what the current input stream 
-     * values are.  This is done when we switch streams for including files.
-     */    
-    private void resetLexerState() {
-        state.tokenStartCharIndex = input.index();
-        state.tokenStartCharPositionInLine = input.getCharPositionInLine();
-        state.tokenStartLine = input.getLine();
-        state.token = null;
-        state.text = null;
-    }// end resetLexerState()
+		if (tk.getType() == EOF) {
+			CToken eofToken;
+			FortranStream fs = getInput();
 
+			tk.setChannel(Token.DEFAULT_CHANNEL);
+			this.inclusionFormation = tokenFactory.newInclusion(new SourceFile(
+					new File(this.input.getSourceName()), this.fileIndex
+							.intValue()));
+			eofToken = tokenFactory.newCToken(this.input, T_EOF,
+					Token.DEFAULT_CHANNEL, this.input.index(),
+					this.input.index() + 1, inclusionFormation);
 
-    // overrides nextToken in superclass
-   public Token nextToken() {
-      Token tk = super.nextToken();
+			if (this.oldStreams != null && this.oldStreams.empty() == false) {
 
-      if (tk.getType() == EOF) {
-         Token eofToken;
-         FortranStream fs = getInput();
+				// TODO - provide better information about the location of this
+				// token
+				// It is probably ok for it to start at last character position
+				// in file but
+				// consider the end position of the token.
+				eofToken.setLine(state.tokenStartLine);
+				eofToken.setCharPositionInLine(state.tokenStartCharPositionInLine);
 
-         tk.setChannel(Token.DEFAULT_CHANNEL);
-         eofToken = new FortranToken(this.input, T_EOF, Token.DEFAULT_CHANNEL,
-                                     this.input.index(), this.input.index()+1);
+				eofToken.setText(fs.getFileName() + ":" + fs.getAbsolutePath());
 
-         if (this.oldStreams != null && this.oldStreams.empty() == false) {
+				tk = eofToken;
+				/*
+				 * We have at least one previous input stream on the stack,
+				 * meaning we should be at the end of an included file. Switch
+				 * back to the previous stream and continue.
+				 */
+				this.input = this.oldStreams.pop();
+				this.fileIndex = this.oldFileIndexes.pop();
+				/* Is this ok to do?? */
+				resetLexerState();
+			} else {
+				tk.setText(fs.getFileName() + ":" + fs.getAbsolutePath());
+				eofToken = tk;
+			}
 
-            // TODO - provide better information about the location of this token
-            // It is probably ok for it to start at last character position in file but
-            // consider the end position of the token.
-            eofToken.setLine(state.tokenStartLine);
-            eofToken.setCharPositionInLine(state.tokenStartCharPositionInLine);
+			return tk;
+		}
 
-            eofToken.setText(fs.getFileName() + ":" + fs.getAbsolutePath());
+		if (tk.getType() != LINE_COMMENT && tk.getType() != WS
+				&& tk.getType() != PREPROCESS_LINE) {
+			prevToken = tk;
+		}
 
-            tk = eofToken;
-            /* We have at least one previous input stream on the stack, 
-               meaning we should be at the end of an included file.  
-               Switch back to the previous stream and continue.  */
-            this.input = this.oldStreams.pop();
-            /* Is this ok to do??  */
-            resetLexerState();
-         }
-         else {
-            tk.setText(fs.getFileName() + ":" + fs.getAbsolutePath());
-            eofToken = tk;
-         }
+		if (tk.getType() == T_EOS && continueFlag == true) {
+			tk.setChannel(99);
+		} else if (continueFlag == true) {
+			if (tk.getType() != LINE_COMMENT && tk.getType() != WS
+					&& tk.getType() != PREPROCESS_LINE
+					&& tk.getType() != CONTINUE_CHAR) {
+				// if the token we have is not T_EOS or any kind of WS or
+				// comment, and we have a continue, then this should be the
+				// first token on the line folliwng the '&'. this means that
+				// we only have one '&' (no '&' on the second line) and we
+				// need to clear the flag so we know to process the T_EOS.
+				continueFlag = false;
+			}
+		}
 
-         return tk;
-      }
+		return tk;
+	} // end nextToken()
 
-        if (tk.getType() != LINE_COMMENT && tk.getType() != WS &&
-            tk.getType() != PREPROCESS_LINE) {
-           prevToken = tk;
-        } 
+	public int getIgnoreChannelNumber() {
+		// return the channel number that antlr uses for ignoring a token
+		return 99;
+	}// end getIgnoreChannelNumber()
 
-        if (tk.getType() == T_EOS && continueFlag == true) {
-            tk.setChannel(99);
-        } else if (continueFlag == true) {
-            if (tk.getType() != LINE_COMMENT && tk.getType() != WS &&
-                tk.getType() != PREPROCESS_LINE && tk.getType() != CONTINUE_CHAR) {
-                // if the token we have is not T_EOS or any kind of WS or 
-                // comment, and we have a continue, then this should be the
-                // first token on the line folliwng the '&'.  this means that
-                // we only have one '&' (no '&' on the second line) and we 
-                // need to clear the flag so we know to process the T_EOS.
-                continueFlag = false;
-            }
-        }
+	public FortranStream getInput() {
+		return (FortranStream) this.input;
+	}
 
-        return tk;
-    } // end nextToken()
+	public Formation getFormation() {
+		assert this.inclusionFormation != null;
+		return this.inclusionFormation;
+	}
 
+	/**
+	 * Do this here because not sure how to get antlr to generate the init code.
+	 * It doesn't seem to do anything with the @init block below. This is called
+	 * by FortranMain().
+	 */
+	public FortranLexer(FortranStream input) {
+		super(input);
+		this.sourceForm = input.getSourceForm();
+		this.prevToken = null;
+		this.continueFlag = false;
+		this.includeLine = false;
+		this.inFormat = false;
+		this.oldStreams = new Stack<FortranStream>();
+		this.oldFileIndexes = new Stack<Integer>();
+		// TODO: idx
+		this.inclusionFormation = tokenFactory
+				.newInclusion(new SourceFile(new File(this.input
+						.getSourceName()), this.fileIndex.intValue()));
+	} // end constructor()
 
-    public int getIgnoreChannelNumber() {
-        // return the channel number that antlr uses for ignoring a token
-        return 99;
-    }// end getIgnoreChannelNumber()
+	public void setIncludeDirs(ArrayList<String> includeDirs) {
+		this.includeDirs = includeDirs;
+	}// end setIncludeDirs()
 
-    
-   public FortranStream getInput() {
-      return (FortranStream) this.input;
-   }
-    
+	private File findFile(String fileName) {
+		File tmpFile;
+		String tmpPath;
+		StringBuffer newFileName;
 
-   /**
-    * Do this here because not sure how to get antlr to generate the 
-    * init code.  It doesn't seem to do anything with the @init block below.
-    * This is called by FortranMain().
-    */
-   public FortranLexer(FortranStream input)
-   {
-      super(input);
-      this.sourceForm = input.getSourceForm();
-      this.prevToken = null;
-      this.continueFlag = false;
-      this.includeLine = false;
-      this.inFormat = false;
-      this.oldStreams = new Stack<FortranStream>();
-   } // end constructor()
+		tmpFile = new File(fileName);
+		if (tmpFile.exists() == false) {
+			/*
+			 * the file doesn't exist by the given name from the include line,
+			 * so we need to append it to each include dir and search.
+			 */
+			for (int i = 0; i < this.includeDirs.size(); i++) {
+				tmpPath = this.includeDirs.get(i);
 
+				newFileName = new StringBuffer();
 
-    public void setIncludeDirs(ArrayList<String> includeDirs) {
-        this.includeDirs = includeDirs;
-    }// end setIncludeDirs()
+				/*
+				 * Build the new file name with the path. Add separator to end
+				 * of path if necessary (unix specific).
+				 */
+				newFileName = newFileName.append(tmpPath);
+				if (tmpPath.charAt(tmpPath.length() - 1) != '/') {
+					newFileName = newFileName.append('/');
+				}
+				newFileName = newFileName.append(fileName);
 
-    
-    private File findFile(String fileName) {
-        File tmpFile;
-        String tmpPath;
-        StringBuffer newFileName;
-        
-        tmpFile = new File(fileName);
-        if(tmpFile.exists() == false) {
-            /* the file doesn't exist by the given name from the include line, 
-             * so we need to append it to each include dir and search.  */
-            for(int i = 0; i < this.includeDirs.size(); i++) {
-                tmpPath = this.includeDirs.get(i);
+				/* Try opening the new file. */
+				tmpFile = new File(newFileName.toString());
+				if (tmpFile.exists() == true) {
+					return tmpFile;
+				}
+			}
 
-                newFileName = new StringBuffer();
+			/* File did not exist. */
+			return null;
+		} else {
+			return tmpFile;
+		}
+	} // end findFile()
 
-                /* Build the new file name with the path.  Add separator to 
-                 * end of path if necessary (unix specific).  */
-                newFileName = newFileName.append(tmpPath);
-                if(tmpPath.charAt(tmpPath.length()-1) != '/') {
-                    newFileName = newFileName.append('/');
-                }
-                newFileName = newFileName.append(fileName);
+	private String includeFile() {
+		String filename = "ERROR: no file name";
+		File includedFile = null;
 
-                /* Try opening the new file.  */
-                tmpFile = new File(newFileName.toString());
-                if(tmpFile.exists() == true) {
-                    return tmpFile;
-                }
-            }
+		if (prevToken != null) {
+			String charConst = null;
+			FortranStream includedStream = null;
 
-            /* File did not exist.  */
-            return null;
-        } else {
-            return tmpFile;
-        }
-    } // end findFile()
+			charConst = prevToken.getText();
+			filename = charConst.substring(1, charConst.length() - 1);
 
+			/* Find the file, including it's complete path. */
+			includedFile = findFile(filename);
+			if (includedFile == null) {
+				System.err.println("WARNING: Could not find file '" + filename
+						+ "'");
+				return filename + ":ERROR_FILE_NOT_FOUND";
+			}
 
-    private String includeFile() {
-        String filename = "ERROR: no file name";
-        File includedFile = null;
+			/* Create a new stream for the included file. */
+			try {
+				// the included file should have the save source form as
+				// original
+				includedStream = new FortranStream(filename,
+						includedFile.getAbsolutePath(), this.sourceForm);
+			} catch (IOException e) {
+				System.err.println("WARNING: Could not open file '" + filename
+						+ "'");
+				e.printStackTrace();
+				return includedFile.getAbsolutePath();
+			}
 
-        if (prevToken != null) {
-            String charConst = null;
-            FortranStream includedStream = null;
+			/* Save current character stream. */
+			oldStreams.push(getInput());
+			oldFileIndexes.push(fileIndex);
+			this.fileCounter++;
+			this.fileIndex = Integer.valueOf(this.fileCounter);
+			this.input = includedStream;
+			/* Is this ok to do?? */
+			resetLexerState();
+		} else {
+			System.err.println("ERROR: Unable to determine file name from "
+					+ "include line");
+		}
 
-            charConst = prevToken.getText();
-            filename = charConst.substring(1, charConst.length()-1);
+		return filename + ":" + includedFile.getAbsolutePath();
 
-            /* Find the file, including it's complete path.  */
-            includedFile = findFile(filename);
-            if (includedFile == null) {
-                System.err.println("WARNING: Could not find file '" + filename + "'");
-                return filename + ":ERROR_FILE_NOT_FOUND";
-            }
-
-            /* Create a new stream for the included file.  */
-            try {
-               // the included file should have the save source form as original
-               includedStream = new FortranStream(filename, includedFile.getAbsolutePath(), this.sourceForm);
-            } catch(IOException e) {
-                System.err.println("WARNING: Could not open file '" + filename + "'");
-                e.printStackTrace();
-                return includedFile.getAbsolutePath();
-            }
-            
-            /* Save current character stream.  */
-            oldStreams.push(getInput());
-            this.input = includedStream;
-            /* Is this ok to do??  */
-            resetLexerState();
-        } else {
-            System.err.println("ERROR: Unable to determine file name from " + 
-                               "include line");
-        }
-
-        return filename + ":" + includedFile.getAbsolutePath();
-
-    } // end includeFile()
+	} // end includeFile()
 
 }
 
