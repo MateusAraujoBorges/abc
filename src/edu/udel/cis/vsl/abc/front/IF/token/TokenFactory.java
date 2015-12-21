@@ -2,6 +2,7 @@ package edu.udel.cis.vsl.abc.front.IF.token;
 
 import java.util.List;
 
+import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 
@@ -62,6 +63,9 @@ public interface TokenFactory {
 	CToken newCToken(Token token, Formation formation);
 
 	CToken newCToken(int type, String text, Formation formation);
+
+	CToken newCToken(CharStream input, int type, int channel, int start,
+			int stop, Formation formation);
 
 	// Characters and Strings...
 

@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 
@@ -51,6 +52,12 @@ public class CommonTokenFactory implements TokenFactory {
 	@Override
 	public CToken newCToken(int type, String text, Formation formation) {
 		return new CommonCToken(type, text, formation);
+	}
+
+	@Override
+	public CToken newCToken(CharStream input, int type, int channel, int start,
+			int stop, Formation formation) {
+		return new CommonCToken(input, type, channel, start, stop, formation);
 	}
 
 	@Override

@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.front.common.token;
 
+import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 
@@ -58,6 +59,12 @@ public class CommonCToken extends CommonToken implements CToken {
 	 * things I don't understand.
 	 */
 	private int tokenIndex = -1;
+	
+	/**
+	 * Created for fortran parser which derived from OpenFortranParser.
+	 * It requires a field with a type of String.
+	 */
+	private String whiteText = "";
 
 	// Constructors...
 
@@ -76,6 +83,13 @@ public class CommonCToken extends CommonToken implements CToken {
 
 	public CommonCToken(int type, String text, Formation formation) {
 		super(type, text);
+		this.formation = formation;
+	}
+	
+	public CommonCToken(CharStream input, int type, int channel,
+			  int start, int stop, Formation formation){
+		super(input, type, channel, start, stop);
+		assert formation != null;
 		this.formation = formation;
 	}
 
@@ -180,5 +194,17 @@ public class CommonCToken extends CommonToken implements CToken {
 	public Formation getFormation() {
 		return formation;
 	}
+	
+	/* Methods for Frotran parser */
+	@Override
+	public String getWhiteText() {
+		return whiteText;
+	}
+
+	@Override
+	public void setWhiteText(String text) {
+		whiteText = text == null ? "" : text;
+	}
+	/* Methods for Frotran parser */
 
 }
