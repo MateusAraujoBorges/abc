@@ -50,6 +50,150 @@
 	<target name="fortranParsers" depends="blah0,blah1,blah2"> </target>
 		-->
 
+	<target name="fortranLexer" depends="FortranLexer">
+	</target>
+	
+	<!--
+		FortranLexer.java should be built if FortranLexer.g 
+		is newer than FortranLexer.java
+	-->
+
+	<target name="FortranLexerDependencies">
+		<uptodate property="FortranLexerUpToDate" srcfile="${fortran.grammar.dir}/FortranLexer.g" targetfile="${fortran.real.src.dir}/preproc/FortranLexer.java" />
+	</target>
+
+	<target name="FortranLexer" depends="FortranLexerDependencies" unless="FortranLexerUpToDate">
+		<delete file="${fortran.grammar.dir}/FortranLexer.tokens" />
+		<touch file="${fortran.grammar.dir}/FortranLexer.tokens" />
+		<delete file="${fortran.real.src.dir}/preproc/FortranLexer.java" />
+		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${fortran.grammar.dir}">
+			<arg value="-verbose" />
+			<arg value="FortranLexer.g" />
+		</java>
+		<move file="${fortran.grammar.dir}/FortranLexer.java" todir="${fortran.real.src.dir}/preproc/" />
+	</target>
+	
+	<target name="fortranParsers" depends="FortranLexer,FortranParser08,FortranParserExtras,FortranParserRiceCAF">
+	</target>
+
+	<!--
+			FortranParser08.java should be built if FortranParser08.g
+			is newer than FortranParser08.java OR FortranLexer.java
+			is newer than FortranParser08.java.
+			
+			BUT: you only want to check if FortranLexer.java is newer
+			than FortranParser08.java AFTER the lexer things happens.
+	-->
+
+	<target name="FortranParser08Dependencies" depends="FortranLexer">
+		<uptodate property="unchangedFortranParser08Grammar" srcfile="${fortran.grammar.dir}/FortranParser08.g" targetfile="${fortran.real.src.dir}/parse/FortranParser08.java" />
+		<uptodate property="FortranLexerBeforeFortranParser08" srcfile="${fortran.real.src.dir}/parse/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParser08.java" />
+		<condition property="FortranParser08UpToDate">
+			<and>
+				<isset property="unchangedFortranParser08Grammar" />
+				<isset property="FortranLexerBeforeFortranParser08" />
+			</and>
+		</condition>
+	</target>
+
+	<target name="FortranParser08" depends="FortranParser08Dependencies" unless="FortranParser08UpToDate">
+		<delete file="${fortran.grammar.dir}/FortranParser08.tokens" />
+		<delete file="${fortran.real.src.dir}/parse/FortranParser08.java" />
+		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${fortran.grammar.dir}">
+			<arg value="-verbose" />
+			<arg value="FortranParser08.g" />
+		</java>
+		<move file="${fortran.grammar.dir}/FortranParser08.java" todir="${fortran.real.src.dir}/parse/" />
+	</target>
+
+	<!--
+			FortranParserExtras.java should be built if FortranParserExtras.g
+			is newer than FortranParserExtras.java OR FortranLexer.java
+			is newer than FortranParserExtras.java.
+			
+			BUT: you only want to check if FortranLexer.java is newer
+			than FortranParserExtras.java AFTER the lexer things happens.
+	-->
+
+	<target name="FortranParserExtrasDependencies" depends="FortranLexer">
+		<uptodate property="unchangedFortranParserExtrasGrammar" srcfile="${fortran.grammar.dir}/FortranParserExtras.g" targetfile="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
+		<uptodate property="FortranLexerBeforeFortranParserExtras" srcfile="${fortran.real.src.dir}/parse/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
+		<condition property="FortranParserExtrasUpToDate">
+			<and>
+				<isset property="unchangedFortranParserExtrasGrammar" />
+				<isset property="FortranLexerBeforeFortranParserExtras" />
+			</and>
+		</condition>
+	</target>
+
+	<!-- 
+			FortranParserExtras is a composite grammar. It also requires inserting some text
+			(packages and imported packages) at the beginning manually, because ANTLR 3.5 
+			doesn't allow redefinition of headers in composite grammar.
+	-->
+
+	<target name="FortranParserExtras" depends="FortranParserExtrasDependencies" unless="FortranParserExtrasUpToDate">
+		<!--delete file="${fortran.grammar.dir}/FortranParserExtras.tokens" /-->
+		<delete file="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
+		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="false" dir="${fortran.grammar.dir}">
+			<arg value="-verbose" />
+			<arg value="FortranParserExtras.g" />
+		</java>
+		<move file="${fortran.grammar.dir}/FortranParserExtras.java" tofile="${fortran.grammar.dir}/FortranParserExtras2.java" />
+		<echo message="package edu.udel.cis.vsl.abc.front.fortran.parse;${line.separator}import edu.udel.cis.vsl.abc.front.fortran.parse.IActionEnums;${line.separator}${line.separator}" file="${fortran.grammar.dir}/FortranParserExtras.java" />
+		<concat destfile="${fortran.grammar.dir}/FortranParserExtras.java" append="true">
+			<filelist dir="${fortran.grammar.dir}" files="FortranParserExtras2.java" />
+		</concat>
+		<delete file="${fortran.grammar.dir}/FortranParserExtras2.java" />
+		<move file="${fortran.grammar.dir}/FortranParserExtras.java" todir="${fortran.real.src.dir}/parse/" />
+		<move file="${fortran.grammar.dir}/FortranParserExtras_FortranParser08.java" todir="${fortran.real.src.dir}/parse/" />
+	</target>
+
+	<!--
+			FortranParserRiceCAF.java should be built if FortranParserRiceCAF.g
+			is newer than FortranParserRiceCAF.java OR FortranLexer.java
+			is newer than FortranParserRiceCAF.java.
+			
+			BUT: you only want to check if FortranLexer.java is newer
+			than FortranParserRiceCAF.java AFTER the lexer things happens.
+	-->
+
+	<target name="FortranParserRiceCAFDependencies" depends="FortranLexer">
+		<uptodate property="unchangedFortranParserRiceCAFGrammar" srcfile="${fortran.grammar.dir}/FortranParserRiceCAF.g" targetfile="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
+		<uptodate property="FortranLexerBeforeFortranParserRiceCAF" srcfile="${fortran.real.src.dir}/parse/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
+		<condition property="FortranParserRiceCAFUpToDate">
+			<and>
+				<isset property="unchangedFortranParserRiceCAFGrammar" />
+				<isset property="FortranLexerBeforeFortranParserRiceCAF" />
+			</and>
+		</condition>
+	</target>
+
+	<!-- 
+			FortranParserRiceCAF is a composite grammar. It also requires inserting some text
+			(packages and imported packages) at the beginning manually, because ANTLR 3.5 
+			doesn't allow redefinition of headers in composite grammar.
+	-->
+
+	<target name="FortranParserRiceCAF" depends="FortranParserRiceCAFDependencies" unless="FortranParserRiceCAFUpToDate">
+		<!--delete file="${fortran.grammar.dir}/FortranParserRiceCAF.tokens" /-->
+		<delete file="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
+		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="false" dir="${fortran.grammar.dir}">
+			<arg value="-verbose" />
+			<arg value="FortranParserRiceCAF.g" />
+		</java>
+		<move file="${fortran.grammar.dir}/FortranParserRiceCAF.java" tofile="${fortran.grammar.dir}/FortranParserRiceCAF2.java" />
+		<echo message="package edu.udel.cis.vsl.abc.front.fortran.parse;${line.separator}import edu.udel.cis.vsl.abc.front.fortran.parse.IActionEnums;${line.separator}${line.separator}" file="${fortran.grammar.dir}/FortranParserRiceCAF.java" />
+		<concat destfile="${fortran.grammar.dir}/FortranParserRiceCAF.java" append="true">
+			<filelist dir="${fortran.grammar.dir}" files="FortranParserRiceCAF2.java" />
+		</concat>
+		<delete file="${fortran.grammar.dir}/FortranParserRiceCAF2.java" />
+		<move file="${fortran.grammar.dir}/FortranParserRiceCAF.java" todir="${fortran.real.src.dir}/parse/" />
+		<move file="${fortran.grammar.dir}/FortranParserRiceCAF_FortranParser08.java" todir="${fortran.real.src.dir}/parse/" />
+	</target>
+	
+	
+	
 	<target name="cParsers" depends="CPreprocessorExpressionParser,CivlCParser,OmpParser">
 	</target>
 
@@ -229,7 +373,7 @@
 		<pathelement location="${sarl.jar}" />
 	</path>
 
-	<target name="compile" description="Compile all java source files." depends="cParsers">
+	<target name="compile" description="Compile all java source files." depends="cParsers,fortranParsers">
 		<mkdir dir="${bin.dir}" />
 		<javac debug="true" srcdir="${src.dir}" destdir="${bin.dir}" classpathref="src.compile.classpath" encoding="UTF-8" includeantruntime="false">
 		</javac>
@@ -352,8 +496,25 @@
 		<delete file="${c.real.src.dir}/parse/OmpParser.java" />
 		<delete file="${c.real.src.dir}/parse/OmpParser_CivlCParser.java" />
 	</target>
-
-	<target name="clean" description="Delete all generated files.">
+	
+	<target name="cleanFortran" description="Delete all generated files related to Fortran Parser">
+		<delete file="${fortran.grammar.dir}/FortranLexer.tokens" />
+		<touch file="${fortran.grammar.dir}/FortranLexer.tokens" />
+		<delete file="${fortran.real.src.dir}/preproc/FortranLexer.java" />
+		<delete file="${fortran.grammar.dir}/FortranParser08.tokens" />
+		<touch file="${fortran.grammar.dir}/FortranParser08.tokens" />
+		<delete file="${fortran.real.src.dir}/parse/FortranParser08.java" />
+		<delete file="${fortran.grammar.dir}/FortranParserExtras.tokens" />
+		<touch file="${fortran.grammar.dir}/FortranParserExtras.tokens" />
+		<delete file="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
+		<delete file="${fortran.real.src.dir}/parse/FortranParserExtras_FortranParser08.java" />
+		<delete file="${fortran.grammar.dir}/FortranParserRiceCAF.tokens" />
+		<touch file="${fortran.grammar.dir}/FortranParserRiceCAF.tokens" />
+		<delete file="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
+		<delete file="${fortran.real.src.dir}/parse/FortranParserRiceCAF_FortranParser08.java" />
+	</target>
+		
+	<target name="clean" description="Delete all generated files." depends="cleanFortran">
 		<delete dir="${bin.dir}" />
 		<delete dir="${test.bin.dir}" />
 		<delete dir="${junit.dir}" />
