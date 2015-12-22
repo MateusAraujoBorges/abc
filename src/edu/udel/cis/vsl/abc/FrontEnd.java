@@ -116,9 +116,6 @@ public class FrontEnd {
 	private Analyzer analyzer = Analysis.newStandardAnalyzer(configuration,
 			astFactory, entityFactory, conversionFactory);
 
-	public FrontEnd() {
-	}
-
 	/**
 	 * Constructs a new front end. The front end can be used repeatedly to
 	 * perform different translation tasks. The factories used by this front end
