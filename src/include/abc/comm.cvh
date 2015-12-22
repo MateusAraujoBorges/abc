@@ -8,7 +8,6 @@
 /* includes civlc.cvh because this library references $scope */
 #include <civlc.cvh>
 #include <bundle.cvh>
-
 /* *********************** Constants *********************** */
 
 /* Like MPI_ANY_SOURCE, can be used in probe, seek, dequeue
@@ -80,8 +79,14 @@ void $message_unpack($message message, void *buf, int size);
  * message-passing.  The new object will be allocated in the given scope. */
 $gcomm $gcomm_create($scope scope, int size);
 
-/* De-allocation a __gcomm__ object */
-void $gcomm_destroy($gcomm gcomm);
+/* De-allocation a __gcomm__ object. Returns the number of messages
+ * still remaining in the communicator. 
+ *
+ * Parameter gcomm: the  __gcomm__ object that is going to be de-allocated.
+ * Parameter junkMsgs: Output argument, a pointer to a CIVL-C sequence ($seq) 
+ * of $messages.
+ */
+int $gcomm_destroy($gcomm gcomm, void * junkMsgs);
 
 /* Returns $true iff gcomm points to a valid object. */
 //_Bool $gcomm_defined($gcomm gcomm);
