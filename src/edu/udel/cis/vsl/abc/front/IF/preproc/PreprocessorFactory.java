@@ -18,7 +18,7 @@ public interface PreprocessorFactory {
 	 *            enabled?)
 	 * @return a new Preprocessor
 	 */
-	Preprocessor newPreprocessor(Configuration config);
+	Preprocessor newCPreprocessor(Configuration config);
 
 	// CharStream newFilteredCharStreamFromFile(File file) throws IOException;
 	//

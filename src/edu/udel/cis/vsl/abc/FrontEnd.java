@@ -116,6 +116,8 @@ public class FrontEnd {
 	private Analyzer analyzer = Analysis.newStandardAnalyzer(configuration,
 			astFactory, entityFactory, conversionFactory);
 
+	private FrontEndKind frontEndKind;
+
 	/**
 	 * Constructs a new front end. The front end can be used repeatedly to
 	 * perform different translation tasks. The factories used by this front end
@@ -124,6 +126,7 @@ public class FrontEnd {
 	 * 
 	 */
 	public FrontEnd(FrontEndKind kind) {
+		frontEndKind = kind;
 		if (kind == FrontEndKind.C_OR_CIVL_C) {
 			parser = Parse.newCParser();
 			builder = ASTGenerator.newCASTBuilder(astFactory, (CParser) parser);
@@ -142,7 +145,9 @@ public class FrontEnd {
 	 * @return the new Preprocessor
 	 */
 	public Preprocessor getPreprocessor() {
-		return preprocessorFactory.newPreprocessor(configuration);
+		if (this.frontEndKind == FrontEndKind.C_OR_CIVL_C)
+			return preprocessorFactory.newCPreprocessor(configuration);
+		return null;// fix me when the frotran preprocessor is ready
 	}
 
 	/**

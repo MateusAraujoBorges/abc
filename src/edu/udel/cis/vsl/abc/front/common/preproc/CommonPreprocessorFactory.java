@@ -8,7 +8,7 @@ import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 public class CommonPreprocessorFactory implements PreprocessorFactory {
 
 	@Override
-	public Preprocessor newPreprocessor(Configuration config) {
+	public Preprocessor newCPreprocessor(Configuration config) {
 		return new CPreprocessor(config);
 	}
 
