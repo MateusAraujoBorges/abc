@@ -8,6 +8,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Architecture;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.transform.common.Pruner;
@@ -21,6 +22,8 @@ public class SvcompTest {
 	private static boolean debug = false;
 
 	private static File root = new File(new File("examples"), "svcomp");
+
+	FrontEnd frontEnd = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
 
 	@Before
 	public void setUp() throws Exception {
@@ -36,7 +39,6 @@ public class SvcompTest {
 
 	private void check(File file) throws ABCException, IOException {
 		TranslationTask task = new TranslationTask();
-		FrontEnd frontEnd = new FrontEnd();
 
 		task.setVerbose(debug);
 		task.setSilent(true);

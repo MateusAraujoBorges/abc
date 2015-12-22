@@ -35,7 +35,7 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
  * 
  * @author Stephen F. Siegel, University of Delaware
  */
-public class CommonPreprocessor implements Preprocessor {
+public class CPreprocessor implements Preprocessor {
 
 	public final static String SHORT_FILE_NAME_PREFIX = "f";
 
@@ -47,7 +47,7 @@ public class CommonPreprocessor implements Preprocessor {
 
 	private Configuration config;
 
-	public CommonPreprocessor(Configuration config) {
+	public CPreprocessor(Configuration config) {
 		this.config = config;
 	}
 
@@ -69,7 +69,7 @@ public class CommonPreprocessor implements Preprocessor {
 				// Write to temp file
 				FileWriter tmpWriter = new FileWriter(temp);
 				BufferedWriter tmpOut = new BufferedWriter(tmpWriter);
-				PreprocessorWorker worker;
+				CPreprocessorWorker worker;
 				PreprocessorTokenSource tokenSource;
 				Token token;
 
@@ -84,9 +84,9 @@ public class CommonPreprocessor implements Preprocessor {
 				tmpOut.flush();
 				tmpOut.close();
 				tmpWriter.close();
-				worker = new PreprocessorWorker(config, this,
-						PreprocessorWorker.defaultSystemIncludes,
-						PreprocessorWorker.defaultSystemIncludes,
+				worker = new CPreprocessorWorker(config, this,
+						CPreprocessorWorker.defaultSystemIncludes,
+						CPreprocessorWorker.defaultSystemIncludes,
 						new HashMap<String, Macro>());
 				tokenSource = worker.outputTokenSource(temp, true);
 				do {
@@ -246,7 +246,7 @@ public class CommonPreprocessor implements Preprocessor {
 	public PreprocessorTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
 			File file) throws PreprocessorException {
-		PreprocessorWorker worker = new PreprocessorWorker(config, this,
+		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
 				systemIncludePaths, userIncludePaths, implicitMacros);
 
 		return worker.outputTokenSource(file, false);
@@ -256,7 +256,7 @@ public class CommonPreprocessor implements Preprocessor {
 	public CTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
 			String filename) throws PreprocessorException, IOException {
-		PreprocessorWorker worker = new PreprocessorWorker(config, this,
+		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
 				systemIncludePaths, userIncludePaths, implicitMacros);
 
 		return worker.outputTokenSource(filename);
@@ -279,7 +279,7 @@ public class CommonPreprocessor implements Preprocessor {
 	public void printOutputTokens(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
 			PrintStream out, File file) throws PreprocessorException {
-		PreprocessorWorker worker = new PreprocessorWorker(config, this,
+		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
 				systemIncludePaths, userIncludePaths, implicitMacros);
 		PreprocessorTokenSource source = worker.outputTokenSource(file, false);
 
@@ -292,7 +292,7 @@ public class CommonPreprocessor implements Preprocessor {
 	public void printOutput(File[] systemIncludePaths, File[] userIncludePaths,
 			Map<String, Macro> implicitMacros, PrintStream out, File file)
 			throws PreprocessorException {
-		PreprocessorWorker worker = new PreprocessorWorker(config, this,
+		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
 				systemIncludePaths, userIncludePaths, implicitMacros);
 		PreprocessorTokenSource source = worker.outputTokenSource(file, false);
 
@@ -391,17 +391,17 @@ public class CommonPreprocessor implements Preprocessor {
 	 */
 	public final static void main(String[] args) throws PreprocessorException {
 		String filename = args[0];
-		CommonPreprocessor p = new CommonPreprocessor(null);
+		CPreprocessor p = new CPreprocessor(null);
 		File file = new File(filename);
 
 		if (debug)
-			p.debug(PreprocessorWorker.defaultSystemIncludes,
-					PreprocessorWorker.defaultUserIncludes,
-					PreprocessorWorker.defaultImplicitMacros, System.out, file);
+			p.debug(CPreprocessorWorker.defaultSystemIncludes,
+					CPreprocessorWorker.defaultUserIncludes,
+					CPreprocessorWorker.defaultImplicitMacros, System.out, file);
 		else
-			p.printOutput(PreprocessorWorker.defaultSystemIncludes,
-					PreprocessorWorker.defaultUserIncludes,
-					PreprocessorWorker.defaultImplicitMacros, System.out, file);
+			p.printOutput(CPreprocessorWorker.defaultSystemIncludes,
+					CPreprocessorWorker.defaultUserIncludes,
+					CPreprocessorWorker.defaultImplicitMacros, System.out, file);
 	}
 
 }

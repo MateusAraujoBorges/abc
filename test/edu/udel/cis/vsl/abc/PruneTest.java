@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -32,6 +33,8 @@ public class PruneTest {
 
 	private File root = new File("examples/prune");
 
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
@@ -46,7 +49,6 @@ public class PruneTest {
 
 	private void check(File[] inputs, File oracle)
 			throws PreprocessorException, SyntaxException, ParseException {
-		FrontEnd fe = new FrontEnd();
 		Program program = fe.compileAndLink(inputs, Language.C);
 		AST actual, expected;
 

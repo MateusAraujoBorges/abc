@@ -13,7 +13,7 @@ import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
  */
 public class ASTGenerator {
 
-	public static ASTBuilder newASTBuilder(ASTFactory astFactory, CParser parser) {
+	public static ASTBuilder newCASTBuilder(ASTFactory astFactory, CParser parser) {
 		return new CASTBuilder(astFactory, parser);
 	}
 

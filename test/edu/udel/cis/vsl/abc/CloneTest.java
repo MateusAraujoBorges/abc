@@ -10,6 +10,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
@@ -33,6 +34,8 @@ public class CloneTest {
 
 	private static File root = new File("examples");
 
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	@Before
 	public void setUp() throws Exception {
 	}
@@ -45,7 +48,6 @@ public class CloneTest {
 			ParseException, SyntaxException, IOException {
 		AST ast1, ast2;
 		SequenceNode<BlockItemNode> root1, root2;
-		FrontEnd fe = new FrontEnd();
 
 		ast1 = fe.compile(new File(root, filenameRoot + ".c"), Language.C,
 				systemIncludes, userIncludes, new HashMap<String, Macro>());

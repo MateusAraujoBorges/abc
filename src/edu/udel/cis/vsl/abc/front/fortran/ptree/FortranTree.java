@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.runtime.Token;
+import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
@@ -299,5 +300,11 @@ public class FortranTree implements ParseTree{
 	@Override
 	public Language getLanguage() {
 		return language;
+	}
+
+	@Override
+	public CommonTree getRoot() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -8,6 +8,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -33,7 +34,7 @@ public class CallGraphTest {
 
 	private static File root = new File(new File("examples"), "c");
 
-	FrontEnd fe = new FrontEnd();
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
 
 	@Before
 	public void setUp() throws Exception {
@@ -42,9 +43,9 @@ public class CallGraphTest {
 	@After
 	public void tearDown() throws Exception {
 	}
-	
-	private AST getAST(File file) throws ParseException, SyntaxException, PreprocessorException {
-		FrontEnd fe = new FrontEnd();
+
+	private AST getAST(File file) throws ParseException, SyntaxException,
+			PreprocessorException {
 		AST ast = fe.compile(file, Language.C, new File[0], new File[0],
 				new HashMap<String, Macro>());
 		return ast;
@@ -55,8 +56,9 @@ public class CallGraphTest {
 		AST root = getAST(file);
 
 		if (debug) {
-			edu.udel.cis.vsl.abc.analysis.common.CallAnalyzer.printCallGraph(root);
-		} 
+			edu.udel.cis.vsl.abc.analysis.common.CallAnalyzer
+					.printCallGraph(root);
+		}
 	}
 
 	@Test
@@ -68,7 +70,7 @@ public class CallGraphTest {
 	public void indirectcall() throws ABCException, IOException {
 		check("indirectcall");
 	}
-	
+
 	@Test
 	public void recursivecall() throws ABCException, IOException {
 		check("recursivecall");

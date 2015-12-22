@@ -40,10 +40,12 @@ import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
 import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocess;
 import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorFactory;
+import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
 import edu.udel.cis.vsl.abc.front.IF.token.CTokenSource;
 import edu.udel.cis.vsl.abc.front.IF.token.Macro;
 import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
@@ -76,6 +78,10 @@ import edu.udel.cis.vsl.abc.util.IF.Timer;
  */
 public class FrontEnd {
 
+	public enum FrontEndKind {
+		C_OR_CIVL_C, FORTRAN77
+	}
+
 	private final static String bar = "===================";
 
 	private Configuration configuration = Configurations
@@ -86,7 +92,7 @@ public class FrontEnd {
 	private PreprocessorFactory preprocessorFactory = Preprocess
 			.newPreprocessorFactory();
 
-	private CParser parser = Parse.newCParser();
+	private Parser parser;// = Parse.newCParser();
 
 	private TypeFactory typeFactory = Types.newTypeFactory();
 
@@ -104,10 +110,14 @@ public class FrontEnd {
 	private ConversionFactory conversionFactory = Conversions
 			.newConversionFactory(typeFactory);
 
-	private ASTBuilder builder = ASTGenerator.newASTBuilder(astFactory, parser);
+	private ASTBuilder builder;// = ASTGenerator
+	// .newCASTBuilder(astFactory, parser);
 
 	private Analyzer analyzer = Analysis.newStandardAnalyzer(configuration,
 			astFactory, entityFactory, conversionFactory);
+
+	public FrontEnd() {
+	}
 
 	/**
 	 * Constructs a new front end. The front end can be used repeatedly to
@@ -116,7 +126,11 @@ public class FrontEnd {
 	 * for each task.
 	 * 
 	 */
-	public FrontEnd() {
+	public FrontEnd(FrontEndKind kind) {
+		if (kind == FrontEndKind.C_OR_CIVL_C) {
+			parser = Parse.newCParser();
+			builder = ASTGenerator.newCASTBuilder(astFactory, (CParser) parser);
+		}
 		// analyzer = Analysis.newStandardAnalyzer(configuration, astFactory,
 		// entityFactory, conversionFactory);
 		// valueFactory = Values.newValueFactory(configuration, typeFactory);
@@ -136,12 +150,12 @@ public class FrontEnd {
 
 	/**
 	 * Returns the parser used by this front end. The parser is used to parse a
-	 * token stream and produce a {@link CParseTree}. The parser can be used
+	 * token stream and produce a {@link ParseTree}. The parser can be used
 	 * repeatedly.
 	 * 
 	 * @return the parser
 	 */
-	public CParser getParser() {
+	public Parser getParser() {
 		return parser;
 	}
 
@@ -240,7 +254,7 @@ public class FrontEnd {
 			throws PreprocessorException, SyntaxException, ParseException {
 		Preprocessor preprocessor;
 		CTokenSource tokens;
-		CParseTree parseTree;
+		ParseTree parseTree;
 		AST ast;
 
 		this.configuration.setLanguage(language);
@@ -401,7 +415,7 @@ public class FrontEnd {
 			CTokenSource tokens = preprocessor.outputTokenSource(
 					systemIncludePaths, userIncludePaths, implicitMacros,
 					files[i]);
-			CParseTree parseTree = parser.parse(tokens);
+			ParseTree parseTree = parser.parse(tokens);
 
 			asts[i] = builder.getTranslationUnit(configuration, parseTree);
 		}
@@ -550,7 +564,7 @@ public class FrontEnd {
 					timer.markTime("preprocess and write " + filename);
 				}
 			} else { // not preproc only
-				CParseTree parseTree;
+				ParseTree parseTree;
 
 				parseTree = parser.parse(tokens);
 				timer.markTime("preprocess, parse, and build ANTLR tree");
@@ -646,11 +660,19 @@ public class FrontEnd {
 
 	}
 
+	private FrontEndKind frontEndKindByLanguage(Language language) {
+		if (language == Language.FORTRAN77)
+			return FrontEndKind.FORTRAN77;
+		return FrontEndKind.C_OR_CIVL_C;
+	}
+
 	public void compileAndCompare(TranslationTask task)
 			throws PreprocessorException, SyntaxException, ParseException {
 		int nfiles = task.getFiles().length;
 		File file1, file2;
-		FrontEnd frontEnd1 = new FrontEnd(), frontEnd2 = new FrontEnd();
+		Language language = task.getLanguage();
+		FrontEndKind kind = this.frontEndKindByLanguage(language);
+		FrontEnd frontEnd1 = new FrontEnd(kind), frontEnd2 = new FrontEnd(kind);
 		AST ast1, ast2;
 		DifferenceObject diffObj;
 

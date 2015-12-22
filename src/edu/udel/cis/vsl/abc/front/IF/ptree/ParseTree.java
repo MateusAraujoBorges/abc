@@ -1,5 +1,7 @@
 package edu.udel.cis.vsl.abc.front.IF.ptree;
 
+import org.antlr.runtime.tree.CommonTree;
+
 import edu.udel.cis.vsl.abc.astgen.IF.ASTBuilder;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 
@@ -18,4 +20,11 @@ public interface ParseTree {
 	 * @return
 	 */
 	Language getLanguage();
+
+	/**
+	 * Gets the root of the tree.
+	 * 
+	 * @return the root
+	 */
+	CommonTree getRoot();
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
@@ -20,8 +21,9 @@ public class CIVLTranslationTest {
 
 	private File root = new File(new File("examples"), "civl");
 
+	FrontEnd f = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	private void check(String filenameRoot) throws ABCException, IOException {
-		FrontEnd f = new FrontEnd();
 		File file = new File(root, filenameRoot + ".cvl");
 
 		if (debug) {
@@ -123,7 +125,7 @@ public class CIVLTranslationTest {
 	public void cond() throws ABCException, IOException {
 		check("cond");
 	}
-	
+
 	@Test
 	public void externalDefs() throws ABCException, IOException {
 		check("externaldefs");

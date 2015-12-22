@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -36,6 +37,8 @@ public class LinkTest {
 
 	private File root = new File(new File("examples"), "link");
 
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
@@ -50,7 +53,6 @@ public class LinkTest {
 
 	private void check(File[] inputs, File oracle)
 			throws PreprocessorException, SyntaxException, ParseException {
-		FrontEnd fe = new FrontEnd();
 		AST actual = fe.compileAndLink(inputs, Language.CIVL_C).getAST();
 		AST expected = fe.compile(oracle, Language.CIVL_C);
 

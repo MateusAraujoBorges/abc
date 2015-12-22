@@ -9,6 +9,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.program.IF.Program;
@@ -33,7 +34,7 @@ public class MPITranslationTest {
 
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
-	FrontEnd fe = new FrontEnd();
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
 
 	@Before
 	public void setUp() throws Exception {
@@ -44,7 +45,6 @@ public class MPITranslationTest {
 	}
 
 	private void check(String filenameRoot) throws ABCException, IOException {
-		FrontEnd fe = new FrontEnd();
 		File file = new File(root, filenameRoot + ".c");
 
 		if (debug) {

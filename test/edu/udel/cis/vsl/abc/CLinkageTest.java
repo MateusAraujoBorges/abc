@@ -12,6 +12,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
@@ -35,6 +36,8 @@ public class CLinkageTest {
 
 	private File root = new File("examples");
 
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
 	}
@@ -49,7 +52,6 @@ public class CLinkageTest {
 
 	private AST getAST(File file) throws ParseException, SyntaxException,
 			PreprocessorException {
-		FrontEnd fe = new FrontEnd();
 		AST ast = fe.compile(file, Language.C, new File[0], new File[0],
 				new HashMap<String, Macro>());
 

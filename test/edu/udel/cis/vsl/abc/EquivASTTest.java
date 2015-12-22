@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -23,9 +24,10 @@ public class EquivASTTest {
 
 	private File root = new File(new File("examples"), "equiv");
 
+	FrontEnd f = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	private boolean isEquiv(String filenameRoot1, String filenameRoot2)
 			throws ABCException, IOException {
-		FrontEnd f = new FrontEnd();
 		File file1 = new File(root, filenameRoot1 + ".c");
 		File file2 = new File(root, filenameRoot2 + ".c");
 		Program program1, program2;

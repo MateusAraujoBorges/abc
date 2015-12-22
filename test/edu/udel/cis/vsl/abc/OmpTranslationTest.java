@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -38,7 +39,7 @@ public class OmpTranslationTest {
 
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
-	FrontEnd fe = new FrontEnd();
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
 
 	@Before
 	public void setUp() throws Exception {
@@ -49,7 +50,6 @@ public class OmpTranslationTest {
 	}
 
 	private void check(String filenameRoot) throws ABCException, IOException {
-		FrontEnd fe = new FrontEnd();
 		File file = new File(root, filenameRoot + ".c");
 
 		if (debug) {

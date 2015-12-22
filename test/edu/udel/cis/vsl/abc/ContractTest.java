@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.program.IF.Program;
@@ -19,8 +20,9 @@ public class ContractTest {
 
 	private File root = new File(new File("examples"), "contract");
 
+	FrontEnd f = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	private void check(String filenameRoot) throws ABCException, IOException {
-		FrontEnd f = new FrontEnd();
 		File file = new File(root, filenameRoot + ".cvl");
 
 		if (debug) {

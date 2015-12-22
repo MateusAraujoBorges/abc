@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Architecture;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -99,6 +100,8 @@ public class ABC {
 
 			if ("cvl".equals(suffix) || "cvh".equals(suffix))
 				return Language.CIVL_C;
+			else if ("f".equals(suffix) || "F".equals(suffix))
+				return Language.FORTRAN77;
 		}
 		return Language.C;
 	}
@@ -273,6 +276,8 @@ public class ABC {
 					language = Language.C;
 				else if (arg.equals("-lang=civlc"))
 					language = Language.CIVL_C;
+				else if (arg.equals("-lang=fortran77"))
+					language = Language.FORTRAN77;
 				else
 					err("Unknown command line option: " + arg);
 			} else if (arg.startsWith("-arch")) {
@@ -360,7 +365,9 @@ public class ABC {
 			err.flush();
 			System.exit(1);
 		}
-		frontEnd = new FrontEnd();
+		frontEnd = new FrontEnd(
+				config.getLanguage() == Language.FORTRAN77 ? FrontEndKind.FORTRAN77
+						: FrontEndKind.C_OR_CIVL_C);
 		try {
 
 			if (config.doShowDiff()) {

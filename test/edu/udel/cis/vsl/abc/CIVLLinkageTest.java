@@ -6,6 +6,7 @@ import java.io.File;
 
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
@@ -21,12 +22,11 @@ import edu.udel.cis.vsl.abc.program.IF.Program;
 public class CIVLLinkageTest {
 
 	public final static boolean debug = false;
-
 	private File root = new File(new File("examples"), "link");
+	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
 
 	private boolean compileAndLink(String[] filenames, File[] systemIncludePaths)
 			throws ParseException, SyntaxException, PreprocessorException {
-		FrontEnd fe = new FrontEnd();
 		File files[] = new File[filenames.length];
 		Program program;
 
@@ -63,5 +63,5 @@ public class CIVLLinkageTest {
 		assertTrue(compileAndLink(new String[] { "comm/messageUnpack.cvl",
 				"comm/comm.cvl" }, new File[] { new File(root, "comm") }));
 	}
-	
+
 }

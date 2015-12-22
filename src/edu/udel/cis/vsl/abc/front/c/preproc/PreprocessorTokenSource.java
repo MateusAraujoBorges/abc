@@ -39,6 +39,7 @@ import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
 import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
 import edu.udel.cis.vsl.abc.front.IF.token.TokenUtils;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser.file_return;
+import edu.udel.cis.vsl.abc.front.common.preproc.CTokenIterator;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
 
@@ -169,7 +170,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	/**
 	 * The worker who created this token source.
 	 */
-	private PreprocessorWorker worker;
+	private CPreprocessorWorker worker;
 
 	// Constructors...
 
@@ -193,7 +194,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	public PreprocessorTokenSource(Configuration config, File source,
 			PreprocessorParser parser, File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> macroMap,
-			TokenFactory tokenFactory, PreprocessorWorker worker,
+			TokenFactory tokenFactory, CPreprocessorWorker worker,
 			boolean tmpFile) throws PreprocessorException {
 		assert systemIncludePaths != null;
 		assert userIncludePaths != null;
@@ -248,7 +249,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 
 	public PreprocessorTokenSource(File source, PreprocessorParser parser,
 			File[] systemIncludePaths, File[] userIncludePaths,
-			TokenFactory tokenFactory, PreprocessorWorker worker,
+			TokenFactory tokenFactory, CPreprocessorWorker worker,
 			boolean tmpFile) throws PreprocessorException {
 		this(null, source, parser, systemIncludePaths, userIncludePaths,
 				new HashMap<String, Macro>(), tokenFactory, worker, tmpFile);

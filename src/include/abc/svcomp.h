@@ -30,17 +30,6 @@ extern void* malloc(size_t size);
 extern void assert(_Bool);
 extern void assume(_Bool);
 
-
-/*
-__VERIFIER_nondet_X(): In order to model nondeterministic values, 
-the following functions can be assumed to return an arbitrary value of 
-the indicated type: __VERIFIER_nondet_X() (and nondet_X(), deprecated) 
-with X in {bool, char, int, float, loff_t, long, pchar, pointer, pthread_t, 
-sector_t, short, size_t, u32, uchar, uint, ulong, unsigned, ushort} 
-(no side effects, pointer for void *, etc.). The verification tool can 
-assume that the functions are implemented according to the following template:
-X __VERIFIER_nondet_X() { X val; return val; }
-*/
 int __VERIFIER_nondet_int(void);
 unsigned int __VERIFIER_nondet_uint(void);
 void* __VERIFIER_nondet_pointer(void);

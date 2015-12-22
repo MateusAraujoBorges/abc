@@ -27,13 +27,6 @@ public interface CParseTree extends ParseTree {
 	RuleKind getKind();
 
 	/**
-	 * Gets the root of the tree.
-	 * 
-	 * @return the root
-	 */
-	CommonTree getRoot();
-
-	/**
 	 * Given a node in the parse tree, returns a source object for it.
 	 * 
 	 * @param tree

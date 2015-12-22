@@ -26,14 +26,14 @@ import edu.udel.cis.vsl.abc.front.IF.token.Tokens;
  * @author Manchun Zheng
  * 
  */
-public class PreprocessorWorker {
+public class CPreprocessorWorker {
 
 	/* ******************* Package-private static fields ******************* */
 
 	/**
 	 * The preprocessor which created this worker.
 	 */
-	private CommonPreprocessor preprocessor;
+	private CPreprocessor preprocessor;
 
 	/**
 	 * The system include paths to search for included system headers
@@ -93,8 +93,8 @@ public class PreprocessorWorker {
 	 *            the predefined macros, including those specified in command
 	 *            line
 	 */
-	public PreprocessorWorker(Configuration config,
-			CommonPreprocessor preprocessor, File[] systemIncludePaths,
+	public CPreprocessorWorker(Configuration config,
+			CPreprocessor preprocessor, File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> macros) {
 		this.preprocessor = preprocessor;
 		this.config = config;

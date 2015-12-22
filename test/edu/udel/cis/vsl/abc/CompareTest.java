@@ -6,6 +6,7 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -19,9 +20,10 @@ public class CompareTest {
 
 	private PrintStream out = System.out;
 
+	FrontEnd f = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	private void check(String filename0, String filename1) throws ABCException,
 			IOException {
-		FrontEnd f = new FrontEnd();
 		File file0 = new File(root, filename0 + ".cvl"), file1 = new File(root,
 				filename1 + ".cvl");
 		Program program0, program1, compositeProgram;

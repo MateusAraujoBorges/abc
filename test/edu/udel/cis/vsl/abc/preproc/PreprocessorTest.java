@@ -14,7 +14,7 @@ import org.junit.Test;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.IF.token.Macro;
-import edu.udel.cis.vsl.abc.front.c.preproc.CommonPreprocessor;
+import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorUtils;
 
@@ -36,11 +36,11 @@ public class PreprocessorTest {
 
 	private static Map<String, Macro> implicitMacros = new HashMap<>();
 
-	private CommonPreprocessor p;
+	private CPreprocessor p;
 
 	@Before
 	public void setUp() throws Exception {
-		p = new CommonPreprocessor(null);
+		p = new CPreprocessor(null);
 	}
 
 	private void readSource(TokenSource source) throws PreprocessorException {

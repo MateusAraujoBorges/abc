@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.program.IF.Program;
@@ -21,8 +22,9 @@ public class SideEffectRemoverTest {
 
 	private File root = new File(new File("examples"), "side-effects");
 
+	FrontEnd f = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+
 	private void check(String filename) throws ABCException, IOException {
-		FrontEnd f = new FrontEnd();
 		File file = new File(root, filename);
 		File outputFile = new File(root, "out_" + filename);
 		Program program = f
