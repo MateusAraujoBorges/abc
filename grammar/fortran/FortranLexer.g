@@ -37,11 +37,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import edu.udel.cis.vsl.abc.front.IF.token.CToken;
-import edu.udel.cis.vsl.abc.front.IF.token.Formation;
-import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
-import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
-import edu.udel.cis.vsl.abc.front.IF.token.Tokens;
+import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.Formation;
+import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.token.IF.Tokens;
 }
 
 @members {

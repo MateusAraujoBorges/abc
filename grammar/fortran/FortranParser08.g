@@ -43,7 +43,7 @@ options {
 //
 @header {
 package edu.udel.cis.vsl.abc.front.fortran.parse;
-import edu.udel.cis.vsl.abc.front.IF.token.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CToken;
 }
 
 @members {
