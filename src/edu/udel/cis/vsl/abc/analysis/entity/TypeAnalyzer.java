@@ -48,10 +48,9 @@ import edu.udel.cis.vsl.abc.ast.type.IF.UnqualifiedObjectType;
 import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
 import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
-import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
-import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 /**
  * Analyzes types nodes in the AST, sets the type of the type node and processes
@@ -72,8 +71,8 @@ public class TypeAnalyzer {
 
 	private ValueFactory valueFactory;
 
-	private Configuration configuration;
-	// private Language language;
+	// private Configuration configuration;
+	private Language language;
 
 	/**
 	 * The type used for enumerators, i.e., the elements of enumeration types.
@@ -83,16 +82,14 @@ public class TypeAnalyzer {
 
 	// ************************** Constructors ****************************
 
-	TypeAnalyzer(EntityAnalyzer entityAnalyzer, TypeFactory typeFactory
-	// , EntityFactory entityFactory
-	) {
+	TypeAnalyzer(EntityAnalyzer entityAnalyzer, TypeFactory typeFactory) {
 		this.entityAnalyzer = entityAnalyzer;
 		this.nodeFactory = entityAnalyzer.nodeFactory;
 		this.typeFactory = typeFactory;
 		this.valueFactory = entityAnalyzer.valueFactory;
 		this.enumeratorType = (IntegerType) typeFactory
 				.basicType(BasicTypeKind.INT);
-		this.configuration = entityAnalyzer.configuration;
+		this.language = entityAnalyzer.language;
 	}
 
 	// ************************** Private Methods **************************
@@ -152,7 +149,7 @@ public class TypeAnalyzer {
 			throw error("Non-object type used for element type of array type",
 					elementTypeNode);
 		elementType = (ObjectType) tempElementType;
-		if (configuration.getLanguage() == Language.C && !isParameter
+		if (this.language == Language.C && !isParameter
 				&& !elementType.isComplete())
 			throw error("Element type of array type is not complete",
 					elementTypeNode);

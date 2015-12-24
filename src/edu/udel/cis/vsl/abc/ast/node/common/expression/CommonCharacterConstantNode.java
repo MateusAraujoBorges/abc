@@ -4,7 +4,7 @@ import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.value.IF.CharacterValue;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonCharacterConstantNode extends CommonConstantNode implements
 		CharacterConstantNode {

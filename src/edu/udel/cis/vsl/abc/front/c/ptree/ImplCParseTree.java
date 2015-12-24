@@ -4,16 +4,16 @@ import java.util.Collection;
 
 import org.antlr.runtime.tree.CommonTree;
 
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parse.RuleKind;
-import edu.udel.cis.vsl.abc.front.IF.token.CToken;
-import edu.udel.cis.vsl.abc.front.IF.token.CTokenSequence;
-import edu.udel.cis.vsl.abc.front.IF.token.CTokenSource;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
-import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
-import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.front.IF.parse.Parser.RuleKind;
 import edu.udel.cis.vsl.abc.front.common.ptree.CommonParseTree;
+import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 public class ImplCParseTree extends CommonParseTree implements CParseTree {
 

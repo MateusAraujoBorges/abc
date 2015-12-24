@@ -41,10 +41,9 @@ import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.ast.value.IF.Value;
-import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
-import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 /**
  * A tool to analyze declarations in an AST.
@@ -71,7 +70,7 @@ public class DeclarationAnalyzer {
 	 */
 	private Collection<String> ignoredTypes = null;
 
-	private Configuration configuration;
+	private Language language;
 
 	// ************************** Constructors ****************************
 
@@ -84,8 +83,7 @@ public class DeclarationAnalyzer {
 	 */
 	DeclarationAnalyzer(EntityAnalyzer entityAnalyzer) {
 		this.entityAnalyzer = entityAnalyzer;
-		// civl = entityAnalyzer.configuration.getLanguage() == Language.CIVL_C;
-		this.configuration = entityAnalyzer.configuration;
+		this.language = entityAnalyzer.language;
 	}
 
 	// ************************* Exported Methods *************************
@@ -661,7 +659,7 @@ public class DeclarationAnalyzer {
 	}
 
 	private boolean civl() {
-		return configuration.getLanguage() == Language.CIVL_C;
+		return language == Language.CIVL_C;
 	}
 
 }

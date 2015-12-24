@@ -6,7 +6,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.ChooseStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.common.CommonSequenceNode;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonChooseStatementNode extends
 		CommonSequenceNode<StatementNode> implements ChooseStatementNode {

@@ -6,10 +6,12 @@ import java.io.PrintStream;
 
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.transform.IF.Transform;
 
@@ -20,7 +22,10 @@ public class CompareTest {
 
 	private PrintStream out = System.out;
 
-	FrontEnd f = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+	private static Configuration config = Configurations
+			.newMinimalConfiguration();
+
+	private static FrontEnd f = new FrontEnd(config);
 
 	private void check(String filename0, String filename1) throws ABCException,
 			IOException {
@@ -39,8 +44,8 @@ public class CompareTest {
 				program1.getAST());
 		if (debug)
 			combinedAST.prettyPrint(out, false);
-		compositeProgram = f.getProgramFactory(f.getStandardAnalyzer())
-				.newProgram(combinedAST);
+		compositeProgram = f.getProgramFactory(
+				f.getStandardAnalyzer(Language.CIVL_C)).newProgram(combinedAST);
 		if (debug)
 			compositeProgram.prettyPrint(out);
 	}

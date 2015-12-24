@@ -43,10 +43,11 @@ import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
-import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
-import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 /**
  * Performs standard analysis of a translation unit, creating the following
@@ -91,6 +92,8 @@ public class EntityAnalyzer implements Analyzer {
 
 	StandardTypes standardTypes;
 
+	Language language;
+
 	Configuration configuration;
 
 	// Private fields...
@@ -99,9 +102,11 @@ public class EntityAnalyzer implements Analyzer {
 
 	// Constructors...
 
-	public EntityAnalyzer(Configuration configuration, ASTFactory astFactory,
-			EntityFactory entityFactory, ConversionFactory conversionFactory) {
+	public EntityAnalyzer(Language language, Configuration configuration,
+			ASTFactory astFactory, EntityFactory entityFactory,
+			ConversionFactory conversionFactory) {
 		this.configuration = configuration;
+		this.language = language;
 		this.astFactory = astFactory;
 		this.nodeFactory = astFactory.getNodeFactory();
 		this.typeFactory = conversionFactory.getTypeFactory();
@@ -143,7 +148,7 @@ public class EntityAnalyzer implements Analyzer {
 			processBlockItemNode((BlockItemNode) child);
 		}
 		findTentativeDefinitions(rootScope);
-		this.expressionAnalyzer.processUnknownIdentifiers();
+		this.expressionAnalyzer.processUnknownIdentifiers(root);
 	}
 
 	// Package private methods...

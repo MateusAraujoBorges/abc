@@ -2,11 +2,10 @@ package edu.udel.cis.vsl.abc.front.IF.parse;
 
 import java.util.Stack;
 
-import edu.udel.cis.vsl.abc.front.IF.parse.Parse.RuleKind;
-import edu.udel.cis.vsl.abc.front.IF.token.CTokenSource;
 import edu.udel.cis.vsl.abc.front.c.parse.CivlCParser;
 import edu.udel.cis.vsl.abc.front.c.parse.ScopeSymbols;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
+import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
 
 /**
  * <p>
@@ -334,6 +333,7 @@ public interface CParser extends Parser {
 	 * @return The parse tree.
 	 * @throws ParseException
 	 */
+	@Override
 	CParseTree parse(RuleKind rule, CTokenSource tokenSource,
 			Stack<ScopeSymbols> symbols) throws ParseException;
 

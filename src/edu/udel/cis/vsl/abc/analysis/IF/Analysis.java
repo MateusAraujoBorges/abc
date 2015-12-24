@@ -9,7 +9,8 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entities;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Simple factory class providing static methods for creating new instances of
@@ -38,11 +39,11 @@ public class Analysis {
 	 *            the factory used for producing conversions
 	 * @return the new standard analyzer
 	 */
-	public static Analyzer newStandardAnalyzer(Configuration configuration,
-			ASTFactory astFactory, EntityFactory entityFactory,
-			ConversionFactory conversionFactory) {
-		return new StandardAnalyzer(configuration, astFactory, entityFactory,
-				conversionFactory);
+	public static Analyzer newStandardAnalyzer(Language language,
+			Configuration configuration, ASTFactory astFactory,
+			EntityFactory entityFactory, ConversionFactory conversionFactory) {
+		return new StandardAnalyzer(language, configuration, astFactory,
+				entityFactory, conversionFactory);
 	}
 
 	/**
@@ -58,15 +59,15 @@ public class Analysis {
 	 * @see #newStandardAnalyzer(Configuration, ASTFactory, EntityFactory,
 	 *      ConversionFactory)
 	 */
-	public static void performStandardAnalysis(Configuration configuration,
-			AST ast) throws SyntaxException {
+	public static void performStandardAnalysis(Language language,
+			Configuration configuration, AST ast) throws SyntaxException {
 		EntityFactory entityFactory = Entities.newEntityFactory();
 		ASTFactory astFactory = ast.getASTFactory();
 		TypeFactory typeFactory = astFactory.getTypeFactory();
 		ConversionFactory conversionFactory = Conversions
 				.newConversionFactory(typeFactory);
-		Analyzer analyzer = newStandardAnalyzer(configuration, astFactory,
-				entityFactory, conversionFactory);
+		Analyzer analyzer = newStandardAnalyzer(language, configuration,
+				astFactory, entityFactory, conversionFactory);
 
 		analyzer.clear(ast);
 		analyzer.analyze(ast);

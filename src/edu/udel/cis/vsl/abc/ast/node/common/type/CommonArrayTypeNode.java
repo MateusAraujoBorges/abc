@@ -5,7 +5,7 @@ import java.io.PrintStream;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonArrayTypeNode extends CommonTypeNode implements
 		ArrayTypeNode {

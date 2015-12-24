@@ -1,7 +1,7 @@
 package edu.udel.cis.vsl.abc.analysis.IF;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * An analyzer is an object which performs some kind of analysis on an AST,

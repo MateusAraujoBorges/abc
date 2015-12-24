@@ -5,7 +5,7 @@ import java.util.List;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.DeclarationListNode;
 import edu.udel.cis.vsl.abc.ast.node.common.CommonSequenceNode;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonDeclarationListNode extends
 		CommonSequenceNode<VariableDeclarationNode> implements

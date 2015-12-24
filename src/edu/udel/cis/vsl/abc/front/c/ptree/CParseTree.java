@@ -4,12 +4,12 @@ import java.util.Collection;
 
 import org.antlr.runtime.tree.CommonTree;
 
-import edu.udel.cis.vsl.abc.front.IF.parse.Parse.RuleKind;
+import edu.udel.cis.vsl.abc.front.IF.parse.Parser.RuleKind;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
-import edu.udel.cis.vsl.abc.front.IF.token.CTokenSequence;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
-import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * A ParseTree is the result of parsing a translation unit. It comprises an

@@ -6,8 +6,6 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 
 public class CommonConfiguration implements Configuration {
 
-	Language language = Language.C;
-
 	private boolean svcomp = false;
 
 	private Architecture architecture = Architecture.UNKNOWN;
@@ -71,16 +69,6 @@ public class CommonConfiguration implements Configuration {
 
 	/** maximum value for an object of type unsigned long long int */
 	BigInteger ULLONG_MAX = new BigInteger("18446744073709551615");// 2^64-1
-
-	@Override
-	public Language getLanguage() {
-		return language;
-	}
-
-	@Override
-	public void setLanguage(Language language) {
-		this.language = language;
-	}
 
 	@Override
 	public BigInteger unsignedCharMax() {
@@ -221,7 +209,7 @@ public class CommonConfiguration implements Configuration {
 	public void setSvcomp(boolean svcomp) {
 		this.svcomp = svcomp;
 	}
-	
+
 	@Override
 	public void setArchitecture(Architecture arch) {
 		this.architecture = arch;

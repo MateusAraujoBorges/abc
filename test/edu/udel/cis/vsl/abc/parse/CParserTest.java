@@ -8,22 +8,23 @@ import java.util.Map;
 import org.antlr.runtime.tree.CommonTree;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
 import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocess;
 import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.token.Macro;
-import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
+import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 
 public class CParserTest {
 
 	private static boolean debug = false;
 
-	private static Preprocessor preprocessor = Preprocess
-			.newPreprocessorFactory().newCPreprocessor(null);
+	private static Preprocessor preprocessor = Preprocess.newPreprocessor(
+			Language.C, null);
 
 	private static PrintStream out = System.out;
 
@@ -39,8 +40,8 @@ public class CParserTest {
 	private void check(String filenameRoot) throws PreprocessorException,
 			ParseException {
 		File file = new File(root, filenameRoot + ".c");
-		CParser parser = Parse.newCParser();
-		CParseTree parseTree = parser.parse(preprocessor.outputTokenSource(
+		Parser parser = Parse.newParser(Language.C);
+		ParseTree parseTree = parser.parse(preprocessor.outputTokenSource(
 				systemIncludes, userIncludes, implicitMacros, file));
 		CommonTree tree = parseTree.getRoot();
 

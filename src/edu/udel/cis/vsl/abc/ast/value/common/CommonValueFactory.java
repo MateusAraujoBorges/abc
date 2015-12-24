@@ -62,10 +62,10 @@ import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.VariableReference;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Architecture;
-import edu.udel.cis.vsl.abc.front.IF.token.ExecutionCharacter;
-import edu.udel.cis.vsl.abc.front.IF.token.StringLiteral;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
-import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
+import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
+import edu.udel.cis.vsl.abc.token.IF.StringLiteral;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 /**
  * Flyweight pattern is used for those values which are immutable. Compound

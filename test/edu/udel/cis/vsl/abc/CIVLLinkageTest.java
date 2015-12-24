@@ -6,12 +6,15 @@ import java.io.File;
 
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.main.ABC;
+import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.program.IF.Program;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Tests linkage issues: internal, external, or "none".
@@ -23,7 +26,9 @@ public class CIVLLinkageTest {
 
 	public final static boolean debug = false;
 	private File root = new File(new File("examples"), "link");
-	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+	private static Configuration config = Configurations
+			.newMinimalConfiguration();
+	private static FrontEnd fe = new FrontEnd(config);
 
 	private boolean compileAndLink(String[] filenames, File[] systemIncludePaths)
 			throws ParseException, SyntaxException, PreprocessorException {

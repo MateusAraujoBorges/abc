@@ -1,7 +1,9 @@
 package edu.udel.cis.vsl.abc.front.IF.parse;
 
-import edu.udel.cis.vsl.abc.front.IF.token.CToken;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.parse.ImplCParser;
+import edu.udel.cis.vsl.abc.token.IF.CToken;
 
 /**
  * The entry point for the parse module, this class provides static method(s)
@@ -13,23 +15,29 @@ import edu.udel.cis.vsl.abc.front.c.parse.ImplCParser;
  */
 public class Parse {
 
-	public static enum RuleKind {
-		TRANSLATION_UNIT, BLOCK_ITEM
-	}
-
 	/**
 	 * Creates a new instance of a {@link CParser} using the given source of
 	 * tokens. It is unspecified whether the parsing process will begin
 	 * immediately with the creation of the new parser, or whether it will begin
-	 * only when some other method in the parser is invoked.
+	 * only when some other method in the parser is invoked. This method throws
+	 * a runtime exception if the given language is not supported yet.
 	 * 
 	 * @param source
 	 *            the token source, an abstraction specifying the sequence of
 	 *            {@link CToken}s that are to be parsed
 	 * @return the new {@link CParser}
 	 */
-	public static CParser newCParser() {
-		return new ImplCParser();
+	public static Parser newParser(Language language) {
+		switch (language) {
+		case C:
+		case CIVL_C:
+			return new ImplCParser();
+		case FORTRAN77:
+			return null;
+		default:
+			throw new ABCRuntimeException(
+					"ABC doesn't support parsing programs in " + language + ".");
+		}
 	}
 
 	// public static CParser newCParser(RuleKind rule, CTokenSource source,

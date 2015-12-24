@@ -9,9 +9,9 @@ import java.util.Map;
 import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Parser;
 
-import edu.udel.cis.vsl.abc.front.IF.token.CTokenSource;
-import edu.udel.cis.vsl.abc.front.IF.token.Macro;
-import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.Macro;
+import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
 /**
  * <p>

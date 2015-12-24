@@ -2,7 +2,7 @@ package edu.udel.cis.vsl.abc.front.common.preproc;
 
 import java.util.Iterator;
 
-import edu.udel.cis.vsl.abc.front.IF.token.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CToken;
 
 /**
  * A simple iterator over CTokens that works by following the "next" fields in

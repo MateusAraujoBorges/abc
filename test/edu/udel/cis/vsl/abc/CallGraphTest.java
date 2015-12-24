@@ -8,14 +8,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.token.Macro;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.main.FrontEnd;
+import edu.udel.cis.vsl.abc.token.IF.Macro;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Checks a number of simple C programs to make sure they pass on the call graph
@@ -34,7 +36,10 @@ public class CallGraphTest {
 
 	private static File root = new File(new File("examples"), "c");
 
-	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+	private static Configuration config = Configurations
+			.newMinimalConfiguration();
+
+	private static FrontEnd fe = new FrontEnd(config);
 
 	@Before
 	public void setUp() throws Exception {

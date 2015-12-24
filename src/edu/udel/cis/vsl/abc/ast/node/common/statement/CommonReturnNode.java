@@ -2,7 +2,7 @@ package edu.udel.cis.vsl.abc.ast.node.common.statement;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ReturnNode;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonReturnNode extends CommonJumpNode implements ReturnNode {
 

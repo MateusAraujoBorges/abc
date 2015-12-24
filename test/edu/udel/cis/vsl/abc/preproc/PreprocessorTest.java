@@ -13,10 +13,10 @@ import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorRuntimeException;
-import edu.udel.cis.vsl.abc.front.IF.token.Macro;
 import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorUtils;
+import edu.udel.cis.vsl.abc.token.IF.Macro;
 
 public class PreprocessorTest {
 

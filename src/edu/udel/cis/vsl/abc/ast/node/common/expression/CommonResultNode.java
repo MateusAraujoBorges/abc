@@ -3,7 +3,7 @@ package edu.udel.cis.vsl.abc.ast.node.common.expression;
 import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ResultNode;
-import edu.udel.cis.vsl.abc.front.IF.token.Source;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonResultNode extends CommonExpressionNode implements
 		ResultNode {

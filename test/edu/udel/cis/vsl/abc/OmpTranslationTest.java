@@ -10,14 +10,17 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.main.FrontEnd;
+import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.program.IF.Program;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Checks a number of simple C programs to make sure they pass on the parsing
@@ -39,7 +42,10 @@ public class OmpTranslationTest {
 
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
-	FrontEnd fe = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+	private static Configuration config = Configurations
+			.newMinimalConfiguration();
+
+	private static FrontEnd fe = new FrontEnd(config);
 
 	@Before
 	public void setUp() throws Exception {
@@ -53,10 +59,10 @@ public class OmpTranslationTest {
 		File file = new File(root, filenameRoot + ".c");
 
 		if (debug) {
-			TranslationTask config = new TranslationTask(Language.CIVL_C, file);
+			TranslationTask task = new TranslationTask(Language.CIVL_C, file);
 
-			config.addAllTransformCodes(codes);
-			fe.showTranslation(config);
+			task.addAllTransformCodes(codes);
+			fe.showTranslation(task);
 		} else {
 			Program p = fe.compileAndLink(new File[] { file }, Language.CIVL_C);
 
@@ -69,8 +75,8 @@ public class OmpTranslationTest {
 			SyntaxException, ParseException {
 		AST ast = fe.compile(new File(root, "dijkstra_openmp.c"),
 				Language.CIVL_C);
-		Program p = fe.getProgramFactory(fe.getStandardAnalyzer()).newProgram(
-				ast);
+		Program p = fe.getProgramFactory(
+				fe.getStandardAnalyzer(Language.CIVL_C)).newProgram(ast);
 
 		p.applyTransformers(codes);
 	}

@@ -2,7 +2,7 @@ package edu.udel.cis.vsl.abc.preproc;
 
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.ABC;
+import edu.udel.cis.vsl.abc.main.ABC;
 
 // TODO: fix these so they test something and don't write output
 

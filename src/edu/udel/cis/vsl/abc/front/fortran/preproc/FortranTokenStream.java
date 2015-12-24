@@ -23,9 +23,9 @@ import java.util.List;
 import org.antlr.runtime.LegacyCommonTokenStream;
 import org.antlr.runtime.Token;
 
-import edu.udel.cis.vsl.abc.front.IF.token.Formation;
-import edu.udel.cis.vsl.abc.front.common.token.CommonCToken;
 import edu.udel.cis.vsl.abc.front.fortran.parse.IFortranParserAction;
+import edu.udel.cis.vsl.abc.token.IF.Formation;
+import edu.udel.cis.vsl.abc.token.common.CommonCToken;
 
 public class FortranTokenStream extends LegacyCommonTokenStream {
    public FortranLexer lexer;

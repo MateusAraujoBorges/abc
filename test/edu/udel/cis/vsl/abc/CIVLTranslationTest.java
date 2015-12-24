@@ -8,10 +8,13 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.FrontEnd.FrontEndKind;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.main.FrontEnd;
+import edu.udel.cis.vsl.abc.main.TranslationTask;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 public class CIVLTranslationTest {
 
@@ -21,7 +24,10 @@ public class CIVLTranslationTest {
 
 	private File root = new File(new File("examples"), "civl");
 
-	FrontEnd f = new FrontEnd(FrontEndKind.C_OR_CIVL_C);
+	private static Configuration config = Configurations
+			.newMinimalConfiguration();
+
+	private static FrontEnd f = new FrontEnd(config);
 
 	private void check(String filenameRoot) throws ABCException, IOException {
 		File file = new File(root, filenameRoot + ".cvl");

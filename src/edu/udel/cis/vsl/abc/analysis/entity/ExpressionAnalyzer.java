@@ -1,8 +1,5 @@
 package edu.udel.cis.vsl.abc.analysis.entity;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.Conversion;
@@ -11,6 +8,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entity.EntityKind;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
@@ -74,10 +72,10 @@ import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.UnqualifiedObjectType;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
-import edu.udel.cis.vsl.abc.front.IF.token.UnsourcedException;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 /**
  * Analyzes expressions in an AST.
@@ -138,7 +136,12 @@ public class ExpressionAnalyzer {
 
 	private Configuration config;
 
-	private List<IdentifierExpressionNode> unknownIdentifiers = new LinkedList<>();
+	private Language language;
+
+	private AttributeKey unknownIdentifier;
+
+	// private List<IdentifierExpressionNode> unknownIdentifiers = new
+	// LinkedList<>();
 
 	// ************************** Constructors ****************************
 
@@ -154,6 +157,9 @@ public class ExpressionAnalyzer {
 		this.specialCallAnalyzer = new SpecialFunctionCallAnalyzer(
 				this.entityAnalyzer, typeFactory, this.conversionFactory);
 		this.config = entityAnalyzer.configuration;
+		this.language = entityAnalyzer.language;
+		unknownIdentifier = this.nodeFactory.newAttribute("unknown_identifier",
+				Boolean.class);
 	}
 
 	void setStatementAnalyzer(StatementAnalyzer statementAnalyzer) {
@@ -293,9 +299,28 @@ public class ExpressionAnalyzer {
 		return type;
 	}
 
-	void processUnknownIdentifiers() throws SyntaxException {
-		for (IdentifierExpressionNode identifier : this.unknownIdentifiers) {
-			this.processIdentifierExpression(identifier, false);
+	/**
+	 * For any IdentifierExpressionNode representing a function that has the
+	 * attribute unknownIdentifier set as true, this method tries to analyze it
+	 * and get its entity.
+	 * 
+	 * @param node
+	 * @throws SyntaxException
+	 */
+	void processUnknownIdentifiers(ASTNode node) throws SyntaxException {
+		if (node instanceof IdentifierExpressionNode) {
+			Object unknownIdentiferAttribute = node
+					.getAttribute(unknownIdentifier);
+
+			if (unknownIdentiferAttribute != null
+					&& (boolean) unknownIdentiferAttribute)
+				this.processIdentifierExpression(
+						(IdentifierExpressionNode) node, false);
+		} else {
+			for (ASTNode child : node.children()) {
+				if (child != null)
+					processUnknownIdentifiers(child);
+			}
 		}
 	}
 
@@ -742,7 +767,7 @@ public class ExpressionAnalyzer {
 
 		if (entity == null) {
 			if (isFirstRound && config.svcomp()) {
-				this.unknownIdentifiers.add(node);
+				node.setAttribute(unknownIdentifier, true);
 				return;
 			} else {
 				throw error("Undeclared identifier " + name, node);
@@ -751,10 +776,10 @@ public class ExpressionAnalyzer {
 		kind = entity.getEntityKind();
 		switch (kind) {
 		case VARIABLE:
-			node.setInitialType(entity.getType());
+			if (isFirstRound)
+				node.setInitialType(entity.getType());
 			break;
 		case FUNCTION:
-
 			node.setInitialType(getFunctionExpressionType(node,
 					(Function) entity));
 			break;
@@ -1885,7 +1910,7 @@ public class ExpressionAnalyzer {
 	 */
 	private boolean isPointerToCompleteObjectType(Type type) {
 		if (type instanceof PointerType) {
-			if (config.getLanguage() == Language.CIVL_C)
+			if (this.language == Language.CIVL_C)
 				return true;
 			else {
 				Type baseType = ((PointerType) type).referencedType();

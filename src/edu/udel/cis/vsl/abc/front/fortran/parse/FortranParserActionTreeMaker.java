@@ -7,14 +7,14 @@ import java.util.Stack;
 import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.astgen.fortran.FortranASTBuilderWorker;
-import edu.udel.cis.vsl.abc.front.IF.token.CToken;
-import edu.udel.cis.vsl.abc.front.IF.token.Formation;
-import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
-import edu.udel.cis.vsl.abc.front.IF.token.TokenFactory;
-import edu.udel.cis.vsl.abc.front.IF.token.Tokens;
-import edu.udel.cis.vsl.abc.front.common.token.CommonCToken;
+import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
+import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.Formation;
+import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.token.IF.Tokens;
+import edu.udel.cis.vsl.abc.token.common.CommonCToken;
 
 public class FortranParserActionTreeMaker implements IFortranParserAction {
 	private int currentIndex = 0;

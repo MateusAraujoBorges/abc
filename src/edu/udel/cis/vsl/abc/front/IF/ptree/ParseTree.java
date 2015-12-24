@@ -2,8 +2,8 @@ package edu.udel.cis.vsl.abc.front.IF.ptree;
 
 import org.antlr.runtime.tree.CommonTree;
 
-import edu.udel.cis.vsl.abc.astgen.IF.ASTBuilder;
-import edu.udel.cis.vsl.abc.config.IF.Configuration.Language;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilder;
 
 /**
  * This represents a parse tree which is the result of preprocessing and parsing

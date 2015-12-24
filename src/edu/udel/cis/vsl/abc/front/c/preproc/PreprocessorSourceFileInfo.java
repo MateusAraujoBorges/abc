@@ -2,8 +2,8 @@ package edu.udel.cis.vsl.abc.front.c.preproc;
 
 import org.antlr.runtime.tree.Tree;
 
-import edu.udel.cis.vsl.abc.front.IF.token.Formation;
-import edu.udel.cis.vsl.abc.front.IF.token.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.Formation;
+import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
 /**
  * A class which records information related to a source file that is parsed by

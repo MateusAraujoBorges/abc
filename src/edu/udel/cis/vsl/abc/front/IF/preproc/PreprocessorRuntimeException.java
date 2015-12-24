@@ -3,7 +3,7 @@ package edu.udel.cis.vsl.abc.front.IF.preproc;
 import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.front.IF.token.TokenUtils;
+import edu.udel.cis.vsl.abc.token.IF.TokenUtils;
 
 public class PreprocessorRuntimeException extends ABCRuntimeException {
 	/**

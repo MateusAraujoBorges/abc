@@ -7,7 +7,8 @@ import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.ConversionFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.front.IF.token.SyntaxException;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Performs all standard analyses of a Translation Unit: determines and sets
@@ -24,11 +25,12 @@ public class StandardAnalyzer implements Analyzer {
 
 	private CallAnalyzer callAnalyzer;
 
-	public StandardAnalyzer(Configuration configuration, ASTFactory astFactory,
-			EntityFactory entityFactory, ConversionFactory conversionFactory) {
+	public StandardAnalyzer(Language language, Configuration configuration,
+			ASTFactory astFactory, EntityFactory entityFactory,
+			ConversionFactory conversionFactory) {
 		scopeAnalyzer = new ScopeAnalyzer(entityFactory);
-		entityAnalyzer = new EntityAnalyzer(configuration, astFactory,
-				entityFactory, conversionFactory);
+		entityAnalyzer = new EntityAnalyzer(language, configuration,
+				astFactory, entityFactory, conversionFactory);
 		callAnalyzer = new CallAnalyzer();
 	}
 

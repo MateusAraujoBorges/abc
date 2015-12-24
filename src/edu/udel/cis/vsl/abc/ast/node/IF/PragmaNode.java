@@ -1,8 +1,8 @@
 package edu.udel.cis.vsl.abc.ast.node.IF;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
-import edu.udel.cis.vsl.abc.front.IF.token.CToken;
-import edu.udel.cis.vsl.abc.front.IF.token.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
 
 /**
  * A pragma may be included in the AST wherever a statement or an external
