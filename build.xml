@@ -87,7 +87,7 @@
 
 	<target name="FortranParser08Dependencies" depends="FortranLexer">
 		<uptodate property="unchangedFortranParser08Grammar" srcfile="${fortran.grammar.dir}/FortranParser08.g" targetfile="${fortran.real.src.dir}/parse/FortranParser08.java" />
-		<uptodate property="FortranLexerBeforeFortranParser08" srcfile="${fortran.real.src.dir}/parse/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParser08.java" />
+		<uptodate property="FortranLexerBeforeFortranParser08" srcfile="${fortran.real.src.dir}/preproc/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParser08.java" />
 		<condition property="FortranParser08UpToDate">
 			<and>
 				<isset property="unchangedFortranParser08Grammar" />
@@ -117,7 +117,7 @@
 
 	<target name="FortranParserExtrasDependencies" depends="FortranLexer">
 		<uptodate property="unchangedFortranParserExtrasGrammar" srcfile="${fortran.grammar.dir}/FortranParserExtras.g" targetfile="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
-		<uptodate property="FortranLexerBeforeFortranParserExtras" srcfile="${fortran.real.src.dir}/parse/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
+		<uptodate property="FortranLexerBeforeFortranParserExtras" srcfile="${fortran.real.src.dir}/preproc/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
 		<condition property="FortranParserExtrasUpToDate">
 			<and>
 				<isset property="unchangedFortranParserExtrasGrammar" />
@@ -160,7 +160,7 @@
 
 	<target name="FortranParserRiceCAFDependencies" depends="FortranLexer">
 		<uptodate property="unchangedFortranParserRiceCAFGrammar" srcfile="${fortran.grammar.dir}/FortranParserRiceCAF.g" targetfile="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
-		<uptodate property="FortranLexerBeforeFortranParserRiceCAF" srcfile="${fortran.real.src.dir}/parse/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
+		<uptodate property="FortranLexerBeforeFortranParserRiceCAF" srcfile="${fortran.real.src.dir}/preproc/FortranLexer.java" targetfile="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
 		<condition property="FortranParserRiceCAFUpToDate">
 			<and>
 				<isset property="unchangedFortranParserRiceCAFGrammar" />
