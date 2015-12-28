@@ -26,7 +26,7 @@
 	<property name="javadoc.dir" value="${basedir}/doc/javadoc" />
 	<property name="jar-name" value="abc.jar" />
 	<property name="jar-path" value="${basedir}/${jar-name}" />
-	<property name="main-class" value="edu.udel.cis.vsl.abc.ABC" />
+	<property name="main-class" value="edu.udel.cis.vsl.abc.main.ABC" />
 
 	<!-- Junit and JaCoCo Coverage  -->
 
