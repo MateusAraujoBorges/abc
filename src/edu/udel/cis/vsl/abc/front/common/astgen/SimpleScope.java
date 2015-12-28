@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.front.IF.astgen;
+package edu.udel.cis.vsl.abc.front.common.astgen;
 
 import java.util.HashMap;
 import java.util.HashSet;

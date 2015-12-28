@@ -43,7 +43,7 @@ import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Values;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.front.IF.astgen.SimpleScope;
+import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
 import edu.udel.cis.vsl.abc.token.IF.CToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;

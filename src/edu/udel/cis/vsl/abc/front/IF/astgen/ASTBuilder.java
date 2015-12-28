@@ -4,7 +4,7 @@ import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
-import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
@@ -25,18 +25,6 @@ public interface ASTBuilder {
 	 *             an ABC
 	 */
 	AST getTranslationUnit(ParseTree tree) throws SyntaxException;
-
-	/**
-	 * Creates a worker which can be used to perform more specific translation
-	 * tasks related to a single {@link ParseTree}. The worker can be used to
-	 * translate a single expression, a single block item, etc.
-	 * 
-	 * @param tree
-	 *            a {@link CParseTree}
-	 * @return a worker for performing specific translation tasks related to
-	 *         that parse tree
-	 */
-	ASTBuilderWorker getWorker(ParseTree tree);
 
 	/**
 	 * Gets the {@link ASTFactory} used by this builder to create new

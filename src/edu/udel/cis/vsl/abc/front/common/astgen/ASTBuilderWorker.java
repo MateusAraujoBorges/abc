@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.front.IF.astgen;
+package edu.udel.cis.vsl.abc.front.common.astgen;
 
 import java.util.List;
 
@@ -18,7 +18,7 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
  * @author siegel
  * 
  */
-public interface ASTBuilderWorker {
+public abstract class ASTBuilderWorker {
 
 	/**
 	 * Assuming the {@link ParseTree} associated to this worker represents an
@@ -31,7 +31,8 @@ public interface ASTBuilderWorker {
 	 *             if any syntax error is encountered in the process of
 	 *             translation
 	 */
-	SequenceNode<BlockItemNode> translateRoot() throws SyntaxException;
+	public abstract SequenceNode<BlockItemNode> translateRoot()
+			throws SyntaxException;
 
 	/**
 	 * Translates a single expression in the parse tree. The method takes a
@@ -47,8 +48,9 @@ public interface ASTBuilderWorker {
 	 * @throws SyntaxException
 	 *             if there is a syntax error in the expression
 	 */
-	ExpressionNode translateExpression(CommonTree expressionTree,
-			SimpleScope scope) throws SyntaxException;
+	public abstract ExpressionNode translateExpression(
+			CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException;
 
 	/**
 	 * Translates an ANTLR {@link CommonTree} node of type BLOCK_ITEM. The
@@ -63,7 +65,7 @@ public interface ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	List<BlockItemNode> translateBlockItem(CommonTree blockItemTree,
-			SimpleScope scope) throws SyntaxException;
+	public abstract List<BlockItemNode> translateBlockItem(
+			CommonTree blockItemTree, SimpleScope scope) throws SyntaxException;
 
 }

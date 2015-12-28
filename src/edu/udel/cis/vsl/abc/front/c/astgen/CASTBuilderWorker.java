@@ -74,13 +74,13 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilderWorker;
-import edu.udel.cis.vsl.abc.front.IF.astgen.PragmaFactory;
-import edu.udel.cis.vsl.abc.front.IF.astgen.PragmaHandler;
-import edu.udel.cis.vsl.abc.front.IF.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
+import edu.udel.cis.vsl.abc.front.common.astgen.ASTBuilderWorker;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
+import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.token.IF.CToken;
 import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
 import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
@@ -97,7 +97,7 @@ import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
  * @author siegel
  * 
  */
-public class CASTBuilderWorker implements ASTBuilderWorker {
+public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	/* ************************** Instance Fields ************************* */
 

@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.front.IF.astgen;
+package edu.udel.cis.vsl.abc.front.common.astgen;
 
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
@@ -28,7 +28,7 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
  * @author siegel
  * 
  */
-public interface PragmaHandler extends Entity {
+public abstract class PragmaHandler implements Entity {
 
 	/**
 	 * Returns the parse tree associated to this handler. The handler should
@@ -36,7 +36,7 @@ public interface PragmaHandler extends Entity {
 	 * 
 	 * @return the parse tree associated to this pragma
 	 */
-	ParseTree getParseTree();
+	public abstract ParseTree getParseTree();
 
 	/**
 	 * Translates a pragma node originating from the parse tree. The result can
@@ -54,7 +54,7 @@ public interface PragmaHandler extends Entity {
 	 *             if the pragma does not adhere to the syntax specified by the
 	 *             pragma domain
 	 */
-	ASTNode processPragmaNode(PragmaNode pragmaNode, SimpleScope scope)
-			throws SyntaxException, ParseException;
+	public abstract ASTNode processPragmaNode(PragmaNode pragmaNode,
+			SimpleScope scope) throws SyntaxException, ParseException;
 
 }

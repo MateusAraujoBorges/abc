@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.front.IF.parse;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.parse.ImplCParser;
+import edu.udel.cis.vsl.abc.front.c.parse.COmpParser;
 import edu.udel.cis.vsl.abc.token.IF.CToken;
 
 /**
@@ -34,6 +35,18 @@ public class Parse {
 			return new ImplCParser();
 		case FORTRAN77:
 			return null;
+		default:
+			throw new ABCRuntimeException(
+					"ABC doesn't support parsing programs in " + language + ".");
+		}
+	}
+
+	public static OmpPragmaParser newOmpPragmaParser(Language language) {
+		switch (language) {
+		case C:
+		case CIVL_C:
+			return new COmpParser();
+		case FORTRAN77:
 		default:
 			throw new ABCRuntimeException(
 					"ABC doesn't support parsing programs in " + language + ".");

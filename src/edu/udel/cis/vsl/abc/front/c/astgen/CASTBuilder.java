@@ -6,11 +6,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilder;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilderWorker;
-import edu.udel.cis.vsl.abc.front.IF.astgen.PragmaFactory;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
-import edu.udel.cis.vsl.abc.front.common.astgen.CommonPragmaFactory;
+import edu.udel.cis.vsl.abc.front.common.astgen.ASTBuilderWorker;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 public class CASTBuilder implements ASTBuilder {
@@ -24,7 +23,7 @@ public class CASTBuilder implements ASTBuilder {
 	public CASTBuilder(Configuration config, ASTFactory astFactory) {
 		this.astFactory = astFactory;
 		this.config = config;
-		pragmaFactory = new CommonPragmaFactory(this);
+		pragmaFactory = new PragmaFactory(this);
 	}
 
 	@Override
@@ -37,8 +36,7 @@ public class CASTBuilder implements ASTBuilder {
 		return ast;
 	}
 
-	@Override
-	public ASTBuilderWorker getWorker(ParseTree tree) {
+	public CASTBuilderWorker getWorker(ParseTree tree) {
 		return new CASTBuilderWorker(config, (CParseTree) tree, astFactory,
 				pragmaFactory);
 	}

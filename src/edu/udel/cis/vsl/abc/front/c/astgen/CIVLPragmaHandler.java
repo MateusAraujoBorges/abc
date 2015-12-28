@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.front.common.astgen;
+package edu.udel.cis.vsl.abc.front.c.astgen;
 
 import java.util.List;
 
@@ -6,20 +6,18 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilder;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilderWorker;
-import edu.udel.cis.vsl.abc.front.IF.astgen.PragmaHandler;
-import edu.udel.cis.vsl.abc.front.IF.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parser.RuleKind;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
+import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
-public class CIVLPragmaHandler implements PragmaHandler {
+public class CIVLPragmaHandler extends PragmaHandler {
 
 	private NodeFactory nodeFactory;
 
@@ -27,9 +25,9 @@ public class CIVLPragmaHandler implements PragmaHandler {
 
 	private ParseTree parseTree;
 
-	ASTBuilderWorker worker;
+	CASTBuilderWorker worker;
 
-	public CIVLPragmaHandler(ASTBuilder builder, ParseTree parseTree) {
+	public CIVLPragmaHandler(CASTBuilder builder, ParseTree parseTree) {
 		this.nodeFactory = builder.getASTFactory().getNodeFactory();
 		this.parseTree = parseTree;
 		this.worker = builder.getWorker(parseTree);

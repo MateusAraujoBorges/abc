@@ -1,12 +1,14 @@
-package edu.udel.cis.vsl.abc.front.IF.parse;
+package edu.udel.cis.vsl.abc.front.c.parse;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
-import edu.udel.cis.vsl.abc.front.c.parse.OmpParser;
+import edu.udel.cis.vsl.abc.front.IF.parse.OmpPragmaParser;
+import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
-public class OmpCParser {
+public class COmpParser implements OmpPragmaParser {
 	public static final int AMPERSAND = OmpParser.AMPERSAND;
 	public static final int ATOMIC = OmpParser.OMPATOMIC;
 	public static final int BARRIER = OmpParser.BARRIER;
@@ -55,10 +57,14 @@ public class OmpCParser {
 	public static final int UPDATE = OmpParser.UPDATE;
 	public static final int WRITE = OmpParser.WRITE;
 
-	public static CommonTree parse(TokenStream tokens)
-			throws RecognitionException {
+	@Override
+	public CommonTree parse(Source source, TokenStream tokens) throws SyntaxException {
 		OmpParser parser = new OmpParser(tokens);
 
-		return (CommonTree) parser.openmp_construct().getTree();
+		try {
+			return (CommonTree) parser.openmp_construct().getTree();
+		} catch (RecognitionException e) {
+			throw new SyntaxException(e.getMessage(), null);
+		}
 	}
 }

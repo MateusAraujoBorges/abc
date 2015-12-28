@@ -1,58 +1,57 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.AMPERSAND;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.ATOMIC;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.BARRIER;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.BITOR;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.BITXOR;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.CAPTURE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.COLLAPSE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.COPYIN;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.COPYPRIVATE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.CRITICAL;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.DATA_CLAUSE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.DEFAULT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.DYNAMIC;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.FLUSH;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.FOR;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.FST_PRIVATE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.GUIDED;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.IDENTIFIER;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.IF;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.LST_PRIVATE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.MASTER;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.NONE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.NOWAIT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.NUM_THREADS;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.ORDERED;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.PARALLEL;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.PARALLEL_FOR;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.PARALLEL_SECTIONS;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.PLUS;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.PRIVATE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.READ;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.REDUCTION;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.RUNTIME;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.SCHEDULE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.SECTION;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.SECTIONS;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.SEQ_CST;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.SHARED;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.SINGLE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.STAR;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.STATIC;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.SUB;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.THD_PRIVATE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.UNIQUE_FOR;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.UNIQUE_PARALLEL;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.UPDATE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser.WRITE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.AMPERSAND;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.ATOMIC;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.BARRIER;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.BITOR;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.BITXOR;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.CAPTURE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.COLLAPSE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.COPYIN;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.COPYPRIVATE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.CRITICAL;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.DATA_CLAUSE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.DEFAULT;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.DYNAMIC;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.FLUSH;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.FOR;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.FST_PRIVATE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.GUIDED;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.IDENTIFIER;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.IF;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.LST_PRIVATE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.MASTER;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.NONE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.NOWAIT;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.NUM_THREADS;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.ORDERED;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.PARALLEL;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.PARALLEL_FOR;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.PARALLEL_SECTIONS;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.PLUS;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.PRIVATE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.READ;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.REDUCTION;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.RUNTIME;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.SCHEDULE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.SECTION;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.SECTIONS;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.SEQ_CST;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.SHARED;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.SINGLE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.STAR;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.STATIC;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.SUB;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.THD_PRIVATE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.UNIQUE_FOR;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.UNIQUE_PARALLEL;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.UPDATE;
+import static edu.udel.cis.vsl.abc.front.c.parse.COmpParser.WRITE;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
@@ -77,12 +76,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode.OmpWorksharingNodeKind;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilder;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilderWorker;
-import edu.udel.cis.vsl.abc.front.IF.astgen.PragmaHandler;
-import edu.udel.cis.vsl.abc.front.IF.astgen.SimpleScope;
-import edu.udel.cis.vsl.abc.front.IF.parse.OmpCParser;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.c.parse.COmpParser;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
+import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.token.IF.CToken;
 import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
@@ -104,11 +101,11 @@ import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
  * @author Manchun Zheng
  *
  */
-public class OMPPragmaHandler implements PragmaHandler {
+public class COmpPragmaHandler extends PragmaHandler {
 
 	private ParseTree parseTree;
 
-	private ASTBuilderWorker worker;
+	private CASTBuilderWorker worker;
 
 	/**
 	 * The node factory used to create new AST nodes.
@@ -120,13 +117,16 @@ public class OMPPragmaHandler implements PragmaHandler {
 	 */
 	private TokenFactory tokenFactory;
 
-	public OMPPragmaHandler(ASTBuilder builder, ParseTree parseTree) {
+	private COmpParser cOmpParser;
+
+	public COmpPragmaHandler(CASTBuilder builder, ParseTree parseTree) {
 		ASTFactory astFactory = builder.getASTFactory();
 
 		this.parseTree = parseTree;
 		this.worker = builder.getWorker(parseTree);
 		this.nodeFactory = astFactory.getNodeFactory();
 		this.tokenFactory = astFactory.getTokenFactory();
+		this.cOmpParser = new COmpParser();
 	}
 
 	// Private methods...
@@ -658,65 +658,63 @@ public class OMPPragmaHandler implements PragmaHandler {
 		Source source = pragmaNode.getSource();
 		CTokenSource tokenSource;
 		TokenStream tokens;
+		CommonTree rootTree;
+		int type;
 
 		markTokens(pragmaNode);
 		tokenSource = pragmaNode.newTokenSource();
 		tokens = new CommonTokenStream(tokenSource);
-		try {
-			CommonTree rootTree = OmpCParser.parse(tokens);
-			int type = rootTree.getType();
+		rootTree = this.cOmpParser.parse(source, tokens);
+		type = rootTree.getType();
+		switch (type) {
+		case PARALLEL_FOR:
+			return translateParallelFor(source, rootTree);
+		case PARALLEL_SECTIONS:
+			return translateParallelSections(source, rootTree);
+		case PARALLEL:
+			return translateParallel(source, rootTree);
+		case FOR:
+			return translateFor(source, rootTree);
+		case SECTIONS:
+			return translateWorkshare(source, rootTree,
+					OmpWorksharingNodeKind.SECTIONS);
+		case SINGLE:
+			return translateWorkshare(source, rootTree,
+					OmpWorksharingNodeKind.SINGLE);
+		case MASTER:
+			return nodeFactory.newOmpMasterNode(source, null);
+		case CRITICAL: {
+			OmpSyncNode criticalNode = nodeFactory.newOmpCriticalNode(source,
+					null, null);
 
-			switch (type) {
-			case PARALLEL_FOR:
-				return translateParallelFor(source, rootTree);
-			case PARALLEL_SECTIONS:
-				return translateParallelSections(source, rootTree);
-			case PARALLEL:
-				return translateParallel(source, rootTree);
-			case FOR:
-				return translateFor(source, rootTree);
-			case SECTIONS:
-				return translateWorkshare(source, rootTree,
-						OmpWorksharingNodeKind.SECTIONS);
-			case SINGLE:
-				return translateWorkshare(source, rootTree,
-						OmpWorksharingNodeKind.SINGLE);
-			case MASTER:
-				return nodeFactory.newOmpMasterNode(source, null);
-			case CRITICAL: {
-				OmpSyncNode criticalNode = nodeFactory.newOmpCriticalNode(
-						source, null, null);
-
-				if (rootTree.getChildCount() > 0) {
-					criticalNode.setCriticalName(this
-							.translateIdentifier((CommonTree) rootTree
-									.getChild(0)));
-				}
-				return criticalNode;
+			if (rootTree.getChildCount() > 0) {
+				criticalNode
+						.setCriticalName(this
+								.translateIdentifier((CommonTree) rootTree
+										.getChild(0)));
 			}
-			case ORDERED:
-				return nodeFactory.newOmpOrederedNode(source, null);
-			case SECTION:
-				return nodeFactory.newOmpSectionNode(source, null);
-			case BARRIER:
-				return nodeFactory.newOmpBarrierNode(source);
-			case FLUSH:
-				return nodeFactory.newOmpFlushNode(
-						source,
-						translateIdentifierList(source, "flushList",
-								(CommonTree) rootTree.getChild(0)));
-			case THD_PRIVATE:
-				return nodeFactory.newOmpThreadprivateNode(
-						source,
-						translateIdentifierList(source, "threadprivateList",
-								(CommonTree) rootTree.getChild(0)));
-			case ATOMIC:
-				return nodeFactory.newOmpAtomicNode(source, null);
-			default:
-				throw new ABCRuntimeException("Unreachable");
-			}
-		} catch (RecognitionException e) {
-			throw new SyntaxException(e.getMessage(), source);
+			return criticalNode;
+		}
+		case ORDERED:
+			return nodeFactory.newOmpOrederedNode(source, null);
+		case SECTION:
+			return nodeFactory.newOmpSectionNode(source, null);
+		case BARRIER:
+			return nodeFactory.newOmpBarrierNode(source);
+		case FLUSH:
+			return nodeFactory.newOmpFlushNode(
+					source,
+					translateIdentifierList(source, "flushList",
+							(CommonTree) rootTree.getChild(0)));
+		case THD_PRIVATE:
+			return nodeFactory.newOmpThreadprivateNode(
+					source,
+					translateIdentifierList(source, "threadprivateList",
+							(CommonTree) rootTree.getChild(0)));
+		case ATOMIC:
+			return nodeFactory.newOmpAtomicNode(source, null);
+		default:
+			throw new ABCRuntimeException("Unreachable");
 		}
 	}
 }
