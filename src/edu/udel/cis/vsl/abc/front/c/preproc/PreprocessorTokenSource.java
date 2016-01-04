@@ -259,7 +259,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 	private void addEofNodeToTree(Tree tree, String filename) {
 		Formation eofFormation = tokenFactory.newSystemFormation("EOF");
-		CivlcToken eofToken = tokenFactory.newCToken(Token.EOF, "EndOfFile<"
+		CivlcToken eofToken = tokenFactory.newCivlcToken(Token.EOF, "EndOfFile<"
 				+ filename + ">", eofFormation);
 		CommonTree eofNode = new CommonTree(eofToken);
 
@@ -517,7 +517,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	private void processInvocation(Macro macro, Tree invocationNode)
 			throws PreprocessorException {
 		Token token = ((CommonTree) invocationNode).getToken();
-		CivlcToken cToken = tokenFactory.newCToken(token, getIncludeHistory());
+		CivlcToken cToken = tokenFactory.newCivlcToken(token, getIncludeHistory());
 		Pair<CivlcToken, CivlcToken> result;
 
 		if (macro instanceof ObjectMacro) {
@@ -672,7 +672,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			int formalIndex = macro.getReplacementFormalIndex(i);
 
 			if (formalIndex < 0) {
-				current = tokenFactory.newCToken(token,
+				current = tokenFactory.newCivlcToken(token,
 						tokenFactory.newMacroExpansion(origin, macro, i));
 				if (previous != null)
 					previous.setNext(current);
@@ -683,7 +683,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 				CivlcToken argument = arguments[formalIndex];
 
 				while (argument != null) {
-					current = tokenFactory.newCToken(argument,
+					current = tokenFactory.newCivlcToken(argument,
 							tokenFactory.newMacroExpansion(argument, macro, i));
 					if (previous != null)
 						previous.setNext(current);
@@ -721,7 +721,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		for (int i = 0; i < numTokens; i++) {
 			Token token = macro.getReplacementToken(i);
 
-			current = tokenFactory.newCToken(token,
+			current = tokenFactory.newCivlcToken(token,
 					tokenFactory.newMacroExpansion(origin, macro, i));
 			if (previous != null)
 				previous.setNext(current);
@@ -889,7 +889,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			public CivlcToken next() {
 				Tree node = getNextInputNode();
 				Token inputToken = ((CommonTree) node).getToken();
-				CivlcToken result = tokenFactory.newCToken(inputToken,
+				CivlcToken result = tokenFactory.newCivlcToken(inputToken,
 						getIncludeHistory());
 
 				if (node.getChildCount() > 0)
@@ -1040,7 +1040,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		PreprocessorSourceFileInfo o = sourceStack.pop();
 
 		if (sourceStack.isEmpty()) {
-			CivlcToken myEof = tokenFactory.newCToken(eof, o.getIncludeHistory());
+			CivlcToken myEof = tokenFactory.newCivlcToken(eof, o.getIncludeHistory());
 
 			// myEof.setText(text)
 			addOutput(myEof);
@@ -1137,7 +1137,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		String message = "Preprocessor #error directive encountered:\n";
 		int numChildren = errorNode.getChildCount();
 		Token errorToken = ((CommonTree) errorNode).getToken();
-		Token betterErrorToken = tokenFactory.newCToken(errorToken,
+		Token betterErrorToken = tokenFactory.newCivlcToken(errorToken,
 				getIncludeHistory());
 
 		for (int i = 0; i < numChildren; i++) {
@@ -1231,7 +1231,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 						"Encountered null token as child " + i + " of node "
 								+ root);
 			if (!PreprocessorUtils.isWhiteSpace(token)) {
-				CivlcToken newToken = tokenFactory.newCToken(token,
+				CivlcToken newToken = tokenFactory.newCivlcToken(token,
 						getIncludeHistory());
 
 				if (prev == null)
@@ -1288,7 +1288,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					+ fullName, filenameToken);
 		}
 		try {
-			CivlcToken amplifiedFilenameToken = tokenFactory.newCToken(
+			CivlcToken amplifiedFilenameToken = tokenFactory.newCivlcToken(
 					filenameToken, getIncludeHistory());
 
 			newInfo = findInclude(amplifiedFilenameToken, name, system);
@@ -1395,7 +1395,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private void processPragma(Tree pragmaNode) throws PreprocessorException {
 		Token token = ((CommonTree) pragmaNode).getToken();
-		CivlcToken pragmaToken = tokenFactory.newCToken(token, getIncludeHistory());
+		CivlcToken pragmaToken = tokenFactory.newCivlcToken(token, getIncludeHistory());
 
 		addOutput(pragmaToken);
 		inTextBlock = true; // don't have to check for directives
@@ -1747,7 +1747,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private void shiftToOutput(Tree node) throws PreprocessorException {
 		Token token = ((CommonTree) node).getToken();
-		CivlcToken output = tokenFactory.newCToken(token, getIncludeHistory());
+		CivlcToken output = tokenFactory.newCivlcToken(token, getIncludeHistory());
 
 		addOutput(output);
 	}

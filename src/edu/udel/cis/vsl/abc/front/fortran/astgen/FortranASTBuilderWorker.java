@@ -168,7 +168,7 @@ public class FortranASTBuilderWorker {
 			}
 		}
 		if (lToken == null) {
-			result = tokenFactory.newSource(tokenFactory.newCToken(
+			result = tokenFactory.newSource(tokenFactory.newCivlcToken(
 					new CommonToken(0, ""), dummyFormation));
 		} else if (rToken == null) {
 			rToken = lToken;

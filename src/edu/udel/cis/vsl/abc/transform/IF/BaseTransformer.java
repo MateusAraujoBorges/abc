@@ -72,7 +72,7 @@ public abstract class BaseTransformer implements Transformer {
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newTransformFormation(longName,
 				method);
-		CivlcToken token = tokenFactory.newCToken(
+		CivlcToken token = tokenFactory.newCivlcToken(
 				CivlcTokenConstant.STRING_LITERAL, representation, formation);
 		StringToken stringToken = tokenFactory.newStringToken(token);
 		Source source = tokenFactory.newSource(stringToken);

@@ -211,7 +211,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		if (idToken instanceof CivlcToken)
 			token = (CivlcToken) idToken;
 		else {
-			token = tokenFactory.newCToken(idToken, null);
+			token = tokenFactory.newCivlcToken(idToken, null);
 		}
 		source = tokenFactory.newSource(token);
 		return nodeFactory.newIdentifierNode(source, token.getText());
@@ -1149,7 +1149,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			Source source;
 
 			if (analysis.specifierListNode.getChildCount() == 0)
-				source = this.tokenFactory.newSource(tokenFactory.newCToken(
+				source = this.tokenFactory.newSource(tokenFactory.newCivlcToken(
 						IDENTIFIER, analysis.basicTypeKind.toString(),
 						tokenFactory.newSystemFormation("system")));
 			else
@@ -1184,7 +1184,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 				if (analysis.specifierListNode.getChildCount() == 0)
 					source = this.tokenFactory.newSource(tokenFactory
-							.newCToken(IDENTIFIER,
+							.newCivlcToken(IDENTIFIER,
 									analysis.basicTypeKind.toString(),
 									tokenFactory.newSystemFormation("system")));
 				else

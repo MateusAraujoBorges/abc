@@ -644,7 +644,7 @@ public class CompareCombiner implements Combiner {
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newTransformFormation(MY_NAME,
 				"stringLiteral");
-		CivlcToken ctoke = tokenFactory.newCToken(
+		CivlcToken ctoke = tokenFactory.newCivlcToken(
 				CivlcTokenConstant.STRING_LITERAL, text, formation);
 		StringToken stringToken = tokenFactory.newStringToken(ctoke);
 

@@ -52,7 +52,7 @@ options {
 //
 @header {
 package edu.udel.cis.vsl.abc.front.fortran.parse;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 }
 //
 //@F2003@@header {
@@ -5014,7 +5014,7 @@ stmt_function_stmt
 end_of_stmt returns [Token tk]
     : T_EOS			
         {
-            CToken eos = (CToken)$T_EOS;
+            CivlcToken eos = (CivlcToken)$T_EOS;
             tk = $T_EOS; 
             action.end_of_stmt($T_EOS);
         }

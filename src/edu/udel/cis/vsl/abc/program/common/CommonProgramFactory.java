@@ -299,7 +299,7 @@ public class CommonProgramFactory implements ProgramFactory {
 		NodeFactory nodeFactory = astFactory.getNodeFactory();
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newSystemFormation("Program");
-		CivlcToken fakeToken = tokenFactory.newCToken(CivlCParser.PROGRAM,
+		CivlcToken fakeToken = tokenFactory.newCivlcToken(CivlCParser.PROGRAM,
 				"Program", formation);
 		Source fakeSource = tokenFactory.newSource(fakeToken);
 		List<BlockItemNode> definitions = new LinkedList<>();

@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
@@ -74,7 +74,7 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 			stop = start; // for now
 		}
 		this.inclusionFormation = tokenFactory.newInclusion(new SourceFile(new File(this.input.getSourceName()), this.fileIndex.intValue()));
-		CToken t = tokenFactory.newCToken(input, state.type, state.channel, start, stop, inclusionFormation);
+		CivlcToken t = tokenFactory.newCivlcToken(input, state.type, state.channel, start, stop, inclusionFormation);
 		t.setLine(state.tokenStartLine);
 		t.setText(state.text);
 		t.setCharPositionInLine(state.tokenStartCharPositionInLine);
@@ -117,18 +117,18 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 	
 	// overrides nextToken in superclass
 	public Token nextToken() {
-		CToken tk = tokenFactory.newCToken(super.nextToken(),
+		CivlcToken tk = tokenFactory.newCivlcToken(super.nextToken(),
 				inclusionFormation);
 
 		if (tk.getType() == EOF) {
-			CToken eofToken;
+			CivlcToken eofToken;
 			FortranStream fs = getInput();
 
 			tk.setChannel(Token.DEFAULT_CHANNEL);
 			this.inclusionFormation = tokenFactory.newInclusion(new SourceFile(
 					new File(this.input.getSourceName()), this.fileIndex
 							.intValue()));
-			eofToken = tokenFactory.newCToken(this.input, T_EOF,
+			eofToken = tokenFactory.newCivlcToken(this.input, T_EOF,
 					Token.DEFAULT_CHANNEL, this.input.index(),
 					this.input.index() + 1, inclusionFormation);
 

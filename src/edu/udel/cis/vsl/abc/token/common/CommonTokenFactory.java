@@ -45,17 +45,17 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public CivlcToken newCToken(Token token, Formation formation) {
+	public CivlcToken newCivlcToken(Token token, Formation formation) {
 		return new CommonCivlcToken(token, formation);
 	}
 
 	@Override
-	public CivlcToken newCToken(int type, String text, Formation formation) {
+	public CivlcToken newCivlcToken(int type, String text, Formation formation) {
 		return new CommonCivlcToken(type, text, formation);
 	}
 
 	@Override
-	public CivlcToken newCToken(CharStream input, int type, int channel, int start,
+	public CivlcToken newCivlcToken(CharStream input, int type, int channel, int start,
 			int stop, Formation formation) {
 		return new CommonCivlcToken(input, type, channel, start, stop, formation);
 	}

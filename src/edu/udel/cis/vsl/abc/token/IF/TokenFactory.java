@@ -28,7 +28,8 @@ public interface TokenFactory {
 
 	// Formations (records of history of token creation)...
 
-	MacroExpansion newMacroExpansion(CivlcToken startToken, Macro macro, int index);
+	MacroExpansion newMacroExpansion(CivlcToken startToken, Macro macro,
+			int index);
 
 	Concatenation newConcatenation(List<CivlcToken> tokens);
 
@@ -60,12 +61,12 @@ public interface TokenFactory {
 
 	// Basic token creation...
 
-	CivlcToken newCToken(Token token, Formation formation);
+	CivlcToken newCivlcToken(Token token, Formation formation);
 
-	CivlcToken newCToken(int type, String text, Formation formation);
+	CivlcToken newCivlcToken(int type, String text, Formation formation);
 
-	CivlcToken newCToken(CharStream input, int type, int channel, int start,
-			int stop, Formation formation);
+	CivlcToken newCivlcToken(CharStream input, int type, int channel,
+			int start, int stop, Formation formation);
 
 	// Characters and Strings...
 
