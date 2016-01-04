@@ -1,10 +1,10 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
 
-public class CommonCharacterToken extends CommonCToken implements
+public class CommonCharacterToken extends CommonCivlcToken implements
 		CharacterToken {
 
 	/**
@@ -14,7 +14,7 @@ public class CommonCharacterToken extends CommonCToken implements
 
 	private ExecutionCharacter character;
 
-	public CommonCharacterToken(CToken token, ExecutionCharacter character) {
+	public CommonCharacterToken(CivlcToken token, ExecutionCharacter character) {
 		super(token, token.getFormation());
 		assert character != null;
 		this.character = character;

@@ -45,7 +45,7 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
@@ -90,14 +90,14 @@ public class FortranASTBuilderWorker {
 	}
 
 	/* Private Functions */
-	private CToken findLToken(FortranTree node) {
-		CToken result = null;
+	private CivlcToken findLToken(FortranTree node) {
+		CivlcToken result = null;
 		Token[] tempTokens = node.cTokens();
 		int numChildren = node.numChildren();
 		int childIndex = 0;
 
 		if (tempTokens != null && tempTokens.length > 0) {
-			return (CToken) node.cTokens()[0];
+			return (CivlcToken) node.cTokens()[0];
 		} else if (numChildren > 0) {
 			while (childIndex < numChildren) {
 				FortranTree tempNode = node.getChildByIndex(childIndex);
@@ -113,13 +113,13 @@ public class FortranASTBuilderWorker {
 		return result;
 	}
 
-	private CToken findRToken(FortranTree node) {
-		CToken result = null;
+	private CivlcToken findRToken(FortranTree node) {
+		CivlcToken result = null;
 		Token[] tempTokens = node.cTokens();
 		int childIndex = node.numChildren() - 1;
 
 		if (tempTokens != null && tempTokens.length > 0) {
-			return (CToken) node.cTokens()[tempTokens.length - 1];
+			return (CivlcToken) node.cTokens()[tempTokens.length - 1];
 		} else if (childIndex >= 0) {
 			while (childIndex >= 0) {
 				FortranTree tempNode = node.getChildByIndex(childIndex);
@@ -138,7 +138,7 @@ public class FortranASTBuilderWorker {
 	private Source generateSource(FortranTree... sourceNodes) {
 		int numNodes = sourceNodes.length;
 		int counter = 0;
-		CToken lToken = null, rToken = null;
+		CivlcToken lToken = null, rToken = null;
 		Formation dummyFormation = tokenFactory.newInclusion(new SourceFile(
 				new File(this.filePath), 0));
 		Source result = null;
@@ -150,7 +150,7 @@ public class FortranASTBuilderWorker {
 			if (tempNode != null) {
 				tempToken = findLToken(tempNode);
 				if (tempToken != null) {
-					lToken = (CToken) tempToken;
+					lToken = (CivlcToken) tempToken;
 					break;
 				}
 			}
@@ -162,7 +162,7 @@ public class FortranASTBuilderWorker {
 			if (tempNode != null) {
 				tempToken = findRToken(tempNode);
 				if (tempToken != null) {
-					rToken = (CToken) tempToken;
+					rToken = (CivlcToken) tempToken;
 					break;
 				}
 			}

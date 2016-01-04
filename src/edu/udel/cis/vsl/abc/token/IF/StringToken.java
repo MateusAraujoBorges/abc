@@ -9,7 +9,7 @@ package edu.udel.cis.vsl.abc.token.IF;
  * @author siegel
  * 
  */
-public interface StringToken extends CToken {
+public interface StringToken extends CivlcToken {
 
 	StringLiteral getStringLiteral();
 

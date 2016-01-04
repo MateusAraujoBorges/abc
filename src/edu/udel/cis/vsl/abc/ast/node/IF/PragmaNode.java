@@ -1,8 +1,8 @@
 package edu.udel.cis.vsl.abc.ast.node.IF;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 
 /**
  * A pragma may be included in the AST wherever a statement or an external
@@ -45,18 +45,18 @@ public interface PragmaNode extends StatementNode {
 	 * 
 	 * @return the index-th token in the pragma body
 	 */
-	CToken getToken(int index);
+	CivlcToken getToken(int index);
 
 	/**
 	 * Returns an iterable over the tokens in the pragma body.
 	 * 
 	 * @return iterator over the tokens of pragma body
 	 */
-	Iterable<CToken> getTokens();
+	Iterable<CivlcToken> getTokens();
 
 	/**
 	 * <p>
-	 * Returns the tokens of the pragma body as a {@link CTokenSource}, which
+	 * Returns the tokens of the pragma body as a {@link CivlcTokenSource}, which
 	 * can then be fed into an ANTLR parser for syntactic analysis. Note that
 	 * each call returns a new token source, since each can only be used once.
 	 * </p>
@@ -68,14 +68,14 @@ public interface PragmaNode extends StatementNode {
 	 * 
 	 * @return a token source for the tokens comprising the body of this pragma
 	 */
-	CTokenSource newTokenSource();
+	CivlcTokenSource newTokenSource();
 
 	/**
 	 * Returns the newline token which terminates this pragma.
 	 * 
 	 * @return the newline token
 	 */
-	CToken getNewlineToken();
+	CivlcToken getNewlineToken();
 
 	@Override
 	PragmaNode copy();

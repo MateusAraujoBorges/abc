@@ -1,6 +1,6 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TransformFormation;
 
@@ -23,13 +23,13 @@ public class CommonTransformFormation implements TransformFormation {
 	 * The token in the original source that immediately precedes the point at
 	 * which the new content is inserted. May be null.
 	 */
-	private CToken preToken = null;
+	private CivlcToken preToken = null;
 
 	/**
 	 * The token in the original source that immediately succeeds the point at
 	 * which the new content is inserted. May be null.
 	 */
-	private CToken postToken = null;
+	private CivlcToken postToken = null;
 
 	/**
 	 * Creates new transform formation with null @{link {@link #preToken} and
@@ -51,7 +51,7 @@ public class CommonTransformFormation implements TransformFormation {
 	 * @return the preToken
 	 */
 	@Override
-	public CToken getPreToken() {
+	public CivlcToken getPreToken() {
 		return this.preToken;
 	}
 
@@ -60,7 +60,7 @@ public class CommonTransformFormation implements TransformFormation {
 	 *            the preToken to set
 	 */
 	@Override
-	public void setPreToken(CToken preToken) {
+	public void setPreToken(CivlcToken preToken) {
 		this.preToken = preToken;
 	}
 
@@ -68,7 +68,7 @@ public class CommonTransformFormation implements TransformFormation {
 	 * @return the postToken
 	 */
 	@Override
-	public CToken getPostToken() {
+	public CivlcToken getPostToken() {
 		return this.postToken;
 	}
 
@@ -77,7 +77,7 @@ public class CommonTransformFormation implements TransformFormation {
 	 *            the postToken to set
 	 */
 	@Override
-	public void setPostToken(CToken postToken) {
+	public void setPostToken(CivlcToken postToken) {
 		this.postToken = postToken;
 	}
 

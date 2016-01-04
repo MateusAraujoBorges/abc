@@ -1,11 +1,11 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.StringLiteral;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
 
-public class CommonStringToken extends CommonCToken implements StringToken {
+public class CommonStringToken extends CommonCivlcToken implements StringToken {
 
 	/**
 	 * Eclipse made me do it.
@@ -20,7 +20,7 @@ public class CommonStringToken extends CommonCToken implements StringToken {
 		this.literal = literal;
 	}
 
-	public CommonStringToken(CToken token, Formation formation,
+	public CommonStringToken(CivlcToken token, Formation formation,
 			StringLiteral data) {
 		super(token, formation);
 		this.literal = data;

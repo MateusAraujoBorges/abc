@@ -15,12 +15,12 @@ package edu.udel.cis.vsl.abc.token.IF;
  */
 public interface TransformFormation extends Formation {
 
-	CToken getPreToken();
+	CivlcToken getPreToken();
 
-	void setPreToken(CToken preToken);
+	void setPreToken(CivlcToken preToken);
 
-	CToken getPostToken();
+	CivlcToken getPostToken();
 
-	void setPostToken(CToken postToken);
+	void setPostToken(CivlcToken postToken);
 
 }

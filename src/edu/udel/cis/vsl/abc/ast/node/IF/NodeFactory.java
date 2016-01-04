@@ -97,9 +97,9 @@ import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringLiteral;
@@ -1739,7 +1739,7 @@ public interface NodeFactory {
 	 *            the first token after the <code>#pragma</code> token
 	 *            specifying the pragma domain (e.g., <code>omp</code>)
 	 * @param producer
-	 *            a producer for producing new {@link CTokenSource} objects
+	 *            a producer for producing new {@link CivlcTokenSource} objects
 	 *            which are essentially iterators over the tokens comprising the
 	 *            body, i.e., the sequence of tokens comprising the rest of the
 	 *            pragma body after the identifier, and not including the
@@ -1749,7 +1749,7 @@ public interface NodeFactory {
 	 * @return the new pragma node
 	 */
 	PragmaNode newPragmaNode(Source source, IdentifierNode identifier,
-			CTokenSequence producer, CToken newlineToken);
+			CivlcTokenSequence producer, CivlcToken newlineToken);
 
 	/**
 	 * Constructs a new node representing a CIVL-C <code>$requires</code>

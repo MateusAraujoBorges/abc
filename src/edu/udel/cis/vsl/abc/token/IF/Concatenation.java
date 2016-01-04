@@ -24,6 +24,6 @@ public interface Concatenation extends Formation {
 	 *            an integer in the range [0, numConstitutents-1]
 	 * @return
 	 */
-	CToken getConstituent(int index);
+	CivlcToken getConstituent(int index);
 
 }

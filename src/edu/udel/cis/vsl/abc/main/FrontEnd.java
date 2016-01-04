@@ -39,7 +39,6 @@ import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilder;
 import edu.udel.cis.vsl.abc.front.IF.astgen.ASTGenerator;
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
@@ -52,7 +51,7 @@ import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.program.IF.ProgramFactory;
 import edu.udel.cis.vsl.abc.program.IF.Programs;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
@@ -67,11 +66,10 @@ import edu.udel.cis.vsl.abc.util.IF.Timer;
  * A FrontEnd provides a simple, high-level interface for accessing all of the
  * main functionality of ABC. It provides two different families of methods: (1)
  * methods to get or create individual components of the ABC tool chain, such as
- * factories, {@link Preprocessor}s, {@link CParser}s, etc., and (2)
- * higher-level methods which marshal together these different components in
- * order to carry out a complete translation task, such as compiling a
- * translation unit, or linking several translation units to form a complete
- * {@link Program}.
+ * factories, {@link Preprocessor}s, {@link Parser}s, etc., and (2) higher-level
+ * methods which marshal together these different components in order to carry
+ * out a complete translation task, such as compiling a translation unit, or
+ * linking several translation units to form a complete {@link Program}.
  * </p>
  * 
  * @author siegel
@@ -142,8 +140,8 @@ public class FrontEnd {
 		preprocessors.put(Language.CIVL_C, cOrcivlcPreprocessor);
 		preprocessors.put(Language.FORTRAN77,
 				Preprocess.newPreprocessor(Language.FORTRAN77, configuration));
-		cOrcivlcBuilder = ASTGenerator.newASTBuilder(
-				Language.CIVL_C, configuration, astFactory);
+		cOrcivlcBuilder = ASTGenerator.newASTBuilder(Language.CIVL_C,
+				configuration, astFactory);
 		astBuilders.put(Language.C, cOrcivlcBuilder);
 		astBuilders.put(Language.CIVL_C, cOrcivlcBuilder);
 		astBuilders.put(Language.FORTRAN77, ASTGenerator.newASTBuilder(
@@ -281,7 +279,7 @@ public class FrontEnd {
 			File[] userIncludePaths, Map<String, Macro> implicitMacros)
 			throws PreprocessorException, SyntaxException, ParseException {
 		Preprocessor preprocessor;
-		CTokenSource tokens;
+		CivlcTokenSource tokens;
 		ParseTree parseTree;
 		AST ast;
 		Parser parser = this.getParser(language);
@@ -441,7 +439,7 @@ public class FrontEnd {
 		analyzer = getStandardAnalyzer(language);
 		programFactory = getProgramFactory(analyzer);
 		for (int i = 0; i < n; i++) {
-			CTokenSource tokens = preprocessor.outputTokenSource(
+			CivlcTokenSource tokens = preprocessor.outputTokenSource(
 					systemIncludePaths, userIncludePaths, implicitMacros,
 					files[i]);
 			ParseTree parseTree = parser.parse(tokens);
@@ -552,7 +550,7 @@ public class FrontEnd {
 		for (int i = 0; i < nfiles; i++) {
 			File file = task.getFiles()[i];
 			String filename = file.getName();
-			CTokenSource tokens;
+			CivlcTokenSource tokens;
 
 			if (verbose) {
 				out.println(bar + " File " + filename + " " + bar);

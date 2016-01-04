@@ -3,17 +3,17 @@ package edu.udel.cis.vsl.abc.token.common;
 import java.io.PrintStream;
 import java.util.Iterator;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.TokenUtils;
 
 public class CommonSource implements Source {
 
-	private CToken firstToken;
+	private CivlcToken firstToken;
 
-	private CToken lastToken;
+	private CivlcToken lastToken;
 
-	public CommonSource(CToken firstToken, CToken lastToken) {
+	public CommonSource(CivlcToken firstToken, CivlcToken lastToken) {
 		if (firstToken == null)
 			throw new IllegalArgumentException("Null firstToken");
 		if (lastToken == null)
@@ -30,17 +30,17 @@ public class CommonSource implements Source {
 	}
 
 	@Override
-	public CToken getFirstToken() {
+	public CivlcToken getFirstToken() {
 		return firstToken;
 	}
 
 	@Override
-	public CToken getLastToken() {
+	public CivlcToken getLastToken() {
 		return lastToken;
 	}
 
 	@Override
-	public Iterator<CToken> tokens() {
+	public Iterator<CivlcToken> tokens() {
 		return new SourceTokenIterator(firstToken, lastToken);
 	}
 
@@ -76,17 +76,17 @@ public class CommonSource implements Source {
 	}
 }
 
-class SourceTokenIterator implements Iterator<CToken> {
-	CToken nextToken;
-	CToken last;
+class SourceTokenIterator implements Iterator<CivlcToken> {
+	CivlcToken nextToken;
+	CivlcToken last;
 
-	SourceTokenIterator(CToken firstToken, CToken lastToken) {
+	SourceTokenIterator(CivlcToken firstToken, CivlcToken lastToken) {
 		nextToken = firstToken;
 		last = lastToken;
 	}
 
-	public CToken next() {
-		CToken result = nextToken;
+	public CivlcToken next() {
+		CivlcToken result = nextToken;
 
 		if (nextToken == last)
 			nextToken = null;

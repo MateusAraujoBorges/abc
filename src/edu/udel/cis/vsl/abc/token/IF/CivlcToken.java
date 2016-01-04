@@ -19,7 +19,7 @@ import org.antlr.runtime.Token;
  * @author siegel
  * 
  */
-public interface CToken extends Token {
+public interface CivlcToken extends Token {
 
 	/**
 	 * A record of how this token was formed, through macro expansions, token
@@ -42,7 +42,7 @@ public interface CToken extends Token {
 	 * 
 	 * @param nextToken
 	 */
-	void setNext(CToken nextToken);
+	void setNext(CivlcToken nextToken);
 
 	/**
 	 * Returns the "next" token, which, if non-null, should have index one
@@ -50,7 +50,7 @@ public interface CToken extends Token {
 	 * 
 	 * @return the next token
 	 */
-	CToken getNext();
+	CivlcToken getNext();
 
 	/**
 	 * Sets the index of this token.

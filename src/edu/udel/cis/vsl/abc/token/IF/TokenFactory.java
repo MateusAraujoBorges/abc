@@ -12,7 +12,7 @@ import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter.CharacterKind;
  * A factory for producing all the objects under the control of the token
  * module. These includes instances of the following types (and their subtypes):
  * <ul>
- * <li>{@link CToken}</li>
+ * <li>{@link CivlcToken}</li>
  * <li>{@link Formation}</li>
  * <li>{@link ExecutionCharacter}</li>
  * <li>{@link Source}</li>
@@ -28,9 +28,9 @@ public interface TokenFactory {
 
 	// Formations (records of history of token creation)...
 
-	MacroExpansion newMacroExpansion(CToken startToken, Macro macro, int index);
+	MacroExpansion newMacroExpansion(CivlcToken startToken, Macro macro, int index);
 
-	Concatenation newConcatenation(List<CToken> tokens);
+	Concatenation newConcatenation(List<CivlcToken> tokens);
 
 	/**
 	 * Inclusion record for original source file.
@@ -41,7 +41,7 @@ public interface TokenFactory {
 	 */
 	Inclusion newInclusion(SourceFile file);
 
-	Inclusion newInclusion(SourceFile file, CToken includeToken);
+	Inclusion newInclusion(SourceFile file, CivlcToken includeToken);
 
 	/**
 	 * Creates a new formation which represents some code added by the system
@@ -60,11 +60,11 @@ public interface TokenFactory {
 
 	// Basic token creation...
 
-	CToken newCToken(Token token, Formation formation);
+	CivlcToken newCToken(Token token, Formation formation);
 
-	CToken newCToken(int type, String text, Formation formation);
+	CivlcToken newCToken(int type, String text, Formation formation);
 
-	CToken newCToken(CharStream input, int type, int channel, int start,
+	CivlcToken newCToken(CharStream input, int type, int channel, int start,
 			int stop, Formation formation);
 
 	// Characters and Strings...
@@ -72,19 +72,19 @@ public interface TokenFactory {
 	ExecutionCharacter executionCharacter(CharacterKind kind, int codePoint,
 			char[] characters);
 
-	CharacterToken characterToken(CToken token) throws SyntaxException;
+	CharacterToken characterToken(CivlcToken token) throws SyntaxException;
 
-	StringToken newStringToken(CToken token) throws SyntaxException;
+	StringToken newStringToken(CivlcToken token) throws SyntaxException;
 
-	StringToken newStringToken(List<CToken> tokens) throws SyntaxException;
+	StringToken newStringToken(List<CivlcToken> tokens) throws SyntaxException;
 
 	// Source objects...
 
-	Source newSource(CToken token);
+	Source newSource(CivlcToken token);
 
-	Source newSource(CToken first, CToken last);
+	Source newSource(CivlcToken first, CivlcToken last);
 
-	Source join(Source source, CToken token);
+	Source join(Source source, CivlcToken token);
 
 	Source join(Source source1, Source source2);
 
@@ -92,11 +92,11 @@ public interface TokenFactory {
 
 	SyntaxException newSyntaxException(String message, Source source);
 
-	SyntaxException newSyntaxException(String message, CToken token);
+	SyntaxException newSyntaxException(String message, CivlcToken token);
 
 	SyntaxException newSyntaxException(UnsourcedException e, Source source);
 
-	SyntaxException newSyntaxException(UnsourcedException e, CToken token);
+	SyntaxException newSyntaxException(UnsourcedException e, CivlcToken token);
 
 	UnsourcedException newUnsourcedException(String message);
 
@@ -108,9 +108,9 @@ public interface TokenFactory {
 
 	// TokenSources...
 
-	CTokenSequence getTokenSubsequence(CTokenSource fullSource,
-			CToken startToken, CToken stopToken);
+	CivlcTokenSequence getTokenSubsequence(CivlcTokenSource fullSource,
+			CivlcToken startToken, CivlcToken stopToken);
 
-	CTokenSequence getEmptyTokenSubsequence(CTokenSource originalSource);
+	CivlcTokenSequence getEmptyTokenSubsequence(CivlcTokenSource originalSource);
 
 }

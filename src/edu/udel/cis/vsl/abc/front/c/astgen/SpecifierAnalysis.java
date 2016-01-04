@@ -1,44 +1,46 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.ABSTRACT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.ALIGNAS;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.ATOMIC;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.AUTO;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.BOOL;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.CHAR;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.COMPLEX;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.CONST;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.DOMAIN;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.DOUBLE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.ENUM;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.EXTERN;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.FATOMIC;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.FLOAT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.GLOBAL;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.INLINE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.INPUT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.INT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.LONG;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.NORETURN;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.OUTPUT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.RANGE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.REAL;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.REGISTER;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.RESTRICT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.SHARED;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.SHORT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.SIGNED;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.STATIC;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.STRUCT;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.THREADLOCAL;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.TYPEDEF;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.TYPEDEF_NAME;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.TYPEOF_EXPRESSION;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.TYPEOF_TYPE;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.UNION;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.UNSIGNED;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.VOID;
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.VOLATILE;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.ABSTRACT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.ALIGNAS;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.ATOMIC;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.AUTO;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.BOOL;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.CHAR;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.COMPLEX;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.CONST;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.DOMAIN;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.DOUBLE;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.ENUM;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.EXPR;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.EXTERN;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.FATOMIC;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.FLOAT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.GLOBAL;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.INLINE;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.INPUT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.INT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.LONG;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.NORETURN;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.OUTPUT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.RANGE;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.REAL;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.REGISTER;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.RESTRICT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.SHARED;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.SHORT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.SIGNED;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.STATIC;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.STRUCT;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.THREADLOCAL;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.TYPE;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.TYPEDEF;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.TYPEDEF_NAME;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.TYPEOF_EXPRESSION;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.TYPEOF_TYPE;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.UNION;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.UNSIGNED;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.VOID;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.VOLATILE;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -48,7 +50,6 @@ import org.antlr.runtime.tree.CommonTree;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
@@ -326,9 +327,9 @@ public class SpecifierAnalysis {
 					int alignKind = ((CommonTree) node.getChild(0)).getType();
 					CommonTree argument = (CommonTree) node.getChild(1);
 
-					if (alignKind == CParser.TYPE) {
+					if (alignKind == TYPE) {
 						alignmentTypeNodes.add(argument);
-					} else if (kind == CParser.EXPR) {
+					} else if (kind == EXPR) {
 						alignmentExpressionNodes.add(argument);
 					} else {
 						throw error("Unexpected kind of ALIGN_AS argument",

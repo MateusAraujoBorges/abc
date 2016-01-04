@@ -23,13 +23,13 @@ import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Values;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 import edu.udel.cis.vsl.abc.token.IF.Tokens;
-import edu.udel.cis.vsl.abc.token.common.CommonCToken;
+import edu.udel.cis.vsl.abc.token.common.CommonCivlcToken;
 import edu.udel.cis.vsl.abc.token.common.CommonSource;
 import edu.udel.cis.vsl.abc.token.common.SystemFormation;
 
@@ -39,8 +39,8 @@ public class SimpleCudaAST {
 			.newMinimalConfiguration();
 	private static Formation sysForm = new SystemFormation("System Formation",
 			-1);
-	private static CToken firstTok = new CommonCToken(0, "first", sysForm);
-	private static CToken lastTok = new CommonCToken(0, "first", sysForm);
+	private static CivlcToken firstTok = new CommonCivlcToken(0, "first", sysForm);
+	private static CivlcToken lastTok = new CommonCivlcToken(0, "first", sysForm);
 	private static Source source = new CommonSource(firstTok, lastTok);
 	private static TypeFactory typeF = Types.newTypeFactory();
 	private static ValueFactory valueF = Values.newValueFactory(configuration,

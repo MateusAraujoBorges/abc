@@ -10,9 +10,9 @@ import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.Concatenation;
 import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
@@ -45,28 +45,28 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public CToken newCToken(Token token, Formation formation) {
-		return new CommonCToken(token, formation);
+	public CivlcToken newCToken(Token token, Formation formation) {
+		return new CommonCivlcToken(token, formation);
 	}
 
 	@Override
-	public CToken newCToken(int type, String text, Formation formation) {
-		return new CommonCToken(type, text, formation);
+	public CivlcToken newCToken(int type, String text, Formation formation) {
+		return new CommonCivlcToken(type, text, formation);
 	}
 
 	@Override
-	public CToken newCToken(CharStream input, int type, int channel, int start,
+	public CivlcToken newCToken(CharStream input, int type, int channel, int start,
 			int stop, Formation formation) {
-		return new CommonCToken(input, type, channel, start, stop, formation);
+		return new CommonCivlcToken(input, type, channel, start, stop, formation);
 	}
 
 	@Override
-	public Concatenation newConcatenation(List<CToken> tokens) {
-		return new CommonConcatenation(new ArrayList<CToken>(tokens));
+	public Concatenation newConcatenation(List<CivlcToken> tokens) {
+		return new CommonConcatenation(new ArrayList<CivlcToken>(tokens));
 	}
 
 	@Override
-	public Inclusion newInclusion(SourceFile file, CToken includeToken) {
+	public Inclusion newInclusion(SourceFile file, CivlcToken includeToken) {
 		return new CommonInclusion(file, includeToken);
 	}
 
@@ -98,7 +98,7 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public CharacterToken characterToken(CToken token) throws SyntaxException {
+	public CharacterToken characterToken(CivlcToken token) throws SyntaxException {
 		return characterFactory.characterToken(token);
 	}
 
@@ -110,7 +110,7 @@ public class CommonTokenFactory implements TokenFactory {
 	 * @throws SyntaxException
 	 */
 	@Override
-	public StringToken newStringToken(CToken token) throws SyntaxException {
+	public StringToken newStringToken(CivlcToken token) throws SyntaxException {
 		StringLiteral data = characterFactory.stringLiteral(token);
 
 		return new CommonStringToken(token, token.getFormation(), data);
@@ -120,7 +120,7 @@ public class CommonTokenFactory implements TokenFactory {
 	 * Precondition: tokens has length at least 2.
 	 */
 	@Override
-	public StringToken newStringToken(List<CToken> tokens)
+	public StringToken newStringToken(List<CivlcToken> tokens)
 			throws SyntaxException {
 		int type = tokens.get(0).getType();
 		CommonStringLiteral data = characterFactory.stringLiteral(tokens);
@@ -132,17 +132,17 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public Source newSource(CToken token) {
+	public Source newSource(CivlcToken token) {
 		return sourceFactory.newSource(token);
 	}
 
 	@Override
-	public Source newSource(CToken first, CToken last) {
+	public Source newSource(CivlcToken first, CivlcToken last) {
 		return sourceFactory.newSource(first, last);
 	}
 
 	@Override
-	public Source join(Source source, CToken token) {
+	public Source join(Source source, CivlcToken token) {
 		return sourceFactory.join(source, token);
 	}
 
@@ -168,12 +168,12 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public SyntaxException newSyntaxException(String message, CToken token) {
+	public SyntaxException newSyntaxException(String message, CivlcToken token) {
 		return newSyntaxException(message, newSource(token));
 	}
 
 	@Override
-	public SyntaxException newSyntaxException(UnsourcedException e, CToken token) {
+	public SyntaxException newSyntaxException(UnsourcedException e, CivlcToken token) {
 		return newSyntaxException(e, newSource(token));
 	}
 
@@ -188,21 +188,21 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public MacroExpansion newMacroExpansion(CToken startToken, Macro macro,
+	public MacroExpansion newMacroExpansion(CivlcToken startToken, Macro macro,
 			int index) {
 		return new CommonMacroExpansion(startToken, macro, index);
 	}
 
 	@Override
-	public CTokenSequence getTokenSubsequence(CTokenSource fullSource,
-			CToken startToken, CToken stopToken) {
-		return new CTokenSubSequence(fullSource, startToken.getIndex(),
+	public CivlcTokenSequence getTokenSubsequence(CivlcTokenSource fullSource,
+			CivlcToken startToken, CivlcToken stopToken) {
+		return new CivlcTokenSubSequence(fullSource, startToken.getIndex(),
 				stopToken.getIndex());
 	}
 
 	@Override
-	public CTokenSequence getEmptyTokenSubsequence(CTokenSource originalSource) {
-		return new CTokenSubSequence(originalSource, 0, -1);
+	public CivlcTokenSequence getEmptyTokenSubsequence(CivlcTokenSource originalSource) {
+		return new CivlcTokenSubSequence(originalSource, 0, -1);
 	}
 
 }

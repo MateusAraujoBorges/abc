@@ -12,7 +12,7 @@ import org.antlr.runtime.CommonTokenStream;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
@@ -235,7 +235,7 @@ public class CPreprocessorWorker {
 	 * @throws PreprocessorException
 	 *             if an I/O error occurs
 	 */
-	CTokenSource outputTokenSource(String filename)
+	CivlcTokenSource outputTokenSource(String filename)
 			throws PreprocessorException, IOException {
 		Map<String, Macro> macroMap = new HashMap<String, Macro>();
 

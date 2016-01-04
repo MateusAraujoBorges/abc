@@ -5,22 +5,22 @@ import java.util.Collection;
 
 import org.antlr.runtime.Token;
 
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
-public class CTokenSubSequence implements CTokenSequence {
+public class CivlcTokenSubSequence implements CivlcTokenSequence {
 
 	int startTokenIndex;
 
 	int lastTokenIndex;
 
-	CTokenSource rootSource;
+	CivlcTokenSource rootSource;
 
-	CToken eofToken;
+	CivlcToken eofToken;
 
 	/**
 	 * A helper class which represents a subsequence of sequence of tokens
@@ -29,7 +29,7 @@ public class CTokenSubSequence implements CTokenSequence {
 	 * @author siegel
 	 * 
 	 */
-	class SubTokenSource implements CTokenSource {
+	class SubTokenSource implements CivlcTokenSource {
 
 		int currentTokenIndex = startTokenIndex;
 
@@ -56,7 +56,7 @@ public class CTokenSubSequence implements CTokenSequence {
 		}
 
 		@Override
-		public CToken getToken(int index) {
+		public CivlcToken getToken(int index) {
 			return rootSource.getToken(index);
 		}
 
@@ -76,24 +76,24 @@ public class CTokenSubSequence implements CTokenSequence {
 		}
 	}
 
-	public CTokenSubSequence(CTokenSource rootSource, int startTokenIndex,
+	public CivlcTokenSubSequence(CivlcTokenSource rootSource, int startTokenIndex,
 			int lastTokenIndex) {
 		this.rootSource = rootSource;
 		this.startTokenIndex = startTokenIndex;
 		this.lastTokenIndex = lastTokenIndex;
-		this.eofToken = rootSource.getTokenFactory().newCToken(CParser.EOF,
-				"EOF", null);
+		this.eofToken = rootSource.getTokenFactory().newCToken(
+				CivlcTokenConstant.EOF, "EOF", null);
 	}
 
 	@Override
-	public CTokenSource newSource() {
+	public CivlcTokenSource newSource() {
 		return new SubTokenSource();
 	}
 
 	@Override
-	public CToken[] getTokens() {
+	public CivlcToken[] getTokens() {
 		int numTokens = size();
-		CToken[] result = new CToken[numTokens];
+		CivlcToken[] result = new CivlcToken[numTokens];
 
 		for (int i = 0; i < numTokens; i++) {
 			result[i] = rootSource.getToken(startTokenIndex + i);
@@ -107,7 +107,7 @@ public class CTokenSubSequence implements CTokenSequence {
 	}
 
 	@Override
-	public CToken getEOFToken() {
+	public CivlcToken getEOFToken() {
 		return this.eofToken;
 	}
 }

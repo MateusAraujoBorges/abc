@@ -4,6 +4,7 @@
 package edu.udel.cis.vsl.abc.front.fortran.ptree;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import org.antlr.runtime.Token;
@@ -11,13 +12,17 @@ import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * @author Wenhao Wu
  *
  */
-public class FortranTree implements ParseTree{
+public class FortranTree implements ParseTree {
 
 	private Language language = Language.FORTRAN77;
 
@@ -31,7 +36,7 @@ public class FortranTree implements ParseTree{
 
 	private int childIndex;
 
-	private CToken[] cTokens;
+	private CivlcToken[] cTokens;
 
 	private int rule;
 
@@ -44,7 +49,7 @@ public class FortranTree implements ParseTree{
 	private ArrayList<FortranTree> children;
 
 	// Constructor
-	public FortranTree(String name, CToken... cTokens) {
+	public FortranTree(String name, CivlcToken... cTokens) {
 		id = COUNT++;
 		index = -1;
 		childIndex = -1;
@@ -56,7 +61,7 @@ public class FortranTree implements ParseTree{
 		children = new ArrayList<FortranTree>();
 	}
 
-	public FortranTree(int rule, String name, CToken... cTokens) {
+	public FortranTree(int rule, String name, CivlcToken... cTokens) {
 		id = COUNT++;
 		index = -1;
 		childIndex = -1;
@@ -68,7 +73,7 @@ public class FortranTree implements ParseTree{
 		children = new ArrayList<FortranTree>();
 	}
 
-	public FortranTree(int rule, String name, int type, CToken... cTokens) {
+	public FortranTree(int rule, String name, int type, CivlcToken... cTokens) {
 		id = COUNT++;
 		index = -1;
 		childIndex = -1;
@@ -105,11 +110,11 @@ public class FortranTree implements ParseTree{
 		childIndex = newIndex;
 	}
 
-	public CToken[] cTokens() {
+	public CivlcToken[] cTokens() {
 		return cTokens;
 	}
-	
-	public void setTokens(CToken... cTokens){
+
+	public void setTokens(CivlcToken... cTokens) {
 		this.cTokens = cTokens;
 	}
 
@@ -275,7 +280,8 @@ public class FortranTree implements ParseTree{
 						result += t.getText();
 					} else {
 						result += t.toString();
-						//result += "{" + t.getInputStream().getSourceName() + "}";
+						// result += "{" + t.getInputStream().getSourceName() +
+						// "}";
 					}
 				} else {
 					result += "null";
@@ -304,6 +310,30 @@ public class FortranTree implements ParseTree{
 
 	@Override
 	public CommonTree getRoot() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Source source(CommonTree tree) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Collection<SourceFile> getSourceFiles() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public SyntaxException newSyntaxException(String message, CommonTree tree) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CivlcTokenSequence getTokenSourceProducer(CommonTree tokenListNode) {
 		// TODO Auto-generated method stub
 		return null;
 	}

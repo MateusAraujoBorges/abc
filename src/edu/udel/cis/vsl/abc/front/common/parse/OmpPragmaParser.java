@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.front.IF.parse;
+package edu.udel.cis.vsl.abc.front.common.parse;
 
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;

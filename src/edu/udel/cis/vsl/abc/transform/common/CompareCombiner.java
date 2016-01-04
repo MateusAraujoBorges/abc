@@ -31,8 +31,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
@@ -644,8 +644,8 @@ public class CompareCombiner implements Combiner {
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newTransformFormation(MY_NAME,
 				"stringLiteral");
-		CToken ctoke = tokenFactory.newCToken(CParser.STRING_LITERAL, text,
-				formation);
+		CivlcToken ctoke = tokenFactory.newCToken(
+				CivlcTokenConstant.STRING_LITERAL, text, formation);
 		StringToken stringToken = tokenFactory.newStringToken(ctoke);
 
 		return factory.newStringLiteralNode(tokenFactory.newSource(ctoke),

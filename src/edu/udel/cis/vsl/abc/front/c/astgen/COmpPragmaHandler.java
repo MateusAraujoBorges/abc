@@ -80,8 +80,8 @@ import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
 import edu.udel.cis.vsl.abc.front.c.parse.COmpParser;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
@@ -141,7 +141,7 @@ public class COmpPragmaHandler extends PragmaHandler {
 	private void markTokens(PragmaNode pragmaNode) {
 		int number = pragmaNode.getNumTokens();
 
-		for (CToken token : pragmaNode.getTokens()) {
+		for (CivlcToken token : pragmaNode.getTokens()) {
 			int type = token.getType();
 
 			if (type == IDENTIFIER) {
@@ -274,7 +274,7 @@ public class COmpPragmaHandler extends PragmaHandler {
 				} else {
 					throw new ABCRuntimeException(
 							"At most one nowait directive is allowed in an OpenMP construct.",
-							(tokenFactory.newSource((CToken) sectionsClause
+							(tokenFactory.newSource((CivlcToken) sectionsClause
 									.getToken()).getSummary(false)));
 				}
 				workshareNode.setNowait(true);
@@ -389,7 +389,7 @@ public class COmpPragmaHandler extends PragmaHandler {
 					} else {
 						throw new ABCRuntimeException(
 								"At most one if clause is allowed in an OpenMP parallel construct.",
-								(tokenFactory.newSource((CToken) parallelClause
+								(tokenFactory.newSource((CivlcToken) parallelClause
 										.getToken()).getSummary(false)));
 					}
 				} else if (result == NUM_THREADS) {
@@ -398,7 +398,7 @@ public class COmpPragmaHandler extends PragmaHandler {
 					} else {
 						throw new ABCRuntimeException(
 								"At most one num_threads() clause is allowed in an OpenMP parallel construct.",
-								(tokenFactory.newSource((CToken) parallelClause
+								(tokenFactory.newSource((CivlcToken) parallelClause
 										.getToken()).getSummary(false)));
 					}
 				}
@@ -556,7 +556,7 @@ public class COmpPragmaHandler extends PragmaHandler {
 		int operatorType = reduction.getChild(0).getType();
 		List<IdentifierExpressionNode> list = translateIdentifierList((CommonTree) reduction
 				.getChild(1));
-		Source rootSource = tokenFactory.newSource((CToken) reduction
+		Source rootSource = tokenFactory.newSource((CivlcToken) reduction
 				.getToken());
 		SequenceNode<IdentifierExpressionNode> nodes = nodeFactory
 				.newSequenceNode(rootSource, "reductionList", list);
@@ -629,7 +629,7 @@ public class COmpPragmaHandler extends PragmaHandler {
 	}
 
 	private IdentifierNode translateIdentifier(CommonTree identifier) {
-		CToken token = (CToken) identifier.getToken();
+		CivlcToken token = (CivlcToken) identifier.getToken();
 		Source source = tokenFactory.newSource(token);
 
 		return nodeFactory.newIdentifierNode(source, token.getText());
@@ -656,7 +656,7 @@ public class COmpPragmaHandler extends PragmaHandler {
 	public ASTNode processPragmaNode(PragmaNode pragmaNode, SimpleScope scope)
 			throws SyntaxException {
 		Source source = pragmaNode.getSource();
-		CTokenSource tokenSource;
+		CivlcTokenSource tokenSource;
 		TokenStream tokens;
 		CommonTree rootTree;
 		int type;

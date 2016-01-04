@@ -55,8 +55,8 @@ public class TokenUtils {
 	 * @return the short file name
 	 */
 	public static String getShortFilename(Token token, boolean abbreviated) {
-		if (token instanceof CToken) {
-			CToken ppToken = (CToken) token;
+		if (token instanceof CivlcToken) {
+			CivlcToken ppToken = (CivlcToken) token;
 			SourceFile file = ppToken.getSourceFile();
 
 			if (abbreviated)
@@ -81,7 +81,7 @@ public class TokenUtils {
 		}
 	}
 
-	public static String summarizeRangeLocation(CToken first, CToken last,
+	public static String summarizeRangeLocation(CivlcToken first, CivlcToken last,
 			boolean abbreviated) {
 		String result;
 		String filename1 = getShortFilename(first, abbreviated);
@@ -90,7 +90,7 @@ public class TokenUtils {
 		int pos1 = first.getCharPositionInLine();
 		String endPosition;
 		int line2, pos2;
-		CToken next = last.getNext();
+		CivlcToken next = last.getNext();
 
 		if (next != null) {
 			int line3 = next.getLine();
@@ -134,12 +134,12 @@ public class TokenUtils {
 		return result;
 	}
 
-	public static String summarizeRange(CToken first, CToken last,
+	public static String summarizeRange(CivlcToken first, CivlcToken last,
 			boolean abbreviated) {
 		String result = summarizeRangeLocation(first, last, abbreviated);
 		String excerpt = "";
 		int tokenCount = 0;
-		CToken token = first;
+		CivlcToken token = first;
 
 		while (token != null && token != last && tokenCount < summaryBound - 1) {
 			excerpt += token.getText();
@@ -162,12 +162,12 @@ public class TokenUtils {
 		return result;
 	}
 	
-	public static String contentOfRange(CToken first, CToken last,
+	public static String contentOfRange(CivlcToken first, CivlcToken last,
 			boolean abbreviated) {
 		String result = summarizeRangeLocation(first, last, abbreviated);
 		String excerpt = "";
 //		int tokenCount = 0;
-		CToken token = first;
+		CivlcToken token = first;
 
 		while (token != null && token != last) {
 			excerpt += token.getText();
@@ -214,7 +214,7 @@ public class TokenUtils {
 		return "\"" + txt + "\"";
 	}
 
-	public static TokenSource makeTokenSourceFromList(CToken first) {
+	public static TokenSource makeTokenSourceFromList(CivlcToken first) {
 		return new ListTokenSource(first);
 	}
 
@@ -230,9 +230,9 @@ public class TokenUtils {
  */
 class ListTokenSource implements TokenSource {
 
-	private CToken current;
+	private CivlcToken current;
 
-	ListTokenSource(CToken first) {
+	ListTokenSource(CivlcToken first) {
 		this.current = first;
 	}
 

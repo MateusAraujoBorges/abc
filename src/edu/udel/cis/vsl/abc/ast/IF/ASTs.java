@@ -8,7 +8,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 /**
@@ -31,7 +31,7 @@ public class ASTs {
 	 * @param nodeFactory
 	 *            a factory for producing {@link ASTNode}s
 	 * @param tokenFactory
-	 *            a factory for producing {@link CToken}s
+	 *            a factory for producing {@link CivlcToken}s
 	 * @param typeFactory
 	 *            a factory for producing {@link Type}s
 	 * @return the new ASTFactory

@@ -29,8 +29,8 @@ import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser.file_return;
 import edu.udel.cis.vsl.abc.front.common.preproc.CTokenIterator;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.FunctionMacro;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
@@ -59,7 +59,7 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
  * 
  * @author Stephen F. Siegel
  */
-public class PreprocessorTokenSource implements CTokenSource {
+public class PreprocessorTokenSource implements CivlcTokenSource {
 
 	// Fields...
 
@@ -122,19 +122,19 @@ public class PreprocessorTokenSource implements CTokenSource {
 	/**
 	 * The output tokens, if we are saving them, else null.
 	 */
-	private ArrayList<CToken> theTokens = null;
+	private ArrayList<CivlcToken> theTokens = null;
 
 	/**
 	 * Adjacent string literal tokens will be accumulated in a buffer before
 	 * being added to the output stream because adjacent string literal must be
 	 * concatenated to form one token.
 	 */
-	private LinkedList<CToken> stringLiteralBuffer = new LinkedList<CToken>();
+	private LinkedList<CivlcToken> stringLiteralBuffer = new LinkedList<CivlcToken>();
 
 	/**
 	 * The last token, which will be the EOF token, once it is reached.
 	 */
-	private CToken finalToken = null;
+	private CivlcToken finalToken = null;
 
 	/**
 	 * The expression analyzer is used to analyze and evaluate integer
@@ -160,7 +160,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * This is where tokens stay temporarily until they are removed by an
 	 * invocation of nextToken().
 	 */
-	private CToken firstOutput, lastOutput;
+	private CivlcToken firstOutput, lastOutput;
 
 	/**
 	 * The number of tokens that have been output.
@@ -244,7 +244,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 			throw new PreprocessorException(e.getMessage());
 		}
 		if (saveTokens)
-			theTokens = new ArrayList<CToken>();
+			theTokens = new ArrayList<CivlcToken>();
 	}
 
 	public PreprocessorTokenSource(File source, PreprocessorParser parser,
@@ -259,7 +259,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 
 	private void addEofNodeToTree(Tree tree, String filename) {
 		Formation eofFormation = tokenFactory.newSystemFormation("EOF");
-		CToken eofToken = tokenFactory.newCToken(Token.EOF, "EndOfFile<"
+		CivlcToken eofToken = tokenFactory.newCToken(Token.EOF, "EndOfFile<"
 				+ filename + ">", eofFormation);
 		CommonTree eofNode = new CommonTree(eofToken);
 
@@ -336,7 +336,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 *                if anything goes wrong in trying to find the next token
 	 */
 	@Override
-	public CToken nextToken() {
+	public CivlcToken nextToken() {
 		// nextToken_calls++;
 		if (finalToken != null)
 			return finalToken;
@@ -366,7 +366,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	}
 
 	@Override
-	public CToken getToken(int index) {
+	public CivlcToken getToken(int index) {
 		return theTokens.get(index);
 	}
 
@@ -517,14 +517,14 @@ public class PreprocessorTokenSource implements CTokenSource {
 	private void processInvocation(Macro macro, Tree invocationNode)
 			throws PreprocessorException {
 		Token token = ((CommonTree) invocationNode).getToken();
-		CToken cToken = tokenFactory.newCToken(token, getIncludeHistory());
-		Pair<CToken, CToken> result;
+		CivlcToken cToken = tokenFactory.newCToken(token, getIncludeHistory());
+		Pair<CivlcToken, CivlcToken> result;
 
 		if (macro instanceof ObjectMacro) {
 			result = processInvocation((ObjectMacro) macro, cToken);
 			incrementNextNode();
 		} else {
-			CToken[] arguments = findInvocationArguments((FunctionMacro) macro,
+			CivlcToken[] arguments = findInvocationArguments((FunctionMacro) macro,
 					invocationNode);
 
 			// note the call to findInvocationArguments updated
@@ -557,8 +557,8 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 *             if something goes wrong while expanding the list of
 	 *             replacement tokens (i.e., the second expansion)
 	 */
-	private Pair<CToken, CToken> processInvocation(ObjectMacro macro,
-			CToken origin) throws PreprocessorException {
+	private Pair<CivlcToken, CivlcToken> processInvocation(ObjectMacro macro,
+			CivlcToken origin) throws PreprocessorException {
 		return performSecondExpansion(instantiate(macro, origin), macro);
 	}
 
@@ -587,8 +587,8 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * @param arguments
 	 * @throws PreprocessorException
 	 */
-	private Pair<CToken, CToken> processInvocation(FunctionMacro macro,
-			CToken origin, CToken[] arguments) throws PreprocessorException {
+	private Pair<CivlcToken, CivlcToken> processInvocation(FunctionMacro macro,
+			CivlcToken origin, CivlcToken[] arguments) throws PreprocessorException {
 		for (int i = 0; i < arguments.length; i++)
 			arguments[i] = expandList(arguments[i]).left;
 		return performSecondExpansion(instantiate(macro, origin, arguments),
@@ -610,13 +610,13 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * @throws PreprocessorException
 	 *             any improper macro invocations occur in the token list
 	 */
-	private Pair<CToken, CToken> performSecondExpansion(
-			Pair<CToken, CToken> tokenList, Macro macro)
+	private Pair<CivlcToken, CivlcToken> performSecondExpansion(
+			Pair<CivlcToken, CivlcToken> tokenList, Macro macro)
 			throws PreprocessorException {
 		String name = macro.getName();
 
 		// mark all occurrences of identifier M as "do not expand"...
-		for (CToken token = tokenList.left; token != null; token = token
+		for (CivlcToken token = tokenList.left; token != null; token = token
 				.getNext()) {
 			if (PreprocessorUtils.isIdentifier(token)
 					&& name.equals(token.getText()))
@@ -662,10 +662,10 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 *         performing substitution of actual arguments for formal parameters
 	 *         in the macro body
 	 */
-	private Pair<CToken, CToken> instantiate(FunctionMacro macro,
-			CToken origin, CToken[] arguments) {
+	private Pair<CivlcToken, CivlcToken> instantiate(FunctionMacro macro,
+			CivlcToken origin, CivlcToken[] arguments) {
 		int numTokens = macro.getNumReplacementTokens();
-		CToken first = null, previous = null, current = null;
+		CivlcToken first = null, previous = null, current = null;
 
 		for (int i = 0; i < numTokens; i++) {
 			Token token = macro.getReplacementToken(i);
@@ -680,7 +680,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 					first = current;
 				previous = current;
 			} else { // splice in argument
-				CToken argument = arguments[formalIndex];
+				CivlcToken argument = arguments[formalIndex];
 
 				while (argument != null) {
 					current = tokenFactory.newCToken(argument,
@@ -714,9 +714,9 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * @return first and last element in a null-terminated linked list of fresh
 	 *         CTokens obtained from the macro's body
 	 */
-	private Pair<CToken, CToken> instantiate(ObjectMacro macro, CToken origin) {
+	private Pair<CivlcToken, CivlcToken> instantiate(ObjectMacro macro, CivlcToken origin) {
 		int numTokens = macro.getNumReplacementTokens();
-		CToken first = null, previous = null, current = null;
+		CivlcToken first = null, previous = null, current = null;
 
 		for (int i = 0; i < numTokens; i++) {
 			Token token = macro.getReplacementToken(i);
@@ -760,9 +760,9 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * @return first element in expanded list; may be null for empty list
 	 * @throws PreprocessorException
 	 */
-	private Pair<CToken, CToken> expandList(CToken first)
+	private Pair<CivlcToken, CivlcToken> expandList(CivlcToken first)
 			throws PreprocessorException {
-		CToken current = first, previous = null;
+		CivlcToken current = first, previous = null;
 
 		while (current != null) {
 			if (!current.isExpandable()) {
@@ -791,7 +791,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 				} else if (macro instanceof ObjectMacro) {
 					isInvocation = true;
 				} else {
-					CToken next = current.getNext();
+					CivlcToken next = current.getNext();
 
 					isInvocation = (next != null && next.getType() == PreprocessorLexer.LPAREN);
 				}
@@ -802,14 +802,14 @@ public class PreprocessorTokenSource implements CTokenSource {
 				continue;
 			}
 
-			Pair<CToken, CToken> replacements;
+			Pair<CivlcToken, CivlcToken> replacements;
 
 			if (macro instanceof ObjectMacro) {
 				replacements = processInvocation((ObjectMacro) macro, current);
 				current = current.getNext();
 			} else {
-				Iterator<CToken> iter = new CTokenIterator(current.getNext());
-				CToken[] arguments = findInvocationArguments(
+				Iterator<CivlcToken> iter = new CTokenIterator(current.getNext());
+				CivlcToken[] arguments = findInvocationArguments(
 						(FunctionMacro) macro, iter);
 
 				replacements = processInvocation((FunctionMacro) macro,
@@ -874,22 +874,22 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 *             if a sequence of tokens that would otherwise act as
 	 *             preprocessing directives occurs in the argument list
 	 */
-	private CToken[] findInvocationArguments(FunctionMacro macro,
+	private CivlcToken[] findInvocationArguments(FunctionMacro macro,
 			Tree invocationNode) throws PreprocessorException {
-		Iterator<CToken> iter;
+		Iterator<CivlcToken> iter;
 
 		incrementNextNode();
-		iter = new Iterator<CToken>() {
+		iter = new Iterator<CivlcToken>() {
 			@Override
 			public boolean hasNext() {
 				return getNextInputNode() != null;
 			}
 
 			@Override
-			public CToken next() {
+			public CivlcToken next() {
 				Tree node = getNextInputNode();
 				Token inputToken = ((CommonTree) node).getToken();
-				CToken result = tokenFactory.newCToken(inputToken,
+				CivlcToken result = tokenFactory.newCToken(inputToken,
 						getIncludeHistory());
 
 				if (node.getChildCount() > 0)
@@ -906,8 +906,8 @@ public class PreprocessorTokenSource implements CTokenSource {
 		return findInvocationArguments(macro, iter);
 	}
 
-	private CToken[] findInvocationArguments(FunctionMacro macro,
-			Iterator<CToken> argumentIterator) throws PreprocessorException {
+	private CivlcToken[] findInvocationArguments(FunctionMacro macro,
+			Iterator<CivlcToken> argumentIterator) throws PreprocessorException {
 		try {
 			return findInvocationArgumentsWorker(macro, argumentIterator);
 		} catch (IllegalMacroArgumentException e) {
@@ -949,12 +949,12 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 *                number of formals in the macro definition
 	 * @return
 	 */
-	private CToken[] findInvocationArgumentsWorker(FunctionMacro macro,
-			Iterator<CToken> argumentIterator) throws PreprocessorException {
+	private CivlcToken[] findInvocationArgumentsWorker(FunctionMacro macro,
+			Iterator<CivlcToken> argumentIterator) throws PreprocessorException {
 		int numFormals = macro.getNumFormals();
-		CToken[] result = new CToken[numFormals];
+		CivlcToken[] result = new CivlcToken[numFormals];
 		int argCount = 0, type, parenDepth;
-		CToken token, previousToken;
+		CivlcToken token, previousToken;
 
 		// first, skip through all the white space to get to the '(':
 		while (true) {
@@ -1040,7 +1040,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 		PreprocessorSourceFileInfo o = sourceStack.pop();
 
 		if (sourceStack.isEmpty()) {
-			CToken myEof = tokenFactory.newCToken(eof, o.getIncludeHistory());
+			CivlcToken myEof = tokenFactory.newCToken(eof, o.getIncludeHistory());
 
 			// myEof.setText(text)
 			addOutput(myEof);
@@ -1151,7 +1151,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 
 	private void processIf(Tree ifNode) throws PreprocessorException {
 		CommonTree expressionNode = (CommonTree) ifNode.getChild(0);
-		CToken first, expandedFirst;
+		CivlcToken first, expandedFirst;
 		TokenSource source;
 		int result;
 
@@ -1218,10 +1218,10 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * @throws PreprocessorException
 	 *             if one of the children has a null token
 	 */
-	private CToken nonWhiteSpaceTokenListFromChildren(CommonTree root)
+	private CivlcToken nonWhiteSpaceTokenListFromChildren(CommonTree root)
 			throws PreprocessorException {
 		int numChildren = root.getChildCount();
-		CToken first = null, prev = null;
+		CivlcToken first = null, prev = null;
 
 		for (int i = 0; i < numChildren; i++) {
 			Token token = ((CommonTree) root.getChild(i)).getToken();
@@ -1231,7 +1231,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 						"Encountered null token as child " + i + " of node "
 								+ root);
 			if (!PreprocessorUtils.isWhiteSpace(token)) {
-				CToken newToken = tokenFactory.newCToken(token,
+				CivlcToken newToken = tokenFactory.newCToken(token,
 						getIncludeHistory());
 
 				if (prev == null)
@@ -1288,7 +1288,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 					+ fullName, filenameToken);
 		}
 		try {
-			CToken amplifiedFilenameToken = tokenFactory.newCToken(
+			CivlcToken amplifiedFilenameToken = tokenFactory.newCToken(
 					filenameToken, getIncludeHistory());
 
 			newInfo = findInclude(amplifiedFilenameToken, name, system);
@@ -1327,7 +1327,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * @throws PreprocessorException
 	 *             if some other syntax error occurs in processing the file
 	 */
-	private PreprocessorSourceFileInfo findInclude(CToken filenameToken,
+	private PreprocessorSourceFileInfo findInclude(CivlcToken filenameToken,
 			String filename, boolean system) throws IOException,
 			RecognitionException, PreprocessorException {
 		File file = null;
@@ -1395,7 +1395,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 */
 	private void processPragma(Tree pragmaNode) throws PreprocessorException {
 		Token token = ((CommonTree) pragmaNode).getToken();
-		CToken pragmaToken = tokenFactory.newCToken(token, getIncludeHistory());
+		CivlcToken pragmaToken = tokenFactory.newCToken(token, getIncludeHistory());
 
 		addOutput(pragmaToken);
 		inTextBlock = true; // don't have to check for directives
@@ -1637,7 +1637,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 *            a token to add to output buffer
 	 * @throws PreprocessorException
 	 */
-	private void addOutput(CToken token) throws PreprocessorException {
+	private void addOutput(CivlcToken token) throws PreprocessorException {
 		int type = token.getType();
 
 		// The string literals will be separated by some white
@@ -1669,10 +1669,10 @@ public class PreprocessorTokenSource implements CTokenSource {
 				stringLiteralBuffer.add(token);
 				return;
 			} else {
-				List<CToken> pureStringTokens = new LinkedList<>();
-				List<CToken> extraWhiteSpaces = new LinkedList<>();
+				List<CivlcToken> pureStringTokens = new LinkedList<>();
+				List<CivlcToken> extraWhiteSpaces = new LinkedList<>();
 
-				for (CToken stringToken : stringLiteralBuffer) {
+				for (CivlcToken stringToken : stringLiteralBuffer) {
 					if (PreprocessorUtils.isWhiteSpace(stringToken))
 						extraWhiteSpaces.add(stringToken);
 					else
@@ -1693,14 +1693,14 @@ public class PreprocessorTokenSource implements CTokenSource {
 					throw new PreprocessorException(e.getMessage(),
 							pureStringTokens.get(0));
 				}
-				for (CToken ws : extraWhiteSpaces)
+				for (CivlcToken ws : extraWhiteSpaces)
 					addOutputHelper(ws);
 			}
 		}
 		addOutputHelper(token);
 	}
 
-	private void addOutputHelper(CToken token) throws PreprocessorException {
+	private void addOutputHelper(CivlcToken token) throws PreprocessorException {
 		int type = token.getType();
 
 		if (type == PreprocessorParser.CHARACTER_CONSTANT) {
@@ -1726,9 +1726,9 @@ public class PreprocessorTokenSource implements CTokenSource {
 		}
 	}
 
-	private void addOutputList(Pair<CToken, CToken> list)
+	private void addOutputList(Pair<CivlcToken, CivlcToken> list)
 			throws PreprocessorException {
-		CToken previous = null, current = list.left;
+		CivlcToken previous = null, current = list.left;
 
 		while (current != null) {
 			previous = current;
@@ -1747,7 +1747,7 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 */
 	private void shiftToOutput(Tree node) throws PreprocessorException {
 		Token token = ((CommonTree) node).getToken();
-		CToken output = tokenFactory.newCToken(token, getIncludeHistory());
+		CivlcToken output = tokenFactory.newCToken(token, getIncludeHistory());
 
 		addOutput(output);
 	}
@@ -1757,8 +1757,8 @@ public class PreprocessorTokenSource implements CTokenSource {
 	 * 
 	 * @return the first token, i.e., the one removed
 	 */
-	private CToken removeOutput() {
-		CToken result = firstOutput;
+	private CivlcToken removeOutput() {
+		CivlcToken result = firstOutput;
 
 		if (result == null)
 			throw new PreprocessorRuntimeException(

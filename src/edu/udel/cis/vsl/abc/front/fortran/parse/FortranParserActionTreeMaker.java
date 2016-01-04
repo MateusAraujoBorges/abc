@@ -9,12 +9,12 @@ import org.antlr.runtime.Token;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 import edu.udel.cis.vsl.abc.token.IF.Tokens;
-import edu.udel.cis.vsl.abc.token.common.CommonCToken;
+import edu.udel.cis.vsl.abc.token.common.CommonCivlcToken;
 
 public class FortranParserActionTreeMaker implements IFortranParserAction {
 	private int currentIndex = 0;
@@ -25,7 +25,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	
 	private FortranTree root;
 
-	private ArrayList<CToken> cTokens = new ArrayList<CToken>();
+	private ArrayList<CivlcToken> cTokens = new ArrayList<CivlcToken>();
 
 	private TokenFactory tokenFactory = Tokens.newTokenFactory();
 
@@ -40,24 +40,24 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		super();
 	}
 
-	private CToken getCToken(Token token) {
-		CToken newCToken = null;
+	private CivlcToken getCToken(Token token) {
+		CivlcToken newCToken = null;
 		
 		if (token != null){
 			int tokenIndex = token.getTokenIndex();
 			int numCTokens = cTokens.size();
 			
 			for(int i = 0; i < numCTokens; i++){
-				CToken tempCToken = cTokens.get(i);
+				CivlcToken tempCToken = cTokens.get(i);
 				
 				if (tempCToken.getIndex() == tokenIndex){
 					currentIndex = tokenIndex;
-					newCToken = new CommonCToken(token, inclusion);
+					newCToken = new CommonCivlcToken(token, inclusion);
 					
 					newCToken.setNext(tempCToken.getNext());
 					if (i > 0) cTokens.get(i-1).setNext(newCToken);
 				}else if(tokenIndex < 0){
-					newCToken = new CommonCToken(token, inclusion);
+					newCToken = new CommonCivlcToken(token, inclusion);
 
 					newCToken.setNext(cTokens.get(currentIndex).getNext());
 					if (i > 0) cTokens.get(currentIndex).setNext(newCToken);
@@ -4817,10 +4817,10 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 	public void next_token(Token tk) {
 		int size = cTokens.size();
-		CToken cToken = null;
+		CivlcToken cToken = null;
 
 		if (tk != null) {
-			cToken = new CommonCToken(tk, inclusion);
+			cToken = new CommonCivlcToken(tk, inclusion);
 			cToken.setIndex(tk.getTokenIndex());
 			if (size < 1) {
 				cTokens.add(cToken);

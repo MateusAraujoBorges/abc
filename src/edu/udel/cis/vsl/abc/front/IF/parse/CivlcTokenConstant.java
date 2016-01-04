@@ -1,18 +1,14 @@
 package edu.udel.cis.vsl.abc.front.IF.parse;
 
-import java.util.Stack;
-
 import edu.udel.cis.vsl.abc.front.c.parse.CivlCParser;
-import edu.udel.cis.vsl.abc.front.c.parse.ScopeSymbols;
-import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
 
 /**
- * <p>
- * Simple interface for a parser of C programs. It includes a bunch of integer
- * constants which are ID numbers of each kind of token (real or fake) that can
- * occur in a C parse tree.
- * </p>
+ * This class exports the constants for token types from CivlCParser. These are
+ * needed currently for transformers when they create new AST nodes and need to
+ * make up source object for them.
+ * 
+ * Ultimately, this class will be got rid of when the transformers create
+ * intermediate files and generate source object from them.
  * 
  * The token constants are just extracted from the ANTLR-generated parser using
  * the following Perl script:
@@ -33,10 +29,10 @@ import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
  * totally to the generated code. On the other hand, other code does need to
  * access these constants.
  * 
- * @author siegel
+ * @author Manchun Zheng
  * 
  */
-public interface CParser extends Parser {
+public interface CivlcTokenConstant {
 
 	// constants defined in the ANTLR-generated parser
 
@@ -295,8 +291,6 @@ public interface CParser extends Parser {
 	public static final int PRE_DECREMENT = CivlCParser.PRE_DECREMENT;
 	public static final int PRE_INCREMENT = CivlCParser.PRE_INCREMENT;
 	public static final int SCALAR_INITIALIZER = CivlCParser.SCALAR_INITIALIZER;
-	// public static final int SCOPE_LIST = CivlCParser.SCOPE_LIST;
-	// public static final int SCOPE_NAME = CivlCParser.SCOPE_NAME;
 	public static final int SPECIFIER_QUALIFIER_LIST = CivlCParser.SPECIFIER_QUALIFIER_LIST;
 	public static final int STRUCT_DECLARATION = CivlCParser.STRUCT_DECLARATION;
 	public static final int STRUCT_DECLARATION_LIST = CivlCParser.STRUCT_DECLARATION_LIST;
@@ -309,32 +303,5 @@ public interface CParser extends Parser {
 	public static final int TYPEDOF = CivlCParser.TYPEOF;
 	public static final int TYPE_NAME = CivlCParser.TYPE_NAME;
 	public static final int TYPE_QUALIFIER_LIST = CivlCParser.TYPE_QUALIFIER_LIST;
-
-	/**
-	 * Returns the ANTLR CommonTree resulting from parsing the input, after some
-	 * "post-processing" has been done to the tree to fill in some fields.
-	 * 
-	 * @return the ANTLR tree resulting from parsing and clean up
-	 * @throws ParseException
-	 *             if there is a syntax exception
-	 */
-	@Override
-	CParseTree parse(CTokenSource tokenSource) throws ParseException;
-
-	/**
-	 * Uses a certain rule to parse the given tokens.
-	 * 
-	 * @param rule
-	 *            The rule to be used for parsing
-	 * @param tokenSource
-	 *            The tokens to be parsed.
-	 * @param symbols
-	 *            The stack of symbols defined or visible in the current scope
-	 * @return The parse tree.
-	 * @throws ParseException
-	 */
-	@Override
-	CParseTree parse(RuleKind rule, CTokenSource tokenSource,
-			Stack<ScopeSymbols> symbols) throws ParseException;
 
 }

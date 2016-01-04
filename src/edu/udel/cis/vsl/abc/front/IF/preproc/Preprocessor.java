@@ -9,7 +9,7 @@ import java.util.Map;
 import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Parser;
 
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
@@ -134,7 +134,7 @@ public interface Preprocessor {
 	 * @throws PreprocessorException
 	 *             if an I/O error occurs
 	 */
-	CTokenSource outputTokenSource(File[] systemIncludePaths,
+	CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
 			File file) throws PreprocessorException;
 
@@ -157,7 +157,7 @@ public interface Preprocessor {
 	 *             if an I/O error occurs
 	 * @throws IOException
 	 */
-	CTokenSource outputTokenSource(File[] systemIncludePaths,
+	CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
 			String filename) throws PreprocessorException, IOException;
 

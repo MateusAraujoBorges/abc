@@ -6,7 +6,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
@@ -34,11 +34,11 @@ public class CommonCharacterFactory {
 	 * @author siegel
 	 */
 	private class StringAnalysis {
-		CToken token;
+		CivlcToken token;
 		StringKind kind;
 		String core;
 
-		StringAnalysis(CToken token, StringKind kind, String core) {
+		StringAnalysis(CivlcToken token, StringKind kind, String core) {
 			this.token = token;
 			this.kind = kind;
 			this.core = core;
@@ -128,7 +128,7 @@ public class CommonCharacterFactory {
 	 * @throws SyntaxException
 	 *             if the text of the character constant is not well formed
 	 */
-	public CharacterToken characterToken(CToken token) throws SyntaxException {
+	public CharacterToken characterToken(CivlcToken token) throws SyntaxException {
 		String text = token.getText();
 		Character prefix = text.charAt(0);
 		CharacterKind kind;
@@ -188,7 +188,7 @@ public class CommonCharacterFactory {
 	 *             if the text of given token does not have the proper syntax
 	 *             for a string literal
 	 */
-	public CommonStringLiteral stringLiteral(CToken token)
+	public CommonStringLiteral stringLiteral(CivlcToken token)
 			throws SyntaxException {
 		StringAnalysis analysis = stringAnalyze(token);
 		StringKind stringKind = analysis.kind;
@@ -222,14 +222,14 @@ public class CommonCharacterFactory {
 	 *             if any of the token texts are not proper string literals, or
 	 *             the string kinds do not match up
 	 */
-	public CommonStringLiteral stringLiteral(List<CToken> tokens)
+	public CommonStringLiteral stringLiteral(List<CivlcToken> tokens)
 			throws SyntaxException {
 		List<StringAnalysis> analyses = new LinkedList<StringAnalysis>();
 		ArrayList<ExecutionCharacter> characters = new ArrayList<ExecutionCharacter>();
 		StringKind stringKind;
 		CharacterKind characterKind;
 
-		for (CToken token : tokens)
+		for (CivlcToken token : tokens)
 			analyses.add(stringAnalyze(token));
 		stringKind = concatKind(analyses);
 		characterKind = characterKind(stringKind);
@@ -254,7 +254,7 @@ public class CommonCharacterFactory {
 			list.add(parseNextCharacter(data));
 	}
 
-	private StringAnalysis stringAnalyze(CToken token) throws SyntaxException {
+	private StringAnalysis stringAnalyze(CivlcToken token) throws SyntaxException {
 		String text = token.getText();
 		int length = text.length();
 		char prefix0;

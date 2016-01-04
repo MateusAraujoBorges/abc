@@ -2,15 +2,15 @@ package edu.udel.cis.vsl.abc.token.common;
 
 import java.util.ArrayList;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Concatenation;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
 public class CommonConcatenation implements Concatenation {
 
-	private ArrayList<CToken> constituents;
+	private ArrayList<CivlcToken> constituents;
 
-	public CommonConcatenation(ArrayList<CToken> constituents) {
+	public CommonConcatenation(ArrayList<CivlcToken> constituents) {
 		assert constituents != null;
 		assert constituents.size() >= 1;
 		this.constituents = constituents;
@@ -21,7 +21,7 @@ public class CommonConcatenation implements Concatenation {
 		String result = " from concatenation of the following "
 				+ getNumConstituents() + " tokens:";
 
-		for (CToken token : constituents)
+		for (CivlcToken token : constituents)
 			result += "\n" + token;
 		return result;
 	}
@@ -37,7 +37,7 @@ public class CommonConcatenation implements Concatenation {
 	}
 
 	@Override
-	public CToken getConstituent(int index) {
+	public CivlcToken getConstituent(int index) {
 		return constituents.get(index);
 	}
 

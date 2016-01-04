@@ -8,12 +8,12 @@ import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parser.RuleKind;
 import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.c.parse.CParser;
+import edu.udel.cis.vsl.abc.front.c.parse.CParser.RuleKind;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
@@ -21,7 +21,7 @@ public class CIVLPragmaHandler extends PragmaHandler {
 
 	private NodeFactory nodeFactory;
 
-	private Parser parser;
+	private CParser parser;
 
 	private ParseTree parseTree;
 
@@ -31,7 +31,7 @@ public class CIVLPragmaHandler extends PragmaHandler {
 		this.nodeFactory = builder.getASTFactory().getNodeFactory();
 		this.parseTree = parseTree;
 		this.worker = builder.getWorker(parseTree);
-		this.parser = Parse.newParser(parseTree.getLanguage());
+		this.parser = (CParser) Parse.newParser(parseTree.getLanguage());
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class CIVLPragmaHandler extends PragmaHandler {
 	@Override
 	public ASTNode processPragmaNode(PragmaNode pragmaNode, SimpleScope scope)
 			throws SyntaxException, ParseException {
-		CTokenSource tokens = pragmaNode.newTokenSource();
+		CivlcTokenSource tokens = pragmaNode.newTokenSource();
 		Source source = pragmaNode.getSource();
 		ParseTree pragmaTree = parser.parse(RuleKind.BLOCK_ITEM, tokens,
 				scope.getScopeSymbolStack());

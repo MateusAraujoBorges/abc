@@ -4,8 +4,8 @@ import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
@@ -72,8 +72,8 @@ public abstract class BaseTransformer implements Transformer {
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newTransformFormation(longName,
 				method);
-		CToken token = tokenFactory.newCToken(CParser.STRING_LITERAL,
-				representation, formation);
+		CivlcToken token = tokenFactory.newCToken(
+				CivlcTokenConstant.STRING_LITERAL, representation, formation);
 		StringToken stringToken = tokenFactory.newStringToken(token);
 		Source source = tokenFactory.newSource(stringToken);
 		StringLiteralNode result = nodeFactory.newStringLiteralNode(source,

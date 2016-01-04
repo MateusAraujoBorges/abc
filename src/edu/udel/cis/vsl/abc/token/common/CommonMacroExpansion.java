@@ -2,7 +2,7 @@ package edu.udel.cis.vsl.abc.token.common;
 
 import org.antlr.runtime.Token;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.MacroExpansion;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
@@ -12,7 +12,7 @@ public class CommonMacroExpansion implements MacroExpansion {
 	/**
 	 * The token that is being expanded by the macro.
 	 */
-	private CToken startToken;
+	private CivlcToken startToken;
 
 	/**
 	 * The macro doing the expanding. Its name should be the same as the text of
@@ -27,7 +27,7 @@ public class CommonMacroExpansion implements MacroExpansion {
 	 */
 	private int index;
 
-	CommonMacroExpansion(CToken startToken, Macro macro, int index) {
+	CommonMacroExpansion(CivlcToken startToken, Macro macro, int index) {
 		this.startToken = startToken;
 		this.macro = macro;
 		this.index = index;
@@ -45,7 +45,7 @@ public class CommonMacroExpansion implements MacroExpansion {
 	}
 
 	@Override
-	public CToken getStartToken() {
+	public CivlcToken getStartToken() {
 		return startToken;
 	}
 

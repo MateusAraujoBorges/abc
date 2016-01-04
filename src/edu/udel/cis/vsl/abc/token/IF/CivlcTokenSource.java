@@ -31,7 +31,7 @@ import org.antlr.runtime.TokenSource;
  * @author siegel
  * 
  */
-public interface CTokenSource extends TokenSource {
+public interface CivlcTokenSource extends TokenSource {
 
 	/**
 	 * The number of tokens produced by this token source so far.
@@ -47,7 +47,7 @@ public interface CTokenSource extends TokenSource {
 	 *            an integer in the range [0,numTokens-1]
 	 * @return the index-th token produced
 	 */
-	CToken getToken(int index);
+	CivlcToken getToken(int index);
 
 	/**
 	 * Returns the token factory used by this token source object.

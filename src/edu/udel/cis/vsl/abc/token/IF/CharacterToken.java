@@ -8,7 +8,7 @@ package edu.udel.cis.vsl.abc.token.IF;
  * @author siegel
  * 
  */
-public interface CharacterToken extends CToken {
+public interface CharacterToken extends CivlcToken {
 
 	/**
 	 * Returns the execution character which this character constant represents

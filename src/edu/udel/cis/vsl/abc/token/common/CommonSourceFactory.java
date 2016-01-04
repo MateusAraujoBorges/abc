@@ -1,16 +1,16 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 public class CommonSourceFactory {
 
-	public Source newSource(CToken token) {
+	public Source newSource(CivlcToken token) {
 		return new CommonSource(token, token);
 	}
 
-	public Source newSource(CToken first, CToken last) {
+	public Source newSource(CivlcToken first, CivlcToken last) {
 		return new CommonSource(first, last);
 	}
 
@@ -18,9 +18,9 @@ public class CommonSourceFactory {
 	// return new CommonSource(tree, tokenSource);
 	// }
 
-	public Source join(Source source, CToken token) {
+	public Source join(Source source, CivlcToken token) {
 		int firstIndex, lastIndex, index = token.getTokenIndex();
-		CToken first, last;
+		CivlcToken first, last;
 
 		if (index < 0)
 			return source;
@@ -36,16 +36,16 @@ public class CommonSourceFactory {
 	}
 
 	public Source join(Source source1, Source source2) {
-		CToken first1 = source1.getFirstToken();
-		CToken last1 = source1.getLastToken();
-		CToken first2 = source2.getFirstToken();
-		CToken last2 = source2.getLastToken();
+		CivlcToken first1 = source1.getFirstToken();
+		CivlcToken last1 = source1.getLastToken();
+		CivlcToken first2 = source2.getFirstToken();
+		CivlcToken last2 = source2.getLastToken();
 		int firstIndex1 = first1.getIndex();
 		int lastIndex1 = last1.getIndex();
 		int firstIndex2 = first2.getIndex();
 		int lastIndex2 = last2.getIndex();
-		CToken newFirst = (firstIndex1 < firstIndex2 ? first1 : first2);
-		CToken newLast = (lastIndex1 > lastIndex2 ? last1 : last2);
+		CivlcToken newFirst = (firstIndex1 < firstIndex2 ? first1 : first2);
+		CivlcToken newLast = (lastIndex1 > lastIndex2 ? last1 : last2);
 
 		return new CommonSource(newFirst, newLast);
 	}

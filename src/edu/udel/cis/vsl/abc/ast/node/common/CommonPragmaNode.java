@@ -8,21 +8,21 @@ import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject.DiffKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonPragmaNode extends CommonASTNode implements PragmaNode {
 
-	protected CToken[] body;
+	protected CivlcToken[] body;
 
-	protected CTokenSequence tokenSequence;
+	protected CivlcTokenSequence tokenSequence;
 
-	protected CToken newlineToken;
+	protected CivlcToken newlineToken;
 
 	public CommonPragmaNode(Source source, IdentifierNode identifier,
-			CTokenSequence tokenSequence, CToken newlineToken) {
+			CivlcTokenSequence tokenSequence, CivlcToken newlineToken) {
 		super(source, identifier);
 		this.tokenSequence = tokenSequence;
 		this.newlineToken = newlineToken;
@@ -35,7 +35,7 @@ public class CommonPragmaNode extends CommonASTNode implements PragmaNode {
 
 		out.print("Pragma[");
 		for (int i = 0; i < numTokens; i++) {
-			CToken token = body[i];
+			CivlcToken token = body[i];
 
 			if (i > 0)
 				out.print(" ");
@@ -55,12 +55,12 @@ public class CommonPragmaNode extends CommonASTNode implements PragmaNode {
 	}
 
 	@Override
-	public CToken getToken(int index) {
+	public CivlcToken getToken(int index) {
 		return body[index];
 	}
 
 	@Override
-	public Iterable<CToken> getTokens() {
+	public Iterable<CivlcToken> getTokens() {
 		return Arrays.asList(body);
 	}
 
@@ -113,12 +113,12 @@ public class CommonPragmaNode extends CommonASTNode implements PragmaNode {
 	}
 
 	@Override
-	public CTokenSource newTokenSource() {
+	public CivlcTokenSource newTokenSource() {
 		return tokenSequence.newSource();
 	}
 
 	@Override
-	public CToken getNewlineToken() {
+	public CivlcToken getNewlineToken() {
 		return newlineToken;
 	}
 }

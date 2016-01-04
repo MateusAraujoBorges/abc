@@ -4,9 +4,9 @@ import org.antlr.runtime.TokenStream;
 
 /**
  * <p>
- * Represents a finite sequence of {@link CToken}. Methods are provided to
+ * Represents a finite sequence of {@link CivlcToken}. Methods are provided to
  * access the sequence in a variety of convenient ways. Most importantly, method
- * {@link #newSource()} returns a {@link CTokenSource}, which can be used to
+ * {@link #newSource()} returns a {@link CivlcTokenSource}, which can be used to
  * construct an ANTLR {@link TokenStream}, which can in turn be used as the
  * input to an ANTLR parser.
  * </p>
@@ -33,21 +33,21 @@ import org.antlr.runtime.TokenStream;
  * @author siegel
  * 
  */
-public interface CTokenSequence {
+public interface CivlcTokenSequence {
 
 	/**
 	 * Returns the extra EOF token which is used by method {@link #newSource()}.
 	 * 
 	 * @return the extra EOF token
 	 */
-	CToken getEOFToken();
+	CivlcToken getEOFToken();
 
 	/**
 	 * <p>
-	 * Returns a new {@link CTokenSource} which produces the tokens in this
+	 * Returns a new {@link CivlcTokenSource} which produces the tokens in this
 	 * sequence, in order, with an "EOF" token appended. Since a token source is
 	 * basically infinite, the final EOF token is stuttered, i.e., repeated
-	 * calls to {@link CTokenSource#nextToken()} will continue to produce the
+	 * calls to {@link CivlcTokenSource#nextToken()} will continue to produce the
 	 * EOF token after the EOF token has been reached.
 	 * </p>
 	 * 
@@ -56,10 +56,10 @@ public interface CTokenSequence {
 	 * as the input to a parser.
 	 * </p>
 	 * 
-	 * @return a new {@link CTokenSource} yielding the elements of this
+	 * @return a new {@link CivlcTokenSource} yielding the elements of this
 	 *         sequence.
 	 */
-	CTokenSource newSource();
+	CivlcTokenSource newSource();
 
 	/**
 	 * Returns the tokens as an array. Whether or not this array can be modified
@@ -69,7 +69,7 @@ public interface CTokenSequence {
 	 * 
 	 * @return the tokens as an array
 	 */
-	CToken[] getTokens();
+	CivlcToken[] getTokens();
 
 	/**
 	 * Returns the number of tokens in the sequence. This number does not

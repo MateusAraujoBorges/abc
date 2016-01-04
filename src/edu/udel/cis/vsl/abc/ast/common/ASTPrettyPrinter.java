@@ -110,7 +110,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeofNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
@@ -433,13 +433,13 @@ public class ASTPrettyPrinter {
 
 	private static void pPrintPragma(PrintStream out, String prefix,
 			PragmaNode pragma) {
-		Iterable<CToken> tokens = pragma.getTokens();
+		Iterable<CivlcToken> tokens = pragma.getTokens();
 
 		out.print(prefix);
 		out.print("#pragma ");
 		out.print(pragma.getPragmaIdentifier().name());
 
-		for (CToken token : tokens) {
+		for (CivlcToken token : tokens) {
 			out.print(" ");
 			out.print(token.getText());
 		}

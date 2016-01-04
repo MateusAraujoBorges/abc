@@ -24,6 +24,6 @@ public interface Inclusion extends Formation {
 	 * 
 	 * @return the token containing the file name from the include directive
 	 */
-	CToken getIncludeToken();
+	CivlcToken getIncludeToken();
 
 }

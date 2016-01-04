@@ -26,7 +26,7 @@ import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.front.fortran.parse.IFortranParser;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
-import edu.udel.cis.vsl.abc.token.common.CommonCToken;
+import edu.udel.cis.vsl.abc.token.common.CommonCivlcToken;
 
 //import fortran.ofp.FrontEnd;
 
@@ -2155,7 +2155,7 @@ END OBSOLETE********/
       //
       if (tokens.currLineLA(lineStart+2) == FortranLexer.T_DIGIT_STRING) {
     	  //Wwh
-    	  CommonCToken tempToken = new CommonCToken(tokens.getToken(lineStart+1), sysFormation);
+    	  CommonCivlcToken tempToken = new CommonCivlcToken(tokens.getToken(lineStart+1), sysFormation);
           doLabels.push(tempToken);
     	  //
          //doLabels.push(new FortranToken(tokens.getToken(lineStart+1)));

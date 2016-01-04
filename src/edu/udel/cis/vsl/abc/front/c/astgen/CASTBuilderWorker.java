@@ -1,6 +1,6 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-import static edu.udel.cis.vsl.abc.front.IF.parse.CParser.*;
+import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,15 +74,14 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.ASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
 import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
@@ -206,11 +205,11 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private IdentifierNode translateIdentifier(CommonTree identifier) {
 		Token idToken = identifier.getToken();
-		CToken token;
+		CivlcToken token;
 		Source source;
 
-		if (idToken instanceof CToken)
-			token = (CToken) idToken;
+		if (idToken instanceof CivlcToken)
+			token = (CivlcToken) idToken;
 		else {
 			token = tokenFactory.newCToken(idToken, null);
 		}
@@ -1151,7 +1150,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 			if (analysis.specifierListNode.getChildCount() == 0)
 				source = this.tokenFactory.newSource(tokenFactory.newCToken(
-						CParser.IDENTIFIER, analysis.basicTypeKind.toString(),
+						IDENTIFIER, analysis.basicTypeKind.toString(),
 						tokenFactory.newSystemFormation("system")));
 			else
 				source = newSource(analysis.specifierListNode);
@@ -1185,7 +1184,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 				if (analysis.specifierListNode.getChildCount() == 0)
 					source = this.tokenFactory.newSource(tokenFactory
-							.newCToken(CParser.IDENTIFIER,
+							.newCToken(IDENTIFIER,
 									analysis.basicTypeKind.toString(),
 									tokenFactory.newSystemFormation("system")));
 				else
@@ -1211,7 +1210,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			if (node.getChildCount() != 0) {
 				CommonTree child = (CommonTree) node.getChild(0);
 
-				if (child.getToken().getType() != CParser.ABSENT) {
+				if (child.getToken().getType() != ABSENT) {
 					ExpressionNode dimensionNode = translateExpression(child,
 							scope);
 
@@ -1962,7 +1961,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	private LabeledStatementNode translateCaseLabeledStatement(
 			CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		CToken caseToken = (CToken) ((CommonTree) statementTree.getChild(0))
+		CivlcToken caseToken = (CivlcToken) ((CommonTree) statementTree.getChild(0))
 				.getToken();
 		CommonTree expression = (CommonTree) statementTree.getChild(1);
 		ExpressionNode expressionNode = translateExpression(expression, scope);
@@ -1980,7 +1979,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	private LabeledStatementNode translateDefaultLabeledStatement(
 			CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		CToken defaultToken = (CToken) ((CommonTree) statementTree.getChild(0))
+		CivlcToken defaultToken = (CivlcToken) ((CommonTree) statementTree.getChild(0))
 				.getToken();
 		Source labelSource = tokenFactory.newSource(defaultToken);
 		StatementNode statement = translateStatement(
@@ -2219,8 +2218,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		String code = identifier.name();
 		CommonTree bodyTree = (CommonTree) pragmaTree.getChild(1);
 		CommonTree newlineTree = (CommonTree) pragmaTree.getChild(2);
-		CToken newlineToken = (CToken) newlineTree.getToken();
-		CTokenSequence producer = parseTree.getTokenSourceProducer(bodyTree);
+		CivlcToken newlineToken = (CivlcToken) newlineTree.getToken();
+		CivlcTokenSequence producer = parseTree.getTokenSourceProducer(bodyTree);
 		PragmaNode pragmaNode = nodeFactory.newPragmaNode(source, identifier,
 				producer, newlineToken);
 		PragmaHandler handler = getPragmaHandler(code);

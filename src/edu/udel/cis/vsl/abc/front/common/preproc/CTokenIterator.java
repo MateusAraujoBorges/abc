@@ -2,7 +2,7 @@ package edu.udel.cis.vsl.abc.front.common.preproc;
 
 import java.util.Iterator;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 
 /**
  * A simple iterator over CTokens that works by following the "next" fields in
@@ -11,11 +11,11 @@ import edu.udel.cis.vsl.abc.token.IF.CToken;
  * @author Stephen F. Siegel, University of Delaware
  * 
  */
-public class CTokenIterator implements Iterator<CToken> {
+public class CTokenIterator implements Iterator<CivlcToken> {
 
-	private CToken theNextToken;
+	private CivlcToken theNextToken;
 
-	public CTokenIterator(CToken firstToken) {
+	public CTokenIterator(CivlcToken firstToken) {
 		theNextToken = firstToken;
 	}
 
@@ -25,8 +25,8 @@ public class CTokenIterator implements Iterator<CToken> {
 	}
 
 	@Override
-	public CToken next() {
-		CToken result = theNextToken;
+	public CivlcToken next() {
+		CivlcToken result = theNextToken;
 
 		theNextToken = theNextToken.getNext();
 		return result;

@@ -25,7 +25,7 @@ import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.front.fortran.parse.IFortranParserAction;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
-import edu.udel.cis.vsl.abc.token.common.CommonCToken;
+import edu.udel.cis.vsl.abc.token.common.CommonCivlcToken;
 
 public class FortranTokenStream extends LegacyCommonTokenStream {
    public FortranLexer lexer;
@@ -274,7 +274,7 @@ END OBSOLETE*******/
       // need to make sure the line was terminated with a T_EOS.  this may 
       // not happen if we're working on a file that ended w/o a newline
       if (pList.get(pList.size()-1).getType() != FortranLexer.T_EOS) {
-    	  CommonCToken eos = new CommonCToken(lexer.getInput(), FortranLexer.T_EOS, 
+    	  CommonCivlcToken eos = new CommonCivlcToken(lexer.getInput(), FortranLexer.T_EOS, 
                                              Token.DEFAULT_CHANNEL, 
                                              lexer.getInput().index(), 
                                              lexer.getInput().index()+1, lexer.getFormation());
@@ -715,7 +715,7 @@ OBSOLETE*****/
 
    
    public boolean appendToken(int tokenType, String tokenText, Formation formation) {
-	   CommonCToken newToken = new CommonCToken(tokenType, tokenText, formation);
+	   CommonCivlcToken newToken = new CommonCivlcToken(tokenType, tokenText, formation);
       // append a token to the end of newTokenList
       return this.packedList.add(newToken);   
    } // end appendToken()
@@ -734,7 +734,7 @@ OBSOLETE*****/
          // newTokenList.size() == 22
          // 22-3+1=20 
          // so, inserted between the label and T_CONTINUE
-         this.packedList.add(index, new CommonCToken(tokenType, tokenText, formation));
+         this.packedList.add(index, new CommonCivlcToken(tokenType, tokenText, formation));
       } catch(Exception e) {
          e.printStackTrace();
          System.exit(1);
@@ -782,8 +782,8 @@ OBSOLETE*****/
    } // end getTokensListSize()
 
 
-   public CommonCToken createToken(int type, String text, int line, int col, Formation formation) {
-	   CommonCToken token = new CommonCToken(type, text, formation);
+   public CommonCivlcToken createToken(int type, String text, int line, int col, Formation formation) {
+	   CommonCivlcToken token = new CommonCivlcToken(type, text, formation);
       token.setLine(line);
       token.setCharPositionInLine(col);
       return token;

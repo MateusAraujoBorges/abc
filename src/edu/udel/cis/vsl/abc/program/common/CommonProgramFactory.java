@@ -29,7 +29,7 @@ import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.parse.CivlCParser;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.program.IF.ProgramFactory;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
@@ -299,7 +299,7 @@ public class CommonProgramFactory implements ProgramFactory {
 		NodeFactory nodeFactory = astFactory.getNodeFactory();
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newSystemFormation("Program");
-		CToken fakeToken = tokenFactory.newCToken(CivlCParser.PROGRAM,
+		CivlcToken fakeToken = tokenFactory.newCToken(CivlCParser.PROGRAM,
 				"Program", formation);
 		Source fakeSource = tokenFactory.newSource(fakeToken);
 		List<BlockItemNode> definitions = new LinkedList<>();

@@ -23,7 +23,7 @@ public interface MacroExpansion extends Formation {
 	 * 
 	 * @return the original token which is replaced
 	 */
-	CToken getStartToken();
+	CivlcToken getStartToken();
 
 	/**
 	 * Returns the (function or object) macro that is being applied.

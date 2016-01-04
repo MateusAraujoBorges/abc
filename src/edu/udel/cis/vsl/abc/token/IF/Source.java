@@ -20,21 +20,21 @@ public interface Source {
 	 * 
 	 * @return the first token
 	 */
-	CToken getFirstToken();
+	CivlcToken getFirstToken();
 
 	/**
 	 * Returns the last token in the range of tokens represented by this Source.
 	 * 
 	 * @return the last token
 	 */
-	CToken getLastToken();
+	CivlcToken getLastToken();
 
 	/**
 	 * Returns an iterator over the tokens represented by this Source.
 	 * 
 	 * @return an iterator over the tokens
 	 */
-	Iterator<CToken> tokens();
+	Iterator<CivlcToken> tokens();
 
 	/**
 	 * Returns the number of tokens represented by this Source.

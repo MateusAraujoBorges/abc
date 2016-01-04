@@ -23,7 +23,7 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser.file_return;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
@@ -253,7 +253,7 @@ public class CPreprocessor implements Preprocessor {
 	}
 
 	@Override
-	public CTokenSource outputTokenSource(File[] systemIncludePaths,
+	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
 			String filename) throws PreprocessorException, IOException {
 		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,

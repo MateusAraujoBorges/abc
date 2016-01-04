@@ -4,7 +4,7 @@ import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TokenUtils;
@@ -26,7 +26,7 @@ import edu.udel.cis.vsl.abc.token.IF.TokenUtils;
  * @author Stephen F. Siegel, University of Delaware, All rights reserved
  * 
  */
-public class CommonCToken extends CommonToken implements CToken {
+public class CommonCivlcToken extends CommonToken implements CivlcToken {
 
 	// Fields...
 
@@ -49,7 +49,7 @@ public class CommonCToken extends CommonToken implements CToken {
 	 * The CppTokens emanating from a CppTokenSource form a linked list. This is
 	 * the next element in the list.
 	 */
-	private CToken next = null;
+	private CivlcToken next = null;
 
 	/**
 	 * Index of this token in the list of tokens emanating from CppTokenSource.
@@ -75,18 +75,18 @@ public class CommonCToken extends CommonToken implements CToken {
 	 * @param token
 	 *            any kind of Token
 	 */
-	public CommonCToken(Token token, Formation formation) {
+	public CommonCivlcToken(Token token, Formation formation) {
 		super(token);
 		assert formation != null;
 		this.formation = formation;
 	}
 
-	public CommonCToken(int type, String text, Formation formation) {
+	public CommonCivlcToken(int type, String text, Formation formation) {
 		super(type, text);
 		this.formation = formation;
 	}
 	
-	public CommonCToken(CharStream input, int type, int channel,
+	public CommonCivlcToken(CharStream input, int type, int channel,
 			  int start, int stop, Formation formation){
 		super(input, type, channel, start, stop);
 		assert formation != null;
@@ -161,7 +161,7 @@ public class CommonCToken extends CommonToken implements CToken {
 	 * @param nextToken
 	 */
 	@Override
-	public void setNext(CToken nextToken) {
+	public void setNext(CivlcToken nextToken) {
 		this.next = nextToken;
 	}
 
@@ -171,7 +171,7 @@ public class CommonCToken extends CommonToken implements CToken {
 	 * @return the next token
 	 */
 	@Override
-	public CToken getNext() {
+	public CivlcToken getNext() {
 		return next;
 	}
 

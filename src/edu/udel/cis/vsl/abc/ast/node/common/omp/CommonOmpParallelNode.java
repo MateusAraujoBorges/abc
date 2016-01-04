@@ -11,7 +11,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpParallelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpExecutableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonOmpParallelNode extends CommonOmpStatementNode implements
@@ -37,7 +37,7 @@ public class CommonOmpParallelNode extends CommonOmpStatementNode implements
 	}
 
 	public CommonOmpParallelNode(Source source, IdentifierNode identifier,
-			List<CToken> body, CToken eofToken, ExpressionNode numThreads,
+			List<CivlcToken> body, CivlcToken eofToken, ExpressionNode numThreads,
 			ExpressionNode ifClause, StatementNode statementNode,
 			boolean isDefaultShared) {
 		super(source, statementNode);

@@ -10,23 +10,46 @@ import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.front.IF.parse.CParser;
 import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
 import edu.udel.cis.vsl.abc.front.IF.parse.RuntimeParseException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
-import edu.udel.cis.vsl.abc.front.c.ptree.ImplCParseTree;
-import edu.udel.cis.vsl.abc.token.IF.CTokenSource;
-import edu.udel.cis.vsl.abc.token.common.CommonCToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.common.CommonCivlcToken;
 
 // why not make static methods of all these?
-
-public class ImplCParser implements CParser {
-
-	/* ****************************** Fields ****************************** */
+/**
+ * <p>
+ * Simple interface for a parser of C programs. It includes a bunch of integer
+ * constants which are ID numbers of each kind of token (real or fake) that can
+ * occur in a C parse tree.
+ * </p>
+ * 
+ * 
+ * @author siegel
+ * 
+ */
+public class CParser implements Parser {
+	/**
+	 * Kind of parsing rule
+	 * 
+	 * @author Manchun Zhengs
+	 *
+	 */
+	public static enum RuleKind {
+		/**
+		 * the rule for translating a translation unit
+		 */
+		TRANSLATION_UNIT,
+		/**
+		 * the rule for translating a block item
+		 */
+		BLOCK_ITEM
+	}
 
 	/* *************************** Constructors *************************** */
 
-	public ImplCParser() {
+	public CParser() {
 
 	}
 
@@ -100,8 +123,8 @@ public class ImplCParser implements CParser {
 			CommonToken token = (CommonToken) tree.getToken();
 			int min, max;
 
-			if (token instanceof CommonCToken) {
-				min = max = ((CommonCToken) token).getIndex();
+			if (token instanceof CommonCivlcToken) {
+				min = max = ((CommonCivlcToken) token).getIndex();
 			} else {
 				min = max = -1;
 			}
@@ -132,8 +155,7 @@ public class ImplCParser implements CParser {
 	 * @throws ParseException
 	 *             if something goes wrong parsing the input
 	 */
-	@Override
-	public CParseTree parse(RuleKind rule, CTokenSource tokenSource,
+	public CParseTree parse(RuleKind rule, CivlcTokenSource tokenSource,
 			Stack<ScopeSymbols> symbols) throws ParseException {
 		TokenStream stream = new CommonTokenStream(tokenSource);
 		CivlCParser parser = new CivlCParser(stream);
@@ -160,11 +182,11 @@ public class ImplCParser implements CParser {
 		} catch (RuntimeParseException e) {
 			throw new ParseException(e.getMessage());
 		}
-		return new ImplCParseTree(Language.CIVL_C, rule, tokenSource, root);
+		return new CParseTree(Language.CIVL_C, rule, tokenSource, root);
 	}
 
 	@Override
-	public CParseTree parse(CTokenSource tokenSource) throws ParseException {
+	public CParseTree parse(CivlcTokenSource tokenSource) throws ParseException {
 		return parse(RuleKind.TRANSLATION_UNIT, tokenSource,
 				new Stack<ScopeSymbols>());
 	}

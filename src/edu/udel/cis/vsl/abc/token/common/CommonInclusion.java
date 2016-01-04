@@ -1,6 +1,6 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import edu.udel.cis.vsl.abc.token.IF.CToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Inclusion;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
@@ -16,7 +16,7 @@ public class CommonInclusion implements Inclusion {
 	 * the file. Will be null for the original file (which wasn't included from
 	 * anything).
 	 */
-	private CToken includeToken;
+	private CivlcToken includeToken;
 
 	public CommonInclusion(SourceFile file) {
 		assert file != null;
@@ -24,7 +24,7 @@ public class CommonInclusion implements Inclusion {
 		this.includeToken = null;
 	}
 
-	public CommonInclusion(SourceFile file, CToken includeToken) {
+	public CommonInclusion(SourceFile file, CivlcToken includeToken) {
 		assert file != null;
 		this.file = file;
 		this.includeToken = includeToken;
@@ -49,7 +49,7 @@ public class CommonInclusion implements Inclusion {
 	}
 
 	@Override
-	public CToken getIncludeToken() {
+	public CivlcToken getIncludeToken() {
 		return includeToken;
 	}
 
