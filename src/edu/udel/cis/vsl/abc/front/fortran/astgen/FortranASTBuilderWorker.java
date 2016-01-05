@@ -13,10 +13,8 @@ import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
-import edu.udel.cis.vsl.abc.ast.IF.ASTs;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
-import edu.udel.cis.vsl.abc.ast.node.IF.Nodes;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
@@ -37,12 +35,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.CommonSequenceNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
-import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
-import edu.udel.cis.vsl.abc.ast.type.IF.Types;
-import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
-import edu.udel.cis.vsl.abc.ast.value.IF.Values;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
@@ -51,42 +44,42 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
-import edu.udel.cis.vsl.abc.token.IF.Tokens;
 
 public class FortranASTBuilderWorker {
 
 	/* Instance Field */
-	private static Configuration configuration = Configurations
-			.newMinimalConfiguration();
+	@SuppressWarnings("unused")
+	private Configuration configuration;
 
 	private String filePath;
 
 	private FortranTree parseTree;
 
-	private TokenFactory tokenFactory = Tokens.newTokenFactory();
+	private TokenFactory tokenFactory;
 
-	private TypeFactory typeFactory = Types.newTypeFactory();
+	// private TypeFactory typeFactory = Types.newTypeFactory();
+	//
+	// private ValueFactory valueFactory = Values.newValueFactory(configuration,
+	// typeFactory);
 
-	private ValueFactory valueFactory = Values.newValueFactory(configuration,
-			typeFactory);
+	private NodeFactory nodeFactory;
 
-	private NodeFactory nodeFactory = Nodes.newNodeFactory(configuration,
-			typeFactory, valueFactory);
-
-	private ASTFactory astFactory = ASTs.newASTFactory(nodeFactory,
-			tokenFactory, typeFactory);
+	private ASTFactory astFactory;
 
 	private SequenceNode<BlockItemNode> rootNode;
-
-	private AST ast;
 
 	private Stack<FortranTree> gotoLabelStack = new Stack<FortranTree>();
 
 	/* Constructor */
 
-	public FortranASTBuilderWorker(FortranTree parseTree, String filePath) {
+	public FortranASTBuilderWorker(Configuration config, FortranTree parseTree,
+			ASTFactory astFactory, String filePath) {
+		this.configuration = config;
 		this.parseTree = parseTree;
 		this.filePath = filePath;
+		this.astFactory = astFactory;
+		this.nodeFactory = astFactory.getNodeFactory();
+		this.tokenFactory = astFactory.getTokenFactory();
 	}
 
 	/* Private Functions */
@@ -180,7 +173,8 @@ public class FortranASTBuilderWorker {
 	}
 
 	private FunctionTypeNode translateFunctionType(
-			FortranTree programPrefixNode, FortranTree parameterNode, boolean isMain) {
+			FortranTree programPrefixNode, FortranTree parameterNode,
+			boolean isMain) {
 		Source typeSource = generateSource(programPrefixNode);
 		TypeNode returnType;
 		SequenceNode<VariableDeclarationNode> formals = new CommonSequenceNode<VariableDeclarationNode>(
@@ -191,7 +185,8 @@ public class FortranASTBuilderWorker {
 		assert parameterNode == null;
 		returnType = nodeFactory.newVoidTypeNode(typeSource);
 		if (isMain) {
-			returnType = nodeFactory.newBasicTypeNode(typeSource, BasicTypeKind.INT);
+			returnType = nodeFactory.newBasicTypeNode(typeSource,
+					BasicTypeKind.INT);
 		}
 		return nodeFactory.newFunctionTypeNode(typeSource, returnType, formals,
 				hasIdentifierList);
@@ -501,9 +496,11 @@ public class FortranASTBuilderWorker {
 		Operator initOperator = Operator.ASSIGN;
 		Operator condOperator = Operator.LTE;
 		Operator stepOperator = Operator.PLUSEQ;
-		FortranTree doControlNode = blockItemNode.getChildByIndex(0).getChildByIndex(4);
+		FortranTree doControlNode = blockItemNode.getChildByIndex(0)
+				.getChildByIndex(4);
 		FortranTree doBodyNode = blockItemNode.getChildByIndex(1);
-		FortranTree doVariableNode = doControlNode.getChildByIndex(1).getChildByIndex(0);
+		FortranTree doVariableNode = doControlNode.getChildByIndex(1)
+				.getChildByIndex(0);
 		Source doVariableSource = generateSource(doVariableNode);
 		FortranTree initExprNode = doControlNode.getChildByIndex(2);
 		Source initSource = generateSource(initExprNode);
@@ -511,7 +508,8 @@ public class FortranASTBuilderWorker {
 		FortranTree condExprNode = doControlNode.getChildByIndex(3);
 		Source condSource = generateSource(condExprNode);
 		List<ExpressionNode> condArgs = new LinkedList<ExpressionNode>();
-		Source stepSource = generateSource(doVariableNode);//TODO: Fix no step defined
+		Source stepSource = generateSource(doVariableNode);// TODO: Fix no step
+															// defined
 		List<ExpressionNode> stepArgs = new LinkedList<ExpressionNode>();
 
 		initArgs.add(nodeFactory.newIdentifierExpressionNode(doVariableSource,
@@ -524,24 +522,22 @@ public class FortranASTBuilderWorker {
 				translateIdentifier(doVariableNode)));
 		if (doControlNode.numChildren() > 4) {
 			FortranTree stepExprNode = doControlNode.getChildByIndex(4);
-			
+
 			stepArgs.add(translateExpression(stepSource, stepExprNode, scope));
-		}else{
+		} else {
 			stepArgs.add(nodeFactory.newIntegerConstantNode(stepSource, "1"));
 		}
-		initializerNode = nodeFactory.newOperatorNode(initSource, initOperator, initArgs);
-		conditionNode = nodeFactory.newOperatorNode(condSource, condOperator, condArgs);
-		incrementerNode = nodeFactory.newOperatorNode(stepSource, stepOperator, stepArgs);
+		initializerNode = nodeFactory.newOperatorNode(initSource, initOperator,
+				initArgs);
+		conditionNode = nodeFactory.newOperatorNode(condSource, condOperator,
+				condArgs);
+		incrementerNode = nodeFactory.newOperatorNode(stepSource, stepOperator,
+				stepArgs);
 		bodyNode = translateBody(null, doBodyNode, scope);
-		
-		return nodeFactory
-				.newForLoopNode(
-						generateSource(blockItemNode.parent()),
-						initializerNode,
-						conditionNode,
-						incrementerNode,
-						bodyNode,
-						null);
+
+		return nodeFactory.newForLoopNode(
+				generateSource(blockItemNode.parent()), initializerNode,
+				conditionNode, incrementerNode, bodyNode, null);
 	}
 
 	private StatementNode translateGoto(FortranTree blockItemNode) {
@@ -681,7 +677,7 @@ public class FortranASTBuilderWorker {
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
 		if (specificationPartNode != null) {
 			int numOfSpecification = specificationPartNode.numChildren();
-			
+
 			source = generateSource(specificationPartNode);
 			for (int i = 0; i < numOfSpecification; i++) {
 				FortranTree specificationNode = specificationPartNode
@@ -702,10 +698,11 @@ public class FortranASTBuilderWorker {
 		}
 		if (executionPartNode != null) {
 			int numOfExecution = executionPartNode.numChildren();
-			
-			if (specificationPartNode != null){
-				source = generateSource(specificationPartNode, executionPartNode);
-			}else{
+
+			if (specificationPartNode != null) {
+				source = generateSource(specificationPartNode,
+						executionPartNode);
+			} else {
 				source = generateSource(executionPartNode);
 			}
 			for (int i = 0; i < numOfExecution; i++) {
@@ -719,8 +716,8 @@ public class FortranASTBuilderWorker {
 					List<BlockItemNode> blockItemNodes = this
 							.translateBlockItem(stmtNode, newScope);
 					items.addAll(blockItemNodes);
-					if (executionNode.getChildByIndex(0)
-							.getChildByIndex(0).rule() == 848) {
+					if (executionNode.getChildByIndex(0).getChildByIndex(0)
+							.rule() == 848) {
 						i++;
 					}
 					break;
@@ -752,7 +749,8 @@ public class FortranASTBuilderWorker {
 
 		source = generateSource(programUnitNode);
 		name = this.translateIdentifier(identifierNode);
-		if (unitType == 0) name = nodeFactory.newIdentifierNode(source, "main");
+		if (unitType == 0)
+			name = nodeFactory.newIdentifierNode(source, "main");
 		type = this.translateFunctionType(null, null, true);
 		body = translateBody(specificationPartNode, executionPartNode, newScope);
 		result = nodeFactory.newFunctionDefinitionNode(source, name, type,
@@ -806,7 +804,7 @@ public class FortranASTBuilderWorker {
 		return nodeFactory.newTranslationUnitNode(source, programUnits);
 	}
 
-	public AST generateAST() throws Exception {
+	public AST generateAST() throws SyntaxException {
 		rootNode = this.generateRoot();
 		Set<SourceFile> sourceFiles = new LinkedHashSet<>();
 		sourceFiles.add(new SourceFile(new File(filePath), 0));

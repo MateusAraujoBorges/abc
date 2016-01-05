@@ -1,161 +1,159 @@
-// $ANTLR 3.2 Sep 23, 2009 12:02:23 FortranParser.g 2009-10-15 15:39:31
-
-/**
- * Copyright (c) 2005, 2006 Los Alamos National Security, LLC.  This
- * material was produced under U.S. Government contract DE-
- * AC52-06NA25396 for Los Alamos National Laboratory (LANL), which is
- * operated by the Los Alamos National Security, LLC (LANS) for the
- * U.S. Department of Energy. The U.S. Government has rights to use,
- * reproduce, and distribute this software. NEITHER THE GOVERNMENT NOR
- * LANS MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY
- * LIABILITY FOR THE USE OF THIS SOFTWARE. If software is modified to
- * produce derivative works, such modified software should be clearly
- * marked, so as not to confuse it with the version available from
- * LANL.
- *  
- * Additionally, this program and the accompanying materials are made
- * available under the terms of the Eclipse Public License v1.0 which
- * accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
- */
- 
- /**
- *
- * @author Craig E Rasmussen, Christopher D. Rickett, Bryan Rasmussen
- */
- 
 package edu.udel.cis.vsl.abc.front.fortran.parse;
 
-import java.util.HashMap;
-
-import org.antlr.runtime.Parser;
 import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.RecognizerSharedState;
-import org.antlr.runtime.Token;
-import org.antlr.runtime.TokenStream;
 
-import edu.udel.cis.vsl.abc.ast.IF.AST;
+import edu.udel.cis.vsl.abc.front.IF.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.Parser;
 import edu.udel.cis.vsl.abc.front.fortran.preproc.FortranLexer;
+import edu.udel.cis.vsl.abc.front.fortran.preproc.FortranTokenSource;
+import edu.udel.cis.vsl.abc.front.fortran.preproc.FortranTokenStream;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 
-public abstract class FortranParser extends Parser implements IFortranParser {
+public class FortranParser implements Parser {
 
-   /* Provide action objects to implement the AST.  These are singleton objects. */
-   protected static IFortranParserAction action = null;
-   protected static IFortranParserAction nullAction = new FortranParserActionNull(null, null, null);
+	@Override
+	public ParseTree parse(CivlcTokenSource tokenSource) throws ParseException {
+		FortranTokenSource fortranTokenSource = (FortranTokenSource) tokenSource;
+		FortranTokenStream fortranTokenStream = fortranTokenSource
+				.getTokenStream();
+		IFortranParser parser = new FortranParserExtras(fortranTokenStream);
 
-   protected FortranParser delegate = null;
-   
-   protected String filename;
-   protected String pathname;
+		// FIXME can we get rid of the path in the parser?
+		parser.initialize(new String[0],
+				FortranParserActionFactory.ACTION_TREE,
+				fortranTokenSource.getSourceName(), "");
+		while (fortranTokenStream.LA(1) != FortranLexer.EOF) {
+			// attempt to parse the current program unit
+			boolean error;
+			try {
+				error = parseProgramUnit(fortranTokenStream, parser);
+				// see if we successfully parse the program unit or not
+				if (error) {
+					throw new ParseException(
+							"encounter error when parsing the fortran token stream");
+				}
+			} catch (RecognitionException e) {
+				throw new ParseException(e.getMessage());
+			}
 
-   // TODO - does this state have to be shared?   
-   protected boolean has_error_occurred = false;
-   
-   protected FortranParser(TokenStream input, RecognizerSharedState state)
-   {
-      super(input, state);
+		} // end while (not end of file)
 
-      // TODO - see if the size has to increase with new F2008 rules
-      state.ruleMemo = new HashMap[489+1];
-   }
-	
-   public void initialize(FortranParser delegate, IFortranParserAction action,
-                          String filename, String path)
-   {
-      this.delegate = delegate;
-      this.filename = filename;
-      this.pathname = path;
+		return parser.getAction().getFortranParseTree();
 
-//      if (FortranParser.action != null) FortranParser.action = action;
-      FortranParser.action = action;
-   }
-   
-   public boolean hasErrorOccurred() { return delegate.has_error_occurred; }
+		// // Call the end_of_file action here so that it comes after the
+		// // end_program_stmt occurs.
+		// getParser().eofAction();
+		//
+		// // Call the cleanUp method for the give action class. This is more
+		// // important in the case of a C action *class* since it could easily
+		// // have created memory that's outside of the jvm.
+		// getParser().getAction().cleanUp();
 
-   public void reportError(RecognitionException re) {
-      super.reportError(re);
+	}
 
-      // Change action class to FortranParserActionNull so that actions are no
-      // longer called.  This will allow error handling to be done by ANTLR
-      // only.
-      //
-      this.action = nullAction;
+	private static boolean parseMainProgram(FortranTokenStream tokens,
+			IFortranParser parser, int start) throws RecognitionException {
+		// try parsing the main program
+		parser.main_program();
 
-      delegate.has_error_occurred = true;
-   }
-     
-   public IFortranParserAction getAction() {
-      return action;
-   }
-   
-   public void main_program() throws RecognitionException {
-       delegate.main_program();      
-    }
-     
-   /* TODO - implement, needed by FortranParserAction */
-   public Token getRightIToken() {
-	   return null;
-   }
+		return parser.hasErrorOccurred();
+	} // end parseMainProgram()
 
-   /* TODO - implement, may be needed by FortranParserAction */
-   public Token getRhsIToken(int i) {
-      return null;
-   }
- 	
-   /**
-    * Check for include and end of file.  T_INCLUDE is not in the grammar
-    * so this method must be called after every statement (and initially
-    * at the beginning of program unit file).
-    */
-   public void checkForInclude() {
-	   
-      // consume bare T_EOS
-      while (input.LA(1) == FortranLexer.T_EOS) {
-    	  input.consume();
-      }
-         
-      if (input.LA(1) == FortranLexer.T_INCLUDE) {
-         String files[];
-         input.consume();  // consume T_INCLUDE
+	private static boolean parseModule(FortranTokenStream tokens,
+			IFortranParser parser, int start) throws RecognitionException {
+		parser.module();
+		return parser.hasErrorOccurred();
+	} // end parseModule()
 
-         // get include filename from token stream
-         files = input.LT(1).getText().split(":");
-         action.inclusion(files[1], filename);
-         action.start_of_file(files[0], files[1]);
-         input.consume();  // consume T_INCLUDE_NAME
+	private static boolean parseSubmodule(FortranTokenStream tokens,
+			IFortranParser parser, int start) throws RecognitionException {
+		parser.submodule();
+		return parser.hasErrorOccurred();
+	} // end parseSubmodule()
 
-         // check for empty include file (no statements)
-         if (input.LA(1) == FortranLexer.T_EOF) {
-            Token tk = input.LT(1);
-            input.consume();
+	private static boolean parseBlockData(FortranTokenStream tokens,
+			IFortranParser parser, int start) throws RecognitionException {
+		parser.block_data();
 
-            files = tk.getText().split(":");
-            action.end_of_file(files[0], files[1]);
-         }
+		return parser.hasErrorOccurred();
+	} // end parseBlockData()
 
-         // include acts like a statement so need to see if another include follows
-         checkForInclude();
-      }
+	private static boolean parseSubroutine(FortranTokenStream tokens,
+			IFortranParser parser, int start) throws RecognitionException {
+		parser.subroutine_subprogram();
 
-      else if (input.LA(1) == FortranLexer.T_EOF) {
-         Token tk = input.LT(1);
-         String[] files = tk.getText().split(":");
-         input.consume();
-         action.end_of_file(files[0], files[1]);
-         // unwind T_EOFs for include files containing includes
-         checkForInclude();
-      }
+		return parser.hasErrorOccurred();
+	} // end parserSubroutine()
 
-// This is caught by derived class so don't do it here (Craig 2011.5.16)
-//      else if (input.LA(1) == FortranLexer.EOF) {
-//         Token tk = input.LT(1);
-//         input.consume();
-//         action.end_of_file(tk.getText());
-//      }
-   }	
-   
-   public AST getAST(){
-	   return action.getAST();
-   }
+	private static boolean parseFunction(FortranTokenStream tokens,
+			IFortranParser parser, int start) throws RecognitionException {
+		parser.ext_function_subprogram();
+		return parser.hasErrorOccurred();
+	} // end parseFunction()
 
-} // end FortranParser
+	private static boolean parseProgramUnit(FortranTokenStream tokens,
+			IFortranParser parser) throws RecognitionException {
+		int firstToken;
+		int lookAhead = 1;
+		int start;
+		boolean error = false;
+
+		// check for opening with an include file
+		parser.checkForInclude();
+
+		// first token on the *line*. will check to see if it's
+		// equal to module, block, etc. to determine what rule of
+		// the grammar to start with.
+		try {
+			lookAhead = 1;
+			do {
+				firstToken = tokens.LA(lookAhead);
+				lookAhead++;
+			} while (firstToken == FortranLexer.LINE_COMMENT
+					|| firstToken == FortranLexer.T_EOS);
+
+			// mark the location of the first token we're looking at
+			start = tokens.mark();
+
+			// attempt to match the program unit
+			// each of the parse routines called will first try and match
+			// the unit they represent (function, block, etc.). if that
+			// fails, they may or may not try and match it as a main
+			// program; it depends on how it fails.
+			//
+			// due to Sale's algorithm, we know that if the token matches
+			// then the parser should be able to successfully match.
+			if (firstToken != FortranLexer.EOF) {
+				if (firstToken == FortranLexer.T_MODULE
+						&& tokens.LA(lookAhead) != FortranLexer.T_PROCEDURE) {
+					// try matching a module
+					error = parseModule(tokens, parser, start);
+				} else if (firstToken == FortranLexer.T_SUBMODULE) {
+					// try matching a submodule
+					error = parseSubmodule(tokens, parser, start);
+				} else if (firstToken == FortranLexer.T_BLOCKDATA
+						|| (firstToken == FortranLexer.T_BLOCK && tokens
+								.LA(lookAhead) == FortranLexer.T_DATA)) {
+					// try matching block data
+					error = parseBlockData(tokens, parser, start);
+				} else if (tokens.lookForToken(FortranLexer.T_SUBROUTINE) == true) {
+					// try matching a subroutine
+					error = parseSubroutine(tokens, parser, start);
+				} else if (tokens.lookForToken(FortranLexer.T_FUNCTION) == true) {
+					// try matching a function
+					error = parseFunction(tokens, parser, start);
+				} else {
+					// what's left should be a main program
+					error = parseMainProgram(tokens, parser, start);
+				}// end else(unhandled token)
+			}// end if(file had nothing but comments empty)
+		} catch (RecognitionException e) {
+			e.printStackTrace();
+			error = true;
+		}// end try/catch(parsing program unit)
+
+		return error;
+	} // end parseProgramUnit()
+
+}

@@ -499,17 +499,17 @@
 	
 	<target name="cleanFortran" description="Delete all generated files related to Fortran Parser">
 		<delete file="${fortran.grammar.dir}/FortranLexer.tokens" />
-		<touch file="${fortran.grammar.dir}/FortranLexer.tokens" />
+		<!--<touch file="${fortran.grammar.dir}/FortranLexer.tokens" />-->
 		<delete file="${fortran.real.src.dir}/preproc/FortranLexer.java" />
 		<delete file="${fortran.grammar.dir}/FortranParser08.tokens" />
-		<touch file="${fortran.grammar.dir}/FortranParser08.tokens" />
+		<!--<touch file="${fortran.grammar.dir}/FortranParser08.tokens" />-->
 		<delete file="${fortran.real.src.dir}/parse/FortranParser08.java" />
 		<delete file="${fortran.grammar.dir}/FortranParserExtras.tokens" />
-		<touch file="${fortran.grammar.dir}/FortranParserExtras.tokens" />
+		<!--<touch file="${fortran.grammar.dir}/FortranParserExtras.tokens" />-->
 		<delete file="${fortran.real.src.dir}/parse/FortranParserExtras.java" />
 		<delete file="${fortran.real.src.dir}/parse/FortranParserExtras_FortranParser08.java" />
 		<delete file="${fortran.grammar.dir}/FortranParserRiceCAF.tokens" />
-		<touch file="${fortran.grammar.dir}/FortranParserRiceCAF.tokens" />
+		<!--<touch file="${fortran.grammar.dir}/FortranParserRiceCAF.tokens" />-->
 		<delete file="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
 		<delete file="${fortran.real.src.dir}/parse/FortranParserRiceCAF_FortranParser08.java" />
 	</target>

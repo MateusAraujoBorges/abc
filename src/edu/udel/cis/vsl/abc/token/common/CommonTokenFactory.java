@@ -209,21 +209,30 @@ public class CommonTokenFactory implements TokenFactory {
 		return new CivlcTokenSubSequence(originalSource, 0, -1);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public CivlcTokenSource getCTokenSourceByTokens(
+	public CivlcTokenSource getCivlcTokenSourceByTokens(
 			List<? extends Token> tokens, Formation formation) {
 		int num = tokens.size();
 		List<CivlcToken> ctokens = new ArrayList<>(num);
+		boolean needsTransformed = false;
 
 		for (Token token : tokens) {
-			ctokens.add(this.newCivlcToken(token, formation));
+			if (token instanceof CivlcToken)
+				ctokens.add((CivlcToken) token);
+			else {
+				needsTransformed = true;
+				ctokens.add(this.newCivlcToken(token, formation));
+			}
 		}
-		for (int i = 0; i < num - 1; i++) {
-			CivlcToken current = ctokens.get(i), next = ctokens.get(i + 1);
+		if (needsTransformed) {
+			for (int i = 0; i < num - 1; i++) {
+				CivlcToken current = ctokens.get(i), next = ctokens.get(i + 1);
 
-			current.setNext(next);
-		}
-		return new CommonCivlcTokenSource(ctokens, this);
+				current.setNext(next);
+			}
+			return new CommonCivlcTokenSource(ctokens, this);
+		} else
+			return new CommonCivlcTokenSource((List<CivlcToken>) tokens, this);
 	}
-
 }

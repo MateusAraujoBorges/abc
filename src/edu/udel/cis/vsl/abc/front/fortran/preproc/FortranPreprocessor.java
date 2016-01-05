@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.runtime.Parser;
@@ -14,9 +15,12 @@ import org.antlr.runtime.Parser;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 public class FortranPreprocessor implements Preprocessor {
 
@@ -26,8 +30,11 @@ public class FortranPreprocessor implements Preprocessor {
 
 	private Configuration config;
 
-	public FortranPreprocessor(Configuration config) {
+	private TokenFactory tokenFactory;
+
+	public FortranPreprocessor(Configuration config, TokenFactory tokenFactory) {
 		this.config = config;
+		this.tokenFactory = tokenFactory;
 	}
 
 	/**
@@ -105,6 +112,7 @@ public class FortranPreprocessor implements Preprocessor {
 		return new HashMap<String, Macro>();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
@@ -116,9 +124,31 @@ public class FortranPreprocessor implements Preprocessor {
 				System.getProperty("user.dir")) } : userIncludePaths;
 		Map<String, Macro> impMacros = (implicitMacros == null || implicitMacros
 				.size() == 0) ? new HashMap<String, Macro>() : implicitMacros;
-		FortranLexer lexer = lexer(file);
+		FortranStream fortranStream = null;
+		Formation inclusionFormation = tokenFactory
+				.newInclusion(new SourceFile(file, 0));// FIXME make it work for
+														// included files
 
-		return null;
+		try {
+			fortranStream = new FortranStream(file.getAbsolutePath());
+		} catch (IOException e) {
+			throw new PreprocessorException(e.getMessage());
+		}
+
+		FortranLexer lexer = new FortranLexer(fortranStream);
+		FortranTokenStream tokenStream = new FortranTokenStream(lexer);
+		FortranLexicalPrepass prepass = new FortranLexicalPrepass(lexer,
+				tokenStream);
+
+		// determine whether the file is fixed or free form and
+		// set the source form in the prepass so it knows how to handle lines.
+		prepass.setSourceForm(fortranStream.getSourceForm());
+		prepass.performPrepass();
+		tokenStream.finalizeTokenStream();
+
+		return new FortranTokenSource(
+				(List<CivlcToken>) tokenStream.getTokens(), this.tokenFactory,
+				tokenStream);
 	}
 
 	@Override

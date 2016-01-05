@@ -22,6 +22,7 @@ package edu.udel.cis.vsl.abc.front.fortran.parse;
 import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
+import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
 
 public class FortranParserActionPrint implements IFortranParserAction {
    private boolean verbose = true;
@@ -5268,6 +5269,12 @@ public void inclusion(String included, String source) {
 
 @Override
 public AST getAST() {
+		// TODO Auto-generated method stub
+	return null;
+}
+
+@Override
+public FortranTree getFortranParseTree() {
 	// TODO Auto-generated method stub
 	return null;
 }

@@ -7,6 +7,10 @@ import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.astgen.CASTBuilder;
 import edu.udel.cis.vsl.abc.front.c.parse.CParser;
 import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
+import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilder;
+import edu.udel.cis.vsl.abc.front.fortran.parse.FortranParser;
+import edu.udel.cis.vsl.abc.front.fortran.preproc.FortranPreprocessor;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 /**
  * Entry point of the front module.
@@ -32,13 +36,13 @@ public class Front {
 	 * @return a new Preprocessor
 	 */
 	public static Preprocessor newPreprocessor(Language language,
-			Configuration config) {
+			Configuration config, TokenFactory tokenFactory) {
 		switch (language) {
 		case C:
 		case CIVL_C:
 			return new CPreprocessor(config);
 		case FORTRAN77:
-			return null;
+			return new FortranPreprocessor(config, tokenFactory);
 		default:
 			throw new ABCRuntimeException(
 					"ABC doesn't support preprocessing programs in " + language
@@ -59,7 +63,7 @@ public class Front {
 		case CIVL_C:
 			return new CParser();
 		case FORTRAN77:
-			return null;
+			return new FortranParser();
 		default:
 			throw new ABCRuntimeException(
 					"ABC doesn't support parsing programs in " + language + ".");
@@ -82,7 +86,7 @@ public class Front {
 		case CIVL_C:
 			return new CASTBuilder(configuration, astFactory);
 		case FORTRAN77:
-			return null;
+			return new FortranASTBuilder(configuration, astFactory);
 		default:
 			throw new ABCRuntimeException(
 					"ABC doesn't support generating AST for programs written in "

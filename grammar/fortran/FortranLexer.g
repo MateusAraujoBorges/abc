@@ -95,12 +95,182 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 	} // end isKeyword()
 
 	public boolean isKeyword(int tokenType) {
-		if (tokenType > T_BEGIN_KEYWORDS && tokenType < T_END_KEYWORDS) {
+		switch (tokenType) {
+		case T_BEGIN_KEYWORDS:
+		case T_INTEGER:
+		case T_REAL:
+		case T_COMPLEX:
+		case T_CHARACTER:
+		case T_LOGICAL:
+		case T_ABSTRACT:
+		case T_ACQUIRED_LOCK:
+		case T_ALL:
+		case T_ALLOCATABLE:
+		case T_ALLOCATE:
+		case T_ASSIGNMENT:
+		case T_ASSIGN:
+		case T_ASSOCIATE:
+		case T_ASYNCHRONOUS:
+		case T_BACKSPACE:
+		case T_BLOCK:
+		case T_BLOCKDATA:
+		case T_CALL:
+		case T_CASE:
+		case T_CLASS:
+		case T_CLOSE:
+		case T_CODIMENSION:
+		case T_COMMON:
+		case T_CONCURRENT:
+		case T_CONTAINS:
+		case T_CONTIGUOUS:
+		case T_CONTINUE:
+		case T_CRITICAL:
+		case T_CYCLE:
+		case T_DATA:
+		case T_DEFAULT:
+		case T_DEALLOCATE:
+		case T_DEFERRED:
+		case T_DO:
+		case T_DOUBLE:
+		case T_DOUBLEPRECISION:
+		case T_DOUBLECOMPLEX:
+		case T_ELEMENTAL:
+		case T_ELSE:
+		case T_ELSEIF:
+		case T_ELSEWHERE:
+		case T_ENTRY:
+		case T_ENUM:
+		case T_ENUMERATOR:
+		case T_ERROR:
+		case T_EQUIVALENCE:
+		case T_EXIT:
+		case T_EXTENDS:
+		case T_EXTERNAL:
+		case T_FILE:
+		case T_FINAL:
+		case T_FLUSH:
+		case T_FORALL:
+		case T_FORMAT:
+		case T_FORMATTED:
+		case T_FUNCTION:
+		case T_GENERIC:
+		case T_GO:
+		case T_GOTO:
+		case T_IF:
+		case T_IMAGES:
+		case T_IMPLICIT:
+		case T_IMPORT:
+		case T_IN:
+		case T_INOUT:
+		case T_INTENT:
+		case T_INTERFACE:
+		case T_INTRINSIC:
+		case T_INQUIRE:
+		case T_LOCK:
+		case T_MEMORY:
+		case T_MODULE:
+		case T_NAMELIST:
+		case T_NONE:
+		case T_NON_INTRINSIC:
+		case T_NON_OVERRIDABLE:
+		case T_NOPASS:
+		case T_NULLIFY:
+		case T_ONLY:
+		case T_OPEN:
+		case T_OPERATOR:
+		case T_OPTIONAL:
+		case T_OUT:
+		case T_PARAMETER:
+		case T_PASS:
+		case T_PAUSE:
+		case T_POINTER:
+		case T_PRINT:
+		case T_PRECISION:
+		case T_PRIVATE:
+		case T_PROCEDURE:
+		case T_PROGRAM:
+		case T_PROTECTED:
+		case T_PUBLIC:
+		case T_PURE:
+		case T_READ:
+		case T_RECURSIVE:
+		case T_RESULT:
+		case T_RETURN:
+		case T_REWIND:
+		case T_SAVE:
+		case T_SELECT:
+		case T_SELECTCASE:
+		case T_SELECTTYPE:
+		case T_SEQUENCE:
+		case T_STOP:
+		case T_SUBMODULE:
+		case T_SUBROUTINE:
+		case T_SYNC:
+		case T_TARGET:
+		case T_THEN:
+		case T_TO:
+		case T_TYPE:
+		case T_UNFORMATTED:
+		case T_UNLOCK:
+		case T_USE:
+		case T_VALUE:
+		case T_VOLATILE:
+		case T_WAIT:
+		case T_WHERE:
+		case T_WHILE:
+		case T_WRITE:
+		case T_WITHTEAM:
+		case T_WITH:
+		case T_TEAM:
+		case T_TOPOLOGY:
+		case T_EVENT:
+		case T_LOCKSET:
+		case T_FINISH:
+		case T_SPAWN:
+		case T_COPOINTER:
+		case T_COTARGET:
+		case T_ENDASSOCIATE:
+		case T_ENDBLOCK:
+		case T_ENDBLOCKDATA:
+		case T_ENDCRITICAL:
+		case T_ENDDO:
+		case T_ENDENUM:
+		case T_ENDFILE:
+		case T_ENDFORALL:
+		case T_ENDFUNCTION:
+		case T_ENDIF:
+		case T_ENDMODULE:
+		case T_ENDINTERFACE:
+		case T_ENDPROCEDURE:
+		case T_ENDPROGRAM:
+		case T_ENDSELECT:
+		case T_ENDSUBMODULE:
+		case T_ENDSUBROUTINE:
+		case T_ENDTYPE:
+		case T_ENDWHERE:
+		case T_END:
+		case T_DIMENSION:
+		case T_KIND:
+		case T_LEN:
+		case T_BIND:
+		case T_END_KEYWORDS:
 			return true;
-		} else {
+		default:
 			return false;
 		}
+		// (by Manchun) Commenting out the original tricky implementation because it requires
+		// ANTLR to always generates the constants for tokens in the same order
+		// as they were in the lexer file.
+		// however, this is apparently not true for antlr-3.5, which generates
+		// constants by alphabetic order of the token names.
+		// if (tokenType > T_BEGIN_KEYWORDS && tokenType < T_END_KEYWORDS) {
+		// return true;
+		// } else {
+		// return false;
+		// }
 	} // end isKeyword()
+
+	
 
 	/**
 	 * This is necessary because the lexer class caches some values from the
@@ -659,7 +829,7 @@ T_COTARGET      :       'COTARGET'      ;
 //
 
 T_ENDASSOCIATE  :       'ENDASSOCIATE'  ;
-T_ENDBLOCK      :       'ENDBLOCK'      ;
+T_ENDBLOCK      :       'ENDCOTARGETBLOCK'      ;
 T_ENDBLOCKDATA  :       'ENDBLOCKDATA'  ;
 T_ENDCRITICAL   :       'ENDCRITICAL'   ;
 T_ENDDO         :       'ENDDO'         ;

@@ -23,7 +23,7 @@ public class CParserTest {
 	private static boolean debug = false;
 
 	private static Preprocessor preprocessor = Front.newPreprocessor(
-			Language.C, null);
+			Language.C, null, null);
 
 	private static PrintStream out = System.out;
 

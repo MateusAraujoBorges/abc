@@ -7,6 +7,12 @@ import java.util.Stack;
 import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
+import edu.udel.cis.vsl.abc.ast.IF.ASTs;
+import edu.udel.cis.vsl.abc.ast.node.IF.Nodes;
+import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
+import edu.udel.cis.vsl.abc.ast.type.IF.Types;
+import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
+import edu.udel.cis.vsl.abc.ast.value.IF.Values;
 import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
@@ -18,11 +24,11 @@ import edu.udel.cis.vsl.abc.token.common.CommonCivlcToken;
 
 public class FortranParserActionTreeMaker implements IFortranParserAction {
 	private int currentIndex = 0;
-	
+
 	private boolean isAST = true;
 
 	private AST ast;
-	
+
 	private FortranTree root;
 
 	private ArrayList<CivlcToken> cTokens = new ArrayList<CivlcToken>();
@@ -34,7 +40,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	private Stack<FortranTree> stack = new Stack<FortranTree>();
 
 	private Stack<Formation> formations = new Stack<Formation>();
-	
+
 	public FortranParserActionTreeMaker(String[] args, IFortranParser parser,
 			String filename) {
 		super();
@@ -42,57 +48,43 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 	private CivlcToken getCToken(Token token) {
 		CivlcToken newCToken = null;
-		
-		if (token != null){
+
+		if (token != null) {
 			int tokenIndex = token.getTokenIndex();
 			int numCTokens = cTokens.size();
-			
-			for(int i = 0; i < numCTokens; i++){
+
+			for (int i = 0; i < numCTokens; i++) {
 				CivlcToken tempCToken = cTokens.get(i);
-				
-				if (tempCToken.getIndex() == tokenIndex){
+
+				if (tempCToken.getIndex() == tokenIndex) {
 					currentIndex = tokenIndex;
 					newCToken = new CommonCivlcToken(token, inclusion);
-					
+
 					newCToken.setNext(tempCToken.getNext());
-					if (i > 0) cTokens.get(i-1).setNext(newCToken);
-				}else if(tokenIndex < 0){
+					if (i > 0)
+						cTokens.get(i - 1).setNext(newCToken);
+				} else if (tokenIndex < 0) {
 					newCToken = new CommonCivlcToken(token, inclusion);
 
 					newCToken.setNext(cTokens.get(currentIndex).getNext());
-					if (i > 0) cTokens.get(currentIndex).setNext(newCToken);
+					if (i > 0)
+						cTokens.get(currentIndex).setNext(newCToken);
 				}
 			}
 		}
 		return newCToken;
 		/*
-		int size = cTokens.size();
-		CToken cToken = null;
-
-		if (token != null) {
-			cToken = new FortranCToken(token, inclusion);
-			cToken.setIndex(token.getTokenIndex());
-			if (size < 1) {
-				cTokens.add(cToken);
-			} else {
-				for (int i = 0; i < size; i++) {
-					if (cTokens.get(i).getTokenIndex() > cToken.getTokenIndex()) {
-						if (i == 0) {
-							cToken.setNext(cTokens.get(i));
-						} else {
-							cTokens.get(i - 1).setNext(cToken);
-							cToken.setNext(cTokens.get(i));
-						}
-						cTokens.add(i, cToken);
-						return cToken;
-					}
-				}
-				cTokens.get(size - 1).setNext(cToken);
-				cTokens.add(cToken);
-			}
-		}
-		return cToken;
-		*/
+		 * int size = cTokens.size(); CToken cToken = null;
+		 * 
+		 * if (token != null) { cToken = new FortranCToken(token, inclusion);
+		 * cToken.setIndex(token.getTokenIndex()); if (size < 1) {
+		 * cTokens.add(cToken); } else { for (int i = 0; i < size; i++) { if
+		 * (cTokens.get(i).getTokenIndex() > cToken.getTokenIndex()) { if (i ==
+		 * 0) { cToken.setNext(cTokens.get(i)); } else { cTokens.get(i -
+		 * 1).setNext(cToken); cToken.setNext(cTokens.get(i)); } cTokens.add(i,
+		 * cToken); return cToken; } } cTokens.get(size - 1).setNext(cToken);
+		 * cTokens.add(cToken); } } return cToken;
+		 */
 	}
 
 	/**
@@ -4707,8 +4699,8 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	 * R0 Start Of File
 	 */
 	public void start_of_file(String filename, String path) {
-		inclusion = tokenFactory.newInclusion(new SourceFile(
-			new File(path), 0));
+		inclusion = tokenFactory
+				.newInclusion(new SourceFile(new File(path), 0));
 		formations.push(inclusion);
 		if (root == null) {
 			FortranTree programe_file_Node = new FortranTree(0, filename);
@@ -4722,20 +4714,25 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	 */
 	public void end_of_file(String filename, String path) {
 		formations.pop();
-		if(!formations.empty()){
+		if (!formations.empty()) {
 			inclusion = formations.peek();
-		}else {
-			//System.out.println("ParsingTree:");
-			//System.out.println(root.toString());
+		} 	
+ else {
+			// System.out.println("ParsingTree:");
+			// System.out.println(root.toString());
 			if (isAST) {
-				FortranASTBuilderWorker worker = new FortranASTBuilderWorker(root, filename);
+				TypeFactory typeFactory=Types.newTypeFactory();
+				ValueFactory valueFactory=Values.newValueFactory(null, typeFactory);
+				FortranASTBuilderWorker worker = new FortranASTBuilderWorker(
+						null, root, ASTs.newASTFactory(Nodes.newNodeFactory(null, typeFactory, valueFactory), tokenFactory, typeFactory), filename);
 
 				try {
 					ast = worker.generateAST();
-					//Configuration config = Configurations.newMinimalConfiguration();
-					//Analysis.performStandardAnalysis(config, ast);
-					//System.out.println("AbstractSyntaxTree:");
-					//ast.print(System.out);
+					// Configuration config =
+					// Configurations.newMinimalConfiguration();
+					// Analysis.performStandardAnalysis(config, ast);
+					// System.out.println("AbstractSyntaxTree:");
+					// ast.print(System.out);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -4874,8 +4871,13 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		FortranTree inclusion_Node = new FortranTree(-3, "Include_Stmt");
 
 	}
-	
-	public AST getAST(){
+
+	public AST getAST() {
 		return ast;
+	}
+
+	@Override
+	public FortranTree getFortranParseTree() {
+		return this.root;
 	}
 }

@@ -114,7 +114,7 @@ public class FrontEnd {
 	public FrontEnd(Configuration configuration) {
 		Parser cOrcivlcParser = Front.newParser(Language.CIVL_C);
 		Preprocessor cOrcivlcPreprocessor = Front.newPreprocessor(
-				Language.CIVL_C, configuration);
+				Language.CIVL_C, configuration, sourceFactory);
 		ASTBuilder cOrcivlcBuilder;
 
 		this.configuration = configuration;
@@ -136,8 +136,8 @@ public class FrontEnd {
 		parsers.put(Language.FORTRAN77, Front.newParser(Language.FORTRAN77));
 		preprocessors.put(Language.C, cOrcivlcPreprocessor);
 		preprocessors.put(Language.CIVL_C, cOrcivlcPreprocessor);
-		preprocessors.put(Language.FORTRAN77,
-				Front.newPreprocessor(Language.FORTRAN77, configuration));
+		preprocessors.put(Language.FORTRAN77, Front.newPreprocessor(
+				Language.FORTRAN77, configuration, sourceFactory));
 		cOrcivlcBuilder = Front.newASTBuilder(Language.CIVL_C, configuration,
 				astFactory);
 		astBuilders.put(Language.C, cOrcivlcBuilder);
