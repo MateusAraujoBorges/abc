@@ -8,7 +8,7 @@ parser grammar FortranParserExtras;
 
 options {
     language=Java;
-    superClass=FortranParser;
+    superClass=AbstractFortranParser;
     tokenVocab=FortranLexer;
 }
 

@@ -29,7 +29,7 @@ parser grammar FortranParser03;
 
 options {
    language=Java;
-   superClass=FortranParser;
+   superClass=AbstractFortranParser;
 //////////////
 // NOTE: tokenVocab causes an antlr warning if used in conjuction
 // with F2008.  The warning should be ignored as an inconsistent tokens
