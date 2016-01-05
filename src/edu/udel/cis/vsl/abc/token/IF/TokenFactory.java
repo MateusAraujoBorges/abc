@@ -114,4 +114,6 @@ public interface TokenFactory {
 
 	CivlcTokenSequence getEmptyTokenSubsequence(CivlcTokenSource originalSource);
 
+	CivlcTokenSource getCTokenSourceByTokens(List<? extends Token> tokens,
+			Formation formation);
 }

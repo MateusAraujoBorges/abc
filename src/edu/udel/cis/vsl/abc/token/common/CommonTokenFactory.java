@@ -10,12 +10,13 @@ import org.antlr.runtime.CharStream;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 
+import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
-import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.Concatenation;
 import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
+import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter.CharacterKind;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.FunctionMacro;
 import edu.udel.cis.vsl.abc.token.IF.Inclusion;
@@ -29,7 +30,6 @@ import edu.udel.cis.vsl.abc.token.IF.StringToken;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
-import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter.CharacterKind;
 
 public class CommonTokenFactory implements TokenFactory {
 
@@ -55,9 +55,10 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public CivlcToken newCivlcToken(CharStream input, int type, int channel, int start,
-			int stop, Formation formation) {
-		return new CommonCivlcToken(input, type, channel, start, stop, formation);
+	public CivlcToken newCivlcToken(CharStream input, int type, int channel,
+			int start, int stop, Formation formation) {
+		return new CommonCivlcToken(input, type, channel, start, stop,
+				formation);
 	}
 
 	@Override
@@ -98,7 +99,8 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public CharacterToken characterToken(CivlcToken token) throws SyntaxException {
+	public CharacterToken characterToken(CivlcToken token)
+			throws SyntaxException {
 		return characterFactory.characterToken(token);
 	}
 
@@ -173,7 +175,8 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public SyntaxException newSyntaxException(UnsourcedException e, CivlcToken token) {
+	public SyntaxException newSyntaxException(UnsourcedException e,
+			CivlcToken token) {
 		return newSyntaxException(e, newSource(token));
 	}
 
@@ -201,8 +204,26 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public CivlcTokenSequence getEmptyTokenSubsequence(CivlcTokenSource originalSource) {
+	public CivlcTokenSequence getEmptyTokenSubsequence(
+			CivlcTokenSource originalSource) {
 		return new CivlcTokenSubSequence(originalSource, 0, -1);
+	}
+
+	@Override
+	public CivlcTokenSource getCTokenSourceByTokens(
+			List<? extends Token> tokens, Formation formation) {
+		int num = tokens.size();
+		List<CivlcToken> ctokens = new ArrayList<>(num);
+
+		for (Token token : tokens) {
+			ctokens.add(this.newCivlcToken(token, formation));
+		}
+		for (int i = 0; i < num - 1; i++) {
+			CivlcToken current = ctokens.get(i), next = ctokens.get(i + 1);
+
+			current.setNext(next);
+		}
+		return new CommonCivlcTokenSource(ctokens, this);
 	}
 
 }
