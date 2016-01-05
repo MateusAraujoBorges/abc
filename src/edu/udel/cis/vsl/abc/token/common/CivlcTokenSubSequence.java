@@ -5,7 +5,7 @@ import java.util.Collection;
 
 import org.antlr.runtime.Token;
 
-import edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant;
+import edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;

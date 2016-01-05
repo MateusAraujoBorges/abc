@@ -6,9 +6,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
-import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.Front;
+import edu.udel.cis.vsl.abc.front.IF.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.ParseTree;
 import edu.udel.cis.vsl.abc.front.c.parse.CParser;
 import edu.udel.cis.vsl.abc.front.c.parse.CParser.RuleKind;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
@@ -31,7 +31,7 @@ public class CIVLPragmaHandler extends PragmaHandler {
 		this.nodeFactory = builder.getASTFactory().getNodeFactory();
 		this.parseTree = parseTree;
 		this.worker = builder.getWorker(parseTree);
-		this.parser = (CParser) Parse.newParser(parseTree.getLanguage());
+		this.parser = (CParser) Front.newParser(parseTree.getLanguage());
 	}
 
 	@Override

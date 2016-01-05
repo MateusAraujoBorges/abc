@@ -20,8 +20,8 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser.file_return;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Macro;

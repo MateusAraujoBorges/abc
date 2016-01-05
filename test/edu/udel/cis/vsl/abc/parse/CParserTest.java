@@ -9,13 +9,12 @@ import org.antlr.runtime.tree.CommonTree;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
-import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
-import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocess;
-import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.Front;
+import edu.udel.cis.vsl.abc.front.IF.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.Parser;
+import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 
@@ -23,7 +22,7 @@ public class CParserTest {
 
 	private static boolean debug = false;
 
-	private static Preprocessor preprocessor = Preprocess.newPreprocessor(
+	private static Preprocessor preprocessor = Front.newPreprocessor(
 			Language.C, null);
 
 	private static PrintStream out = System.out;
@@ -40,7 +39,7 @@ public class CParserTest {
 	private void check(String filenameRoot) throws PreprocessorException,
 			ParseException {
 		File file = new File(root, filenameRoot + ".c");
-		Parser parser = Parse.newParser(Language.C);
+		Parser parser = Front.newParser(Language.C);
 		ParseTree parseTree = parser.parse(preprocessor.outputTokenSource(
 				systemIncludes, userIncludes, implicitMacros, file));
 		CommonTree tree = parseTree.getRoot();

@@ -1,6 +1,6 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-import static edu.udel.cis.vsl.abc.front.IF.parse.CivlcTokenConstant.*;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.*;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -74,7 +74,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.ParseException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.ASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;

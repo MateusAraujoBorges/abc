@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.front.IF.parse;
+package edu.udel.cis.vsl.abc.front.IF;
 
 import edu.udel.cis.vsl.abc.front.c.parse.CivlCParser;
 

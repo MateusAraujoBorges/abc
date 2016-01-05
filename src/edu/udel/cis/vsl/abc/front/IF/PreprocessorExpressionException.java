@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.front.IF.preproc;
+package edu.udel.cis.vsl.abc.front.IF;
 
 import org.antlr.runtime.Token;
 

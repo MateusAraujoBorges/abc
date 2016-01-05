@@ -3,8 +3,8 @@ package edu.udel.cis.vsl.abc.front.common.astgen;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
-import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.ParseTree;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**

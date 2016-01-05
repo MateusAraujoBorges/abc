@@ -37,15 +37,13 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilder;
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTGenerator;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parse;
-import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
-import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocess;
-import edu.udel.cis.vsl.abc.front.IF.preproc.Preprocessor;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.ASTBuilder;
+import edu.udel.cis.vsl.abc.front.IF.Front;
+import edu.udel.cis.vsl.abc.front.IF.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.Parser;
+import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.program.IF.Program;
@@ -114,8 +112,8 @@ public class FrontEnd {
 	 * 
 	 */
 	public FrontEnd(Configuration configuration) {
-		Parser cOrcivlcParser = Parse.newParser(Language.CIVL_C);
-		Preprocessor cOrcivlcPreprocessor = Preprocess.newPreprocessor(
+		Parser cOrcivlcParser = Front.newParser(Language.CIVL_C);
+		Preprocessor cOrcivlcPreprocessor = Front.newPreprocessor(
 				Language.CIVL_C, configuration);
 		ASTBuilder cOrcivlcBuilder;
 
@@ -135,16 +133,16 @@ public class FrontEnd {
 				conversionFactory));
 		parsers.put(Language.C, cOrcivlcParser);
 		parsers.put(Language.CIVL_C, cOrcivlcParser);
-		parsers.put(Language.FORTRAN77, Parse.newParser(Language.FORTRAN77));
+		parsers.put(Language.FORTRAN77, Front.newParser(Language.FORTRAN77));
 		preprocessors.put(Language.C, cOrcivlcPreprocessor);
 		preprocessors.put(Language.CIVL_C, cOrcivlcPreprocessor);
 		preprocessors.put(Language.FORTRAN77,
-				Preprocess.newPreprocessor(Language.FORTRAN77, configuration));
-		cOrcivlcBuilder = ASTGenerator.newASTBuilder(Language.CIVL_C,
-				configuration, astFactory);
+				Front.newPreprocessor(Language.FORTRAN77, configuration));
+		cOrcivlcBuilder = Front.newASTBuilder(Language.CIVL_C, configuration,
+				astFactory);
 		astBuilders.put(Language.C, cOrcivlcBuilder);
 		astBuilders.put(Language.CIVL_C, cOrcivlcBuilder);
-		astBuilders.put(Language.FORTRAN77, ASTGenerator.newASTBuilder(
+		astBuilders.put(Language.FORTRAN77, Front.newASTBuilder(
 				Language.FORTRAN77, configuration, astFactory));
 	}
 

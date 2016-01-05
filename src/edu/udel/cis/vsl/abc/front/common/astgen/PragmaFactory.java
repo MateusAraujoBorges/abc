@@ -1,7 +1,7 @@
 package edu.udel.cis.vsl.abc.front.common.astgen;
 
-import edu.udel.cis.vsl.abc.front.IF.astgen.ASTBuilder;
-import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.ASTBuilder;
+import edu.udel.cis.vsl.abc.front.IF.ParseTree;
 import edu.udel.cis.vsl.abc.front.c.astgen.CASTBuilder;
 import edu.udel.cis.vsl.abc.front.c.astgen.CIVLPragmaHandler;
 import edu.udel.cis.vsl.abc.front.c.astgen.COmpPragmaHandler;

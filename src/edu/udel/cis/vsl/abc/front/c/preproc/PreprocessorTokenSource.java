@@ -24,9 +24,9 @@ import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.front.IF.preproc.IllegalMacroArgumentException;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorRuntimeException;
+import edu.udel.cis.vsl.abc.front.IF.IllegalMacroArgumentException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser.file_return;
 import edu.udel.cis.vsl.abc.front.common.preproc.CTokenIterator;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;

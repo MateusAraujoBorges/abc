@@ -11,8 +11,8 @@ import org.antlr.runtime.TokenSource;
 import org.junit.Before;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorRuntimeException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorUtils;

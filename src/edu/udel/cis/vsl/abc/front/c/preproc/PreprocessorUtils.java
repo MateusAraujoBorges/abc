@@ -10,8 +10,8 @@ import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
 
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorExpressionException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorExpressionException;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 
 public class PreprocessorUtils {

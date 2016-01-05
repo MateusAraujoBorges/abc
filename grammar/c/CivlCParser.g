@@ -108,7 +108,7 @@ package edu.udel.cis.vsl.abc.front.c.parse;
 
 import java.util.Set;
 import java.util.HashSet;
-import edu.udel.cis.vsl.abc.front.IF.parse.RuntimeParseException;
+import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;
 }
 
 @members {

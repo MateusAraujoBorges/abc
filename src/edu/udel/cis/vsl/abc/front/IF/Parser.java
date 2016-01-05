@@ -1,6 +1,5 @@
-package edu.udel.cis.vsl.abc.front.IF.parse;
+package edu.udel.cis.vsl.abc.front.IF;
 
-import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 
 public interface Parser {

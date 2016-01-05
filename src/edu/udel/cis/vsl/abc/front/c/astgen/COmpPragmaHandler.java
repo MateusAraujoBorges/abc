@@ -76,7 +76,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode.OmpWorksharingNodeKind;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
-import edu.udel.cis.vsl.abc.front.IF.ptree.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.ParseTree;
 import edu.udel.cis.vsl.abc.front.c.parse.COmpParser;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;

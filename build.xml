@@ -354,7 +354,7 @@
 			<arg value="OmpParser.g" />
 		</java>
 		<move file="${c.grammar.dir}/OmpParser.java" tofile="${c.grammar.dir}/OmpParser2.java" />
-		<echo message="package edu.udel.cis.vsl.abc.front.c.parse;${line.separator}import edu.udel.cis.vsl.abc.front.IF.parse.RuntimeParseException;${line.separator}import edu.udel.cis.vsl.abc.front.c.preproc.*;${line.separator}${line.separator}" file="${c.grammar.dir}/OmpParser.java" />
+		<echo message="package edu.udel.cis.vsl.abc.front.c.parse;${line.separator}import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;${line.separator}import edu.udel.cis.vsl.abc.front.c.preproc.*;${line.separator}${line.separator}" file="${c.grammar.dir}/OmpParser.java" />
 		<concat destfile="${c.grammar.dir}/OmpParser.java" append="true">
 			<filelist dir="${c.grammar.dir}" files="OmpParser2.java" />
 		</concat>

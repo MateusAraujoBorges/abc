@@ -11,8 +11,8 @@ import org.antlr.runtime.TokenSource;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.IF.preproc.PreprocessorExpressionException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorExpressionException;
 import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
 
 /**

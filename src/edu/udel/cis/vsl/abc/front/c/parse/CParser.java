@@ -10,9 +10,9 @@ import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.front.IF.parse.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.parse.Parser;
-import edu.udel.cis.vsl.abc.front.IF.parse.RuntimeParseException;
+import edu.udel.cis.vsl.abc.front.IF.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.Parser;
+import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.common.CommonCivlcToken;
