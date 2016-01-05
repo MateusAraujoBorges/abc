@@ -17,7 +17,7 @@ public class FortranParser implements Parser {
 		FortranTokenSource fortranTokenSource = (FortranTokenSource) tokenSource;
 		FortranTokenStream fortranTokenStream = fortranTokenSource
 				.getTokenStream();
-		IFortranParser parser = new FortranParserExtras(fortranTokenStream);
+		FortranParserExtras parser = new FortranParserExtras(fortranTokenStream);
 
 		// FIXME can we get rid of the path in the parser?
 		parser.initialize(new String[0],
