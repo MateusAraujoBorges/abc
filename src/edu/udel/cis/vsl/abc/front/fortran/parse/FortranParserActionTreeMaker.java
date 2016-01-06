@@ -2636,8 +2636,8 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	 */
 	public void mult_operand(int numMultOps) {
 		if (numMultOps > 0) {
+			int rule = -1;
 			int counter = numMultOps;
-
 			FortranTree temp = null;
 			FortranTree mult_operand_Node = new FortranTree(704,
 					"MultOperands[" + counter + "]");
@@ -2645,15 +2645,18 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			while (counter > 0) {
 				assert !stack.isEmpty();
 				temp = stack.pop();
-				assert temp.rule() == 704;
+				rule = temp.rule();
+				if (rule == 601) {
+					stack.push(temp);
+					break;
+				}
+				assert rule == 701 /* Primary */
+						|| rule == 702 /* Lv1Expr */
+						|| rule == 704 /* MultOperand */
+						|| rule == 705 /* AddOperandAddOp */;
 				mult_operand_Node.addChild(0, temp);
 				counter--;
 			}
-			assert !stack.isEmpty();
-			temp = stack.pop();
-			assert temp.rule() == 701 || temp.rule() == 702
-					|| temp.rule() == 705;
-			mult_operand_Node.addChild(0, temp);
 			stack.push(mult_operand_Node);
 		}
 	} // Test
@@ -2662,22 +2665,39 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	 * R704 [Element] Multiply Operand
 	 */
 	public void mult_operand__mult_op(Token multOp) {
-		int rule = -1;
-		FortranTree temp = null;
-		FortranTree mult_operand__mult_op_Node = new FortranTree(704,
-				"MultOperand");
-		FortranTree multOp_Node = new FortranTree(708, "MultOp",
-				getCToken(multOp));
+		if (multOp != null) {
+			int rule = -1;
+			FortranTree temp = null;
+			FortranTree mult_operand__mult_op_Node = new FortranTree(704,
+					"MultOperand");
+			FortranTree multOp_Node = new FortranTree(708, "MultOp",
+					getCToken(multOp));
 
-		mult_operand__mult_op_Node.addChild(multOp_Node);
-		assert !stack.isEmpty();
-		temp = stack.pop();
-		rule = temp.rule();
-		assert rule == 701 /* PrimaryExpr */
-				|| rule == 702 /* Lv1Expr */
-				|| rule == 704;
-		mult_operand__mult_op_Node.addChild(temp);
-		stack.push(mult_operand__mult_op_Node);
+			mult_operand__mult_op_Node.addChild(multOp_Node);
+			assert !stack.isEmpty();
+			temp = stack.pop();
+			rule = temp.rule();
+			assert rule == 701 /* PrimaryExpr */
+					|| rule == 702 /* Lv1Expr */
+					|| rule == 704 /* MultOperand */
+			;// TODO:
+			mult_operand__mult_op_Node.addChild(temp);
+			assert !stack.isEmpty();
+			temp = stack.pop();
+			rule = temp.rule();
+			if (rule == 601) {
+				stack.push(temp);
+				stack.push(mult_operand__mult_op_Node);
+				return;
+			}
+			assert rule == 701 /* PrimaryExpr */
+					|| rule == 702 /**/
+					|| rule == 704 /**/
+					|| rule == 705 /**/
+			;
+			mult_operand__mult_op_Node.addChild(1, temp);
+			stack.push(mult_operand__mult_op_Node);
+		}
 	} // Test
 
 	/**
@@ -4721,7 +4741,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			inclusion = formations.peek();
 		} else {
 			// System.out.println("ParsingTree:");
-			// System.out.println(root.toString());
+			System.out.println(root.toString());
 			if (isAST) {
 				TypeFactory typeFactory = Types.newTypeFactory();
 				ValueFactory valueFactory = Values.newValueFactory(null,
