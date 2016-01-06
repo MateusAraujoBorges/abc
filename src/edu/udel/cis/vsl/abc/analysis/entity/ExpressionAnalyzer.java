@@ -620,8 +620,8 @@ public class ExpressionAnalyzer {
 		int numArgs = node.getNumberOfArguments();
 		int numContextArgs = node.getNumberOfContextArguments();
 		FunctionType functionType;
-		int expectedNumArgs;
-		boolean hasVariableNumArgs;
+		int expectedNumArgs = -1;
+		boolean hasVariableNumArgs = false;
 		boolean isSpecialFunction = false;
 		String functionName = null;
 
@@ -674,34 +674,34 @@ public class ExpressionAnalyzer {
 					throw error("Expected " + expectedNumArgs
 							+ " arguments but saw " + numArgs, node);
 			}
-			for (int i = 0; i < numContextArgs; i++) {
-				ExpressionNode argument = node.getContextArgument(i);
+		}
+		for (int i = 0; i < numContextArgs; i++) {
+			ExpressionNode argument = node.getContextArgument(i);
 
-				processExpression(argument);
-			}
-			for (int i = 0; i < numArgs; i++) {
-				ExpressionNode argument = node.getArgument(i);
+			processExpression(argument);
+		}
+		for (int i = 0; i < numArgs; i++) {
+			ExpressionNode argument = node.getArgument(i);
 
-				processExpression(argument);
-				addStandardConversions(argument);
-				specialCallAnalyzer.addConversionsForSpecialFunctions(
-						functionName, argument);
-				if (!hasVariableNumArgs || i < expectedNumArgs
-						|| isSpecialFunction) {
-					ObjectType lhsType;
-					UnqualifiedObjectType type;
+			processExpression(argument);
+			addStandardConversions(argument);
+			specialCallAnalyzer.addConversionsForSpecialFunctions(functionName,
+					argument);
+			if ((functionType != null && (!hasVariableNumArgs || i < expectedNumArgs))
+					|| isSpecialFunction) {
+				ObjectType lhsType;
+				UnqualifiedObjectType type;
 
-					if (i < expectedNumArgs)
-						lhsType = functionType.getParameterType(i);
-					else
-						lhsType = this.specialCallAnalyzer
-								.variableParameterType(functionName, i);
-					type = conversionFactory.lvalueConversionType(lhsType);
-					try {
-						convertRHS(argument, type);
-					} catch (UnsourcedException e) {
-						throw error(e, argument);
-					}
+				if (i < expectedNumArgs)
+					lhsType = functionType.getParameterType(i);
+				else
+					lhsType = this.specialCallAnalyzer.variableParameterType(
+							functionName, i);
+				type = conversionFactory.lvalueConversionType(lhsType);
+				try {
+					convertRHS(argument, type);
+				} catch (UnsourcedException e) {
+					throw error(e, argument);
 				}
 			}
 		}
