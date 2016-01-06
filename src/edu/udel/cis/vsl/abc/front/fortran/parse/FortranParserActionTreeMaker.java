@@ -49,6 +49,9 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	private CivlcToken getCToken(Token token) {
 		CivlcToken newCToken = null;
 
+		if (token instanceof CivlcToken)
+			return (CivlcToken) token;
+
 		if (token != null) {
 			int tokenIndex = token.getTokenIndex();
 			int numCTokens = cTokens.size();
@@ -4716,15 +4719,17 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		formations.pop();
 		if (!formations.empty()) {
 			inclusion = formations.peek();
-		} 	
- else {
+		} else {
 			// System.out.println("ParsingTree:");
 			// System.out.println(root.toString());
 			if (isAST) {
-				TypeFactory typeFactory=Types.newTypeFactory();
-				ValueFactory valueFactory=Values.newValueFactory(null, typeFactory);
+				TypeFactory typeFactory = Types.newTypeFactory();
+				ValueFactory valueFactory = Values.newValueFactory(null,
+						typeFactory);
 				FortranASTBuilderWorker worker = new FortranASTBuilderWorker(
-						null, root, ASTs.newASTFactory(Nodes.newNodeFactory(null, typeFactory, valueFactory), tokenFactory, typeFactory), filename);
+						null, root, ASTs.newASTFactory(Nodes.newNodeFactory(
+								null, typeFactory, valueFactory), tokenFactory,
+								typeFactory), filename);
 
 				try {
 					ast = worker.generateAST();
