@@ -271,19 +271,21 @@ public class FortranASTBuilderWorker {
 			}
 			if (isArray) {
 				FortranTree arrayInfoNode = entityNode.getChildByIndex(1);
+				TypeNode tempType = type;
 				int arity = arrayInfoNode.numChildren();
 
-				for (int j = 0; j < arity; j++) {
+				for (int j = arity - 1; j >= 0; j--) {
 					FortranTree indexExprNode = arrayInfoNode
 							.getChildByIndex(j).getChildByIndex(0);
 					ExpressionNode extent = translateExpression(source,
 							indexExprNode, scope);
 					TypeNode arrayType = nodeFactory.newArrayTypeNode(source,
-							type, extent);
-					BlockItemNode arrayItem = nodeFactory
-							.newVariableDeclarationNode(source, name, arrayType);
-					definitionList.add(arrayItem);
+							tempType, extent);
+
+					tempType = arrayType;
 				}
+				definitionList.add(nodeFactory.newVariableDeclarationNode(
+						source, name, tempType));
 			} else if (hasInit) {
 				FortranTree initNode = entityNode.getChildByIndex(1)
 						.getChildByIndex(0);
@@ -342,6 +344,30 @@ public class FortranASTBuilderWorker {
 				break;
 			default: /* Others */
 				// TODO: recursively get the ast of ((1*1)*1)*1
+				assert false;
+			}
+			break;
+		case 705: /* AddOperand(s) */
+			int addoperand_type = exprNode.getChildByIndex(0).rule();
+			switch (addoperand_type) {
+			case 701: /* AddOperands */
+				int numMult = exprNode.numChildren() - 1;
+				String op_string = exprNode.getChildByIndex(1)
+						.getChildByIndex(0).cTokens()[0].getText();
+
+				operator = op_string.startsWith("+") ? Operator.PLUS
+						: Operator.MINUS;
+
+				ExpressionNode argument = translateExpression(source,
+						exprNode.getChildByIndex(0), scope);
+
+				arguments.add(argument);
+				argument = translateExpression(source, exprNode
+						.getChildByIndex(1).getChildByIndex(1), scope);
+				arguments.add(argument);
+				break;
+			default: /* Others */
+				// TODO: recursively get the ast of ((1+1)+1)+1
 				assert false;
 			}
 			break;
@@ -404,7 +430,12 @@ public class FortranASTBuilderWorker {
 				default:
 					assert false;
 				}
+			case 704: /* MultOperand(s) */
+				return translateOperatorExpression(source, exprNode, scope);
+			case 705: /* AddOperand(s) */
+				return translateOperatorExpression(source, exprNode, scope);
 			default:
+				System.out.print(expr_type);
 				assert false;
 			}
 		case 704: /* MultOperand(s) */
@@ -597,6 +628,9 @@ public class FortranASTBuilderWorker {
 		case 501: /* TypeDeclarationStatement */
 			result = this.translateTypeDeclaration(blockItemNode, scope);
 			break;
+		case 538: /* ParameterStatement */
+			result = this.translateParameterStatement(blockItemNode, scope);
+			break;
 		case 734: /* AssignmentStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
@@ -632,6 +666,35 @@ public class FortranASTBuilderWorker {
 			assert false;
 		}
 		return result;
+	}
+
+	private List<BlockItemNode> translateParameterStatement(
+			FortranTree parameterStmtNode, SimpleScope scope)
+			throws SyntaxException {
+		ArrayList<BlockItemNode> paramterItems = new ArrayList<BlockItemNode>();
+		FortranTree labelDefinition = parameterStmtNode.getChildByIndex(0);
+		FortranTree constList = parameterStmtNode.getChildByIndex(2);
+		int numOfConst = constList.numChildren();
+		Source source = this.generateSource(parameterStmtNode);
+
+		assert numOfConst > 0;
+		for (int i = 0; i < numOfConst; i++) {
+			FortranTree namedConstDefNode = constList.getChildByIndex(i);
+			FortranTree identifierNode = namedConstDefNode.getChildByIndex(0);
+			FortranTree exprNode = namedConstDefNode.getChildByIndex(1);
+			ExpressionNode constValExpr = translateExpression(source, exprNode,
+					scope);
+			OperatorNode expressionNode = null;
+			Operator operator = Operator.ASSIGN;
+			List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
+
+			arguments.add(constValExpr);
+			expressionNode = nodeFactory.newOperatorNode(source, operator,
+					arguments);
+			paramterItems.add(nodeFactory
+					.newExpressionStatementNode(expressionNode));
+		}
+		return paramterItems;
 	}
 
 	private LabeledStatementNode translateIdentifierLabeledStatement(
