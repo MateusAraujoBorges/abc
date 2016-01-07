@@ -1,6 +1,8 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
+
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ABSTRACT;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DEVICE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ALIGNAS;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ATOMIC;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.AUTO;
@@ -155,7 +157,14 @@ public class SpecifierAnalysis {
 	boolean noreturnSpecifier = false;
 	boolean abstractSpecifier = false;
 	boolean fatomicSpecifier = false;
+	/**
+	 * CUDA specifier __global__
+	 */
 	boolean globalSpecifier = false;
+	/**
+	 * CUDA specifier __device__
+	 */
+	boolean deviceSpecifier = false;
 	// CIVL-C continuity for abstract functions: can occur only once
 	int continuity = 0;
 	// CIVL-C domain specifier: can occur only once
@@ -344,6 +353,9 @@ public class SpecifierAnalysis {
 					} else {
 						continuity = parseInt((CommonTree) node.getChild(0));
 					}
+					break;
+				case DEVICE:
+					this.deviceSpecifier = true;
 					break;
 				default:
 					throw error("Unknown declaration specifier", node);

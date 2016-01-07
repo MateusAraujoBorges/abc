@@ -173,6 +173,7 @@ WHEN		:	'$when';
 
 /* Cuda-C keywords */
 
+DEVICE  :   '__device__';
 GLOBAL	:	'__global__';
 SHARED	:	'__shared__';
 

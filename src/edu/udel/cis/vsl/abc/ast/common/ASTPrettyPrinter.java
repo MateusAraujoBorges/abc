@@ -245,7 +245,7 @@ public class ASTPrettyPrinter {
 				if (ignoreStdLibs)
 					switch (sourceFile) {
 					case "assert.h":
-					case "civlc.h":
+					case "cuda.h":
 					case "civlc.cvh":
 					case "bundle.cvh":
 					case "comm.cvh":
@@ -257,35 +257,33 @@ public class ASTPrettyPrinter {
 					case "math.h":
 					case "mpi.h":
 					case "omp.h":
+					case "op.h":
 					case "pthread.h":
+					case "stdarg.h":
 					case "stdbool.h":
 					case "stddef.h":
 					case "stdio.h":
 					case "stdlib.h":
 					case "string.h":
 					case "time.h":
-					case "civlc-common.cvh":
-					case "bundle-common.cvh":
-					case "comm-common.cvh":
-					case "concurrency-common.cvh":
-					case "omp.cvl":
-					case "pointer-common.cvh":
-					case "scope-common.cvh":
-					case "seq-common.cvh":
-					case "stdlib-common.h":
-					case "string-common.h":
-					case "stdio-common.h":
-					case "omp-common.h":
-					case "mpi-common.h":
-					case "civlc-common.h":
-					case "civlc-omp.cvl":
+					case "civl-omp.cvh":
+					case "civl-mpi.cvh":
+					case "civl-cuda.cvh":
+					case "civl-omp.cvl":
+					case "civl-mpi.cvl":
+					case "civl-cuda.cvl":
+					case "civlc.cvl":
+					case "concurrency.cvl":
 					case "stdio-c.cvl":
 					case "stdio.cvl":
+					case "omp.cvl":
+					case "cuda.cvl":
 					case "mpi.cvl":
 					case "pthread-c.cvl":
 					case "pthread.cvl":
-					case "time-common.h":
 					case "math.cvl":
+					case "seq.cvl":
+					case "string.cvl":
 						continue;
 					default:
 					}

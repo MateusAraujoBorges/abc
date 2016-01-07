@@ -157,7 +157,7 @@ civl_keyword	:	ASSIGNS | CHOOSE | COLLECTIVE
 
 gnuc_keyword  :  TYPEOF;
 		
-cuda_keyword	:	GLOBAL | SHARED
+cuda_keyword	:	DEVICE | GLOBAL | SHARED
 		;
 
 

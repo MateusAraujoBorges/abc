@@ -78,6 +78,7 @@ public interface CivlcTokenConstant {
 	public static final int DEFINED = CivlCParser.DEFINED;
 	public static final int DEPENDS = CivlCParser.DEPENDS;
 	public static final int DERIV = CivlCParser.DERIV;
+	public static final int DEVICE = CivlCParser.DEVICE;
 	public static final int DIV = CivlCParser.DIV;
 	public static final int DIVEQ = CivlCParser.DIVEQ;
 	public static final int DO = CivlCParser.DO;
