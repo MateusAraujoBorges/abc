@@ -214,7 +214,7 @@ public class FortranASTBuilderWorker {
 				type = nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
 				break;
 			case 401: /* REAL */
-				type = nodeFactory.newBasicTypeNode(source, BasicTypeKind.REAL);
+				type = nodeFactory.newBasicTypeNode(source, BasicTypeKind.DOUBLE);
 				break;
 			case 402: /* DOUBLE PRECISION */
 				type = nodeFactory.newBasicTypeNode(source,
@@ -313,69 +313,90 @@ public class FortranASTBuilderWorker {
 		List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
 
 		switch (rule) {
+		case 613: /* PartRef(ArrayUnit) */
+			FortranTree idNode = exprNode.getChildByIndex(0);
+			FortranTree indexUnitsNode = exprNode.getChildByIndex(1);
+			int arity = indexUnitsNode.numChildren();
+			ExpressionNode tempNode = nodeFactory.newIdentifierExpressionNode(
+					source, translateIdentifier(idNode));
+			ExpressionNode indexNode = null;
+			ExpressionNode adjustedIndexNode = null;
+
+			for (int i = 0; i < arity; i++) {
+				FortranTree indexUnitNode = indexUnitsNode.getChildByIndex(i)
+						.getChildByIndex(0);
+
+				operator = Operator.SUBSCRIPT;
+				arguments = new LinkedList<ExpressionNode>();
+				indexNode = translateExpression(source, indexUnitNode, scope);
+				adjustedIndexNode = adjustIndex(source, indexNode);
+				arguments.add(tempNode);
+				arguments.add(adjustedIndexNode);
+				tempNode = nodeFactory.newOperatorNode(source, operator,
+						arguments);
+			}
+			return (OperatorNode) tempNode;
 		case 734: /* Assign */
 			operator = Operator.ASSIGN;
 			arguments = new LinkedList<ExpressionNode>();
 			for (int i = 1; i < 3; i++) {
 				ExpressionNode argument = translateExpression(source,
 						exprNode.getChildByIndex(i), scope);
-
 				arguments.add(argument);
 			}
-			break;
+			return nodeFactory.newOperatorNode(source, operator, arguments);
 		case 704: /* MultOperand(s) */
-			int multoperand_type = exprNode.getChildByIndex(0).rule();
-			switch (multoperand_type) {
-			case 701: /* MultOperands */
-				int numMult = exprNode.numChildren() - 1;
-				String op_string = exprNode.getChildByIndex(1)
-						.getChildByIndex(0).cTokens()[0].getText();
+			for (int i = 0; i < exprNode.numChildren(); i++) {
+				FortranTree operandNode = exprNode.getChildByIndex(i);
+				String op_string = operandNode.getChildByIndex(0).cTokens()[0]
+						.getText();
+				ExpressionNode leftNode = null;
+				ExpressionNode rightNode = null;
 
 				operator = op_string.startsWith("*") ? Operator.TIMES
 						: Operator.DIV;
-
-				ExpressionNode argument = translateExpression(source,
-						exprNode.getChildByIndex(0), scope);
-
-				arguments.add(argument);
-				argument = translateExpression(source, exprNode
-						.getChildByIndex(1).getChildByIndex(1), scope);
-				arguments.add(argument);
-				break;
-			default: /* Others */
-				// TODO: recursively get the ast of ((1*1)*1)*1
-				assert false;
+				leftNode = translateExpression(source,
+						operandNode.getChildByIndex(1), scope);
+				rightNode = translateExpression(source,
+						operandNode.getChildByIndex(2), scope);
+				arguments.add(leftNode);
+				arguments.add(rightNode);
 			}
-			break;
+			return nodeFactory.newOperatorNode(source, operator, arguments);
 		case 705: /* AddOperand(s) */
-			int addoperand_type = exprNode.getChildByIndex(0).rule();
-			switch (addoperand_type) {
-			case 701: /* AddOperands */
-				int numMult = exprNode.numChildren() - 1;
-				String op_string = exprNode.getChildByIndex(1)
-						.getChildByIndex(0).cTokens()[0].getText();
+			for (int i = 0; i < exprNode.numChildren(); i++) {
+				FortranTree operandNode = exprNode.getChildByIndex(i);
+				String op_string = operandNode.getChildByIndex(0).cTokens()[0]
+						.getText();
+				ExpressionNode leftNode = null;
+				ExpressionNode rightNode = null;
 
 				operator = op_string.startsWith("+") ? Operator.PLUS
 						: Operator.MINUS;
-
-				ExpressionNode argument = translateExpression(source,
-						exprNode.getChildByIndex(0), scope);
-
-				arguments.add(argument);
-				argument = translateExpression(source, exprNode
-						.getChildByIndex(1).getChildByIndex(1), scope);
-				arguments.add(argument);
-				break;
-			default: /* Others */
-				// TODO: recursively get the ast of ((1+1)+1)+1
-				assert false;
+				leftNode = translateExpression(source,
+						operandNode.getChildByIndex(1), scope);
+				rightNode = translateExpression(source,
+						operandNode.getChildByIndex(2), scope);
+				arguments.add(leftNode);
+				arguments.add(rightNode);
 			}
-			break;
+			return nodeFactory.newOperatorNode(source, operator, arguments);
 		default:
+			System.out.println(rule);
 			assert false;
 		}
 		result = nodeFactory.newOperatorNode(source, operator, arguments);
 		return result;
+	}
+
+	private ExpressionNode adjustIndex(Source source, ExpressionNode indexNode) throws SyntaxException {
+		ExpressionNode intOneNode = nodeFactory.newIntegerConstantNode(source, "1");
+		Operator operator = Operator.MINUS;
+		List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
+		
+		arguments.add(indexNode);
+		arguments.add(intOneNode.copy());
+		return nodeFactory.newOperatorNode(source, operator, arguments);
 	}
 
 	private IntegerConstantNode translateIntegerConstant(Source source,
@@ -399,11 +420,15 @@ public class FortranASTBuilderWorker {
 
 			switch (var_type) {
 			case 603: /* Designator */
-				FortranTree identifierNode = exprNode.getChildByIndex(0)
+				FortranTree refNode = exprNode.getChildByIndex(0)
 						.getChildByIndex(0).getChildByIndex(0);
 
-				return nodeFactory.newIdentifierExpressionNode(source,
-						translateIdentifier(identifierNode.getChildByIndex(0)));
+				if (refNode.numChildren() < 2) {
+					return nodeFactory.newIdentifierExpressionNode(source,
+							translateIdentifier(refNode.getChildByIndex(0)));
+				} else {
+					return translateOperatorExpression(source, refNode, scope);
+				}
 			default:
 				assert false;
 			}
@@ -413,11 +438,15 @@ public class FortranASTBuilderWorker {
 
 			switch (expr_type) {
 			case -3: /* DesignatorOrFunctionRef */
-				FortranTree identifierNode = exprNode.getChildByIndex(0)
+				FortranTree refNode = exprNode.getChildByIndex(0)
 						.getChildByIndex(0).getChildByIndex(0);
 
-				return nodeFactory.newIdentifierExpressionNode(source,
-						translateIdentifier(identifierNode.getChildByIndex(0)));
+				if (refNode.numChildren() < 2) {
+					return nodeFactory.newIdentifierExpressionNode(source,
+							translateIdentifier(refNode.getChildByIndex(0)));
+				} else {
+					return translateOperatorExpression(source, refNode, scope);
+				}
 			case 306: /* LiteralConst */
 				FortranTree constNode = primExprNode.getChildByIndex(0);
 				int const_type = constNode.rule();
@@ -431,14 +460,16 @@ public class FortranASTBuilderWorker {
 					assert false;
 				}
 			case 704: /* MultOperand(s) */
-				return translateOperatorExpression(source, exprNode, scope);
+				return translateOperatorExpression(source, primExprNode, scope);
 			case 705: /* AddOperand(s) */
-				return translateOperatorExpression(source, exprNode, scope);
+				return translateOperatorExpression(source, primExprNode, scope);
 			default:
 				System.out.print(expr_type);
 				assert false;
 			}
 		case 704: /* MultOperand(s) */
+			return translateOperatorExpression(source, exprNode, scope);
+		case 705: /* AddOperand(s) */
 			return translateOperatorExpression(source, exprNode, scope);
 		default:
 			System.out.println(rule);
@@ -656,6 +687,9 @@ public class FortranASTBuilderWorker {
 			result.add((BlockItemNode) this
 					.translateIdentifierLabeledStatement(blockItemNode, scope));
 			break;
+		case 912: /* PrintStatement */
+			//TODO: Print statement
+			break;
 		case 1236: /* ReturnStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
@@ -688,6 +722,8 @@ public class FortranASTBuilderWorker {
 			Operator operator = Operator.ASSIGN;
 			List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
 
+			arguments.add(nodeFactory.newIdentifierExpressionNode(source,
+					translateIdentifier(identifierNode)));
 			arguments.add(constValExpr);
 			expressionNode = nodeFactory.newOperatorNode(source, operator,
 					arguments);
