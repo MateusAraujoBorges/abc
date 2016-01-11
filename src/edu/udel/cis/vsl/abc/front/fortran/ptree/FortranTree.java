@@ -258,7 +258,6 @@ public class FortranTree implements ParseTree {
 		}
 
 		result += "{";
-		// result += "(ID:" + id + ")";
 		if (parent == null) {
 			result += "Root";
 		} else if (parent.childIndex < 0) {
@@ -270,8 +269,10 @@ public class FortranTree implements ParseTree {
 			// result += parent.nodeKind;
 		}
 		result += ": ";
-		result += this.id;
-		result += "[" + rule + nodeName + "]";
+		//result += this.id;
+		result += "[";
+		if(rule != Integer.MIN_VALUE) result += " " + rule + " ";
+		result += nodeName + "]";
 		if (cTokens != null && cTokens.length > 0) {
 			result += "<";
 			for (Token t : cTokens) {
