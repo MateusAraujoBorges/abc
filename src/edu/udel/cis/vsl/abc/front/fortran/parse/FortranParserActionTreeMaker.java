@@ -4741,7 +4741,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			inclusion = formations.peek();
 		} else {
 			// System.out.println("ParsingTree:");
-			System.out.println(root.toString());
+			//System.out.println(root.toString());
 			if (isAST) {
 				TypeFactory typeFactory = Types.newTypeFactory();
 				ValueFactory valueFactory = Values.newValueFactory(null,
