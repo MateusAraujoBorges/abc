@@ -112,6 +112,4 @@ void $free(void *p);
 /* Deletes an $int_iter object from the heap. */
 //void $int_iter_destroy($int_iter iter);
 
-int $pow(int, int);
-
 #endif
