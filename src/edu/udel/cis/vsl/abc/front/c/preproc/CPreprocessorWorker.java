@@ -10,6 +10,7 @@ import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonTokenStream;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
@@ -282,6 +283,27 @@ public class CPreprocessorWorker {
 				userIncludePaths, macroMap, tokenFactory, this, false);
 
 		return tokenSource;
+	}
+
+	CivlcTokenSource tokenSourceOfLibrary(String name) {
+		File file = new File(Preprocessor.ABC_INCLUDE_PATH, name);
+
+		try {
+			CharStream charStream = PreprocessorUtils
+					.newFilteredCharStreamFromResource(name,
+							file.getAbsolutePath());
+			PreprocessorLexer lexer = new PreprocessorLexer(charStream);
+			PreprocessorParser parser = new PreprocessorParser(
+					new CommonTokenStream(lexer));
+
+			return new PreprocessorTokenSource(this.config, file, parser,
+					new File[0], new File[0], new HashMap<String, Macro>(),
+					Tokens.newTokenFactory(), this, false);
+
+		} catch (IOException | PreprocessorException e) {
+			throw new ABCRuntimeException(
+					"errors encountered when preprocessing library " + name);
+		}
 	}
 
 }

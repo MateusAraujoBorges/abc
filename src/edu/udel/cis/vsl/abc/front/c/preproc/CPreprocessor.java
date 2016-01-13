@@ -385,6 +385,13 @@ public class CPreprocessor implements Preprocessor {
 		return result;
 	}
 
+	public CivlcTokenSource tokenSourceOfLibrary(String name) {
+		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
+				new File[0], new File[0], new HashMap<String, Macro>());
+
+		return worker.tokenSourceOfLibrary(name);
+	}
+
 	/**
 	 * This main method is just here for simple tests. The real main method is
 	 * in the main class, ABC.java.
