@@ -12,6 +12,7 @@ import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.IF.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.Parser;
+import edu.udel.cis.vsl.abc.front.IF.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
@@ -165,7 +166,11 @@ public class CParser implements Parser {
 		try {
 			switch (rule) {
 			case TRANSLATION_UNIT:
-				root = (CommonTree) parser.translationUnit().getTree();
+				try {
+					root = (CommonTree) parser.translationUnit().getTree();
+				} catch (PreprocessorRuntimeException ex) {
+					throw new ParseException(ex.getMessage(), ex.getToken());
+				}
 				break;
 			// case EXTERNAL_DEFINITION:
 			// root = (CommonTree) parser.externalDeclaration().getTree();
