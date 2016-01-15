@@ -107,4 +107,6 @@ public interface Variable extends OrdinaryEntity {
 	@Override
 	ObjectType getType();
 
+	@Override
+	VariableDeclarationNode getDeclaration(int index);
 }

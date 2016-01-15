@@ -23,4 +23,9 @@ public abstract class CommonObjectType extends CommonType implements ObjectType 
 						.isVariableLengthArrayType());
 	}
 
+	@Override
+	public boolean isConstantQualified() {
+		return false;
+	}
+
 }

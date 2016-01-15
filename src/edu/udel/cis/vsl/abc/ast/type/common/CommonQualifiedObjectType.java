@@ -165,4 +165,9 @@ public class CommonQualifiedObjectType extends CommonObjectType implements
 		return false;
 	}
 
+	@Override
+	public boolean isConstantQualified() {
+		return this.constQualified || this.baseType.isConstantQualified();
+	}
+
 }

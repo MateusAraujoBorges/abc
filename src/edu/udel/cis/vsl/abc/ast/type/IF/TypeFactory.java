@@ -173,6 +173,8 @@ import edu.udel.cis.vsl.abc.ast.value.IF.Value;
  */
 public interface TypeFactory {
 
+	public static String BUNDLE = "$bundle";
+
 	/**
 	 * Returns an instance of BasicType representing the type of the given basic
 	 * type kind and qualified as specified.
@@ -795,4 +797,11 @@ public interface TypeFactory {
 	 */
 	boolean isVoidType(Type type);
 
+	/**
+	 * Is the given type a CIVL-C bundle type?
+	 * 
+	 * @param type
+	 * @return
+	 */
+	boolean isBundleType(Type type);
 }

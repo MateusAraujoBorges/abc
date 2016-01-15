@@ -23,7 +23,8 @@ public class CommonVariable extends CommonOrdinaryEntity implements Variable {
 
 	private Set<Value> constantAlignments = new HashSet<Value>();
 
-	public CommonVariable(String name, ProgramEntity.LinkageKind linkage, Type type) {
+	public CommonVariable(String name, ProgramEntity.LinkageKind linkage,
+			Type type) {
 		super(EntityKind.VARIABLE, name, linkage, type);
 	}
 
@@ -92,6 +93,11 @@ public class CommonVariable extends CommonOrdinaryEntity implements Variable {
 			throw new IllegalArgumentException(
 					"Type of variable must be object type");
 		super.setType(type);
+	}
+
+	@Override
+	public VariableDeclarationNode getDeclaration(int index) {
+		return (VariableDeclarationNode) super.getDeclaration(index);
 	}
 
 }

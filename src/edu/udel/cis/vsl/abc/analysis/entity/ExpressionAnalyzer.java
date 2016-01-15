@@ -4,9 +4,12 @@ import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.Conversion;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.ConversionFactory;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity.EntityKind;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
+import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity.LinkageKind;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Variable;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
@@ -17,6 +20,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
@@ -29,6 +33,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.GenericSelectionNode;
@@ -778,6 +783,8 @@ public class ExpressionAnalyzer {
 		case VARIABLE:
 			if (isFirstRound)
 				node.setInitialType(entity.getType());
+			else
+				throw error("Undeclared identifier " + name, node);
 			break;
 		case FUNCTION:
 			node.setInitialType(getFunctionExpressionType(node,
@@ -787,6 +794,73 @@ public class ExpressionAnalyzer {
 			throw error("Use of " + kind + " " + name + " as expression", node);
 		}
 		identifierNode.setEntity(entity);
+		// only checks external definition for whole-program AST
+		if (node.getOwner().isWholeProgram()) {
+			this.checkExternalDefinitionOfIdentifier(node);
+		}
+	}
+
+	/**
+	 * When an identifier is used in an expression except for
+	 * <code>sizeof</code> or <code>_Alignof</code>, if its declaration is a
+	 * variable with external linkage, then report an error if the external
+	 * definition is missing.
+	 * 
+	 * @param identifierExpression
+	 *            the identifier expression node being checked
+	 * @throws SyntaxException
+	 */
+	private void checkExternalDefinitionOfIdentifier(
+			IdentifierExpressionNode identifierExpression)
+			throws SyntaxException {
+		ASTNode parent = identifierExpression.parent();
+
+		if (parent instanceof ExpressionNode) {
+			ExpressionNode expression = (ExpressionNode) parent;
+			ExpressionKind kind = expression.expressionKind();
+
+			if (kind != ExpressionKind.ALIGNOF && kind != ExpressionKind.SIZEOF) {
+				Entity entity = identifierExpression.getIdentifier()
+						.getEntity();
+
+				if (entity.getEntityKind() == EntityKind.VARIABLE) {
+					Variable variable = (Variable) entity;
+					VariableDeclarationNode definition = variable
+							.getDefinition();
+
+					// don't check $input variables
+					if (variable.getDeclaration(0).getTypeNode()
+							.isInputQualified())
+						return;
+
+					// tentative definitions are OK
+					boolean noStorage = true;
+
+					for (DeclarationNode declaration : variable
+							.getDeclarations()) {
+						VariableDeclarationNode varDeclaration = (VariableDeclarationNode) declaration;
+
+						if (varDeclaration.hasAutoStorage()
+								|| varDeclaration.hasRegisterStorage()
+								|| varDeclaration.hasThreadLocalStorage()
+								|| varDeclaration.hasExternStorage()) {
+							noStorage = false;
+							break;
+						}
+					}
+					if (noStorage)
+						return;
+
+					if (variable.getLinkage() == LinkageKind.EXTERNAL) {
+						if (definition == null)
+							throw this.error("the definition for the variable "
+									+ variable.getName() + " which is declared"
+									+ " with external linkage is missing",
+									identifierExpression);
+					}
+				}
+			}
+		}
 	}
 
 	private void processOperator(OperatorNode node) throws SyntaxException {
@@ -1066,6 +1140,14 @@ public class ExpressionAnalyzer {
 	 *             if there is a type incompatibility between the two sides
 	 */
 	private void processASSIGN(OperatorNode node) throws SyntaxException {
+		ExpressionNode lhs = node.getArgument(0);
+
+		if (!this.isLvalue(lhs)) {
+			throw error("The expression " + lhs.prettyRepresentation()
+					+ " doesn't designate an object and thus "
+					+ "can't be used as the left argument of assignment", node);
+		}
+
 		ExpressionNode rhs = node.getArgument(1);
 		Type type = assignmentType(node);
 
@@ -1076,6 +1158,35 @@ public class ExpressionAnalyzer {
 			throw error(e, node);
 		}
 		node.setInitialType(type);
+	}
+
+	/**
+	 * checks if the given expression is an lvalue.
+	 * 
+	 * @param node
+	 *            the expression to be check
+	 */
+	private boolean isLvalue(ExpressionNode node) {
+		ExpressionKind kind = node.expressionKind();
+
+		switch (kind) {
+		case ARROW:
+		case DOT:
+		case IDENTIFIER_EXPRESSION:
+			return true;
+		case OPERATOR: {
+			OperatorNode operatorNode = (OperatorNode) node;
+
+			switch (operatorNode.getOperator()) {
+			case DEREFERENCE:
+			case SUBSCRIPT:
+				return true;
+			default:
+			}
+		}
+		default:
+			return false;
+		}
 	}
 
 	/**
@@ -2023,6 +2134,17 @@ public class ExpressionAnalyzer {
 	 * expression is the result of applying lvalue conversion to the left hand
 	 * side. The expression is not modified.
 	 * 
+	 * <blockquote> 6.3.2.1 Lvalues, arrays, and function designators <br>
+	 * 1. An lvalue is an expression (with an object type other than void) that
+	 * potentially designates an object;64) if an lvalue does not designate an
+	 * object when it is evaluated, the behavior is undefined. When an object is
+	 * said to have a particular type, the type is specified by the lvalue used
+	 * to designate the object. A modifiable lvalue is an lvalue that does not
+	 * have array type, does not have an incomplete type, does not have a const-
+	 * qualified type, and if it is a structure or union, does not have any
+	 * member (including, recursively, any member or element of all contained
+	 * aggregates or unions) with a const-qualified type. </blockquote>
+	 * 
 	 * @param assignExpression
 	 * @return the type of the assignment expression
 	 * @throws SyntaxException
@@ -2034,9 +2156,33 @@ public class ExpressionAnalyzer {
 		Type leftType = leftNode.getType();
 		Conversion leftConversion;
 
+		if (typeFactory.isVoidType(leftType))
+			throw error("Left argument of assignment can't have void type",
+					leftNode);
 		if (!(leftType instanceof ObjectType))
 			throw error(
 					"Left argument of assignment does not have object type",
+					leftNode);
+		if (leftType instanceof ArrayType)
+			throw error("Left argument of assignment can't have array type",
+					leftNode);
+
+		ObjectType objectType = (ObjectType) leftType;
+
+		// if (!this.typeFactory.isBundleType(objectType)
+		// && !objectType.isComplete())
+		// throw error(
+		// "Type of the left argument of assignment can't be incomplete",
+		// leftNode);
+		if (objectType instanceof QualifiedObjectType) {
+			if (((QualifiedObjectType) objectType).isInputQualified())
+				throw error(
+						"Type of the left argument of assignment has input-qualifier",
+						leftNode);
+		}
+		if (objectType.isConstantQualified())
+			throw error(
+					"Type of the left argument of assignment has const-qualifier",
 					leftNode);
 		leftConversion = conversionFactory
 				.lvalueConversion((ObjectType) leftType);

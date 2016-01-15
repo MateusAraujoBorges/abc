@@ -320,7 +320,7 @@ public class CommonProgramFactory implements ProgramFactory {
 				SequenceNode<BlockItemNode> rootClone = root.copy();
 				Collection<SourceFile> sourceFiles = translationUnits[i]
 						.getSourceFiles();
-				AST ast = astFactory.newAST(rootClone, sourceFiles);
+				AST ast = astFactory.newAST(rootClone, sourceFiles, false);
 
 				out.println(ast + ":");
 				ast.prettyPrint(out, false);
@@ -340,7 +340,7 @@ public class CommonProgramFactory implements ProgramFactory {
 			}
 		}
 		newRoot = nodeFactory.newProgramNode(fakeSource, definitions);
-		result = astFactory.newAST(newRoot, allSourceFiles);
+		result = astFactory.newAST(newRoot, allSourceFiles, true);
 		if (debug) {
 			out.println("Linked AST (raw):");
 			result.prettyPrint(out, false);

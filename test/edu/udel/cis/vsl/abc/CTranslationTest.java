@@ -188,4 +188,9 @@ public class CTranslationTest {
 	public void struct() throws ABCException, IOException {
 		check("c/struct");
 	}
+
+	@Test(expected = SyntaxException.class)
+	public void assigns() throws ABCException, IOException {
+		check("c/assigns");
+	}
 }

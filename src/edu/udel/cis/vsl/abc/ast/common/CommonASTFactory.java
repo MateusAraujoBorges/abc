@@ -46,8 +46,9 @@ public class CommonASTFactory implements ASTFactory {
 
 	@Override
 	public AST newAST(SequenceNode<BlockItemNode> root,
-			Collection<SourceFile> sourceFiles) throws SyntaxException {
-		AST unit = new CommonAST(this, root, false, sourceFiles);
+			Collection<SourceFile> sourceFiles, boolean isWholeprogram)
+			throws SyntaxException {
+		AST unit = new CommonAST(this, root, false, sourceFiles, isWholeprogram);
 
 		// do some preparation?
 		return unit;

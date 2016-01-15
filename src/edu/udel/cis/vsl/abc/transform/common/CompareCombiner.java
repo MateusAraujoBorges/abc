@@ -110,8 +110,8 @@ public class CompareCombiner implements Combiner {
 			nodes.add(implFileTypeDef);
 		equalsFunc = this.getAndRemoveEqualsFuncNode(specRoot);
 		nodes.add(equalsFunc);
-		spec = astFactory.newAST(specRoot, sourceFiles0);
-		impl = astFactory.newAST(implRoot, sourceFiles1);
+		spec = astFactory.newAST(specRoot, sourceFiles0, spec.isWholeProgram());
+		impl = astFactory.newAST(implRoot, sourceFiles1, impl.isWholeProgram());
 		specSource = this.getMainSource(specRoot);
 		implSource = this.getMainSource(implRoot);
 		factory = astFactory.getNodeFactory();
@@ -179,9 +179,9 @@ public class CompareCombiner implements Combiner {
 				astFactory.getTokenFactory().join(specSource, implSource),
 				"Composite System", nodes);
 
-		AST result = astFactory.newAST(newRoot, allSourceFiles);
+		AST result = astFactory.newAST(newRoot, allSourceFiles, true);
 
-		result.prettyPrint(System.out, false);
+		// result.prettyPrint(System.out, false);
 		return result;
 	}
 

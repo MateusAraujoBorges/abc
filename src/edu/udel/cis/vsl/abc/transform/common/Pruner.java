@@ -135,7 +135,8 @@ public class Pruner extends BaseTransformer {
 			// but not the declaration, need to replace that node with an
 			// expression statement node.
 			root.keepOnly(reachable);
-			newAst = astFactory.newAST(root, ast.getSourceFiles());
+			newAst = astFactory.newAST(root, ast.getSourceFiles(),
+					ast.isWholeProgram());
 			return newAst;
 		}
 	}

@@ -43,15 +43,29 @@ public class CommonAST implements AST {
 	private ArrayList<OrdinaryEntity> externalEntities;
 
 	private Collection<SourceFile> sourceFiles;
-	
+
 	private Function mainFunction = null;
 
-	public CommonAST(ASTFactory astFactory,
-			SequenceNode<BlockItemNode> root, boolean hasOmpPragma,
-			Collection<SourceFile> sourceFiles) throws SyntaxException {
+	private boolean isWholeprogram = false;
+
+	public CommonAST(ASTFactory astFactory, SequenceNode<BlockItemNode> root,
+			boolean hasOmpPragma, Collection<SourceFile> sourceFiles)
+			throws SyntaxException {
 		this.root = root;
 		this.astFactory = astFactory;
 		this.sourceFiles = sourceFiles;
+		this.isWholeprogram = false;
+		clearEntities();
+		initialize();
+	}
+
+	public CommonAST(ASTFactory astFactory, SequenceNode<BlockItemNode> root,
+			boolean hasOmpPragma, Collection<SourceFile> sourceFiles,
+			boolean isWholeprogram) throws SyntaxException {
+		this.root = root;
+		this.astFactory = astFactory;
+		this.sourceFiles = sourceFiles;
+		this.isWholeprogram = isWholeprogram;
 		clearEntities();
 		initialize();
 	}
@@ -82,12 +96,12 @@ public class CommonAST implements AST {
 	public ASTNode getNode(int id) {
 		return nodes[id];
 	}
-	
+
 	@Override
 	public void setMain(Function f) {
 		mainFunction = f;
 	}
-	
+
 	@Override
 	public Function getMain() {
 		return mainFunction;
@@ -250,5 +264,10 @@ public class CommonAST implements AST {
 		}
 		result += "]";
 		return result;
+	}
+
+	@Override
+	public boolean isWholeProgram() {
+		return this.isWholeprogram;
 	}
 }

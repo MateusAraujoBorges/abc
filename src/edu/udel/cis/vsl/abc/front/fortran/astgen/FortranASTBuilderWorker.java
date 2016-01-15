@@ -907,7 +907,7 @@ public class FortranASTBuilderWorker {
 		rootNode = this.generateRoot();
 		Set<SourceFile> sourceFiles = new LinkedHashSet<>();
 		sourceFiles.add(new SourceFile(new File(filePath), 0));
-		AST ast = astFactory.newAST(rootNode, sourceFiles);
+		AST ast = astFactory.newAST(rootNode, sourceFiles, false);
 		return ast;
 	}
 }

@@ -505,14 +505,18 @@ public abstract class CommonASTNode implements ASTNode {
 			FileReader fileReader;
 			BufferedReader bufferReader;
 			String line;
+			boolean first = true;
 
 			ASTs.prettyPrint(this, tmpOut);
 			fileReader = new FileReader(temp);
 			bufferReader = new BufferedReader(fileReader);
 			line = bufferReader.readLine();
 			while (line != null) {
+				if (first)
+					first = false;
+				else
+					result.append("\n");
 				result.append(line);
-				result.append("\n");
 				line = bufferReader.readLine();
 			}
 			bufferReader.close();

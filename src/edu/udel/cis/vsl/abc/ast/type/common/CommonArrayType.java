@@ -238,4 +238,9 @@ public class CommonArrayType extends CommonObjectType implements ArrayType {
 		return equivalent ? equivalentTo(other, seen) : compatibleWith(other,
 				seen);
 	}
+
+	@Override
+	public boolean isConstantQualified() {
+		return this.elementType.isConstantQualified();
+	}
 }

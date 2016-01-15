@@ -60,13 +60,17 @@ public interface ASTFactory {
 	 * 
 	 * @param root
 	 *            the root node of the new AST
+	 * @param isWholeprogram
+	 *            is this AST representing a whole program (see
+	 *            {@link AST#isWholeProgram()} )
 	 * @return the new AST
 	 * @throws SyntaxException
 	 *             if something violating the syntax rules is found while
 	 *             traversing this AST
 	 */
 	AST newAST(SequenceNode<BlockItemNode> root,
-			Collection<SourceFile> sourceFiles) throws SyntaxException;
+			Collection<SourceFile> sourceFiles, boolean isWholeprogram)
+			throws SyntaxException;
 
 	/**
 	 * Returns the node factory used by this AST factory. The node factory is

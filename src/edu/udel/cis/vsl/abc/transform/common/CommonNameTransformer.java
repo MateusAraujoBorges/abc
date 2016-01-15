@@ -52,7 +52,8 @@ public class CommonNameTransformer extends BaseTransformer implements
 		for (IdentifierNode identifierNode : identifierNameMap.keySet()) {
 			identifierNode.setName(identifierNameMap.get(identifierNode));
 		}
-		result = astFactory.newAST(rootNode, unit.getSourceFiles());
+		result = astFactory.newAST(rootNode, unit.getSourceFiles(),
+				unit.isWholeProgram());
 		return result;
 	}
 

@@ -930,4 +930,16 @@ public class CommonTypeFactory implements TypeFactory {
 		return type instanceof CommonVoidType;
 	}
 
+	@Override
+	public boolean isBundleType(Type type) {
+		if (type instanceof StructureOrUnionType) {
+			StructureOrUnionType structOrUnionType = (StructureOrUnionType) type;
+
+			if (structOrUnionType.isStruct()
+					&& structOrUnionType.getName().equals(TypeFactory.BUNDLE)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

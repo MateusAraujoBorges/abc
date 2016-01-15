@@ -177,4 +177,17 @@ public interface AST {
 	 * @return the source file objects for this AST
 	 */
 	Collection<SourceFile> getSourceFiles();
+
+	/**
+	 * Is this AST representing a whole program? Or is it representing some
+	 * arbitrary translation unit.
+	 * 
+	 * A whole program should contain exactly one main function definition. All
+	 * identifier used in an expression (except for sizeof or _Alignof
+	 * operators) or as the function in a function call should have its
+	 * definition.
+	 * 
+	 * @return true iff this AST is representing a whole program
+	 */
+	boolean isWholeProgram();
 }

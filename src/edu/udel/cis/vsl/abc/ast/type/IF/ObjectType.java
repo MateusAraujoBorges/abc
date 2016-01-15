@@ -18,4 +18,10 @@ public interface ObjectType extends Type {
 	 */
 	boolean hasKnownConstantSize();
 
+	/**
+	 * Is this type or any sub-type of this type (recursively) const-qualified?
+	 * 
+	 * @return
+	 */
+	boolean isConstantQualified();
 }

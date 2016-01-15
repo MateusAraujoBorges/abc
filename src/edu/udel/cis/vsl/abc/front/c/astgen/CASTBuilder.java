@@ -31,7 +31,7 @@ public class CASTBuilder implements ASTBuilder {
 		ASTBuilderWorker worker = getWorker(tree);
 		SequenceNode<BlockItemNode> rootNode = worker.translateRoot();
 		AST ast = astFactory.newAST(rootNode,
-				((CParseTree) tree).getSourceFiles());
+				((CParseTree) tree).getSourceFiles(), false);
 
 		return ast;
 	}

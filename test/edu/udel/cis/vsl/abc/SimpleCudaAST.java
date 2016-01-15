@@ -39,8 +39,10 @@ public class SimpleCudaAST {
 			.newMinimalConfiguration();
 	private static Formation sysForm = new SystemFormation("System Formation",
 			-1);
-	private static CivlcToken firstTok = new CommonCivlcToken(0, "first", sysForm);
-	private static CivlcToken lastTok = new CommonCivlcToken(0, "first", sysForm);
+	private static CivlcToken firstTok = new CommonCivlcToken(0, "first",
+			sysForm);
+	private static CivlcToken lastTok = new CommonCivlcToken(0, "first",
+			sysForm);
 	private static Source source = new CommonSource(firstTok, lastTok);
 	private static TypeFactory typeF = Types.newTypeFactory();
 	private static ValueFactory valueF = Values.newValueFactory(configuration,
@@ -259,7 +261,7 @@ public class SimpleCudaAST {
 		AST ast = astF.newAST(
 				nodeF.newSequenceNode(source, "definitions",
 						Arrays.<BlockItemNode> asList(kernelDef, mainDef)),
-				Arrays.asList(sysForm.getLastFile()));
+				Arrays.asList(sysForm.getLastFile()), true);
 
 		ast.print(System.out);
 	}

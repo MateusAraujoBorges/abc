@@ -438,4 +438,14 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 				seen);
 	}
 
+	@Override
+	public boolean isConstantQualified() {
+		if (fields != null)
+			for (Field field : this.fields) {
+				if (field.getType().isConstantQualified())
+					return true;
+			}
+		return false;
+	}
+
 }

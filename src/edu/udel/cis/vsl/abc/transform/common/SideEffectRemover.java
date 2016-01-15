@@ -2643,7 +2643,8 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 		rootNode = nodeFactory.newTranslationUnitNode(rootNode.getSource(),
 				newBlockItems);
-		newAST = astFactory.newAST(rootNode, ast.getSourceFiles());
+		newAST = astFactory.newAST(rootNode, ast.getSourceFiles(),
+				ast.isWholeProgram());
 		// newAST.prettyPrint(System.out, true);
 		return newAST;
 	}
