@@ -6,9 +6,11 @@ import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 /**
  * This represents a parse tree which is the result of preprocessing and parsing
@@ -75,4 +77,19 @@ public interface ParseTree {
 	 */
 	CivlcTokenSequence getTokenSourceProducer(CommonTree tokenListNode);
 
+	/**
+	 * gets the Civlc token source associating with this parse tree, i.e., the
+	 * CToken source that was used to produce this parse tree. It contains all
+	 * tokens, including those hidden for the parser
+	 * 
+	 * @return
+	 */
+	CivlcTokenSource getCivlcTokenSource();
+
+	/**
+	 * gets the token factory associating with this parse tree.
+	 * 
+	 * @return
+	 */
+	TokenFactory getTokenFactory();
 }

@@ -1,13 +1,12 @@
-package edu.udel.cis.vsl.abc.ast.node.common.declaration;
+package edu.udel.cis.vsl.abc.ast.node.common.acsl;
 
 import java.io.PrintStream;
 
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.common.CommonASTNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonGuardNode extends CommonASTNode implements GuardNode {
+public class CommonGuardNode extends CommonContractNode implements GuardNode {
 
 	public CommonGuardNode(Source source, ExpressionNode expression) {
 		super(source, expression);
@@ -15,7 +14,7 @@ public class CommonGuardNode extends CommonASTNode implements GuardNode {
 
 	@Override
 	protected void printBody(PrintStream out) {
-		out.print("Guard");
+		out.print("guards");
 	}
 
 	@Override
@@ -24,13 +23,8 @@ public class CommonGuardNode extends CommonASTNode implements GuardNode {
 	}
 
 	@Override
-	public NodeKind nodeKind() {
-		return NodeKind.CONTRACT;
-	}
-
-	@Override
 	public ContractKind contractKind() {
-		return ContractKind.GUARD;
+		return ContractKind.GUARDS;
 	}
 
 	@Override

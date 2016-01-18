@@ -94,4 +94,14 @@ public abstract class CommonParseTree implements ParseTree {
 	public String toString() {
 		return tokenSource.toString();
 	}
+
+	@Override
+	public CivlcTokenSource getCivlcTokenSource() {
+		return this.tokenSource;
+	}
+
+	@Override
+	public TokenFactory getTokenFactory() {
+		return this.tokenFactory;
+	}
 }

@@ -1,13 +1,13 @@
-package edu.udel.cis.vsl.abc.ast.node.common.declaration;
+package edu.udel.cis.vsl.abc.ast.node.common.acsl;
 
 import java.io.PrintStream;
 
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.RequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.common.CommonASTNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonRequiresNode extends CommonASTNode implements RequiresNode {
+public class CommonRequiresNode extends CommonContractNode implements
+		RequiresNode {
 
 	public CommonRequiresNode(Source source, ExpressionNode expression) {
 		super(source, expression);
@@ -26,11 +26,6 @@ public class CommonRequiresNode extends CommonASTNode implements RequiresNode {
 	@Override
 	public RequiresNode copy() {
 		return new CommonRequiresNode(getSource(), duplicate(getExpression()));
-	}
-
-	@Override
-	public NodeKind nodeKind() {
-		return NodeKind.CONTRACT;
 	}
 
 	@Override

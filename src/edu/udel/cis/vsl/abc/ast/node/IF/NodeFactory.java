@@ -5,23 +5,34 @@ import java.util.List;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AnyactNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompletenessNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode.EventOperator;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.FieldDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AssignsOrReadsNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DependsNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.EnumeratorDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
@@ -1793,7 +1804,7 @@ public interface NodeFactory {
 	 * @return the new <code>$depends</code> clause node
 	 */
 	DependsNode newDependsNode(Source source, ExpressionNode condition,
-			SequenceNode<ExpressionNode> eventList);
+			SequenceNode<DependsEventNode> eventList);
 
 	/**
 	 * Constructs a new node representing a CIVL-C <code>$guard</code> contract
@@ -1809,33 +1820,33 @@ public interface NodeFactory {
 	GuardNode newGuardNode(Source source, ExpressionNode expression);
 
 	/**
-	 * Constructs a new node representing a CIVL-C <code>$assigns</code>
-	 * contract clause.
+	 * Constructs a new node representing an ACSL <code>assigns</code> contract
+	 * clause.
 	 * 
 	 * @param source
 	 *            source specification spanning the entire <code>$assigns</code>
 	 *            clause, including the entire expression
 	 * @param expressionList
 	 *            the expression list which specifies the memory units
-	 *            associated with the <code>$assigns</code> clause
-	 * @return the new <code>$assigns</code> clause node
+	 *            associated with the <code>assigns</code> clause
+	 * @return the new <code>assigns</code> clause node
 	 */
-	AssignsOrReadsNode newAssignsNode(Source source, ExpressionNode condition,
+	AssignsOrReadsNode newAssignsNode(Source source,
 			SequenceNode<ExpressionNode> expressionList);
 
 	/**
-	 * Constructs a new node representing a CIVL-C <code>$reads</code> contract
+	 * Constructs a new node representing an ACSL <code>reads</code> contract
 	 * clause.
 	 * 
 	 * @param source
-	 *            source specification spanning the entire <code>$reads</code>
+	 *            source specification spanning the entire <code>reads</code>
 	 *            clause, including the entire expression
 	 * @param expressionList
 	 *            the expression list which specifies the memory units
-	 *            associated with the <code>$reads</code> clause
-	 * @return the new <code>$reads</code> clause node
+	 *            associated with the <code>reads</code> clause
+	 * @return the new <code>reads</code> clause node
 	 */
-	AssignsOrReadsNode newReadsNode(Source source, ExpressionNode condition,
+	AssignsOrReadsNode newReadsNode(Source source,
 			SequenceNode<ExpressionNode> expressionList);
 
 	// external definitions...
@@ -2237,4 +2248,37 @@ public interface NodeFactory {
 
 	TypeofNode newTypeofNode(Source source, ExpressionNode expression);
 
+	ReadOrWriteEventNode newReadOrWriteEventNode(Source source, boolean isRead,
+			SequenceNode<ExpressionNode> memoryList);
+
+	OperatorEventNode newOperatorEventNode(Source source, EventOperator op,
+			DependsEventNode left, DependsEventNode right);
+
+	NothingNode newNothingNode(Source source);
+
+	BehaviorNode newBehaviorNode(Source source, IdentifierNode name,
+			SequenceNode<ContractNode> body);
+
+	/**
+	 * creates a completeness clause node, which could be <code>complete</code>
+	 * or <code>disjoint</code>
+	 * 
+	 * @param source
+	 * @param isComplete
+	 *            true if to create a complete clause node, otherwise, a
+	 *            disjoint clause node
+	 * @param idList
+	 * @return
+	 */
+	CompletenessNode newCompletenessNode(Source source, boolean isComplete,
+			SequenceNode<IdentifierNode> idList);
+
+	AssumesNode newAssumesNode(Source source, ExpressionNode predicate);
+
+	NoactNode newNoactNode(Source source);
+
+	AnyactNode newAnyactNode(Source source);
+
+	CallEventNode newCallEventNode(Source source, IdentifierNode function,
+			SequenceNode<ExpressionNode> args);
 }

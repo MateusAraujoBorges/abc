@@ -180,6 +180,7 @@ public interface CivlcTokenConstant {
 	public static final int PROCNULL = CivlCParser.PROCNULL;
 	public static final int PROGRAM = CivlCParser.PROGRAM;
 	public static final int PUNDEF = CivlCParser.PUNDEF;
+	public static final int PURE = CivlCParser.PURE;
 	public static final int QMARK = CivlCParser.QMARK;
 	public static final int RCURLY = CivlCParser.RCURLY;
 	public static final int READS = CivlCParser.READS;

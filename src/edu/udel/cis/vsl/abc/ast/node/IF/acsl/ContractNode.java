@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.ast.node.IF.declaration;
+package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 
@@ -23,6 +23,18 @@ public interface ContractNode extends ASTNode {
 		 */
 		ASSIGNS_READS,
 		/**
+		 * an "assumes" clause
+		 */
+		ASSUMES,
+		/**
+		 * An "behavior" node encodes a named behavior block
+		 */
+		BEHAVIOR,
+		/**
+		 * An "completeness" node encodes either a complete or disjoint clause
+		 */
+		COMPLETENESS,
+		/**
 		 * defines features of the dependent processes of the current one
 		 */
 		DEPENDS,
@@ -35,7 +47,7 @@ public interface ContractNode extends ASTNode {
 		 * A "guard" node represents the guard of a CIVL-C function. A node of
 		 * this kind may be safely cast to {@link GuardNode}.
 		 */
-		GUARD,
+		GUARDS,
 		/**
 		 * A "requires" node represents a pre-condition in a CIVL-C procedure
 		 * contract. May be safely cast to {@link RequiresNode}.

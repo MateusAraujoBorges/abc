@@ -52,7 +52,7 @@
 
 	<target name="fortranLexer" depends="FortranLexer">
 	</target>
-	
+
 	<!--
 		FortranLexer.java should be built if FortranLexer.g 
 		is newer than FortranLexer.java
@@ -72,7 +72,7 @@
 		</java>
 		<move file="${fortran.grammar.dir}/FortranLexer.java" todir="${fortran.real.src.dir}/preproc/" />
 	</target>
-	
+
 	<target name="fortranParsers" depends="FortranLexer,FortranParser08,FortranParserExtras,FortranParserRiceCAF">
 	</target>
 
@@ -191,10 +191,10 @@
 		<move file="${fortran.grammar.dir}/FortranParserRiceCAF.java" todir="${fortran.real.src.dir}/parse/" />
 		<move file="${fortran.grammar.dir}/FortranParserRiceCAF_FortranParser08.java" todir="${fortran.real.src.dir}/parse/" />
 	</target>
-	
-	
-	
-	<target name="cParsers" depends="CPreprocessorExpressionParser,CivlCParser,OmpParser">
+
+
+
+	<target name="cParsers" depends="CPreprocessorExpressionParser,CivlCParser,OmpParser, AcslParser">
 	</target>
 
 
@@ -361,7 +361,50 @@
 		<delete file="${c.grammar.dir}/OmpParser2.java" />
 		<move file="${c.grammar.dir}/OmpParser.java" todir="${c.real.src.dir}/parse" />
 		<move file="${c.grammar.dir}/OmpParser_CivlCParser.java" todir="${c.real.src.dir}/parse" />
+	</target>
 
+	<!--
+			AcslLexer is the lexer for ACSL contracts.
+			Both AcslLexer.java and AcslLexer.tokens are needed.
+			They depend on AcslLexer.g.
+		-->
+
+	<target name="AcslLexerDependencies">
+		<uptodate property="unchangedAcslLexerGrammar" srcfile="${c.grammar.dir}/AcslLexer.g" targetfile="${c.grammar.dir}/AcslLexer.tokens" />
+	</target>
+
+	<target name="AcslLexer" depends="AcslLexerDependencies" unless="unchangedAcslLexerGrammar">
+		<delete file="${c.grammar.dir}/AcslLexer.tokens" />
+		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${c.grammar.dir}">
+			<arg value="-verbose" />
+			<arg value="AcslLexer.g" />
+		</java>
+		<move file="${c.grammar.dir}/AcslLexer.java" todir="${c.real.src.dir}/preproc" />
+	</target>
+
+	<!--
+			AcslParser is the parser for ACSL contracts.
+			AcslParser.java depends on AcslParser.g, AcslLexer.tokens,
+			and AcslLexer.java.
+		-->
+
+	<target name="AcslParserDependencies" depends="AcslLexer">
+		<uptodate property="unchangedAcslParserGrammar" srcfile="${c.grammar.dir}/AcslParser.g" targetfile="${c.real.src.dir}/parse/AcslParser.java" />
+		<uptodate property="AcslLexerBeforeAcslParser" srcfile="${c.grammar.dir}/AcslLexer.g" targetfile="${c.real.src.dir}/parse/AcslLexer.java" />
+		<condition property="AcslParserUpToDate">
+			<and>
+				<isset property="unchangedAcslParserGrammar" />
+				<isset property="AcslLexerBeforeAcslParser" />
+			</and>
+		</condition>
+	</target>
+
+	<target name="AcslParser" depends="AcslParserDependencies" unless="AcslParserUpToDate">
+		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${c.grammar.dir}">
+			<arg value="-verbose" />
+			<arg value="AcslParser.g" />
+		</java>
+		<move file="${c.grammar.dir}/AcslParser.java" tofile="${c.real.src.dir}/parse/AcslParser.java" />
 	</target>
 
 
@@ -488,6 +531,13 @@
 
 	<!-- Clean -->
 
+	<target name="cleanAcsl" description="Delete all generated files.">
+		<delete file="${c.grammar.dir}/AcslLexer.tokens" />
+		<delete file="${c.real.src.dir}/preproc/AcslLexer.java" />
+		<delete file="${c.grammar.dir}/AcslParser.tokens" />
+		<delete file="${c.real.src.dir}/parse/AcslParser.java" />
+	</target>
+
 	<target name="cleanOmp" description="Delete all generated files.">
 		<delete file="${c.grammar.dir}/OmpLexer.tokens" />
 		<delete file="${c.real.src.dir}/preproc/OmpLexer.java" />
@@ -496,7 +546,7 @@
 		<delete file="${c.real.src.dir}/parse/OmpParser.java" />
 		<delete file="${c.real.src.dir}/parse/OmpParser_CivlCParser.java" />
 	</target>
-	
+
 	<target name="cleanFortran" description="Delete all generated files related to Fortran Parser">
 		<delete file="${fortran.grammar.dir}/FortranLexer.tokens" />
 		<!--<touch file="${fortran.grammar.dir}/FortranLexer.tokens" />-->
@@ -513,8 +563,8 @@
 		<delete file="${fortran.real.src.dir}/parse/FortranParserRiceCAF.java" />
 		<delete file="${fortran.real.src.dir}/parse/FortranParserRiceCAF_FortranParser08.java" />
 	</target>
-		
-	<target name="clean" description="Delete all generated files." depends="cleanFortran">
+
+	<target name="clean" description="Delete all generated files." depends="cleanFortran, cleanAcsl">
 		<delete dir="${bin.dir}" />
 		<delete dir="${test.bin.dir}" />
 		<delete dir="${junit.dir}" />

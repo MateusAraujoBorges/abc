@@ -857,6 +857,7 @@ functionSpecifier
       -> ^(ABSTRACT INTEGER_CONSTANT)
     | ABSTRACT -> ^(ABSTRACT)
     | FATOMIC -> ^(FATOMIC)
+    | PURE -> ^(PURE)
     | DEVICE
     | GLOBAL
     ;

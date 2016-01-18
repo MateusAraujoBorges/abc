@@ -15,6 +15,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -544,9 +545,10 @@ public class ExpressionAnalyzer {
 			// type is scope type, already set
 		} else if (node instanceof WildcardNode) {
 			node.setInitialType(typeFactory.voidType());
-		} else
-			throw new RuntimeException("Unknown kind of constant node: " + node);
-		if (node.getInitialType() == null)
+		}
+		// else
+		// throw new RuntimeException("Unknown kind of constant node: " + node);
+		if (node.getInitialType() == null && !(node instanceof NothingNode))
 			throw error("Internal error: did not set type", node);
 	}
 

@@ -45,7 +45,11 @@ public class CParser implements Parser {
 		/**
 		 * the rule for translating a block item
 		 */
-		BLOCK_ITEM
+		BLOCK_ITEM,
+		/**
+		 * ACSL contracts
+		 */
+		CONTRACT
 	}
 
 	/* *************************** Constructors *************************** */

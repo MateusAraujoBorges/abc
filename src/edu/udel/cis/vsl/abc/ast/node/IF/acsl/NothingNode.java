@@ -1,4 +1,6 @@
-package edu.udel.cis.vsl.abc.ast.node.IF.expression;
+package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
+
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 
 /**
  * Constant <code>$nothing</code>, argument of <code>$assigns / $reads</code>

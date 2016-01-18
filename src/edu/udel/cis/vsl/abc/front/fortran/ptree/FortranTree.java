@@ -14,9 +14,11 @@ import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.ParseTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 /**
  * @author Wenhao Wu
@@ -335,6 +337,18 @@ public class FortranTree implements ParseTree {
 
 	@Override
 	public CivlcTokenSequence getTokenSourceProducer(CommonTree tokenListNode) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CivlcTokenSource getCivlcTokenSource() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public TokenFactory getTokenFactory() {
 		// TODO Auto-generated method stub
 		return null;
 	}

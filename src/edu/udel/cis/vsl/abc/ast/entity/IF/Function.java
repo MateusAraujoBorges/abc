@@ -3,8 +3,8 @@ package edu.udel.cis.vsl.abc.ast.entity.IF;
 import java.util.Iterator;
 import java.util.Set;
 
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AssignsOrReadsNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DependsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.FunctionType;

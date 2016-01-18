@@ -21,10 +21,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignatorNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.EnumeratorDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
@@ -80,13 +80,15 @@ import edu.udel.cis.vsl.abc.front.common.astgen.ASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
+import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
-import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
+import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.util.IF.Triple;
 
 /**
  * Builds an AST from an ANTLR tree.
@@ -125,6 +127,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private int anonymousTagCount = 0;
 
+	private AcslContractHandler acslHandler;
+
 	/* *************************** Constructors *************************** */
 
 	/**
@@ -146,6 +150,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		this.rootTree = parseTree.getRoot();
 		this.pragmaFactory = pragmaFactory;
 		this.config = config;
+		acslHandler = new AcslContractHandler(this.nodeFactory,
+				this.tokenFactory);
 	}
 
 	/* ************************* Private Methods ************************** */
@@ -1149,9 +1155,10 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			Source source;
 
 			if (analysis.specifierListNode.getChildCount() == 0)
-				source = this.tokenFactory.newSource(tokenFactory.newCivlcToken(
-						IDENTIFIER, analysis.basicTypeKind.toString(),
-						tokenFactory.newSystemFormation("system")));
+				source = this.tokenFactory.newSource(tokenFactory
+						.newCivlcToken(IDENTIFIER,
+								analysis.basicTypeKind.toString(),
+								tokenFactory.newSystemFormation("system")));
 			else
 				source = newSource(analysis.specifierListNode);
 			result = nodeFactory.newBasicTypeNode(source,
@@ -1961,8 +1968,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	private LabeledStatementNode translateCaseLabeledStatement(
 			CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		CivlcToken caseToken = (CivlcToken) ((CommonTree) statementTree.getChild(0))
-				.getToken();
+		CivlcToken caseToken = (CivlcToken) ((CommonTree) statementTree
+				.getChild(0)).getToken();
 		CommonTree expression = (CommonTree) statementTree.getChild(1);
 		ExpressionNode expressionNode = translateExpression(expression, scope);
 		StatementNode statement = translateStatement(
@@ -1979,8 +1986,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	private LabeledStatementNode translateDefaultLabeledStatement(
 			CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		CivlcToken defaultToken = (CivlcToken) ((CommonTree) statementTree.getChild(0))
-				.getToken();
+		CivlcToken defaultToken = (CivlcToken) ((CommonTree) statementTree
+				.getChild(0)).getToken();
 		Source labelSource = tokenFactory.newSource(defaultToken);
 		StatementNode statement = translateStatement(
 				(CommonTree) statementTree.getChild(1), scope);
@@ -2219,7 +2226,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		CommonTree bodyTree = (CommonTree) pragmaTree.getChild(1);
 		CommonTree newlineTree = (CommonTree) pragmaTree.getChild(2);
 		CivlcToken newlineToken = (CivlcToken) newlineTree.getToken();
-		CivlcTokenSequence producer = parseTree.getTokenSourceProducer(bodyTree);
+		CivlcTokenSequence producer = parseTree
+				.getTokenSourceProducer(bodyTree);
 		PragmaNode pragmaNode = nodeFactory.newPragmaNode(source, identifier,
 				producer, newlineToken);
 		PragmaHandler handler = getPragmaHandler(code);
@@ -2459,6 +2467,32 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 						(CommonTree) staticAssertTree.getChild(1)));
 	}
 
+	private SequenceNode<ContractNode> translateAcslContract(
+			CommonTree functionTree, SimpleScope scope) throws SyntaxException {
+		Triple<Integer, StringBuffer, Formation> comments = this.parseTree
+				.getHiddenSubTokenSource(functionTree.getTokenStartIndex() - 1);
+		List<ContractNode> contracts = null;
+		Source source = null;
+
+		if (comments.left >= 0) {
+			String commentsText = comments.middle.toString();
+
+			if (commentsText.contains("/*@")) {
+				contracts = acslHandler.translateContracts(comments.left,
+						commentsText, scope, comments.right);
+				source = contracts.get(0).getSource();
+				// for (ContractNode contract : contracts) {
+				// contract.print("", System.out, true);
+				// System.out.println();
+				// }
+			}
+		}
+		if (contracts != null && contracts.size() > 0)
+			return this.nodeFactory.newSequenceNode(source, "ACSL contracts",
+					contracts);
+		return null;
+	}
+
 	/**
 	 * 
 	 * @param functionDefinitionTree
@@ -2478,8 +2512,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				.getChild(2);
 		CommonTree compoundStatementTree = (CommonTree) functionDefinitionTree
 				.getChild(3);
-		CommonTree contractTree = (CommonTree) functionDefinitionTree
-				.getChild(4);
+		// CommonTree contractTree = (CommonTree) functionDefinitionTree
+		// .getChild(4);
 		// CommonTree scopeListTree = (CommonTree) functionDefinitionTree
 		// .getChild(5);
 		// SequenceNode<VariableDeclarationNode> scopeListNode =
@@ -2561,10 +2595,15 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			}
 		}
 		body = translateCompoundStatement(compoundStatementTree, newScope);
+		// result = nodeFactory.newFunctionDefinitionNode(
+		// newSource(functionDefinitionTree), data.identifier,
+		// (FunctionTypeNode) data.type,
+		// getContract(contractTree, newScope), body);
 		result = nodeFactory.newFunctionDefinitionNode(
 				newSource(functionDefinitionTree), data.identifier,
 				(FunctionTypeNode) data.type,
-				getContract(contractTree, newScope), body);
+				this.translateAcslContract(functionDefinitionTree, newScope),
+				body);
 		// TODO: Should function specifiers actually be set here? I added this
 		// call because otherwise specifiers are not added to function
 		// definitions, only declarations
@@ -2601,23 +2640,24 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 								|| itemKind == DEPENDS) {
 							List<ExpressionNode> argumentList = new ArrayList<>();
 							int expressionCount = itemTree.getChildCount();
-							CommonTree conditionTree = null, listTree;
+							// CommonTree conditionTree = null;
+							CommonTree listTree;
 							int listKind;
-							ExpressionNode condition = null;
-							SequenceNode<ExpressionNode> list;
+							// ExpressionNode condition = null;
+							// SequenceNode<ExpressionNode> list;
 
 							if (expressionCount == 2) {
-								conditionTree = (CommonTree) itemTree
-										.getChild(0);
+								// conditionTree = (CommonTree) itemTree
+								// .getChild(0);
 								listTree = (CommonTree) itemTree.getChild(1);
 							} else {
 								listTree = (CommonTree) itemTree.getChild(0);
 							}
 							listKind = listTree.getType();
-							if (conditionTree != null) {
-								condition = translateExpression(conditionTree,
-										scope);
-							}
+							// if (conditionTree != null) {
+							// condition = translateExpression(conditionTree,
+							// scope);
+							// }
 							if (listKind == ARGUMENT_LIST) {
 								int numArgs = listTree.getChildCount();
 
@@ -2629,19 +2669,19 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 									argumentList.add(argumentNode);
 								}
-								list = nodeFactory.newSequenceNode(
-										newSource(listTree),
-										"$assigns/$reads/$depends arguments",
-										argumentList);
+								// list = nodeFactory.newSequenceNode(
+								// newSource(listTree),
+								// "$assigns/$reads/$depends arguments",
+								// argumentList);
 								if (itemKind == ASSIGNS)
-									contractNode = nodeFactory.newAssignsNode(
-											source, condition, list);
+									contractNode = null;// nodeFactory.newAssignsNode(
+								// source, condition, list);
 								else if (itemKind == READS)
-									contractNode = nodeFactory.newReadsNode(
-											source, condition, list);
+									contractNode = null;// nodeFactory.newReadsNode(
+								// source, condition, list);
 								else
 									contractNode = nodeFactory.newDependsNode(
-											source, condition, list);
+											source, null, null);
 							} else {
 								throw new SyntaxException(
 										"Invalid arguments for $assigns/$reads clause",

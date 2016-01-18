@@ -1,16 +1,11 @@
 #include <civlc.cvh>
 #include <memory.cvh>
 
-void test(int a, int b)
-  $depends {$true}
-$assigns {a, b} ;
-/*{
-  int c = a + b;
+/*@ depends \anyact;
+  @ assigns a, b;
+  @*/
+void test(int a, int b);
 
-  c = c + c;
-}*/
-
-void foo(int n)
-$depends {
-  $access(n) - ($calls($inc(&n)) + $calls($dec(&n)))
-    };
+/*@ depends (\write(n)+\read(n))-(\call(inc, n)+\call(dec, n));
+  @*/
+void foo(int n);

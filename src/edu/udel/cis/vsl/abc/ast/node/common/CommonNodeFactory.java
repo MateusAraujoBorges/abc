@@ -11,23 +11,34 @@ import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AnyactNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompletenessNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode.EventOperator;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.FieldDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AssignsOrReadsNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DependsNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.EnumeratorDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
@@ -102,20 +113,29 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeofNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAnyactNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAssumesNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonBehaviorNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCallEventNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompletenessNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonDependsNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonEnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonGuardNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonOperatorEventNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonReadOrWriteEventNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonRequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonCompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonDesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonFieldDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonAbstractFunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonAssignsOrReadsNode;
-import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonDependsNode;
-import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonEnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonEnumeratorDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonFieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonFunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonFunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonGuardNode;
-import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonRequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonTypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonVariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonAlignOfNode;
@@ -995,8 +1015,8 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public DependsNode newDependsNode(Source source, ExpressionNode condition,
-			SequenceNode<ExpressionNode> eventList) {
-		return new CommonDependsNode(source, condition, eventList);
+			SequenceNode<DependsEventNode> eventList) {
+		return new CommonDependsNode(source, eventList);
 	}
 
 	@Override
@@ -1006,18 +1026,14 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public AssignsOrReadsNode newAssignsNode(Source source,
-			ExpressionNode condition,
 			SequenceNode<ExpressionNode> expressionList) {
-		return new CommonAssignsOrReadsNode(source, true, condition,
-				expressionList);
+		return new CommonAssignsOrReadsNode(source, true, expressionList);
 	}
 
 	@Override
 	public AssignsOrReadsNode newReadsNode(Source source,
-			ExpressionNode condition,
 			SequenceNode<ExpressionNode> expressionList) {
-		return new CommonAssignsOrReadsNode(source, false, condition,
-				expressionList);
+		return new CommonAssignsOrReadsNode(source, false, expressionList);
 	}
 
 	@Override
@@ -1039,6 +1055,56 @@ public class CommonNodeFactory implements NodeFactory {
 	@Override
 	public TypeofNode newTypeofNode(Source source, ExpressionNode expression) {
 		return new CommonTypeofNode(source, expression);
+	}
+
+	@Override
+	public ReadOrWriteEventNode newReadOrWriteEventNode(Source source,
+			boolean isRead, SequenceNode<ExpressionNode> memoryList) {
+		return new CommonReadOrWriteEventNode(source, isRead, memoryList);
+	}
+
+	@Override
+	public OperatorEventNode newOperatorEventNode(Source source,
+			EventOperator op, DependsEventNode left, DependsEventNode right) {
+		return new CommonOperatorEventNode(source, op, left, right);
+	}
+
+	@Override
+	public NothingNode newNothingNode(Source source) {
+		return new CommonNothingNode(source, null);
+	}
+
+	@Override
+	public BehaviorNode newBehaviorNode(Source source, IdentifierNode name,
+			SequenceNode<ContractNode> body) {
+		return new CommonBehaviorNode(source, name, body);
+	}
+
+	@Override
+	public CompletenessNode newCompletenessNode(Source source,
+			boolean isComplete, SequenceNode<IdentifierNode> idList) {
+		return new CommonCompletenessNode(source, isComplete, idList);
+	}
+
+	@Override
+	public AssumesNode newAssumesNode(Source source, ExpressionNode predicate) {
+		return new CommonAssumesNode(source, predicate);
+	}
+
+	@Override
+	public NoactNode newNoactNode(Source source) {
+		return new CommonNoactNode(source);
+	}
+
+	@Override
+	public AnyactNode newAnyactNode(Source source) {
+		return new CommonAnyactNode(source);
+	}
+
+	@Override
+	public CallEventNode newCallEventNode(Source source,
+			IdentifierNode function, SequenceNode<ExpressionNode> args) {
+		return new CommonCallEventNode(source, function, args);
 	}
 
 }

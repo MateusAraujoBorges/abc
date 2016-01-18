@@ -1,22 +1,21 @@
-package edu.udel.cis.vsl.abc.ast.node.common.declaration;
+package edu.udel.cis.vsl.abc.ast.node.common.acsl;
 
 import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.common.CommonASTNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonAssignsOrReadsNode extends CommonASTNode implements
+public class CommonAssignsOrReadsNode extends CommonContractNode implements
 		AssignsOrReadsNode {
 
 	private boolean isAssigns;
 
 	public CommonAssignsOrReadsNode(Source source, boolean isAssigns,
-			ExpressionNode condition, SequenceNode<ExpressionNode> child) {
-		super(source, condition, (ASTNode) child);
+			SequenceNode<ExpressionNode> child) {
+		super(source, (ASTNode) child);
 		this.isAssigns = isAssigns;
 	}
 
@@ -25,34 +24,24 @@ public class CommonAssignsOrReadsNode extends CommonASTNode implements
 		return ContractKind.ASSIGNS_READS;
 	}
 
-	@Override
-	public NodeKind nodeKind() {
-		return NodeKind.CONTRACT;
-	}
-
 	@SuppressWarnings("unchecked")
 	@Override
 	public SequenceNode<ExpressionNode> getMemoryList() {
-		return (SequenceNode<ExpressionNode>) this.child(1);
+		return (SequenceNode<ExpressionNode>) this.child(0);
 	}
 
 	@Override
 	public AssignsOrReadsNode copy() {
 		return new CommonAssignsOrReadsNode(this.getSource(), this.isAssigns,
-				duplicate(getCondition()), duplicate(getMemoryList()));
+				duplicate(getMemoryList()));
 	}
 
 	@Override
 	protected void printBody(PrintStream out) {
 		if (this.isAssigns)
-			out.print("$assigns");
+			out.print("Assigns");
 		else
-			out.print("$reads");
-	}
-
-	@Override
-	public ExpressionNode getCondition() {
-		return (ExpressionNode) this.child(0);
+			out.print("Reads");
 	}
 
 	@Override

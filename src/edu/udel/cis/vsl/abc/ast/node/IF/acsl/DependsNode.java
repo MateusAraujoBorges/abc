@@ -1,7 +1,6 @@
-package edu.udel.cis.vsl.abc.ast.node.IF.declaration;
+package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
 /**
  * A <code>depends</code> clause specifies part of the dependence relation used
@@ -19,17 +18,12 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
  */
 public interface DependsNode extends ContractNode {
 	/**
-	 * Gets the boolean condition which is the condition for the dependency
-	 * relationship among processes.
+	 * Gets the list of events specified by this depends clause
 	 * 
-	 * @return the boolean condition which is the condition for the dependency
-	 *         relationship among processes.
+	 * @return the list of events specified by this depends clause
 	 */
-	SequenceNode<ExpressionNode> getEventList();
-
-	ExpressionNode getCondition();
+	SequenceNode<DependsEventNode> getEventList();
 
 	@Override
 	DependsNode copy();
-
 }

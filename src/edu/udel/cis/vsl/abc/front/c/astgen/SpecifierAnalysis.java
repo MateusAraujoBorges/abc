@@ -1,8 +1,6 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ABSTRACT;
-import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DEVICE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ALIGNAS;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ATOMIC;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.AUTO;
@@ -10,6 +8,7 @@ import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.BOOL;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.CHAR;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.COMPLEX;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.CONST;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DEVICE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DOMAIN;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DOUBLE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ENUM;
@@ -24,6 +23,7 @@ import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.INT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.LONG;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.NORETURN;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.OUTPUT;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.PURE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.RANGE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.REAL;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.REGISTER;
@@ -157,6 +157,7 @@ public class SpecifierAnalysis {
 	boolean noreturnSpecifier = false;
 	boolean abstractSpecifier = false;
 	boolean fatomicSpecifier = false;
+	boolean pureSpecifier = false;
 	/**
 	 * CUDA specifier __global__
 	 */
@@ -356,6 +357,9 @@ public class SpecifierAnalysis {
 					break;
 				case DEVICE:
 					this.deviceSpecifier = true;
+					break;
+				case PURE:
+					this.pureSpecifier = true;
 					break;
 				default:
 					throw error("Unknown declaration specifier", node);

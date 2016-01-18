@@ -1,4 +1,4 @@
-package edu.udel.cis.vsl.abc.ast.node.IF.declaration;
+package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -9,7 +9,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
  * modified in the course of the function call. The syntax is:
  * 
  * <pre>
- * $assigns <memory-list>;
+ * assigns (or reads) <memory-list>;
  * </pre>
  * 
  * where <code>memory-list</code> is a comma-separated list of expressions of
@@ -29,12 +29,20 @@ public interface AssignsOrReadsNode extends ContractNode {
 	 */
 	SequenceNode<ExpressionNode> getMemoryList();
 
-	ExpressionNode getCondition();
-
 	@Override
 	AssignsOrReadsNode copy();
-	
+
+	/**
+	 * Is this an <code>assigns</code> clause?
+	 * 
+	 * @return
+	 */
 	boolean isAssigns();
-	
+
+	/**
+	 * Is this a <code>reads</code> clause?
+	 * 
+	 * @return
+	 */
 	boolean isReads();
 }

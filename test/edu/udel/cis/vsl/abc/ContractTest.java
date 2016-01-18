@@ -40,7 +40,7 @@ public class ContractTest {
 			Program p = f.compileAndLink(new File[] { file }, Language.CIVL_C);
 
 			p.applyTransformers(codes);
-			p.prettyPrint(System.out);
+			// p.prettyPrint(System.out);
 		}
 	}
 

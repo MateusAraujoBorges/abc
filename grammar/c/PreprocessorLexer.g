@@ -157,6 +157,7 @@ LSLIST		:	'<|';  // LSLIST and RSLIST enclose a scope list
 OUTPUT		:	'$output';
 PARFOR		:	'$parfor';
 PROCNULL	:	'$proc_null';
+PURE        :   '$pure';
 RANGE		:	'$range';
 REAL		:	'$real';
 REQUIRES	:	'$requires';

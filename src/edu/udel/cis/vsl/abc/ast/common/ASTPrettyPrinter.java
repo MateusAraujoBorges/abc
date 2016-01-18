@@ -11,24 +11,32 @@ import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode.ContractKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode.EventOperator;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.FieldDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AssignsOrReadsNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ContractNode.ContractKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DependsNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.EnumeratorDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
@@ -518,8 +526,9 @@ public class ASTPrettyPrinter {
 		SequenceNode<VariableDeclarationNode> paras = typeNode.getParameters();
 		int numOfParas = paras.numChildren();
 		SequenceNode<ContractNode> contracts = function.getContract();
-		int numContracts = contracts != null ? contracts.numChildren() : 0;
 
+		if (contracts != null)
+			pPrintFunctionContract(out, prefix, contracts);
 		if (function instanceof AbstractFunctionDefinitionNode)
 			out.print("$abstract ");
 		if (function.hasGlobalFunctionSpecifier())
@@ -537,11 +546,11 @@ public class ASTPrettyPrinter {
 		if (typeNode.hasVariableArgs())
 			out.print(", ...");
 		out.print(")");
-		for (int i = 0; i < numContracts; i++) {
-			out.print("\n");
-			pPrintContract(out, prefix + indention,
-					contracts.getSequenceChild(i));
-		}
+		// for (int i = 0; i < numContracts; i++) {
+		// out.print("\n");
+		// pPrintContract(out, prefix + indention,
+		// contracts.getSequenceChild(i));
+		// }
 
 		if (function instanceof FunctionDefinitionNode) {
 			CompoundStatementNode body = ((FunctionDefinitionNode) function)
@@ -550,14 +559,194 @@ public class ASTPrettyPrinter {
 			out.print("\n");
 			pPrintCompoundStatement(out, prefix + indention, body, true, false);
 		} else {
-			if (numContracts > 0) {
-				out.print("\n");
-				out.print(prefix);
-			}
 			out.print(";");
 		}
 	}
 
+	private static void pPrintFunctionContract(PrintStream out, String prefix,
+			SequenceNode<ContractNode> contracts) {
+		String newLinePrefix = prefix + "\n  @ ";
+		int numContracts = contracts.numChildren();
+		boolean isFirst = true;
+
+		out.print(prefix);
+		out.print("/*@ ");
+		for (int i = 0; i < numContracts; i++) {
+			ContractNode contract = contracts.getSequenceChild(i);
+
+			if (isFirst)
+				isFirst = false;
+			else
+				out.print(newLinePrefix);
+			pPrintContractNode(out, newLinePrefix, contract);
+		}
+		out.print("\n");
+		out.print(prefix);
+		out.print("  @*/\n");
+
+	}
+
+	private static void pPrintContractNode(PrintStream out, String prefix,
+			ContractNode contract) {
+		ContractKind kind = contract.contractKind();
+
+		switch (kind) {
+		case ASSUMES: {
+			AssumesNode assumes = (AssumesNode) contract;
+
+			out.print("assumes ");
+			out.print(expression2Pretty(assumes.getPredicate()));
+			out.print(";");
+			break;
+		}
+		case ASSIGNS_READS: {
+			AssignsOrReadsNode assignsOrReads = (AssignsOrReadsNode) contract;
+			// ExpressionNode condition = assignsOrReads.getCondition();
+
+			if (assignsOrReads.isAssigns())
+				out.print("assigns ");
+			else
+				out.print("reads ");
+			pPrintSequenceNode(assignsOrReads.getMemoryList(), out);
+			out.print(";");
+			break;
+		}
+		case DEPENDS: {
+			DependsNode depends = (DependsNode) contract;
+
+			out.print("depends ");
+			out.print(sequenceDependsEvent2Pretty(depends.getEventList()));
+			out.print(";");
+			break;
+		}
+		case ENSURES: {
+			EnsuresNode ensures = (EnsuresNode) contract;
+
+			out.print("ensures ");
+			out.print(expression2Pretty(ensures.getExpression()));
+			out.print(";");
+			break;
+		}
+		case GUARDS: {
+			GuardNode guard = (GuardNode) contract;
+
+			out.print("guards ");
+			out.print(expression2Pretty(guard.getExpression()));
+			out.print(";");
+			break;
+		}
+		case REQUIRES: {
+			RequiresNode requires = (RequiresNode) contract;
+
+			out.print("requires ");
+			out.print(expression2Pretty(requires.getExpression()));
+			out.print(";");
+			break;
+		}
+		case BEHAVIOR: {
+			BehaviorNode behavior = (BehaviorNode) contract;
+			SequenceNode<ContractNode> body = behavior.getBody();
+			String indentedNewLinePrefix = prefix + "  ";
+
+			out.print("behavior ");
+			out.print(behavior.getName().name());
+			out.print(":");
+			for (ContractNode clause : body) {
+				// out.print("\n");
+				out.print(indentedNewLinePrefix);
+				pPrintContractNode(out, indentedNewLinePrefix, clause);
+			}
+			break;
+		}
+		default:
+			throw new ABCUnsupportedException(
+					"pretty printing contract node of " + kind + " kind");
+		}
+
+	}
+
+	private static StringBuffer sequenceDependsEvent2Pretty(
+			SequenceNode<DependsEventNode> eventList) {
+		StringBuffer result = new StringBuffer();
+		boolean isFirst = true;
+
+		for (DependsEventNode event : eventList) {
+			if (isFirst)
+				isFirst = false;
+			else
+				result.append(", ");
+			result.append(dependsEvent2Pretty(event));
+		}
+		return result;
+	}
+
+	private static StringBuffer dependsEvent2Pretty(DependsEventNode event) {
+		DependsEventKind kind = event.getEventKind();
+		StringBuffer result = new StringBuffer();
+
+		switch (kind) {
+		case READ_WRITE: {
+			ReadOrWriteEventNode rwEvent = (ReadOrWriteEventNode) event;
+
+			if (rwEvent.isRead())
+				result.append("\\read");
+			else
+				result.append("\\write");
+			result.append("(");
+			result.append(sequenceExpression2Pretty(rwEvent.getMemoryList()));
+			result.append(")");
+			break;
+		}
+		case OPERATOR: {
+			OperatorEventNode opEvent = (OperatorEventNode) event;
+			EventOperator op = opEvent.eventOperator();
+
+			result.append("(");
+			result.append(dependsEvent2Pretty(opEvent.getLeft()));
+			result.append(")");
+			switch (op) {
+			case UNION:
+				result.append(" + ");
+				break;
+			case DIFFERENCE:
+				result.append(" - ");
+				break;
+			case INTERSECT:
+				result.append(" & ");
+				break;
+			default:
+				throw new ABCUnsupportedException(
+						"pretty printing depends event node with " + kind
+								+ " operator");
+			}
+			result.append("(");
+			result.append(dependsEvent2Pretty(opEvent.getRight()));
+			result.append(")");
+			break;
+		}
+		case CALL: {
+			CallEventNode callEvent = (CallEventNode) event;
+			SequenceNode<ExpressionNode> args = callEvent.arguments();
+
+			result.append("\\call(");
+			result.append(callEvent.getFunction().name());
+			if (args.numChildren() > 0)
+				result.append(", ");
+			result.append(sequenceExpression2Pretty(callEvent.arguments()));
+			result.append(")");
+			break;
+		}
+		case NOACT:
+			result.append("\\noact");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty printing depends event node of " + kind + " kind");
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unused")
 	private static void pPrintContract(PrintStream out, String prefix,
 			ContractNode contract) {
 		ContractKind kind = contract.contractKind();
@@ -566,17 +755,17 @@ public class ASTPrettyPrinter {
 		switch (kind) {
 		case ASSIGNS_READS: {
 			AssignsOrReadsNode assignsOrReads = (AssignsOrReadsNode) contract;
-			ExpressionNode condition = assignsOrReads.getCondition();
+			// ExpressionNode condition = assignsOrReads.getCondition();
 
 			if (assignsOrReads.isAssigns())
 				out.print("$assigns");
 			else
 				out.print("$reads");
-			if (condition != null) {
-				out.print(" [");
-				out.print(expression2Pretty(condition));
-				out.print("] ");
-			}
+			// if (condition != null) {
+			// out.print(" [");
+			// out.print(expression2Pretty(condition));
+			// out.print("] ");
+			// }
 			out.print("{");
 			pPrintSequenceNode(assignsOrReads.getMemoryList(), out);
 			out.print("}");
@@ -584,16 +773,16 @@ public class ASTPrettyPrinter {
 		}
 		case DEPENDS: {
 			DependsNode depends = (DependsNode) contract;
-			ExpressionNode condition = depends.getCondition();
+			// ExpressionNode condition = depends.getCondition();
 
-			out.print("$depends");
-			if (condition != null) {
-				out.print(" [");
-				out.print(expression2Pretty(condition));
-				out.print("] ");
-			}
+			out.print("depends");
+			// if (condition != null) {
+			// out.print(" [");
+			// out.print(expression2Pretty(condition));
+			// out.print("] ");
+			// }
 			out.print("{");
-			out.print(sequenceExpression2Pretty(depends.getEventList()));
+			// out.print(sequenceExpression2Pretty(depends.getEventList()));
 			out.print("}");
 			break;
 		}
@@ -606,7 +795,7 @@ public class ASTPrettyPrinter {
 			out.print("}");
 			break;
 		}
-		case GUARD: {
+		case GUARDS: {
 			GuardNode guard = (GuardNode) contract;
 
 			out.print("$guard");
@@ -1617,7 +1806,7 @@ public class ASTPrettyPrinter {
 					.getIdentifierNode()));
 			break;
 		case RESULT:
-			result.append("$result");
+			result.append("\\result");
 			break;
 		case STATEMENT_EXPRESSION:
 			return statementExpression2Pretty((StatementExpressionNode) expression);

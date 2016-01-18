@@ -1479,6 +1479,7 @@ public class SideEffectRemover extends BaseTransformer {
 	 *         its type; otherwise nothing is guaranteed (value may or may not
 	 *         be strictly conforming)
 	 */
+	@SuppressWarnings("unused")
 	private boolean isStrictlyConformingValue(Value value) {
 		// TODO: make more precise
 		Configuration config = this.getConfiguration();
