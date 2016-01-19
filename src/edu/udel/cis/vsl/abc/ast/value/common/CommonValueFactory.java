@@ -524,6 +524,8 @@ public class CommonValueFactory implements ValueFactory {
 	private Value evaluateCast(Type castType, Value value)
 			throws UnsourcedException {
 		// TODO: cast concrete numeric types if you can, pointer types, ...
+		if (value == null)
+			return null;
 		if (castType.compatibleWith(value.getType()))
 			return value;
 		return canonic(new CommonCastValue(castType, value));

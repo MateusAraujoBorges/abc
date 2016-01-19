@@ -609,23 +609,25 @@ public class CommonTypeFactory implements TypeFactory {
 	@Override
 	public ArithmeticType usualArithmeticConversion(ArithmeticType type1,
 			ArithmeticType type2) {
-		if (type1.equals(type2))
-			return type1;
-		else {
-			ArithmeticType result = floatingArithmeticConversion(type1, type2);
+		// if (type1.equals(type2))
+		// return type1;
+		// else {
+		ArithmeticType result = floatingArithmeticConversion(type1, type2);
 
-			if (result != null)
-				return result;
-			if (!type1.isInteger())
-				throw new RuntimeException("Unexpected arithmetic type: "
-						+ type1);
-			if (!type2.isInteger())
-				throw new RuntimeException("Unexpected arithmetic type: "
-						+ type2);
-			return integerArithmeticConversion(
-					integerPromotion((IntegerType) type1),
-					integerPromotion((IntegerType) type2));
-		}
+		if (result != null)
+			return result;
+		if (!type1.isInteger())
+			throw new RuntimeException("Unexpected arithmetic type: " + type1);
+		if (!type2.isInteger())
+			throw new RuntimeException("Unexpected arithmetic type: " + type2);
+
+		IntegerType intType1 = integerPromotion((IntegerType) type1);
+		IntegerType intType2 = integerPromotion((IntegerType) type2);
+
+		if (intType1.equals(intType2))
+			return intType1;
+		return integerArithmeticConversion(intType1, intType2);
+		// }
 	}
 
 	/**
