@@ -1,4 +1,5 @@
 #include<assert.h>
+
 //========================= enums.c ========================
 typedef enum color{
   RED,
@@ -11,7 +12,7 @@ color_t f()
 int main()
 {
   int x = 0;
-  enum color $sef$0 = f();
+  int $sef$0 = f();
   if($sef$0 == RED)
   {
     x = 1;
