@@ -18,8 +18,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode.EventOperator;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -2251,7 +2251,7 @@ public interface NodeFactory {
 	ReadOrWriteEventNode newReadOrWriteEventNode(Source source, boolean isRead,
 			SequenceNode<ExpressionNode> memoryList);
 
-	OperatorEventNode newOperatorEventNode(Source source, EventOperator op,
+	CompositeEventNode newOperatorEventNode(Source source, EventOperator op,
 			DependsEventNode left, DependsEventNode right);
 
 	NothingNode newNothingNode(Source source);

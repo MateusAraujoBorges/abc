@@ -2,16 +2,16 @@ package edu.udel.cis.vsl.abc.ast.node.common.acsl;
 
 import java.io.PrintStream;
 
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonOperatorEventNode extends CommonDependsEventNode implements
-		OperatorEventNode {
+public class CommonCompositeEventNode extends CommonDependsEventNode implements
+		CompositeEventNode {
 
 	private EventOperator operator;
 
-	public CommonOperatorEventNode(Source source, EventOperator op,
+	public CommonCompositeEventNode(Source source, EventOperator op,
 			DependsEventNode left, DependsEventNode right) {
 		super(source, left, right);
 		this.operator = op;
@@ -23,8 +23,8 @@ public class CommonOperatorEventNode extends CommonDependsEventNode implements
 	}
 
 	@Override
-	public OperatorEventNode copy() {
-		return new CommonOperatorEventNode(getSource(), this.operator,
+	public CompositeEventNode copy() {
+		return new CommonCompositeEventNode(getSource(), this.operator,
 				duplicate(getLeft()), duplicate(getRight()));
 	}
 

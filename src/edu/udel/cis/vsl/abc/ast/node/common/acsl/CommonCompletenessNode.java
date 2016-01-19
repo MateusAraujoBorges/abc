@@ -42,4 +42,14 @@ public class CommonCompletenessNode extends CommonContractNode implements
 		out.println("completeness");
 	}
 
+	@Override
+	public boolean isDisjoint() {
+		return !this.isComplete;
+	}
+
+	@Override
+	public boolean isComplete() {
+		return this.isComplete;
+	}
+
 }

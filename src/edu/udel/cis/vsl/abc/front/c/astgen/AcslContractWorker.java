@@ -74,8 +74,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.OperatorEventNode.EventOperator;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -310,7 +310,7 @@ public class AcslContractWorker {
 		}
 	}
 
-	private OperatorEventNode translateOperatorEvent(CommonTree tree,
+	private CompositeEventNode translateOperatorEvent(CommonTree tree,
 			EventOperator op, SimpleScope scope) throws SyntaxException {
 		Source source = this.parseTree.source(tree);
 		CommonTree leftTree = (CommonTree) tree.getChild(0), rightTree = (CommonTree) tree

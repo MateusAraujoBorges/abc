@@ -4,12 +4,19 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
 /**
- * A <code>assigns</code> clause specifies a set of existing memory units. The
- * claim is that if an existing memory unit is not in the set, it will not be
- * modified in the course of the function call. The syntax is:
+ * An ACSL <code>assigns</code> or ACSL-CIVLC <code>reads</code> clause
+ * specifies a set of existing memory units. The claim is that if an existing
+ * memory unit is not in the set, it will not be modified in the course of the
+ * function call. The syntax is:
  * 
  * <pre>
- * assigns (or reads) <memory-list>;
+ * assigns <memory-list>;
+ * </pre>
+ * 
+ * or
+ * 
+ * <pre>
+ * reads <memory-list>;
  * </pre>
  * 
  * where <code>memory-list</code> is a comma-separated list of expressions of
