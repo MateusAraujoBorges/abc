@@ -33,6 +33,7 @@ import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.SHORT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.SIGNED;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.STATIC;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.STRUCT;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.SYSTEM;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.THREADLOCAL;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.TYPE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.TYPEDEF;
@@ -158,6 +159,7 @@ public class SpecifierAnalysis {
 	boolean abstractSpecifier = false;
 	boolean fatomicSpecifier = false;
 	boolean pureSpecifier = false;
+	boolean systemSpecifier = false;
 	/**
 	 * CUDA specifier __global__
 	 */
@@ -360,6 +362,9 @@ public class SpecifierAnalysis {
 					break;
 				case PURE:
 					this.pureSpecifier = true;
+					break;
+				case SYSTEM:
+					this.systemSpecifier = true;
 					break;
 				default:
 					throw error("Unknown declaration specifier", node);

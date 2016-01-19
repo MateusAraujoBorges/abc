@@ -22,6 +22,10 @@ public class CommonFunctionDeclarationNode extends
 
 	private boolean globalFunctionSpecifier = false;
 
+	private boolean atomicFunctionSpecifier = false;
+	private boolean pureFunctionSpecifier = false;
+	private boolean systemFunctionSpecifier = false;
+
 	public CommonFunctionDeclarationNode(Source source,
 			IdentifierNode identifier, FunctionTypeNode type,
 			SequenceNode<ContractNode> contract) {
@@ -56,7 +60,7 @@ public class CommonFunctionDeclarationNode extends
 
 	@Override
 	public boolean hasGlobalFunctionSpecifier() {
-		return this.globalFunctionSpecifier ;
+		return this.globalFunctionSpecifier;
 	}
 
 	@Override
@@ -150,5 +154,35 @@ public class CommonFunctionDeclarationNode extends
 				return null;
 		}
 		return new DifferenceObject(this, that);
+	}
+
+	@Override
+	public void setPureFunctionSpeciier(boolean value) {
+		this.pureFunctionSpecifier = value;
+	}
+
+	@Override
+	public void setAtomicFunctionSpeciier(boolean value) {
+		this.atomicFunctionSpecifier = value;
+	}
+
+	@Override
+	public void setSystemFunctionSpeciier(boolean value) {
+		this.systemFunctionSpecifier = value;
+	}
+
+	@Override
+	public boolean hasPureFunctionSpeciier() {
+		return this.pureFunctionSpecifier;
+	}
+
+	@Override
+	public boolean hasAtomicFunctionSpeciier() {
+		return this.atomicFunctionSpecifier;
+	}
+
+	@Override
+	public boolean hasSystemFunctionSpeciier() {
+		return this.systemFunctionSpecifier;
 	}
 }

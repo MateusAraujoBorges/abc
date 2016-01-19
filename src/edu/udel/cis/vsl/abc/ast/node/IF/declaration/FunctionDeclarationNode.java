@@ -70,12 +70,14 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	 * @see #hasNoreturnFunctionSpecifier()
 	 */
 	void setNoreturnFunctionSpecifier(boolean value);
-	
+
 	/**
-	 * Does the declaration include the <code>__global__</code> Cuda function specifier?
+	 * Does the declaration include the <code>__global__</code> Cuda function
+	 * specifier?
 	 * 
-	 * @return <code>true</code> iff declaration contains <code>__global__</code>
-	 * @see #setInlineFunctionSpecifier(boolean)
+	 * @return <code>true</code> iff declaration contains
+	 *         <code>__global__</code>
+	 * @see #setGlobalFunctionSpecifier(boolean)
 	 */
 	boolean hasGlobalFunctionSpecifier();
 
@@ -86,9 +88,67 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	 *            if <code>true</code>, says that this function declaration
 	 *            contains the <code>__global__</code> specifier, if
 	 *            <code>false</code>, it doesn't
-	 * @see #hasInlineFunctionSpecifier()
+	 * @see #hasGlobalFunctionSpecifier()
 	 */
 	void setGlobalFunctionSpecifier(boolean value);
+
+	/**
+	 * Does the declaration include the <code>$pure</code> function specifier?
+	 * 
+	 * @return <code>true</code> iff declaration contains <code>$pure</code>
+	 * @see #setPureFunctionSpeciier(boolean)
+	 */
+	boolean hasPureFunctionSpeciier();
+
+	/**
+	 * Set the pure function specifier bit to the given value.
+	 * 
+	 * @param value
+	 *            if <code>true</code>, says that this function declaration
+	 *            contains the <code>$pure</code> specifier, if
+	 *            <code>false</code>, it doesn't
+	 * @see #hasPureFunctionSpeciier()
+	 */
+	void setPureFunctionSpeciier(boolean value);
+
+	/**
+	 * Does the declaration include the <code>$atomic_f</code> function
+	 * specifier?
+	 * 
+	 * @return <code>true</code> iff declaration contains <code>$atomic_f</code>
+	 * @see #setAtomicFunctionSpeciier(boolean)
+	 */
+	boolean hasAtomicFunctionSpeciier();
+
+	/**
+	 * Set the atomic function specifier bit to the given value.
+	 * 
+	 * @param value
+	 *            if <code>true</code>, says that this function declaration
+	 *            contains the <code>$atomic_f</code> specifier, if
+	 *            <code>false</code>, it doesn't
+	 * @see #hasAtomicFunctionSpeciier()
+	 */
+	void setAtomicFunctionSpeciier(boolean value);
+
+	/**
+	 * Does the declaration include the <code>$system</code> function specifier?
+	 * 
+	 * @return <code>true</code> iff declaration contains <code>$system</code>
+	 * @see #setSystemFunctionSpeciier(boolean)
+	 */
+	boolean hasSystemFunctionSpeciier();
+
+	/**
+	 * Set the system function specifier bit to the given value.
+	 * 
+	 * @param value
+	 *            if <code>true</code>, says that this function declaration
+	 *            contains the <code>$system</code> specifier, if
+	 *            <code>false</code>, it doesn't
+	 * @see #hasSystemFunctionSpeciier()
+	 */
+	void setSystemFunctionSpeciier(boolean value);
 
 	/**
 	 * Returns the contract node for this function declaration. May be

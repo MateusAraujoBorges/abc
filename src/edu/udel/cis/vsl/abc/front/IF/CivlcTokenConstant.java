@@ -220,6 +220,7 @@ public interface CivlcTokenConstant {
 	public static final int SUB = CivlCParser.SUB;
 	public static final int SUBEQ = CivlCParser.SUBEQ;
 	public static final int SWITCH = CivlCParser.SWITCH;
+	public static final int SYSTEM = CivlCParser.SYSTEM;
 	public static final int THREADLOCAL = CivlCParser.THREADLOCAL;
 	public static final int TILDE = CivlCParser.TILDE;
 	public static final int TRUE = CivlCParser.TRUE;
