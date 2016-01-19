@@ -18,7 +18,7 @@ import edu.udel.cis.vsl.abc.program.IF.Program;
 
 public class SideEffectRemoverTest {
 
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
