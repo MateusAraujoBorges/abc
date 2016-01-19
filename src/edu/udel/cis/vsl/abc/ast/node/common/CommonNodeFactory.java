@@ -22,6 +22,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
@@ -122,6 +123,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompletenessNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonDependsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonEnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonGuardNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompositeEventNode;
@@ -1105,6 +1107,13 @@ public class CommonNodeFactory implements NodeFactory {
 	public CallEventNode newCallEventNode(Source source,
 			IdentifierNode function, SequenceNode<ExpressionNode> args) {
 		return new CommonCallEventNode(source, function, args);
+	}
+
+	@Override
+	public MPICollectiveBlockNode newMPICollectiveBlockNode(Source source,
+			ExpressionNode mpiComm, ExpressionNode kind,
+			SequenceNode<ContractNode> body) {
+		return new CommonMPICollectiveBlockNode(source, mpiComm, kind, body);
 	}
 
 }

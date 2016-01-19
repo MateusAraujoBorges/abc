@@ -53,6 +53,11 @@ public interface ContractNode extends ASTNode {
 		 * contract. May be safely cast to {@link RequiresNode}.
 		 */
 		REQUIRES,
+		/**
+		 * A "\mpi_collective" node introduces a block of contracts which should
+		 * satisfy mpi collective behaviors.
+		 */
+		MPI_COLLECTIVE
 	}
 
 	/**

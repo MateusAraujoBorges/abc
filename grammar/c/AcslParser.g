@@ -29,6 +29,7 @@ tokens{
     CLAUSE_BEHAVIOR;
     CLAUSE_COMPLETE;
     CONTRACT;
+    CONTRACT_BLOCK;
     EVENT_BASE;
     EVENT_PLUS;
     EVENT_SUB;
@@ -56,15 +57,21 @@ package edu.udel.cis.vsl.abc.front.c.parse;
 
 /* sec. 2.3 Function contracts */
 function_contract
-    : LCOMMENT (f+=function_clause)+
-        (b+=named_behavior_block)* (c+=completeness_clause_block)* RCOMMENT
-        -> ^(CONTRACT $f+ $b* $c*)
+    : LCOMMENT contract_block RCOMMENT
+      -> ^(CONTRACT contract_block)
+    ;
+
+contract_block
+    : (f+=function_clause)+ (b+=named_behavior_block)* 
+        (c+=completeness_clause_block)* 
+        -> ^(CONTRACT_BLOCK $f+ $b* $c*) 
     ;
 
 function_clause
     : requires_clause SEMICOL-> ^(CLAUSE_NORMAL requires_clause)
     | terminates_clause SEMICOL-> ^(CLAUSE_NORMAL terminates_clause)
     | simple_clause SEMICOL -> ^(CLAUSE_NORMAL simple_clause)
+    | mpi_collective_block
     ;
 
 named_behavior_block
@@ -189,6 +196,14 @@ event_base
     | LPAREN event RPAREN
         -> ^(EVENT_PARENTHESIZED)
     ;
+
+/* ACSL-MPI extensions: mpi_collective */
+mpi_collective_block
+    : MPI_COLLECTIVE LPAREN comm = variable_ident COMMA kind = variable_ident  RPAREN COLON
+      c=contract_block -> ^(MPI_COLLECTIVE $comm $kind $c)
+    ;
+
+
 
 /* sec. 2.3.3 contracts with named behaviors */
 named_behavior
@@ -475,7 +490,9 @@ term
 			
 /* 6.6 */
 constantExpression
-	: conditionalExpression
+	: conditionalExpression 
+    | MPI_COMM_RANK
+    | MPI_COMM_SIZE
 	;
 
 constant

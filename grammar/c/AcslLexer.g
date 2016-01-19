@@ -46,7 +46,18 @@ DISJOINT:   'disjoint';
 DEPENDS :   'depends';
 READS   :   'reads';
 FREES   :   'frees';
-
+//CIVL-MPI extensions
+//---constants:
+MPI_COMM_SIZE : '\\mpi_comm_size';
+MPI_COMM_RANK : '\\mpi_comm_rank';
+//---constructors:
+MPI_COLLECTIVE : '\\mpi_collective';
+//---expressions:
+MPI_EMPTY_IN : '\\mpi_empty_in';
+MPI_EMPTY_OUT : '\\mpi_empty_out';
+MPI_SIZE : '\\mpi_size';
+MPI_REGION : '\\mpi_region';
+MPI_EQUALS : '\\mpi_equals';
 
 /* keywords of terms */
 EMPTY   :   '\\empty';

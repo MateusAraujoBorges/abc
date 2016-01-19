@@ -16,6 +16,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
@@ -2281,4 +2282,19 @@ public interface NodeFactory {
 
 	CallEventNode newCallEventNode(Source source, IdentifierNode function,
 			SequenceNode<ExpressionNode> args);
+
+	/**
+	 * Creates a fresh new MPI Collective block node
+	 * 
+	 * @param source
+	 * @param mpiComm
+	 *            The corresponding MPI communicator
+	 * @param kind
+	 *            The corresponding collective kind
+	 * @param body
+	 *            The body of the MPI collective block
+	 * @return
+	 */
+	MPICollectiveBlockNode newMPICollectiveBlockNode(Source source,
+			ExpressionNode mpiComm, ExpressionNode kind, SequenceNode<ContractNode> body);
 }

@@ -70,12 +70,13 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompletenessNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -116,10 +117,16 @@ public class AcslContractWorker {
 			throws SyntaxException {
 		CommonTree tree = parseTree.getRoot();
 		int kind = tree.getType();
+
+		assert kind == AcslParser.CONTRACT;
+		return translateContractBlock((CommonTree) tree.getChild(0), scope);
+	}
+
+	private List<ContractNode> translateContractBlock(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
 		List<ContractNode> result = new ArrayList<>();
 
-		assert kind == AcslParser.CONTRACT;
 		for (int i = 0; i < numChildren; i++) {
 			CommonTree child = (CommonTree) tree.getChild(i);
 			int childKind = child.getType();
@@ -136,6 +143,10 @@ public class AcslContractWorker {
 			case AcslParser.CLAUSE_COMPLETE:
 				result.add(this.translateCompleteness(
 						(CommonTree) child.getChild(0), scope));
+				break;
+			case AcslParser.MPI_COLLECTIVE:
+				result.add(this.translateMPICollectiveBlock(
+						this.parseTree.source(child), child, scope));
 				break;
 			default:
 				throw this.error("Unknown contract kind", tree);
@@ -697,6 +708,24 @@ public class AcslContractWorker {
 	}
 
 	// ////////////////////////////////////
+
+	private MPICollectiveBlockNode translateMPICollectiveBlock(Source source,
+			CommonTree colBlock, SimpleScope scope) throws SyntaxException {
+		CommonTree mpiComm = (CommonTree) colBlock.getChild(0);
+		CommonTree kind = (CommonTree) colBlock.getChild(1);
+		CommonTree body = (CommonTree) colBlock.getChild(2);
+		List<ContractNode> bodyComponents = new LinkedList<>();
+		SequenceNode<ContractNode> bodyNode;
+		ExpressionNode mpiCommNode, kindNode;
+
+		mpiCommNode = translateExpression(mpiComm, scope);
+		kindNode = translateExpression(kind, scope);
+		bodyComponents.addAll(translateContractBlock(body, scope));
+		bodyNode = nodeFactory.newSequenceNode(source, "mpi_collective body",
+				bodyComponents);
+		return nodeFactory.newMPICollectiveBlockNode(source, mpiCommNode,
+				kindNode, bodyNode);
+	}
 
 	private SyntaxException error(String message, CommonTree tree) {
 		return new SyntaxException(message, newSource(tree));

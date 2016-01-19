@@ -16,6 +16,11 @@ public abstract class CommonContractNode extends CommonASTNode implements
 		super(source, child0, child1);
 	}
 
+	public CommonContractNode(Source source, ASTNode child0, ASTNode child1,
+			ASTNode child2) {
+		super(source, child0, child1, child2);
+	}
+
 	@Override
 	public NodeKind nodeKind() {
 		return NodeKind.CONTRACT;
