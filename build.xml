@@ -390,7 +390,7 @@
 
 	<target name="AcslParserDependencies" depends="AcslLexer">
 		<uptodate property="unchangedAcslParserGrammar" srcfile="${c.grammar.dir}/AcslParser.g" targetfile="${c.real.src.dir}/parse/AcslParser.java" />
-		<uptodate property="AcslLexerBeforeAcslParser" srcfile="${c.grammar.dir}/AcslLexer.g" targetfile="${c.real.src.dir}/parse/AcslLexer.java" />
+		<uptodate property="AcslLexerBeforeAcslParser" srcfile="${c.grammar.dir}/AcslLexer.g" targetfile="${c.grammar.dir}/AcslLexer.tokens" />
 		<condition property="AcslParserUpToDate">
 			<and>
 				<isset property="unchangedAcslParserGrammar" />

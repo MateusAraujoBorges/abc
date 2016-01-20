@@ -168,6 +168,7 @@ SELF		:	'$self';
 READS       :   '$reads';
 ROOT		:	'$root';
 SPAWN		:	'$spawn';
+SYSTEM      :   '$system';
 TRUE		:	'$true';
 UNIFORM		:	'$uniform';
 WHEN		:	'$when';
