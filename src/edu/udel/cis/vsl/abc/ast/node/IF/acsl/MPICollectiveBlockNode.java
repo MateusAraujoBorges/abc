@@ -11,6 +11,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
  *
  */
 public interface MPICollectiveBlockNode extends ContractNode {
+	public enum MPICollectiveKind {
+		COL, P2P, BOTH
+	};
+
 	/**
 	 * Returns the node corresponding to the specific MPI_Comm
 	 * 
@@ -23,7 +27,7 @@ public interface MPICollectiveBlockNode extends ContractNode {
 	 * 
 	 * @return
 	 */
-	ExpressionNode getCollectiveKind();
+	MPICollectiveKind getCollectiveKind();
 
 	/**
 	 * Get the body of a MPI collective block

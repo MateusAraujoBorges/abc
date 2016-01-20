@@ -12,9 +12,12 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode implements
 		MPICollectiveBlockNode {
 	private SequenceNode<ContractNode> body;
 
+	private MPICollectiveKind kind;
+
 	public CommonMPICollectiveBlockNode(Source source, ExpressionNode mpiComm,
-			ExpressionNode kind, SequenceNode<ContractNode> body) {
-		super(source, mpiComm, kind, body);
+			MPICollectiveKind kind, SequenceNode<ContractNode> body) {
+		super(source, mpiComm, body);
+		this.kind = kind;
 		this.body = body;
 	}
 
@@ -29,8 +32,8 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode implements
 	}
 
 	@Override
-	public ExpressionNode getCollectiveKind() {
-		return (ExpressionNode) this.child(1);
+	public MPICollectiveKind getCollectiveKind() {
+		return kind;
 	}
 
 	@Override
@@ -41,8 +44,7 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode implements
 	@Override
 	public MPICollectiveBlockNode copy() {
 		return new CommonMPICollectiveBlockNode(this.getSource(),
-				(ExpressionNode) child(0).copy(), (ExpressionNode) child(1)
-						.copy(), this.body);
+				(ExpressionNode) child(0).copy(), kind, this.body);
 	}
 
 	@Override
@@ -54,8 +56,7 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode implements
 	public StringBuffer prettyRepresentation() {
 		StringBuffer out = new StringBuffer();
 		out.append("\\mpi_collective(" + this.child(0).prettyRepresentation()
-				+ ", " + this.child(1).prettyRepresentation() + ":\n"
-				+ this.body.prettyRepresentation());
+				+ ", " + kind + ":\n" + this.body.prettyRepresentation());
 		return out;
 	}
 

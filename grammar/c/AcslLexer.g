@@ -50,6 +50,9 @@ FREES   :   'frees';
 //---constants:
 MPI_COMM_SIZE : '\\mpi_comm_size';
 MPI_COMM_RANK : '\\mpi_comm_rank';
+COL : 'COL';
+P2P : 'P2P';
+BOTH : 'BOTH';
 //---constructors:
 MPI_COLLECTIVE : '\\mpi_collective';
 //---expressions:

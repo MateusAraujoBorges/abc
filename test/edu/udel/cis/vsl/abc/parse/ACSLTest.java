@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
@@ -60,4 +61,15 @@ public class ACSLTest {
 		this.parse("cqueue.c");
 	}
 
+	@Ignore
+	public void mpiCollective() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("mpiCollectiveTest.c");
+	}
+
+	@Ignore
+	public void mpiConstants() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("mpiConstants.c");
+	}
 }

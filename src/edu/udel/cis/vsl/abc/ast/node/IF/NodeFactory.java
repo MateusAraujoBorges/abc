@@ -11,16 +11,21 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompletenessNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode.MPIConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode.MPIExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -44,6 +49,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
@@ -2284,7 +2290,7 @@ public interface NodeFactory {
 			SequenceNode<ExpressionNode> args);
 
 	/**
-	 * Creates a fresh new MPI Collective block node
+	 * Creates a new MPI Collective block node
 	 * 
 	 * @param source
 	 * @param mpiComm
@@ -2296,5 +2302,38 @@ public interface NodeFactory {
 	 * @return
 	 */
 	MPICollectiveBlockNode newMPICollectiveBlockNode(Source source,
-			ExpressionNode mpiComm, ExpressionNode kind, SequenceNode<ContractNode> body);
+			ExpressionNode mpiComm, MPICollectiveKind kind,
+			SequenceNode<ContractNode> body);
+
+	/**
+	 * Creates a new MPI constant node
+	 * 
+	 * @param source
+	 * @param stringRepresetation
+	 *            The text of the constant
+	 * @param kind
+	 *            The {@link MPIConstantKind} of this constant
+	 * @param constKind
+	 *            The {@link ConstantKind} of this constant
+	 * @return
+	 */
+	MPIConstantNode newMPIConstantNode(Source source,
+			String stringRepresetation, MPIConstantKind kind,
+			ConstantKind constKind);
+
+	/**
+	 * Creates a new MPI expression node
+	 * 
+	 * @param source
+	 * @param arguments
+	 *            A list of arguments of an MPI expression
+	 * @param kind
+	 *            The {@link MPIExpressionKind} of this MPI expression
+	 * @param exprName
+	 *            The String of the name of the MPI expression
+	 * @return
+	 */
+	MPIExpressionNode newMPIExpressionNode(Source source,
+			List<ExpressionNode> arguments, MPIExpressionKind kind,
+			String exprName);
 }

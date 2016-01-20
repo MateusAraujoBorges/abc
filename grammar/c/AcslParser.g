@@ -39,6 +39,8 @@ tokens{
     FUNC_CALL;
     ID_LIST;
     INDEX;
+    MPI_CONSTANT;
+    MPI_EXPRESSION;
     OPERATOR;
     SET_BINDERS;
     SET_SIMPLE;
@@ -57,11 +59,20 @@ package edu.udel.cis.vsl.abc.front.c.parse;
 
 /* sec. 2.3 Function contracts */
 function_contract
-    : LCOMMENT contract_block RCOMMENT
-      -> ^(CONTRACT contract_block)
+    : LCOMMENT full_contract_block RCOMMENT
+      -> ^(CONTRACT full_contract_block)
+    ;
+/* a full contract block non-terminal represents an ACSL contract
+ * block for a function */
+full_contract_block
+    : (f+=function_clause)* (m+=mpi_collective_block)* (b+=named_behavior_block)* 
+        (c+=completeness_clause_block)* 
+        -> ^(CONTRACT_BLOCK $f* $m* $b* $c*) 
     ;
 
-contract_block
+/* a partial contract block non-terminal represents an ACSL contract
+ * block inside an MPI collective block */
+partial_contract_block
     : (f+=function_clause)+ (b+=named_behavior_block)* 
         (c+=completeness_clause_block)* 
         -> ^(CONTRACT_BLOCK $f+ $b* $c*) 
@@ -71,7 +82,6 @@ function_clause
     : requires_clause SEMICOL-> ^(CLAUSE_NORMAL requires_clause)
     | terminates_clause SEMICOL-> ^(CLAUSE_NORMAL terminates_clause)
     | simple_clause SEMICOL -> ^(CLAUSE_NORMAL simple_clause)
-    | mpi_collective_block
     ;
 
 named_behavior_block
@@ -197,10 +207,10 @@ event_base
         -> ^(EVENT_PARENTHESIZED)
     ;
 
-/* ACSL-MPI extensions: mpi_collective */
+/* ACSL-MPI extensions: constructors */
 mpi_collective_block
-    : MPI_COLLECTIVE LPAREN comm = variable_ident COMMA kind = variable_ident  RPAREN COLON
-      c=contract_block -> ^(MPI_COLLECTIVE $comm $kind $c)
+    : MPI_COLLECTIVE LPAREN comm = variable_ident COMMA kind=mpi_collective_kind  RPAREN COLON
+      c=partial_contract_block -> ^(MPI_COLLECTIVE $comm $kind $c)
     ;
 
 
@@ -245,6 +255,7 @@ primaryExpression
         ->^(SET_SIMPLE term)
 	| LPAREN term RPAREN 
 	  -> ^(TERM_PARENTHESIZED term)
+    | mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
 	;
 
 /* 6.5.2 */
@@ -357,7 +368,7 @@ relationalExpression
 	: ( shiftExpression -> shiftExpression )
 	  ( relationalOperator y=shiftExpression
 	    -> ^(OPERATOR relationalOperator ^(ARGUMENT_LIST $relationalExpression $y))
-	  )*
+	  )* 
 	;
 
 relationalOperator
@@ -486,13 +497,11 @@ assignmentExpression
  */
 term
 	: assignmentExpression
-;
+    ;
 			
 /* 6.6 */
 constantExpression
 	: conditionalExpression 
-    | MPI_COMM_RANK
-    | MPI_COMM_SIZE
 	;
 
 constant
@@ -500,7 +509,31 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| TRUE | FALSE | RESULT | NOTHING | ELLIPSIS
+    | mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
+
+/* ACSL-MPI extensions Expressions and Constants  */
+mpi_expression
+    : MPI_EMPTY_IN LPAREN primaryExpression RPAREN
+      -> ^(MPI_EMPTY_IN primaryExpression)
+    | MPI_EMPTY_OUT LPAREN primaryExpression RPAREN
+      -> ^(MPI_EMPTY_OUT primaryExpression)
+    | MPI_SIZE LPAREN a=primaryExpression COMMA b=primaryExpression RPAREN
+      -> ^(MPI_SIZE $a $b) 
+    | MPI_REGION LAPREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
+      -> ^(MPI_REGION $a $b $c)
+    | MPI_EQUALS LAPREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
+      -> ^(MPI_EQUALS $a $b $c $d)
+    ;
+    
+
+mpi_constant
+    : MPI_COMM_RANK | MPI_COMM_SIZE
+    ;
+
+mpi_collective_kind
+    : COL | P2P | BOTH
+    ;
 
 unary_op
     : PLUS | MINUS | NOT | COMP | STAR | AMPERSAND

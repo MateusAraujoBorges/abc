@@ -1,0 +1,24 @@
+package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
+
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+
+public interface MPIExpressionNode extends ExpressionNode {
+	public enum MPIExpressionKind {
+		MPI_EMPTY_IN, MPI_EMPTY_OUT, MPI_EQUALS, MPI_REGION, MPI_SIZE
+	}
+
+	/**
+	 * Return the number of arguments of this MPI expression
+	 * 
+	 * @return
+	 */
+	int numArguments();
+
+	/**
+	 * Returns the index-th argument
+	 * 
+	 * @param index
+	 * @return
+	 */
+	ExpressionNode getArgument(int index);
+}

@@ -37,6 +37,8 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LTE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MOD;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MPI_CONSTANT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MPI_EXPRESSION;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NEQ;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOACT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOT;
@@ -77,9 +79,15 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode.MPIConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode.MPIExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
@@ -104,6 +112,10 @@ public class AcslContractWorker {
 	private NodeFactory nodeFactory;
 	private TokenFactory tokenFactory;
 	private Formation formation;
+
+	/* ******************** Constants ******************* */
+	private final String MPI_COMM_RANK = "\\mpi_comm_rank";
+	private final String MPI_COMM_SIZE = "\\mpi_comm_size";
 
 	public AcslContractWorker(NodeFactory factory, TokenFactory tokenFactory,
 			CParseTree parseTree) {
@@ -438,6 +450,10 @@ public class AcslContractWorker {
 			return this.nodeFactory.newNothingNode(source);
 		case ELLIPSIS:
 			return this.nodeFactory.newWildcardNode(source);
+		case MPI_CONSTANT:
+			return translateMPIConstantNode(expressionTree, source);
+		case MPI_EXPRESSION:
+			return translateMPIExpressionNode(expressionTree, source, scope);
 		case SIZEOF:
 			// return translateSizeOf(source, expressionTree, scope);
 		case FORALL:
@@ -716,15 +732,85 @@ public class AcslContractWorker {
 		CommonTree body = (CommonTree) colBlock.getChild(2);
 		List<ContractNode> bodyComponents = new LinkedList<>();
 		SequenceNode<ContractNode> bodyNode;
-		ExpressionNode mpiCommNode, kindNode;
+		ExpressionNode mpiCommNode;
+		MPICollectiveKind colKind;
 
 		mpiCommNode = translateExpression(mpiComm, scope);
-		kindNode = translateExpression(kind, scope);
+		// The mpi collective kind can only be :COL, P2P or BOTH
+		switch (kind.getType()) {
+		case AcslParser.COL:
+			colKind = MPICollectiveKind.COL;
+			break;
+		case AcslParser.P2P:
+			colKind = MPICollectiveKind.P2P;
+			break;
+		case AcslParser.BOTH:
+			colKind = MPICollectiveKind.BOTH;
+			break;
+		default:
+			throw error("Unknown MPI collective kind", kind);
+		}
 		bodyComponents.addAll(translateContractBlock(body, scope));
 		bodyNode = nodeFactory.newSequenceNode(source, "mpi_collective body",
 				bodyComponents);
 		return nodeFactory.newMPICollectiveBlockNode(source, mpiCommNode,
-				kindNode, bodyNode);
+				colKind, bodyNode);
+	}
+
+	private MPIConstantNode translateMPIConstantNode(CommonTree tree,
+			Source source) throws SyntaxException {
+		String text = tree.getChild(0).getText();
+
+		if (text.equals(MPI_COMM_RANK)) {
+			return nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK,
+					MPIConstantKind.MPI_COMM_RANK, ConstantKind.INT);
+		} else if (text.equals(MPI_COMM_SIZE)) {
+			return nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE,
+					MPIConstantKind.MPI_COMM_SIZE, ConstantKind.INT);
+		} else
+			throw error("Unknown MPI Constant " + text, tree);
+
+	}
+
+	private MPIExpressionNode translateMPIExpressionNode(
+			CommonTree expressionTree, Source source, SimpleScope scope)
+			throws SyntaxException {
+		CommonTree expression = (CommonTree) expressionTree.getChild(0);
+		int kind = expression.getType();
+		int numArgs;
+		List<ExpressionNode> args = new LinkedList<>();
+		String exprName = expression.getText();
+		MPIExpressionKind mpiExprKind;
+
+		switch (kind) {
+		case AcslParser.MPI_EMPTY_IN:
+			numArgs = 1;
+			mpiExprKind = MPIExpressionKind.MPI_EMPTY_IN;
+			break;
+		case AcslParser.MPI_EMPTY_OUT:
+			numArgs = 1;
+			mpiExprKind = MPIExpressionKind.MPI_EMPTY_OUT;
+			break;
+		case AcslParser.MPI_EQUALS:
+			numArgs = 4;
+			mpiExprKind = MPIExpressionKind.MPI_EQUALS;
+			break;
+		case AcslParser.MPI_REGION:
+			numArgs = 3;
+			mpiExprKind = MPIExpressionKind.MPI_REGION;
+			break;
+		case AcslParser.MPI_SIZE:
+			numArgs = 2;
+			mpiExprKind = MPIExpressionKind.MPI_SIZE;
+			break;
+		default:
+			throw error("Unknown MPI expression " + exprName, expressionTree);
+		}
+		for (int i = 0; i < numArgs; i++)
+			args.add(this.translateExpression(
+					(CommonTree) expression.getChild(i), scope));
+		return nodeFactory.newMPIExpressionNode(source, args, mpiExprKind,
+				exprName);
 	}
 
 	private SyntaxException error(String message, CommonTree tree) {

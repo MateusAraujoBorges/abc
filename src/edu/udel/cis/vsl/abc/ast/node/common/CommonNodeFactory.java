@@ -17,16 +17,21 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompletenessNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode.MPIConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode.MPIExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -50,6 +55,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
@@ -120,13 +126,15 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonBehaviorNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCallEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompletenessNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompositeEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonDependsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonEnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonGuardNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPICollectiveBlockNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
-import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompositeEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonRequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonArrayDesignatorNode;
@@ -1111,9 +1119,24 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public MPICollectiveBlockNode newMPICollectiveBlockNode(Source source,
-			ExpressionNode mpiComm, ExpressionNode kind,
+			ExpressionNode mpiComm, MPICollectiveKind kind,
 			SequenceNode<ContractNode> body) {
 		return new CommonMPICollectiveBlockNode(source, mpiComm, kind, body);
+	}
+
+	@Override
+	public MPIConstantNode newMPIConstantNode(Source source,
+			String stringRepresentation, MPIConstantKind kind,
+			ConstantKind constKind) {
+		return new CommonMPIConstantNode(source, stringRepresentation, kind,
+				constKind);
+	}
+
+	@Override
+	public MPIExpressionNode newMPIExpressionNode(Source source,
+			List<ExpressionNode> arguments, MPIExpressionKind kind,
+			String exprName) {
+		return new CommonMPIExpressionNode(source, arguments, kind, exprName);
 	}
 
 }
