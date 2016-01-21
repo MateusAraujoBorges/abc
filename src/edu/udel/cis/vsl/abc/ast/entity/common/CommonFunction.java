@@ -27,13 +27,12 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	private Set<Function> callees = new HashSet<>();
 	static Function mainFunction;
 
-	private List<ExpressionNode> preconditions = new LinkedList<>();
+	private List<ContractNode> seqContracts = new LinkedList<>();
 
-	private List<ExpressionNode> postconditions = new LinkedList<>();
+	private List<ContractNode> mpiContracts = new LinkedList<>();
 
 	private List<DependsNode> depends = new LinkedList<>();
 	private List<ExpressionNode> guards = new LinkedList<>();
-	private List<AssignsOrReadsNode> assigns = new LinkedList<>();
 	private List<AssignsOrReadsNode> reads = new LinkedList<>();
 
 	public CommonFunction(String name, ProgramEntity.LinkageKind linkage,
@@ -97,33 +96,8 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	}
 
 	@Override
-	public Iterator<ExpressionNode> getPreconditions() {
-		return preconditions.iterator();
-	}
-
-	@Override
-	public Iterator<ExpressionNode> getPostconditions() {
-		return postconditions.iterator();
-	}
-
-	@Override
-	public void addPrecondition(ExpressionNode expression) {
-		preconditions.add(expression);
-	}
-
-	@Override
-	public void addPostcondition(ExpressionNode expression) {
-		postconditions.add(expression);
-	}
-
-	@Override
 	public void addDepends(DependsNode depends) {
 		this.depends.add(depends);
-	}
-
-	@Override
-	public void addAssigns(AssignsOrReadsNode assigns) {
-		this.assigns.add(assigns);
 	}
 
 	@Override
@@ -142,11 +116,6 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	}
 
 	@Override
-	public Iterator<AssignsOrReadsNode> getAssigns() {
-		return this.assigns.iterator();
-	}
-
-	@Override
 	public void addReads(AssignsOrReadsNode reads) {
 		this.reads.add(reads);
 	}
@@ -157,14 +126,22 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	}
 
 	@Override
-	public void addContract(ContractNode contract) {
-		// TODO Auto-generated method stub
-		
+	public void addSeqContract(ContractNode contract) {
+		seqContracts.add(contract);
 	}
 
 	@Override
-	public Iterator<ContractNode> getContracts() {
-		// TODO Auto-generated method stub
-		return null;
+	public Iterator<ContractNode> getSeqContracts() {
+		return seqContracts.iterator();
+	}
+
+	@Override
+	public void addMPIContract(ContractNode contract) {
+		mpiContracts.add(contract);
+	}
+
+	@Override
+	public Iterator<ContractNode> getMPIContracts() {
+		return mpiContracts.iterator();
 	}
 }

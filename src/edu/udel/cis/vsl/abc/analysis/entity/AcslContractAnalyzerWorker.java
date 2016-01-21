@@ -25,10 +25,22 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 public class AcslContractAnalyzerWorker {
+	/**
+	 * ContractType distinguishes the type of contracts. Currently there are two
+	 * types of contracts: sequential (regular) and MPI.
+	 * 
+	 * @author ziqingluo
+	 *
+	 */
+	private enum ContractType {
+		SEQ, MPI
+	};
+
 	/**
 	 * The entity analyzer controlling this declaration analyzer.
 	 */
@@ -43,14 +55,19 @@ public class AcslContractAnalyzerWorker {
 	void processContractNodes(SequenceNode<ContractNode> contract,
 			Function result) throws SyntaxException {
 		for (ContractNode contractClause : contract)
-			this.processContractNode(contractClause, result, false);
+			this.processContractNode(contractClause, result, false,
+					ContractType.SEQ);
 	}
 
+	// TODO: MPIContractExpression type checking!
 	private void processContractNode(ContractNode contractClause,
-			Function result, boolean isSubclause) throws SyntaxException {
+			Function result, boolean isSubclause, ContractType contractType)
+			throws SyntaxException {
 		ContractKind contractKind = contractClause.contractKind();
 
 		switch (contractKind) {
+		/* ********************************************************** */
+		/* *** Contracts stored in functions with categorization: *** */
 		case ASSIGNS_READS: {
 			AssignsOrReadsNode assignsOrReads = (AssignsOrReadsNode) contractClause;
 			// ExpressionNode condition = assignsOrReads.getCondition();
@@ -66,70 +83,15 @@ public class AcslContractAnalyzerWorker {
 
 				entityAnalyzer.expressionAnalyzer.processExpression(expression);
 			}
-			if (!isSubclause) {
-				if (assignsOrReads.isAssigns())
-					result.addAssigns(assignsOrReads);
-				else
+			// If the contract is not a sub-clause and is not an "assigns", put
+			// it as "reads" then return; Else, it will be put into the function
+			// later.
+			if (!isSubclause)
+				if (assignsOrReads.isReads())
 					result.addReads(assignsOrReads);
-			}
-			break;
-		}
-		case ASSUMES: {
-			AssumesNode assumesNode = (AssumesNode) contractClause;
-			ExpressionNode expression = assumesNode.getPredicate();
-
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			break;
-		}
-		case BEHAVIOR: {
-			BehaviorNode behavior = (BehaviorNode) contractClause;
-			String name = behavior.getName().name();
-			SequenceNode<ContractNode> body = behavior.getBody();
-
-			if (definedBehaviors.containsKey(name))
-				throw this.error("re-definition of behavior named as "
-						+ name
-						+ ": the previous definition was at "
-						+ definedBehaviors.get(name).getBehavior().getSource()
-								.getSummary(false), contractClause);
-			else
-				this.definedBehaviors.put(name, entityAnalyzer.entityFactory
-						.newBehavior(name, behavior));
-			for (ContractNode subClause : body) {
-				this.processContractNode(subClause, result, true);
-			}
-			break;
-		}
-		case COMPLETENESS: {
-			CompletenessNode completeNode = (CompletenessNode) contractClause;
-			SequenceNode<IdentifierNode> idList = completeNode.getIDList();
-
-			if (idList != null) {
-				for (IdentifierNode id : idList) {
-					BehaviorEntity behavior = this.definedBehaviors.get(id
-							.name());
-
-					if (behavior == null)
-						throw this.error("undefined behavior " + id.name(), id);
-					id.setEntity(behavior);
-				}
-			}
-			break;
-		}
-		case REQUIRES: {
-			ExpressionNode expression = ((RequiresNode) contractClause)
-					.getExpression();
-
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			result.addPrecondition(expression);
-			break;
-		}
-		case ENSURES: {
-			ExpressionNode expression = ((EnsuresNode) contractClause)
-					.getExpression();
-
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			result.addPostcondition(expression);
+				else
+					this.addContractToFunction(result, assignsOrReads,
+							contractType);
 			break;
 		}
 		case DEPENDS: {
@@ -154,7 +116,6 @@ public class AcslContractAnalyzerWorker {
 			result.addDepends(depends);
 			break;
 		}
-
 		case GUARDS: {
 			ExpressionNode expression = ((GuardNode) contractClause)
 					.getExpression();
@@ -163,19 +124,87 @@ public class AcslContractAnalyzerWorker {
 			result.addGuard(expression);
 			break;
 		}
-		case MPI_COLLECTIVE: {
-			MPICollectiveBlockNode collective = (MPICollectiveBlockNode) contractClause;
+		/* *********************************************************** */
+		/* ** Contracts stored in functions without categorization: ** */
+		case ASSUMES: {
+			AssumesNode assumesNode = (AssumesNode) contractClause;
+			ExpressionNode expression = assumesNode.getPredicate();
 
-			entityAnalyzer.expressionAnalyzer.processExpression(collective
-					.getMPIComm());
-			processContractNodes(collective.getBody(), result);
+			entityAnalyzer.expressionAnalyzer.processExpression(expression);
+			if (!isSubclause)
+				addContractToFunction(result, contractClause, contractType);
+			break;
+		}
+		case BEHAVIOR: {
+			BehaviorNode behavior = (BehaviorNode) contractClause;
+			String name = behavior.getName().name();
+			SequenceNode<ContractNode> body = behavior.getBody();
+
+			if (definedBehaviors.containsKey(name))
+				throw this.error("re-definition of behavior named as "
+						+ name
+						+ ": the previous definition was at "
+						+ definedBehaviors.get(name).getBehavior().getSource()
+								.getSummary(false), contractClause);
+			else
+				this.definedBehaviors.put(name, entityAnalyzer.entityFactory
+						.newBehavior(name, behavior));
+			for (ContractNode subClause : body) {
+				this.processContractNode(subClause, result, true, contractType);
+			}
+			if (!isSubclause)
+				addContractToFunction(result, contractClause, contractType);
+			break;
+		}
+		case COMPLETENESS: {
+			CompletenessNode completeNode = (CompletenessNode) contractClause;
+			SequenceNode<IdentifierNode> idList = completeNode.getIDList();
+
+			if (idList != null) {
+				for (IdentifierNode id : idList) {
+					BehaviorEntity behavior = this.definedBehaviors.get(id
+							.name());
+
+					if (behavior == null)
+						throw this.error("undefined behavior " + id.name(), id);
+					id.setEntity(behavior);
+				}
+			}
+			if (!isSubclause)
+				addContractToFunction(result, contractClause, contractType);
+			break;
+		}
+		case REQUIRES: {
+			ExpressionNode expression = ((RequiresNode) contractClause)
+					.getExpression();
+
+			entityAnalyzer.expressionAnalyzer.processExpression(expression);
+			if (!isSubclause)
+				addContractToFunction(result, contractClause, contractType);
+			break;
+		}
+		case ENSURES: {
+			ExpressionNode expression = ((EnsuresNode) contractClause)
+					.getExpression();
+
+			entityAnalyzer.expressionAnalyzer.processExpression(expression);
+			if (!isSubclause)
+				addContractToFunction(result, contractClause, contractType);
+			break;
+		}
+		case MPI_COLLECTIVE: {
+			MPICollectiveBlockNode collective_block = (MPICollectiveBlockNode) contractClause;
+
+			entityAnalyzer.expressionAnalyzer
+					.processExpression(collective_block.getMPIComm());
+			for (ContractNode colClause : collective_block.getBody())
+				processContractNode(colClause, result, true, ContractType.MPI);
+			if (!isSubclause)
+				addContractToFunction(result, contractClause, contractType);
 			break;
 		}
 		default:
 			throw error("Unknown kind of contract clause", contractClause);
-		}
-		if (!isSubclause) {
-			result.addContract(contractClause);
 		}
 	}
 
@@ -222,6 +251,20 @@ public class AcslContractAnalyzerWorker {
 			throw error("Unknown kind of depends event", event);
 		}
 
+	}
+
+	private void addContractToFunction(Function function,
+			ContractNode contract, ContractType type) {
+		switch (type) {
+		case SEQ:
+			function.addSeqContract(contract);
+			break;
+		case MPI:
+			function.addMPIContract(contract);
+			break;
+		default:
+			throw new ABCRuntimeException("Unreachable location");
+		}
 	}
 
 	private SyntaxException error(String message, ASTNode node) {

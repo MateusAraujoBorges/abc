@@ -102,79 +102,51 @@ public interface Function extends OrdinaryEntity {
 	 */
 	Set<Function> getCallees();
 
-	/**
-	 * <p>
-	 * Gets the preconditions specified in this function's contract. The
-	 * precondition list is initially empty. Preconditions can be added to the
-	 * list using method {@link #addPrecondition(ExpressionNode)}.
-	 * </p>
-	 * 
-	 * <p>
-	 * This method is specific to CIVL-C.
-	 * </p>
-	 * 
-	 * @return iterator over the preconditions
-	 */
-	Iterator<ExpressionNode> getPreconditions();
-
-	/**
-	 * Gets the list of postconditions specified in this function's contract.
-	 * The postcondition list is initially empty. Postconditions can be added to
-	 * the list using method {@link #addPostcondition(ExpressionNode)}.
-	 * 
-	 * <p>
-	 * This method is specific to CIVL-C.
-	 * </p>
-	 * 
-	 * @return iterator over the postconditions
-	 */
-	Iterator<ExpressionNode> getPostconditions();
-
 	// TODO clean up contract getter and setter methods
 
-	/**
-	 * Adds the given expression to the list of preconditions for the function.
-	 * Should be a boolean expression.
-	 * 
-	 * <p>
-	 * This method is specific to CIVL-C.
-	 * </p>
-	 * 
-	 * @param expression
-	 *            a boolean expression
-	 */
-	void addPrecondition(ExpressionNode expression);
-
-	/**
-	 * Adds the given expression to the list of postconditions for the function.
-	 * Should be a boolean expression.
-	 * 
-	 * <p>
-	 * This method is specific to CIVL-C.
-	 * </p>
-	 * 
-	 * @param expression
-	 *            a boolean expression
-	 */
-	void addPostcondition(ExpressionNode expression);
-
 	void addDepends(DependsNode depends);
-
-	void addAssigns(AssignsOrReadsNode assigns);
 
 	void addReads(AssignsOrReadsNode reads);
 
 	void addGuard(ExpressionNode expression);
 
-	void addContract(ContractNode contract);
+	/**
+	 * Add a {@link ContractNode} which represents a sequential contract clause.
+	 * A sequential contract clause states sequential properties of a procedure.
+	 * 
+	 * @param contract
+	 *            A node representing a contract clause.
+	 */
+	void addSeqContract(ContractNode contract);
 
-	Iterator<ContractNode> getContracts();
+	/**
+	 * Add a {@link ContractNode} which represents an MPI contract clause. An
+	 * MPI contract clause states specific properties of MPI programs
+	 * 
+	 * @param contract
+	 *            A node representing a contract clause.
+	 */
+	void addMPIContract(ContractNode contract);
+
+	/**
+	 * Returns a {@link Iterator} for a set of sequential contract clauses. A
+	 * sequential contract clause states sequential properties of a procedure.
+	 * 
+	 * @return
+	 */
+	Iterator<ContractNode> getSeqContracts();
+
+	/**
+	 * Returns a {@link Iterator} for a set of MPI contract clauses.An MPI
+	 * contract clause states specific properties of MPI programs
+	 * 
+	 * @return
+	 */
+	Iterator<ContractNode> getMPIContracts();
 
 	Iterator<DependsNode> getDepends();
 
 	Iterator<ExpressionNode> getGuard();
-
-	Iterator<AssignsOrReadsNode> getAssigns();
 
 	Iterator<AssignsOrReadsNode> getReads();
 
