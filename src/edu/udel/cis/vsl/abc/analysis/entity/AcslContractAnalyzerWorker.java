@@ -21,6 +21,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -163,7 +164,12 @@ public class AcslContractAnalyzerWorker {
 			break;
 		}
 		case MPI_COLLECTIVE: {
+			MPICollectiveBlockNode collective = (MPICollectiveBlockNode) contractClause;
 
+			entityAnalyzer.expressionAnalyzer.processExpression(collective
+					.getMPIComm());
+			processContractNodes(collective.getBody(), result);
+			break;
 		}
 		default:
 			throw error("Unknown kind of contract clause", contractClause);

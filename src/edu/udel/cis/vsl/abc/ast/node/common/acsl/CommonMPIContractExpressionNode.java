@@ -5,15 +5,15 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonMPIExpressionNode extends CommonExpressionNode implements
-		MPIExpressionNode {
+public class CommonMPIContractExpressionNode extends CommonExpressionNode
+		implements MPIContractExpressionNode {
 
-	private MPIExpressionKind kind;
+	private MPIContractExpressionKind kind;
 
 	private ExpressionNode[] arguments;
 
@@ -21,8 +21,8 @@ public class CommonMPIExpressionNode extends CommonExpressionNode implements
 
 	private String exprName;
 
-	public CommonMPIExpressionNode(Source source,
-			List<ExpressionNode> arguments, MPIExpressionKind kind,
+	public CommonMPIContractExpressionNode(Source source,
+			List<ExpressionNode> arguments, MPIContractExpressionKind kind,
 			String exprName) {
 		super(source, arguments);
 		this.kind = kind;
@@ -36,13 +36,19 @@ public class CommonMPIExpressionNode extends CommonExpressionNode implements
 		List<ExpressionNode> argCopy = new LinkedList<>();
 
 		argCopy.addAll(Arrays.asList(arguments));
-		return new CommonMPIExpressionNode(this.getSource(), argCopy, kind,
-				exprName);
+		return new CommonMPIContractExpressionNode(this.getSource(), argCopy,
+				kind, exprName);
+	}
+
+	@Override
+	public
+	MPIContractExpressionKind MPIContractExpressionKind() {
+		return kind;
 	}
 
 	@Override
 	public ExpressionKind expressionKind() {
-		return ExpressionKind.FUNCTION_CALL;
+		return ExpressionKind.MPI_CONTRACT_EXPRESSION;
 	}
 
 	@Override

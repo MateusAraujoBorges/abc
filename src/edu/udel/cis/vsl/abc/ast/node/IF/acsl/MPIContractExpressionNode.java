@@ -2,10 +2,12 @@ package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
-public interface MPIExpressionNode extends ExpressionNode {
-	public enum MPIExpressionKind {
+public interface MPIContractExpressionNode extends ExpressionNode {
+	public enum MPIContractExpressionKind {
 		MPI_EMPTY_IN, MPI_EMPTY_OUT, MPI_EQUALS, MPI_REGION, MPI_SIZE
 	}
+
+	MPIContractExpressionKind MPIContractExpressionKind();
 
 	/**
 	 * Return the number of arguments of this MPI expression

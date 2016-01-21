@@ -81,10 +81,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode.MPIConstantKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode.MPIExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -96,6 +96,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType.SignedIntKind;
+import edu.udel.cis.vsl.abc.ast.type.IF.StandardUnsignedIntegerType.UnsignedIntKind;
+import edu.udel.cis.vsl.abc.ast.type.IF.Type;
+import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.front.c.parse.AcslParser;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
@@ -112,6 +116,7 @@ public class AcslContractWorker {
 	private CParseTree parseTree;
 	private NodeFactory nodeFactory;
 	private TokenFactory tokenFactory;
+	private TypeFactory typeFactory;
 	private Formation formation;
 
 	/* ******************** Constants ******************* */
@@ -123,6 +128,7 @@ public class AcslContractWorker {
 		this.nodeFactory = factory;
 		this.tokenFactory = tokenFactory;
 		this.parseTree = parseTree;
+		this.typeFactory = nodeFactory.typeFactory();
 		formation = tokenFactory.newTransformFormation("ACSL", "contract");
 	}
 
@@ -431,7 +437,7 @@ public class AcslContractWorker {
 			return nodeFactory.newIdentifierExpressionNode(source,
 					translateIdentifier(expressionTree));
 		case TERM_PARENTHESIZED:
-			return translateExpression((CommonTree) expressionTree.getChild(1),
+			return translateExpression((CommonTree) expressionTree.getChild(0),
 					scope);
 		case CALL:
 			return translateCall(source, expressionTree, scope);
@@ -763,22 +769,24 @@ public class AcslContractWorker {
 				colKind, bodyNode);
 	}
 
-	private MPIConstantNode translateMPIConstantNode(CommonTree tree,
+	private MPIContractConstantNode translateMPIConstantNode(CommonTree tree,
 			Source source) throws SyntaxException {
 		String text = tree.getChild(0).getText();
+		MPIContractConstantNode result;
 
 		if (text.equals(MPI_COMM_RANK)) {
-			return nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK,
+			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK,
 					MPIConstantKind.MPI_COMM_RANK, ConstantKind.INT);
 		} else if (text.equals(MPI_COMM_SIZE)) {
-			return nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE,
+			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE,
 					MPIConstantKind.MPI_COMM_SIZE, ConstantKind.INT);
 		} else
 			throw error("Unknown MPI Constant " + text, tree);
-
+		result.setInitialType(typeFactory.signedIntegerType(SignedIntKind.INT));
+		return result;
 	}
 
-	private MPIExpressionNode translateMPIExpressionNode(
+	private MPIContractExpressionNode translateMPIExpressionNode(
 			CommonTree expressionTree, Source source, SimpleScope scope)
 			throws SyntaxException {
 		CommonTree expression = (CommonTree) expressionTree.getChild(0);
@@ -786,28 +794,35 @@ public class AcslContractWorker {
 		int numArgs;
 		List<ExpressionNode> args = new LinkedList<>();
 		String exprName = expression.getText();
-		MPIExpressionKind mpiExprKind;
+		MPIContractExpressionKind mpiExprKind;
+		MPIContractExpressionNode result;
+		Type initialType;
 
 		switch (kind) {
 		case AcslParser.MPI_EMPTY_IN:
 			numArgs = 1;
-			mpiExprKind = MPIExpressionKind.MPI_EMPTY_IN;
+			mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_IN;
+			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
 		case AcslParser.MPI_EMPTY_OUT:
 			numArgs = 1;
-			mpiExprKind = MPIExpressionKind.MPI_EMPTY_OUT;
+			mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_OUT;
+			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
 		case AcslParser.MPI_EQUALS:
 			numArgs = 4;
-			mpiExprKind = MPIExpressionKind.MPI_EQUALS;
+			mpiExprKind = MPIContractExpressionKind.MPI_EQUALS;
+			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
 		case AcslParser.MPI_REGION:
 			numArgs = 3;
-			mpiExprKind = MPIExpressionKind.MPI_REGION;
+			mpiExprKind = MPIContractExpressionKind.MPI_REGION;
+			initialType = typeFactory.pointerType(typeFactory.voidType());
 			break;
 		case AcslParser.MPI_SIZE:
 			numArgs = 2;
-			mpiExprKind = MPIExpressionKind.MPI_SIZE;
+			mpiExprKind = MPIContractExpressionKind.MPI_SIZE;
+			initialType = typeFactory.signedIntegerType(SignedIntKind.INT);
 			break;
 		default:
 			throw error("Unknown MPI expression " + exprName, expressionTree);
@@ -815,8 +830,10 @@ public class AcslContractWorker {
 		for (int i = 0; i < numArgs; i++)
 			args.add(this.translateExpression(
 					(CommonTree) expression.getChild(i), scope));
-		return nodeFactory.newMPIExpressionNode(source, args, mpiExprKind,
+		result = nodeFactory.newMPIExpressionNode(source, args, mpiExprKind,
 				exprName);
+		result.setInitialType(initialType);
+		return result;
 	}
 
 	private SyntaxException error(String message, CommonTree tree) {

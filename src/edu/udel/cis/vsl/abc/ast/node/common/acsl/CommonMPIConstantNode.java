@@ -2,12 +2,12 @@ package edu.udel.cis.vsl.abc.ast.node.common.acsl;
 
 import java.io.PrintStream;
 
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonConstantNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonMPIConstantNode extends CommonConstantNode implements
-		MPIConstantNode {
+		MPIContractConstantNode {
 
 	private MPIConstantKind kind;
 
@@ -26,7 +26,7 @@ public class CommonMPIConstantNode extends CommonConstantNode implements
 	}
 
 	@Override
-	public MPIConstantNode copy() {
+	public MPIContractConstantNode copy() {
 		return new CommonMPIConstantNode(this.getSource(), this
 				.getStringRepresentation().toString(), kind, constKind);
 	}

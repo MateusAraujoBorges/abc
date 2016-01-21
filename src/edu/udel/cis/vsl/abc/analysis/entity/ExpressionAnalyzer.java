@@ -15,6 +15,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
@@ -253,6 +254,9 @@ public class ExpressionAnalyzer {
 				break;
 			case STATEMENT_EXPRESSION:
 				processStatementExpression((StatementExpressionNode) node);
+				break;
+			case MPI_CONTRACT_EXPRESSION:
+				processMPIContractExpression((MPIContractExpressionNode) node);
 				break;
 			default:
 				throw new ABCRuntimeException("Unreachable");
@@ -1933,6 +1937,14 @@ public class ExpressionAnalyzer {
 		node.setInitialType(typeFactory.rangeType());
 	}
 
+	private void processMPIContractExpression(MPIContractExpressionNode node)
+			throws SyntaxException {
+		int numArgs = node.numArguments();
+
+		for (int i = 0; i < numArgs; i++)
+			this.processExpression(node.getArgument(i));
+	}
+
 	// Helper functions...
 
 	private SyntaxException error(String message, ASTNode node) {
@@ -2256,5 +2268,4 @@ public class ExpressionAnalyzer {
 			throw error("Expected expression of integer type", node);
 		}
 	}
-
 }

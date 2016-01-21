@@ -26,10 +26,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode.MPIConstantKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode.MPIExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
@@ -132,7 +132,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonEnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonGuardNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonReadOrWriteEventNode;
@@ -241,6 +241,8 @@ public class CommonNodeFactory implements NodeFactory {
 
 	private ValueFactory valueFactory;
 
+	private TypeFactory typeFactory;
+
 	private StandardUnsignedIntegerType booleanType;
 
 	private ObjectType processType;
@@ -253,7 +255,7 @@ public class CommonNodeFactory implements NodeFactory {
 			TypeFactory typeFactory, ValueFactory valueFactory) {
 		this.literalInterpreter = new LiteralInterpreter(typeFactory,
 				valueFactory);
-		// this.typeFactory = typeFactory;
+		this.typeFactory = typeFactory;
 		this.valueFactory = valueFactory;
 		this.booleanType = typeFactory
 				.unsignedIntegerType(UnsignedIntKind.BOOL);
@@ -1125,7 +1127,7 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public MPIConstantNode newMPIConstantNode(Source source,
+	public MPIContractConstantNode newMPIConstantNode(Source source,
 			String stringRepresentation, MPIConstantKind kind,
 			ConstantKind constKind) {
 		return new CommonMPIConstantNode(source, stringRepresentation, kind,
@@ -1133,10 +1135,16 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public MPIExpressionNode newMPIExpressionNode(Source source,
-			List<ExpressionNode> arguments, MPIExpressionKind kind,
+	public MPIContractExpressionNode newMPIExpressionNode(Source source,
+			List<ExpressionNode> arguments, MPIContractExpressionKind kind,
 			String exprName) {
-		return new CommonMPIExpressionNode(source, arguments, kind, exprName);
+		return new CommonMPIContractExpressionNode(source, arguments, kind,
+				exprName);
+	}
+
+	@Override
+	public TypeFactory typeFactory() {
+		return typeFactory;
 	}
 
 }

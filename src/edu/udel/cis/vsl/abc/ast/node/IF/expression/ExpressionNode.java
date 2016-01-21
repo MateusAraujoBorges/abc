@@ -159,7 +159,12 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 * A GNU C statement expression; can be cast to
 		 * {@link StatementExpressionNode}
 		 */
-		STATEMENT_EXPRESSION
+		STATEMENT_EXPRESSION,
+		/**
+		 * An MPI-Contracts constructor expression, it can only appears in a
+		 * function contract block. see {@link MPIContractExpression}.
+		 */
+		MPI_CONTRACT_EXPRESSION
 	}
 
 	/**

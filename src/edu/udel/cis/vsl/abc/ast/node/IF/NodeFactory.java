@@ -20,10 +20,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIConstantNode.MPIConstantKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIExpressionNode.MPIExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
@@ -112,6 +112,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeofNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
+import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
@@ -2317,7 +2318,7 @@ public interface NodeFactory {
 	 *            The {@link ConstantKind} of this constant
 	 * @return
 	 */
-	MPIConstantNode newMPIConstantNode(Source source,
+	MPIContractConstantNode newMPIConstantNode(Source source,
 			String stringRepresetation, MPIConstantKind kind,
 			ConstantKind constKind);
 
@@ -2328,12 +2329,19 @@ public interface NodeFactory {
 	 * @param arguments
 	 *            A list of arguments of an MPI expression
 	 * @param kind
-	 *            The {@link MPIExpressionKind} of this MPI expression
+	 *            The {@link MPIContractExpressionKind} of this MPI expression
 	 * @param exprName
 	 *            The String of the name of the MPI expression
 	 * @return
 	 */
-	MPIExpressionNode newMPIExpressionNode(Source source,
-			List<ExpressionNode> arguments, MPIExpressionKind kind,
+	MPIContractExpressionNode newMPIExpressionNode(Source source,
+			List<ExpressionNode> arguments, MPIContractExpressionKind kind,
 			String exprName);
+
+	/**
+	 * Returns a reference to a {@link TypeFactory}
+	 * 
+	 * @return
+	 */
+	TypeFactory typeFactory();
 }
