@@ -222,7 +222,7 @@ public class ExpressionAnalyzer {
 				break;
 			case IDENTIFIER_EXPRESSION:
 				processIdentifierExpression((IdentifierExpressionNode) node,
-						true);
+						true, false);
 				break;
 			case OPERATOR:
 				processOperator((OperatorNode) node);
@@ -321,7 +321,7 @@ public class ExpressionAnalyzer {
 			if (unknownIdentiferAttribute != null
 					&& (boolean) unknownIdentiferAttribute)
 				this.processIdentifierExpression(
-						(IdentifierExpressionNode) node, false);
+						(IdentifierExpressionNode) node, false, false);
 		} else {
 			for (ASTNode child : node.children()) {
 				if (child != null)
@@ -765,15 +765,15 @@ public class ExpressionAnalyzer {
 		return result;
 	}
 
-	private void processIdentifierExpression(IdentifierExpressionNode node,
-			boolean isFirstRound) throws SyntaxException {
+	void processIdentifierExpression(IdentifierExpressionNode node,
+			boolean isFirstRound, boolean isContract) throws SyntaxException {
 		IdentifierNode identifierNode = node.getIdentifier();
 		String name = identifierNode.name();
 		OrdinaryEntity entity = node.getScope().getLexicalOrdinaryEntity(name);
 		EntityKind kind;
 
 		if (entity == null) {
-			if (isFirstRound && config.svcomp()) {
+			if (isFirstRound && (config.svcomp() || isContract)) {
 				node.setAttribute(unknownIdentifier, true);
 				return;
 			} else {
@@ -1052,7 +1052,7 @@ public class ExpressionAnalyzer {
 				.getIdentifierNode();
 
 		processExpression(left);
-		processIdentifierExpression(identifierExpression, true);
+		processIdentifierExpression(identifierExpression, true, false);
 		node.setInitialType(identifierExpression.getInitialType());
 	}
 

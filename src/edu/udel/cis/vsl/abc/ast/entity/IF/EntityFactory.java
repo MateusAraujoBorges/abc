@@ -2,6 +2,7 @@ package edu.udel.cis.vsl.abc.ast.entity.IF;
 
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope.ScopeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 
@@ -90,5 +91,14 @@ public interface EntityFactory {
 	 * @return the youngest common ancestor of s1 and s2
 	 */
 	Scope join(Scope s1, Scope s2);
+
+	/**
+	 * Creates a new behavior entity.
+	 * 
+	 * @param name
+	 * @param behavior
+	 * @return
+	 */
+	BehaviorEntity newBehavior(String name, BehaviorNode behavior);
 
 }

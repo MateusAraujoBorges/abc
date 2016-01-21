@@ -35,7 +35,7 @@ public class LinkTest {
 
 	public final static PrintStream out = System.out;
 
-	public final static boolean debug = true;
+	public final static boolean debug = false;
 
 	private File root = new File(new File("examples"), "link");
 

@@ -15,6 +15,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode.ContractKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
@@ -22,8 +24,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -697,7 +697,7 @@ public class ASTPrettyPrinter {
 			result.append(")");
 			break;
 		}
-		case OPERATOR: {
+		case COMPOSITE: {
 			CompositeEventNode opEvent = (CompositeEventNode) event;
 			EventOperator op = opEvent.eventOperator();
 
@@ -729,7 +729,7 @@ public class ASTPrettyPrinter {
 			SequenceNode<ExpressionNode> args = callEvent.arguments();
 
 			result.append("\\call(");
-			result.append(callEvent.getFunction().name());
+			result.append(callEvent.getFunction().getIdentifier().name());
 			if (args.numChildren() > 0)
 				result.append(", ");
 			result.append(sequenceExpression2Pretty(callEvent.arguments()));

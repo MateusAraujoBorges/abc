@@ -1,8 +1,8 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
 
-import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 
 /**
  * An event that represents a function call with certain arguments, which is a
@@ -22,7 +22,7 @@ public interface CallEventNode extends DependsEventNode {
 	 * 
 	 * @return
 	 */
-	IdentifierNode getFunction();
+	IdentifierExpressionNode getFunction();
 
 	/**
 	 * the arguments of the function call

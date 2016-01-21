@@ -87,7 +87,12 @@ public interface Entity {
 		 * which is the OpenMP pragma domain. Each pragma domain may have a
 		 * pragma handler which is used to process pragmas of its domain.
 		 */
-		PRAGMA_HANDLER
+		PRAGMA_HANDLER,
+		/**
+		 * An ACSL behavior, named by the token between the keyword
+		 * <code>behavior </code> and the symbol <code>:</code>.
+		 */
+		BEHAVIOR
 	};
 
 	/**

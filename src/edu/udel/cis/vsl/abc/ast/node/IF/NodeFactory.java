@@ -2286,8 +2286,8 @@ public interface NodeFactory {
 
 	AnyactNode newAnyactNode(Source source);
 
-	CallEventNode newCallEventNode(Source source, IdentifierNode function,
-			SequenceNode<ExpressionNode> args);
+	CallEventNode newCallEventNode(Source source,
+			IdentifierExpressionNode function, SequenceNode<ExpressionNode> args);
 
 	/**
 	 * Creates a new MPI Collective block node

@@ -1113,7 +1113,7 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public CallEventNode newCallEventNode(Source source,
-			IdentifierNode function, SequenceNode<ExpressionNode> args) {
+			IdentifierExpressionNode function, SequenceNode<ExpressionNode> args) {
 		return new CommonCallEventNode(source, function, args);
 	}
 

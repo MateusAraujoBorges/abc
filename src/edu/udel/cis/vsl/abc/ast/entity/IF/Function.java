@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -129,6 +130,8 @@ public interface Function extends OrdinaryEntity {
 	 */
 	Iterator<ExpressionNode> getPostconditions();
 
+	// TODO clean up contract getter and setter methods
+
 	/**
 	 * Adds the given expression to the list of preconditions for the function.
 	 * Should be a boolean expression.
@@ -162,6 +165,10 @@ public interface Function extends OrdinaryEntity {
 	void addReads(AssignsOrReadsNode reads);
 
 	void addGuard(ExpressionNode expression);
+
+	void addContract(ContractNode contract);
+
+	Iterator<ContractNode> getContracts();
 
 	Iterator<DependsNode> getDepends();
 

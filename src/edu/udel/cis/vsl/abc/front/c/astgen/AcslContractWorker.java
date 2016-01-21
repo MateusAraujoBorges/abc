@@ -48,6 +48,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.PLUS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QUESTION;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.READ;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RESULT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SELF;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHIFTLEFT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHIFTRIGHT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SIZEOF;
@@ -368,7 +369,10 @@ public class AcslContractWorker {
 			SequenceNode<ExpressionNode> args = this.translateArgumentList(
 					(CommonTree) tree.getChild(1), scope);
 
-			return nodeFactory.newCallEventNode(source, function, args);
+			return nodeFactory.newCallEventNode(
+					source,
+					this.nodeFactory.newIdentifierExpressionNode(
+							function.getSource(), function), args);
 		}
 		case NOACT:
 			return nodeFactory.newNoactNode(source);
@@ -442,6 +446,8 @@ public class AcslContractWorker {
 			return translateFalse(source);
 		case RESULT:
 			return nodeFactory.newResultNode(source);
+		case SELF:
+			return nodeFactory.newSelfNode(source);
 		case DOTDOT:
 			return translateRegularRange(source, expressionTree, scope);
 		case WRITE:

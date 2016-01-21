@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.ast.entity.common;
 
+import edu.udel.cis.vsl.abc.ast.entity.IF.BehaviorEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Label;
@@ -9,6 +10,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Scope.ScopeKind;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Typedef;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Variable;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 
@@ -50,5 +52,10 @@ public class CommonEntityFactory implements EntityFactory {
 				if (scope1a.equals(scope2a))
 					return scope2a;
 		return null;
+	}
+
+	@Override
+	public BehaviorEntity newBehavior(String name, BehaviorNode behavior) {
+		return new CommonBehavior(name, behavior);
 	}
 }

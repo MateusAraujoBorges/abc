@@ -509,6 +509,7 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| TRUE | FALSE | RESULT | NOTHING | ELLIPSIS
+    | SELF
     | mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
 

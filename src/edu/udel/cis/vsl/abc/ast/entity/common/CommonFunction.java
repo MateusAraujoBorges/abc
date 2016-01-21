@@ -11,6 +11,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope.ScopeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -153,5 +154,17 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	@Override
 	public Iterator<AssignsOrReadsNode> getReads() {
 		return this.reads.iterator();
+	}
+
+	@Override
+	public void addContract(ContractNode contract) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public Iterator<ContractNode> getContracts() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

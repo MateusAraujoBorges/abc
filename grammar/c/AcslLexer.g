@@ -46,6 +46,8 @@ DISJOINT:   'disjoint';
 DEPENDS :   'depends';
 READS   :   'reads';
 FREES   :   'frees';
+//CIVL-C constants
+SELF    :   '$self';
 //CIVL-MPI extensions
 //---constants:
 MPI_COMM_SIZE : '\\mpi_comm_size';

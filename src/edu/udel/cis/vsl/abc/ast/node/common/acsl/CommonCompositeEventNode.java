@@ -19,7 +19,7 @@ public class CommonCompositeEventNode extends CommonDependsEventNode implements
 
 	@Override
 	public DependsEventKind getEventKind() {
-		return DependsEventKind.OPERATOR;
+		return DependsEventKind.COMPOSITE;
 	}
 
 	@Override
