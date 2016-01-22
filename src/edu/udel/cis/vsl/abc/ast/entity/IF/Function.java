@@ -104,11 +104,14 @@ public interface Function extends OrdinaryEntity {
 
 	// TODO clean up contract getter and setter methods
 
-	void addDepends(DependsNode depends);
-
-	void addReads(AssignsOrReadsNode reads);
-
-	void addGuard(ExpressionNode expression);
+	/**
+	 * Add a {@link ContractNode} which represents a reduction contract clause.
+	 * Reduction contract clauses include Depends ({@link DependsNode}), Guards
+	 * ({@link ExpressionNode}) and Reads ({@link AssignsOrReadsNode}).
+	 * 
+	 * @param contract
+	 */
+	void addReductionContract(ContractNode contract);
 
 	/**
 	 * Add a {@link ContractNode} which represents a sequential contract clause.
@@ -144,11 +147,14 @@ public interface Function extends OrdinaryEntity {
 	 */
 	Iterator<ContractNode> getMPIContracts();
 
-	Iterator<DependsNode> getDepends();
-
-	Iterator<ExpressionNode> getGuard();
-
-	Iterator<AssignsOrReadsNode> getReads();
+	/**
+	 * Returns a {@link Iterator} for a set of reduction contract clauses.
+	 * Reduction contract clause includes Depends ({@link DependsNode}), Guards
+	 * ({@link ExpressionNode}) and Reads ({@link AssignsOrReadsNode}).
+	 * 
+	 * @return
+	 */
+	Iterator<ContractNode> getReductionContracts();
 
 	// TODO: perhaps more information is needed. About each parameter:
 	// does it have static extent? What is the extent (constant

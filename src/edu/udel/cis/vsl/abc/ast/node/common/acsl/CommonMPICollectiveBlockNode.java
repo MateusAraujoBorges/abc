@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.common.acsl;
 
 import java.io.PrintStream;
+import java.util.Iterator;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
@@ -55,8 +56,14 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode implements
 	@Override
 	public StringBuffer prettyRepresentation() {
 		StringBuffer out = new StringBuffer();
+		Iterator<ContractNode> nodeIter;
+
 		out.append("\\mpi_collective(" + this.child(0).prettyRepresentation()
-				+ ", " + kind + ":\n" + this.body.prettyRepresentation());
+				+ ", " + kind + ":\n");
+		nodeIter = this.body.iterator();
+
+		while (nodeIter.hasNext())
+			out.append(nodeIter.next().prettyRepresentation());
 		return out;
 	}
 

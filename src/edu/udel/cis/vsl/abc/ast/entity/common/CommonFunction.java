@@ -10,11 +10,8 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope.ScopeKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.FunctionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
@@ -31,9 +28,7 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 
 	private List<ContractNode> mpiContracts = new LinkedList<>();
 
-	private List<DependsNode> depends = new LinkedList<>();
-	private List<ExpressionNode> guards = new LinkedList<>();
-	private List<AssignsOrReadsNode> reads = new LinkedList<>();
+	private List<ContractNode> reductionContracts = new LinkedList<>();
 
 	public CommonFunction(String name, ProgramEntity.LinkageKind linkage,
 			Type type) {
@@ -96,33 +91,13 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	}
 
 	@Override
-	public void addDepends(DependsNode depends) {
-		this.depends.add(depends);
+	public void addReductionContract(ContractNode contract) {
+
 	}
 
 	@Override
-	public void addGuard(ExpressionNode expression) {
-		this.guards.add(expression);
-	}
-
-	@Override
-	public Iterator<DependsNode> getDepends() {
-		return this.depends.iterator();
-	}
-
-	@Override
-	public Iterator<ExpressionNode> getGuard() {
-		return this.guards.iterator();
-	}
-
-	@Override
-	public void addReads(AssignsOrReadsNode reads) {
-		this.reads.add(reads);
-	}
-
-	@Override
-	public Iterator<AssignsOrReadsNode> getReads() {
-		return this.reads.iterator();
+	public Iterator<ContractNode> getReductionContracts() {
+		return this.reductionContracts.iterator();
 	}
 
 	@Override
