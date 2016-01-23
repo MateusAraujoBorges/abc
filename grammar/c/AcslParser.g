@@ -65,17 +65,22 @@ function_contract
 /* a full contract block non-terminal represents an ACSL contract
  * block for a function */
 full_contract_block
-    : (f+=function_clause)* (m+=mpi_collective_block)* (b+=named_behavior_block)* 
+    : (f+=function_clause)* (m+=contract_block)* //(m+=mpi_collective_block)* (b+=named_behavior_block)* 
         (c+=completeness_clause_block)* 
-        -> ^(CONTRACT_BLOCK $f* $m* $b* $c*) 
+        -> ^(CONTRACT_BLOCK $f* $m* $c*) 
     ;
 
 /* a partial contract block non-terminal represents an ACSL contract
  * block inside an MPI collective block */
 partial_contract_block
-    : (f+=function_clause)+ (b+=named_behavior_block)* 
+    : (f+=function_clause)* (b+=named_behavior_block)* 
         (c+=completeness_clause_block)* 
-        -> ^(CONTRACT_BLOCK $f+ $b* $c*) 
+        -> ^(CONTRACT_BLOCK $f* $b* $c*) 
+    ;
+
+contract_block
+    : mpi_collective_block
+    | named_behavior_block completeness_clause_block?
     ;
 
 function_clause

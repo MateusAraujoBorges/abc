@@ -24,11 +24,7 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	private Set<Function> callees = new HashSet<>();
 	static Function mainFunction;
 
-	private List<ContractNode> seqContracts = new LinkedList<>();
-
-	private List<ContractNode> mpiContracts = new LinkedList<>();
-
-	private List<ContractNode> reductionContracts = new LinkedList<>();
+	private List<ContractNode> contracts = new LinkedList<>();
 
 	public CommonFunction(String name, ProgramEntity.LinkageKind linkage,
 			Type type) {
@@ -91,32 +87,12 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	}
 
 	@Override
-	public void addReductionContract(ContractNode contract) {
-
+	public void addContract(ContractNode contract) {
+		contracts.add(contract);
 	}
 
 	@Override
-	public Iterator<ContractNode> getReductionContracts() {
-		return this.reductionContracts.iterator();
-	}
-
-	@Override
-	public void addSeqContract(ContractNode contract) {
-		seqContracts.add(contract);
-	}
-
-	@Override
-	public Iterator<ContractNode> getSeqContracts() {
-		return seqContracts.iterator();
-	}
-
-	@Override
-	public void addMPIContract(ContractNode contract) {
-		mpiContracts.add(contract);
-	}
-
-	@Override
-	public Iterator<ContractNode> getMPIContracts() {
-		return mpiContracts.iterator();
+	public Iterator<ContractNode> getContracts() {
+		return contracts.iterator();
 	}
 }

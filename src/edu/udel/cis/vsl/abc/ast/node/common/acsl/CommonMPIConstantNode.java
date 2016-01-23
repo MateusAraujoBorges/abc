@@ -38,28 +38,6 @@ public class CommonMPIConstantNode extends CommonConstantNode implements
 
 	@Override
 	protected void printBody(PrintStream out) {
-		out.println(this.prettyRepresentation());
-	}
-
-	@Override
-	public String toString() {
-		return this.prettyRepresentation().toString();
-	}
-
-	@Override
-	public StringBuffer prettyRepresentation() {
-		StringBuffer pretty = new StringBuffer();
-
-		switch (kind) {
-		case MPI_COMM_RANK:
-			pretty.append("\\mpi_comm_rank");
-			break;
-		case MPI_COMM_SIZE:
-			pretty.append("\\mpi_comm_size");
-			break;
-		default:
-			pretty.append("\\unknown_mpi_constant");
-		}
-		return pretty;
+		out.print(kind);
 	}
 }

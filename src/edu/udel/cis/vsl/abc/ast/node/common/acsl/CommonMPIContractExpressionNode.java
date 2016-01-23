@@ -41,8 +41,7 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 	}
 
 	@Override
-	public
-	MPIContractExpressionKind MPIContractExpressionKind() {
+	public MPIContractExpressionKind MPIContractExpressionKind() {
 		return kind;
 	}
 
@@ -96,24 +95,6 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 
 	@Override
 	protected void printBody(PrintStream out) {
-		out.println(this.prettyRepresentation());
-	}
-
-	@Override
-	public String toString() {
-		return this.prettyRepresentation().toString();
-	}
-
-	@Override
-	public StringBuffer prettyRepresentation() {
-		StringBuffer pretty = new StringBuffer();
-		int numArgs = this.numArguments();
-
-		pretty.append(exprName + "(");
-		pretty.append(arguments[0].prettyRepresentation());
-		for (int i = 1; i < numArgs; i++)
-			pretty.append(" , " + arguments[i].prettyRepresentation());
-		pretty.append(")");
-		return pretty;
+		out.print(kind);
 	}
 }

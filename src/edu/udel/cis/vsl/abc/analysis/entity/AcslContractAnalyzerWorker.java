@@ -25,22 +25,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 public class AcslContractAnalyzerWorker {
-	/**
-	 * ContractType distinguishes the type of contracts. Currently there are two
-	 * types of contracts: sequential (regular) and MPI.
-	 * 
-	 * @author ziqingluo
-	 *
-	 */
-	private enum ContractType {
-		SEQ, MPI, REDUCE
-	};
-
 	/**
 	 * The entity analyzer controlling this declaration analyzer.
 	 */
@@ -53,17 +41,7 @@ public class AcslContractAnalyzerWorker {
 	}
 
 	/**
-	 * Do entity analysis on contract nodes. ContractNodes will be attached to
-	 * {@link Function} with following categorization rules:
-	 * <ol>
-	 * <li>DEPENDES, GUARDS and READS are reduction contracts.</li>
-	 * <li>All MPI contracts are in MPI_Collective blocks.</li>
-	 * <li>For all contracts that are not in MPI_Collective blocks or not belong
-	 * to reduction contracts are sequential contracts.</li>
-	 * <li>Reduction contracts cannot appear in behavior blocks or
-	 * MPI_Collective blocks (TODO: maybe currently, because the semantics is
-	 * not clear)</li>
-	 * </ol>
+	 * Do entity analysis on a whole contract block of a function.
 	 * 
 	 * @param contract
 	 * @param result
@@ -71,25 +49,21 @@ public class AcslContractAnalyzerWorker {
 	 */
 	void processContractNodes(SequenceNode<ContractNode> contract,
 			Function result) throws SyntaxException {
-		ContractType contractType;
-
 		for (ContractNode contractClause : contract) {
-			contractType = processContractNode(contractClause);
-			addContractToFunction(result, contractClause, contractType);
+			processContractNode(contractClause);
+			result.addContract(contractClause);
 		}
 	}
 
 	// TODO: MPIContractExpression type checking!
 	/**
-	 * Recursively process entity analysis for a {@link ContractNode}, returns
-	 * the {@link ContractType}. The process conforms the rule defined at
-	 * {@link #processContractNodes(SequenceNode, Function)}.
+	 * Recursively process entity analysis for a {@link ContractNode}.
 	 * 
 	 * @param contractClause
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private ContractType processContractNode(ContractNode contractClause)
+	private void processContractNode(ContractNode contractClause)
 			throws SyntaxException {
 		ContractKind contractKind = contractClause.contractKind();
 
@@ -109,13 +83,7 @@ public class AcslContractAnalyzerWorker {
 
 				entityAnalyzer.expressionAnalyzer.processExpression(expression);
 			}
-			// If the contract is not a sub-clause and is not an "assigns", put
-			// it as "reads" then return; Else, it will be put into the function
-			// later.
-			if (assignsOrReads.isReads())
-				return ContractType.REDUCE;
-			else
-				return ContractType.SEQ;
+			break;
 		}
 		case DEPENDS: {
 			DependsNode depends = (DependsNode) contractClause;
@@ -125,6 +93,7 @@ public class AcslContractAnalyzerWorker {
 			for (DependsEventNode event : eventList) {
 				processDependsEvent(event);
 			}
+			break;
 			// int numEvents = eventList.numChildren();
 			//
 			// if (condition != null)
@@ -136,14 +105,13 @@ public class AcslContractAnalyzerWorker {
 			// entityAnalyzer.expressionAnalyzer
 			// .processExpression(event);
 			// }
-			return ContractType.REDUCE;
 		}
 		case GUARDS: {
 			ExpressionNode expression = ((GuardNode) contractClause)
 					.getExpression();
 
 			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			return ContractType.REDUCE;
+			break;
 		}
 		/* *********************************************************** */
 		/* ** Contracts stored in functions without categorization: ** */
@@ -152,7 +120,7 @@ public class AcslContractAnalyzerWorker {
 			ExpressionNode expression = assumesNode.getPredicate();
 
 			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			return ContractType.SEQ;
+			break;
 		}
 		case BEHAVIOR: {
 			BehaviorNode behavior = (BehaviorNode) contractClause;
@@ -171,8 +139,7 @@ public class AcslContractAnalyzerWorker {
 			for (ContractNode subClause : body) {
 				processContractNode(subClause);
 			}
-
-			return ContractType.SEQ;
+			break;
 		}
 		case COMPLETENESS: {
 			CompletenessNode completeNode = (CompletenessNode) contractClause;
@@ -188,39 +155,30 @@ public class AcslContractAnalyzerWorker {
 					id.setEntity(behavior);
 				}
 			}
-			return ContractType.SEQ;
+			break;
 		}
 		case REQUIRES: {
 			ExpressionNode expression = ((RequiresNode) contractClause)
 					.getExpression();
 
 			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			return ContractType.SEQ;
+			break;
 		}
 		case ENSURES: {
 			ExpressionNode expression = ((EnsuresNode) contractClause)
 					.getExpression();
 
 			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			return ContractType.SEQ;
+			break;
 		}
 		case MPI_COLLECTIVE: {
 			MPICollectiveBlockNode collective_block = (MPICollectiveBlockNode) contractClause;
 
 			entityAnalyzer.expressionAnalyzer
 					.processExpression(collective_block.getMPIComm());
-			for (ContractNode colClause : collective_block.getBody()) {
-				ContractType nonRecType = processContractNode(colClause);
-
-				// check if there is any reduction contracts:
-				if (nonRecType == ContractType.REDUCE)
-					throw error(
-							"Reduction contract: "
-									+ colClause.contractKind()
-									+ " shall not appear in MPI_Collective blocks",
-							colClause);
-			}
-			return ContractType.MPI;
+			for (ContractNode colClause : collective_block.getBody())
+				processContractNode(colClause);
+			break;
 		}
 		default:
 			throw error("Unknown kind of contract clause", contractClause);
@@ -270,23 +228,6 @@ public class AcslContractAnalyzerWorker {
 			throw error("Unknown kind of depends event", event);
 		}
 
-	}
-
-	private void addContractToFunction(Function function,
-			ContractNode contract, ContractType type) {
-		switch (type) {
-		case SEQ:
-			function.addSeqContract(contract);
-			break;
-		case MPI:
-			function.addMPIContract(contract);
-			break;
-		case REDUCE:
-			function.addReductionContract(contract);
-			break;
-		default:
-			throw new ABCRuntimeException("Unreachable location");
-		}
 	}
 
 	private SyntaxException error(String message, ASTNode node) {

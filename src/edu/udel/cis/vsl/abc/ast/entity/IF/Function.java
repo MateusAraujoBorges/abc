@@ -3,11 +3,8 @@ package edu.udel.cis.vsl.abc.ast.entity.IF;
 import java.util.Iterator;
 import java.util.Set;
 
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.FunctionType;
 
 /**
@@ -103,59 +100,20 @@ public interface Function extends OrdinaryEntity {
 	Set<Function> getCallees();
 
 	// TODO clean up contract getter and setter methods
-
 	/**
-	 * Add a {@link ContractNode} which represents a reduction contract clause.
-	 * Reduction contract clauses include Depends ({@link DependsNode}), Guards
-	 * ({@link ExpressionNode}) and Reads ({@link AssignsOrReadsNode}).
-	 * 
-	 * @param contract
-	 */
-	void addReductionContract(ContractNode contract);
-
-	/**
-	 * Add a {@link ContractNode} which represents a sequential contract clause.
-	 * A sequential contract clause states sequential properties of a procedure.
+	 * Add a {@link ContractNode} which represents a contract clause.
 	 * 
 	 * @param contract
 	 *            A node representing a contract clause.
 	 */
-	void addSeqContract(ContractNode contract);
+	void addContract(ContractNode contract);
 
 	/**
-	 * Add a {@link ContractNode} which represents an MPI contract clause. An
-	 * MPI contract clause states specific properties of MPI programs
-	 * 
-	 * @param contract
-	 *            A node representing a contract clause.
-	 */
-	void addMPIContract(ContractNode contract);
-
-	/**
-	 * Returns a {@link Iterator} for a set of sequential contract clauses. A
-	 * sequential contract clause states sequential properties of a procedure.
+	 * Returns a {@link Iterator} for a set of contract clauses.
 	 * 
 	 * @return
 	 */
-	Iterator<ContractNode> getSeqContracts();
-
-	/**
-	 * Returns a {@link Iterator} for a set of MPI contract clauses.An MPI
-	 * contract clause states specific properties of MPI programs
-	 * 
-	 * @return
-	 */
-	Iterator<ContractNode> getMPIContracts();
-
-	/**
-	 * Returns a {@link Iterator} for a set of reduction contract clauses.
-	 * Reduction contract clause includes Depends ({@link DependsNode}), Guards
-	 * ({@link ExpressionNode}) and Reads ({@link AssignsOrReadsNode}).
-	 * 
-	 * @return
-	 */
-	Iterator<ContractNode> getReductionContracts();
-
+	Iterator<ContractNode> getContracts();
 	// TODO: perhaps more information is needed. About each parameter:
 	// does it have static extent? What is the extent (constant
 	// or expression)?
