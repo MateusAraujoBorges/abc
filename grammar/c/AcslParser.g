@@ -330,14 +330,21 @@ castExpression
 	| unaryExpression
 	;
 
+remoteExpression
+	:(castExpression -> castExpression)
+	( HASH y=castExpression
+	  -> ^(OPERATOR HASH ^(ARGUMENT_LIST $remoteExpression $y))
+    )*
+	;
+
 /* 6.5.5 */
 multiplicativeExpression
-	: (castExpression -> castExpression)
-	( STAR y=castExpression
+	: (remoteExpression -> remoteExpression)
+	( STAR y=remoteExpression
 	  -> ^(OPERATOR STAR ^(ARGUMENT_LIST $multiplicativeExpression $y))
-	| DIV y=castExpression
+	| DIV y=remoteExpression
 	  -> ^(OPERATOR DIV ^(ARGUMENT_LIST $multiplicativeExpression $y))
-    | MOD y=castExpression
+    | MOD y=remoteExpression
 	  -> ^(OPERATOR MOD ^(ARGUMENT_LIST $multiplicativeExpression $y))
     )*
 	;

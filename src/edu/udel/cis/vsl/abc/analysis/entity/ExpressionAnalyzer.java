@@ -889,8 +889,8 @@ public class ExpressionAnalyzer {
 		case ASSIGN: // = standard assignment operator
 			processASSIGN(node);
 			break;
-		case AT:
-			processAT(node);
+		case HASH:
+			processHash(node);
 			break;
 		case BIG_O: // big-O expresion
 			processBIG_O(node);
@@ -981,7 +981,7 @@ public class ExpressionAnalyzer {
 		}
 	}
 
-	private void processAT(OperatorNode node) throws SyntaxException {
+	private void processHash(OperatorNode node) throws SyntaxException {
 		ExpressionNode arg0 = node.getArgument(0);
 		ExpressionNode arg1 = node.getArgument(1);
 		Type type0 = addStandardConversions(arg0), type1 = addStandardConversions(arg1);

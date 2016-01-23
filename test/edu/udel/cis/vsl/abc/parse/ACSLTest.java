@@ -71,4 +71,22 @@ public class ACSLTest {
 			ParseException {
 		this.parse("mpiConstants.c");
 	}
+
+	@Test
+	public void wildcard() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("wildcard_contract_bad.c");
+	}
+
+	@Test
+	public void emptyInBad() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("isRecvBufEmpty_BAD.c");
+	}
+
+	@Test
+	public void emptyInOk() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("isRecvBufEmpty_OK.c");
+	}
 }

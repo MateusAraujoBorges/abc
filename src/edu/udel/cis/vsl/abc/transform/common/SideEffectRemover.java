@@ -1137,7 +1137,7 @@ public class SideEffectRemover extends BaseTransformer {
 		case POSTDECREMENT:
 			result = translateIncrementOrDecrement(expression, isVoid);
 			break;
-		case AT:
+		case HASH:
 		case BITAND:
 		case BITOR:
 		case BITXOR:

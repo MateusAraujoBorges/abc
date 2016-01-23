@@ -46,7 +46,6 @@ public class AcslContractHandler {
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 
 		updateLineNumber(startLine - 1, tokens);
-
 		AcslParser parser = new AcslParser(tokens);
 		CommonTree tree;
 		try {

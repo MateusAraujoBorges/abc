@@ -4,7 +4,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AMPERSAND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ANYACT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARROW;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ASSIGN;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITXOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL;
@@ -28,6 +27,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOATING_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FORALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GTE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.HASH;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLY;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INDEX;
@@ -673,6 +673,9 @@ public class AcslContractWorker {
 		case GTE:
 			operator = Operator.GTE;
 			break;
+		case HASH:
+			operator = Operator.HASH;
+			break;
 		case LAND:
 			operator = Operator.LAND;
 			break;
@@ -711,9 +714,6 @@ public class AcslContractWorker {
 			break;
 		case INDEX:
 			operator = Operator.SUBSCRIPT;
-			break;
-		case AT:
-			operator = Operator.AT;
 			break;
 		default:
 			throw error("Unknown operator :", operatorTree);

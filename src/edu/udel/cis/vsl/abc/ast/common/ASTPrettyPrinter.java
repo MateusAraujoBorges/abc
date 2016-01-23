@@ -1979,9 +1979,9 @@ public class ASTPrettyPrinter {
 			result.append(" = ");
 			result.append(arg1);
 			break;
-		case AT:
+		case HASH:
 			result.append(arg0);
-			result.append("@");
+			result.append("#");
 			result.append(arg1);
 			break;
 		case BIG_O:

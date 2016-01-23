@@ -169,7 +169,7 @@ public class CommonOperatorNode extends CommonExpressionNode implements
 		case SHIFTLEFT:
 		case SHIFTRIGHT:
 		case UNARYPLUS:
-		case AT:
+		case HASH:
 			break;
 		} // end of switch
 			// default case: check operands...

@@ -790,8 +790,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		case STAREQ:
 			operator = Operator.TIMESEQ;
 			break;
-		case AT:
-			operator = Operator.AT;
+		case HASH:
+			operator = Operator.HASH;
 			break;
 		default:
 			throw error("Unknown operator :", operatorTree);
