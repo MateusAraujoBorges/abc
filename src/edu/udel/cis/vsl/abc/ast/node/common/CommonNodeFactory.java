@@ -52,7 +52,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
@@ -153,7 +152,6 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCallsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCastNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCharacterConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonDerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonDotNode;
@@ -752,13 +750,6 @@ public class CommonNodeFactory implements NodeFactory {
 	public RemoteExpressionNode newRemoteExpressionNode(Source source,
 			ExpressionNode left, IdentifierExpressionNode right) {
 		return new CommonRemoteExpressionNode(source, left, right);
-	}
-
-	@Override
-	public CollectiveExpressionNode newCollectiveExpressionNode(Source source,
-			ExpressionNode processesExpression, ExpressionNode bodyExpression) {
-		return new CommonCollectiveExpressionNode(source, processesExpression,
-				bodyExpression);
 	}
 
 	@Override

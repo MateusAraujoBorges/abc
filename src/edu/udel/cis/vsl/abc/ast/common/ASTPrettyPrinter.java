@@ -24,6 +24,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -43,7 +44,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
@@ -633,6 +633,18 @@ public class ASTPrettyPrinter {
 			out.print("guards ");
 			out.print(expression2Pretty(guard.getExpression()));
 			out.print(";");
+			break;
+		}
+		case MPI_COLLECTIVE: {
+			MPICollectiveBlockNode colBlock = (MPICollectiveBlockNode) contract;
+			String indentedNewLinePrefix = prefix + "  ";
+
+			out.print("\\mpi_collective(");
+			out.print(expression2Pretty(colBlock.getMPIComm()));
+			out.print("," + colBlock.getCollectiveKind());
+			for (ContractNode clause : colBlock.getBody()) {
+				pPrintContractNode(out, indentedNewLinePrefix, clause);
+			}
 			break;
 		}
 		case REQUIRES: {
@@ -1725,15 +1737,6 @@ public class ASTPrettyPrinter {
 				result.append(")");
 			break;
 		}
-		case COLLECTIVE:
-			ExpressionNode procsGroupNode = ((CollectiveExpressionNode) expression)
-					.getProcessesGroupExpression();
-			ExpressionNode bodyNode = ((CollectiveExpressionNode) expression)
-					.getBody();
-
-			result.append("$collective(" + expression2Pretty(procsGroupNode));
-			result.append(") { " + expression2Pretty(bodyNode) + " }");
-			break;
 		case COMPOUND_LITERAL:
 			return compoundLiteral2Pretty((CompoundLiteralNode) expression);
 		case CONSTANT: {

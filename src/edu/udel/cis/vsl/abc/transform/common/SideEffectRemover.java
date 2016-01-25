@@ -29,7 +29,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
@@ -1405,27 +1404,28 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
-	private ExprTriple translateCollective(CollectiveExpressionNode expression) {
-		ExprTriple result = new ExprTriple(expression);
-		ExprTriple e0 = translate(expression.getProcessesGroupExpression(),
-				false);
-		// ExprTriple e1 = translate(expression.getLengthExpression());
-		ExprTriple e2 = translate(expression.getBody(), false);
-
-		makesef(e0);
-		// makesef(e1);
-		makesef(e2);
-		expression.setProcessesGroupExpression(e0.getNode());
-		// expression.setLengthExpression(e1.getNode());
-		expression.setBody(e2.getNode());
-		result.addAllBefore(e0.getBefore());
-		// result.addAllBefore(e1.getBefore());
-		result.addAllBefore(e2.getBefore());
-		result.addAllAfter(e0.getAfter());
-		// result.addAllAfter(e1.getAfter());
-		result.addAllAfter(e2.getAfter());
-		return result;
-	}
+	// private ExprTriple translateCollective(CollectiveExpressionNode
+	// expression) {
+	// ExprTriple result = new ExprTriple(expression);
+	// ExprTriple e0 = translate(expression.getProcessesGroupExpression(),
+	// false);
+	// // ExprTriple e1 = translate(expression.getLengthExpression());
+	// ExprTriple e2 = translate(expression.getBody(), false);
+	//
+	// makesef(e0);
+	// // makesef(e1);
+	// makesef(e2);
+	// expression.setProcessesGroupExpression(e0.getNode());
+	// // expression.setLengthExpression(e1.getNode());
+	// expression.setBody(e2.getNode());
+	// result.addAllBefore(e0.getBefore());
+	// // result.addAllBefore(e1.getBefore());
+	// result.addAllBefore(e2.getBefore());
+	// result.addAllAfter(e0.getAfter());
+	// // result.addAllAfter(e1.getAfter());
+	// result.addAllAfter(e2.getAfter());
+	// return result;
+	// }
 
 	private ExprTriple translateCast(CastNode expression, boolean isVoid) {
 		ExpressionNode arg = expression.getArgument();
@@ -1631,8 +1631,6 @@ public class SideEffectRemover extends BaseTransformer {
 			return translateArrow((ArrowNode) expression, isVoid);
 		case CAST:
 			return translateCast((CastNode) expression, isVoid);
-		case COLLECTIVE:
-			return translateCollective((CollectiveExpressionNode) expression);
 		case COMPOUND_LITERAL:
 			return translateCompoundLiteral((CompoundLiteralNode) expression,
 					isVoid);

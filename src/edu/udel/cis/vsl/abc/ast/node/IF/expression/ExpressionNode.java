@@ -72,11 +72,6 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 */
 		CAST,
 		/**
-		 * A CIVL-C collective expression node; can be cast to
-		 * {@link CollectiveExpressionNode}.
-		 */
-		COLLECTIVE,
-		/**
 		 * A compound literal node; can be cast to {@link CompoundLiteralNode}.
 		 */
 		COMPOUND_LITERAL,

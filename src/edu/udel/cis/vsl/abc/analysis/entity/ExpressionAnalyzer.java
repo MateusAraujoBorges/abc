@@ -28,7 +28,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
@@ -195,14 +194,6 @@ public class ExpressionAnalyzer {
 			case CAST:
 				processCast((CastNode) node);
 				break;
-			case COLLECTIVE: {
-				CollectiveExpressionNode collective = (CollectiveExpressionNode) node;
-
-				processExpression(collective.getProcessesGroupExpression());
-				processExpression(collective.getBody());
-				node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
-				break;
-			}
 			case COMPOUND_LITERAL:
 				processCompoundLiteral((CompoundLiteralNode) node);
 				break;

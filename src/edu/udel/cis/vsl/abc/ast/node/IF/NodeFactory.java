@@ -46,7 +46,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CollectiveExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
@@ -916,28 +915,6 @@ public interface NodeFactory {
 	 */
 	RemoteExpressionNode newRemoteExpressionNode(Source source,
 			ExpressionNode left, IdentifierExpressionNode right);
-
-	/**
-	 * Creates a new collective expression node. This expression can be used in
-	 * an assertion to form a collective assertion. It can also be used in an
-	 * assume statement, a loop invariant, or a procedure contract.
-	 * 
-	 * The set of processes over which this collective expression spans is
-	 * specified by an array whose elements have type \proc.
-	 * 
-	 * @param source
-	 *            the source code elements
-	 * @param processPointerExpression
-	 *            a pointer to the first element of an array of process
-	 *            references
-	 * @param lengthExpression
-	 *            the number of processes in the array
-	 * @param body
-	 *            the expression to be interpreted in the collective context
-	 * @return the new collective expression node with given children
-	 */
-	CollectiveExpressionNode newCollectiveExpressionNode(Source source,
-			ExpressionNode processesExpression, ExpressionNode bodyExpression);
 
 	/**
 	 * Constructs a new CIVL-C <code>$scopeof</code> expression node. This is an

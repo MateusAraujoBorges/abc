@@ -925,13 +925,6 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			return nodeFactory.newResultNode(source);
 		case AT:
 			return translateAt(source, expressionTree, scope);
-		case COLLECTIVE:
-			return nodeFactory.newCollectiveExpressionNode(
-					source,
-					translateExpression(
-							(CommonTree) expressionTree.getChild(0), scope),
-					translateExpression(
-							(CommonTree) expressionTree.getChild(1), scope));
 		case FORALL:
 			return translateForall(source, expressionTree, scope);
 		case UNIFORM:
