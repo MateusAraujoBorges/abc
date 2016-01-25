@@ -7,7 +7,7 @@ public interface MPIContractConstantNode extends ConstantNode {
 		MPI_COMM_RANK, MPI_COMM_SIZE
 	}
 
-	MPIConstantKind getConstantKind();
+	public MPIConstantKind getConstantKind();
 
 	@Override
 	MPIContractConstantNode copy();
