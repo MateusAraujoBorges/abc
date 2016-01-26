@@ -238,4 +238,9 @@ public class AcslContractAnalyzerWorker {
 	private SyntaxException error(UnsourcedException e, ASTNode node) {
 		return entityAnalyzer.error(e, node);
 	}
+
+	void processLoopContractNodes(SequenceNode<ContractNode> loopContracts) {
+		// TODO Auto-generated method stub
+
+	}
 }

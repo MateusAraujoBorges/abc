@@ -49,6 +49,11 @@ public interface ContractNode extends ASTNode {
 		 */
 		GUARDS,
 		/**
+		 * A "invariant" node represents a loop invariant or a general
+		 * invariant.
+		 */
+		INVARIANT,
+		/**
 		 * A "requires" node represents a pre-condition in a CIVL-C procedure
 		 * contract. May be safely cast to {@link RequiresNode}.
 		 */

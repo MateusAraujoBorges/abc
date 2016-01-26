@@ -22,4 +22,11 @@ public class AcslContractAnalyzer {
 
 		worker.processContractNodes(contract, result);
 	}
+
+	void processLoopContractNodes(SequenceNode<ContractNode> loopContracts) {
+		AcslContractAnalyzerWorker worker = new AcslContractAnalyzerWorker(
+				this.entityAnalyzer);
+
+		worker.processLoopContractNodes(loopContracts);
+	}
 }

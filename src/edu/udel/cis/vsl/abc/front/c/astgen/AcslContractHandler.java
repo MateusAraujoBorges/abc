@@ -23,6 +23,10 @@ import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 public class AcslContractHandler {
 
+	public enum AcslContractKind {
+		FUNCTION_CONTRACT, LOOP_CONTRACT
+	}
+
 	private NodeFactory nodeFactory;
 	private TokenFactory tokenFactory;
 
@@ -32,15 +36,17 @@ public class AcslContractHandler {
 	}
 
 	public List<ContractNode> translateContracts(int startLine, String text,
-			SimpleScope scope, Formation formation) throws SyntaxException {
-		CParseTree contractTree = this.parse(startLine, text, formation);
+			SimpleScope scope, Formation formation, AcslContractKind kind)
+			throws SyntaxException {
+		CParseTree contractTree = this.parse(startLine, text, formation, kind);
 		AcslContractWorker worker = new AcslContractWorker(nodeFactory,
 				tokenFactory, contractTree);
 
 		return worker.generateASTNodes(scope);
 	}
 
-	private CParseTree parse(int startLine, String text, Formation formation) {
+	private CParseTree parse(int startLine, String text, Formation formation,
+			AcslContractKind kind) throws SyntaxException {
 		ANTLRStringStream input = new ANTLRStringStream(text);
 		AcslLexer lexer = new AcslLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -48,8 +54,19 @@ public class AcslContractHandler {
 		updateLineNumber(startLine - 1, tokens);
 		AcslParser parser = new AcslParser(tokens);
 		CommonTree tree;
+
 		try {
-			tree = (CommonTree) parser.function_contract().getTree();
+			switch (kind) {
+			case FUNCTION_CONTRACT:
+				tree = (CommonTree) parser.function_contract().getTree();
+				break;
+			case LOOP_CONTRACT:
+				tree = (CommonTree) parser.loop_contract().getTree();
+				break;
+			default:
+				throw new SyntaxException(
+						"unknown ACSL contract kind: " + kind, null);
+			}
 		} catch (RecognitionException e) {
 			throw new ABCRuntimeException(e.getMessage());
 		}

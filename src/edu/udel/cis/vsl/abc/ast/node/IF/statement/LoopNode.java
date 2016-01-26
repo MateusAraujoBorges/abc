@@ -1,5 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.statement;
 
+import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
 /**
@@ -48,26 +50,13 @@ public interface LoopNode extends StatementNode {
 	void setBody(StatementNode body);
 
 	/**
-	 * Gets the invariant expression associated to this loop node.
-	 * 
-	 * @return the invariant
-	 */
-	ExpressionNode getInvariant();
-
-	/**
-	 * Sets the loop invariant associated to this loop node.
-	 * 
-	 * @param invariant
-	 *            the loop invariant expression
-	 */
-	void setInvariant(ExpressionNode invariant);
-
-	/**
 	 * What kind of loop is this?
 	 * 
 	 * @return the loop kind
 	 */
 	LoopKind getKind();
+
+	SequenceNode<ContractNode> loopContracts();
 
 	@Override
 	LoopNode copy();

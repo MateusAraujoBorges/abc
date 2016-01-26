@@ -4,6 +4,8 @@ import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
@@ -15,8 +17,8 @@ public class CommonLoopNode extends CommonStatementNode implements LoopNode {
 
 	public CommonLoopNode(Source source, LoopKind loopKind,
 			ExpressionNode condition, StatementNode body,
-			ExpressionNode invariant) {
-		super(source, condition, body, invariant);
+			SequenceNode<ContractNode> contracts) {
+		super(source, condition, body, contracts);
 		this.loopKind = loopKind;
 	}
 
@@ -60,7 +62,7 @@ public class CommonLoopNode extends CommonStatementNode implements LoopNode {
 	public LoopNode copy() {
 		return new CommonLoopNode(getSource(), getKind(),
 				duplicate(getCondition()), duplicate(getBody()),
-				duplicate(getInvariant()));
+				duplicate(loopContracts()));
 	}
 
 	@Override
@@ -86,8 +88,10 @@ public class CommonLoopNode extends CommonStatementNode implements LoopNode {
 		setChild(1, body);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public void setInvariant(ExpressionNode invariant) {
-		setChild(2, invariant);
+	public SequenceNode<ContractNode> loopContracts() {
+		return (SequenceNode<ContractNode>) this.child(2);
 	}
+
 }

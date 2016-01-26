@@ -10,6 +10,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
@@ -78,6 +79,8 @@ public class StatementAnalyzer {
 
 	private Configuration configuration;
 
+	private AcslContractAnalyzer acslAnalyzer;
+
 	// ************************** Constructors ****************************
 
 	StatementAnalyzer(EntityAnalyzer entityAnalyzer,
@@ -90,6 +93,7 @@ public class StatementAnalyzer {
 		this.conversionFactory = conversionFactory;
 		this.typeFactory = typeFactory;
 		this.configuration = config;
+		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer);
 	}
 
 	// ************************* Private Methods **************************
@@ -262,16 +266,21 @@ public class StatementAnalyzer {
 	}
 
 	private void processLoop(LoopNode loopNode) throws SyntaxException {
+		SequenceNode<ContractNode> loopContracts = loopNode.loopContracts();
+
+		if (loopContracts != null) {
+			this.acslAnalyzer.processLoopContractNodes(loopContracts);
+		}
 		switch (loopNode.getKind()) {
 		case WHILE:
 			processExpression(loopNode.getCondition());
 			processStatement(loopNode.getBody());
-			processExpression(loopNode.getInvariant());
+			// processExpression(loopNode.getInvariant());
 			break;
 		case DO_WHILE:
 			processStatement(loopNode.getBody());
 			processExpression(loopNode.getCondition());
-			processExpression(loopNode.getInvariant());
+			// processExpression(loopNode.getInvariant());
 			break;
 		case FOR: {
 			ForLoopNode forNode = (ForLoopNode) loopNode;
@@ -295,7 +304,7 @@ public class StatementAnalyzer {
 			processExpression(loopNode.getCondition());
 			processExpression(forNode.getIncrementer());
 			processStatement(loopNode.getBody());
-			processExpression(loopNode.getInvariant());
+			// processExpression(loopNode.getInvariant());
 			break;
 		}
 		default:

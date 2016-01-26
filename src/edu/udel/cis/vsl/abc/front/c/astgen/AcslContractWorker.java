@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VALID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AMPERSAND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ANYACT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARROW;
@@ -134,18 +135,71 @@ public class AcslContractWorker {
 
 	public List<ContractNode> generateASTNodes(SimpleScope scope)
 			throws SyntaxException {
-		CommonTree tree = parseTree.getRoot();
-		int kind = tree.getType();
+		CommonTree contractTree = parseTree.getRoot();
 
-		assert kind == AcslParser.CONTRACT;
-		return translateContractBlock((CommonTree) tree.getChild(0), scope);
+		switch (contractTree.getType()) {
+		case AcslParser.FUNC_CONTRACT:
+			return translateFunctionContractBlock(
+					(CommonTree) contractTree.getChild(0), scope);
+		case AcslParser.LOOP_CONTRACT:
+			return translateLoopContractBlock(
+					(CommonTree) contractTree.getChild(0), scope);
+		default:
+			throw this.error("unknown kind of contract", contractTree);
+		}
 	}
 
-	private List<ContractNode> translateContractBlock(CommonTree tree,
+	private List<ContractNode> translateLoopContractBlock(CommonTree tree,
 			SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
 		List<ContractNode> result = new ArrayList<>();
 
+		assert tree.getType() == AcslParser.LOOP_CONTRACT_BLOCK;
+		for (int i = 0; i < numChildren; i++) {
+			CommonTree loopIterm = (CommonTree) tree.getChild(i);
+			int loopItemKind = loopIterm.getType();
+
+			switch (loopItemKind) {
+			case AcslParser.LOOP_CLAUSE:
+				result.add(this.translateLoopClause(
+						(CommonTree) loopIterm.getChild(0), scope));
+				break;
+			case AcslParser.LOOP_BEHAVIOR:
+			case AcslParser.LOOP_VARIANT:
+			default:
+				throw this.error("unknown kind of loop contract", loopIterm);
+			}
+		}
+		return result;
+	}
+
+	private ContractNode translateLoopClause(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
+		int loopClauseKind = tree.getType();
+		Source source = this.newSource(tree);
+
+		switch (loopClauseKind) {
+		case AcslParser.LOOP_INVARIANT: {
+			CommonTree exprTree = (CommonTree) tree.getChild(0);
+			ExpressionNode expression = this.translateExpression(exprTree,
+					scope);
+
+			return this.nodeFactory.newInvariantNode(source, true, expression);
+		}
+		case AcslParser.LOOP_ASSIGNS:
+		case AcslParser.LOOP_ALLOC:
+		case AcslParser.LOOP_FREE:
+		default:
+			throw this.error("unkown kind of loop contract clause", tree);
+		}
+	}
+
+	private List<ContractNode> translateFunctionContractBlock(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
+		int numChildren = tree.getChildCount();
+		List<ContractNode> result = new ArrayList<>();
+
+		assert tree.getType() == AcslParser.FUNC_CONTRACT_BLOCK;
 		for (int i = 0; i < numChildren; i++) {
 			CommonTree child = (CommonTree) tree.getChild(i);
 			int childKind = child.getType();
@@ -479,6 +533,8 @@ public class AcslContractWorker {
 			// scope),
 			// translateExpression(
 			// (CommonTree) expressionTree.getChild(1), scope));
+		case VALID:
+
 		default:
 			throw error("Unknown expression kind", expressionTree);
 		} // end switch
@@ -762,7 +818,7 @@ public class AcslContractWorker {
 		default:
 			throw error("Unknown MPI collective kind", kind);
 		}
-		bodyComponents.addAll(translateContractBlock(body, scope));
+		bodyComponents.addAll(translateFunctionContractBlock(body, scope));
 		bodyNode = nodeFactory.newSequenceNode(source, "mpi_collective body",
 				bodyComponents);
 		return nodeFactory.newMPICollectiveBlockNode(source, mpiCommNode,

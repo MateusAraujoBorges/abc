@@ -42,6 +42,9 @@ BEHAVIOR:   'behavior';
 ASSUMES :   'assumes';
 COMPLETE:   'complete';
 DISJOINT:   'disjoint';
+LOOP    :   'loop';
+VARIANT :   'variant';
+INVARIANT:  'invariant';
 //CIVL extensions
 DEPENDS :   'depends';
 READS   :   'reads';
@@ -84,6 +87,7 @@ NOACT   :   '\\noact';
 ANYACT  :   '\\anyact';
 FORALL  :   '\\forall';
 EXISTS  :   '\\exists';
+VALID   :   '\\valid';
 
 /* operators */
 PLUS    :   '+';

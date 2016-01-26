@@ -29,7 +29,6 @@ tokens{
     CLAUSE_BEHAVIOR;
     CLAUSE_COMPLETE;
     CONTRACT;
-    CONTRACT_BLOCK;
     EVENT_BASE;
     EVENT_PLUS;
     EVENT_SUB;
@@ -37,8 +36,19 @@ tokens{
     EVENT_LIST;
     EVENT_PARENTHESIZED;
     FUNC_CALL;
+    FUNC_CONTRACT;
+    FUNC_CONTRACT_BLOCK;
     ID_LIST;
     INDEX;
+    LOOP_ALLOC;
+    LOOP_ASSIGNS;
+    LOOP_BEHAVIOR;
+    LOOP_CLAUSE;
+    LOOP_CONTRACT;
+    LOOP_CONTRACT_BLOCK;
+    LOOP_FREE;
+    LOOP_INVARIANT;
+    LOOP_VARIANT;
     MPI_CONSTANT;
     MPI_EXPRESSION;
     OPERATOR;
@@ -57,17 +67,73 @@ tokens{
 package edu.udel.cis.vsl.abc.front.c.parse;
 }
 
+contract
+    : function_contract
+        -> ^(CONTRACT function_contract)
+    | loop_contract
+        -> ^(CONTRACT loop_contract)
+    ;
+
+
+loop_contract
+    : LCOMMENT loop_contract_block RCOMMENT
+        ->^(LOOP_CONTRACT loop_contract_block)
+    ;
+
+loop_contract_block
+    : lc+=loop_clause* lb+=loop_behavior* lv=loop_variant?
+        ->^(LOOP_CONTRACT_BLOCK $lc* $lb* $lv?)
+    ;
+
+loop_clause
+    : loop_invariant SEMICOL
+        ->^(LOOP_CLAUSE loop_invariant)
+    | loop_assigns SEMICOL
+        ->^(LOOP_CLAUSE loop_assigns)
+    | loop_allocation SEMICOL
+        ->^(LOOP_CLAUSE loop_allocation)
+    ;
+
+loop_invariant
+    : LOOP INVARIANT term
+        ->^(LOOP_INVARIANT term)
+    ;
+
+loop_assigns
+    : LOOP ASSIGNS argumentExpressionList
+        ->^(LOOP_ASSIGNS argumentExpressionList)
+    ;
+
+loop_allocation
+    : LOOP ALLOC argumentExpressionList (COMMA term)?
+        ->^(LOOP_ALLOC argumentExpressionList term?)
+    | LOOP FREES argumentExpressionList
+        ->^(LOOP_FREE argumentExpressionList)
+    ;
+
+loop_behavior
+    : FOR ilist=id_list COLON lc+=loop_clause*
+        ->^(LOOP_BEHAVIOR $ilist $lc*)
+    ;
+
+loop_variant
+    : LOOP VARIANT term
+        ->^(LOOP_VARIANT term)
+    | LOOP VARIANT term FOR ID
+        ->^(LOOP_VARIANT term ID)
+    ;
+
 /* sec. 2.3 Function contracts */
 function_contract
     : LCOMMENT full_contract_block RCOMMENT
-      -> ^(CONTRACT full_contract_block)
+      -> ^(FUNC_CONTRACT full_contract_block)
     ;
 /* a full contract block non-terminal represents an ACSL contract
  * block for a function */
 full_contract_block
     : (f+=function_clause)* (m+=contract_block)*
         (c+=completeness_clause_block)* 
-        -> ^(CONTRACT_BLOCK $f* $m* $c*) 
+        -> ^(FUNC_CONTRACT_BLOCK $f* $m* $c*) 
     ;
 
 /* a partial contract block non-terminal represents an ACSL contract
@@ -76,7 +142,7 @@ full_contract_block
 partial_contract_block
     : (f+=function_clause)* (b+=named_behavior_block)* 
         (c+=completeness_clause_block)* 
-        -> ^(CONTRACT_BLOCK $f* $b* $c*) 
+        -> ^(FUNC_CONTRACT_BLOCK $f* $b* $c*) 
     ;
 
 /* a block in contracts, either an mpi collective block or a behavior
@@ -294,7 +360,7 @@ argumentExpressionList
 	: -> ^(ARGUMENT_LIST)
 	| assignmentExpression (COMMA assignmentExpression)*
 	  -> ^(ARGUMENT_LIST assignmentExpression+)
-	 ;
+	;
 
 /* 6.5.3 */
 unaryExpression
@@ -310,6 +376,8 @@ unaryExpression
         -> ^(UNION argumentExpressionList)
     | INTER LPAREN argumentExpressionList RPAREN
         -> ^(INTER argumentExpressionList)
+    | VALID LPAREN term RPAREN
+        -> ^(VALID term)
 	;
 
 

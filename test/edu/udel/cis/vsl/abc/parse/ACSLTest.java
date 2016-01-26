@@ -89,4 +89,10 @@ public class ACSLTest {
 			ParseException {
 		this.parse("isRecvBufEmpty_OK.c");
 	}
+
+	@Test
+	public void loopInvariant() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("loopInvariant.c");
+	}
 }

@@ -18,6 +18,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
@@ -1399,7 +1400,7 @@ public interface NodeFactory {
 	ForLoopNode newForLoopNode(Source source,
 			ForLoopInitializerNode initializer, ExpressionNode condition,
 			ExpressionNode incrementer, StatementNode body,
-			ExpressionNode invariant);
+			SequenceNode<ContractNode> contracts);
 
 	/**
 	 * Construcs a new declaration list node, which is comprised of a sequence
@@ -1436,7 +1437,7 @@ public interface NodeFactory {
 	 * @return the new <code>while</code> loop node
 	 */
 	LoopNode newWhileLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, ExpressionNode invariant);
+			StatementNode body, SequenceNode<ContractNode> contracts);
 
 	/**
 	 * Constructs a new node representing a <code>do...while</code> loop. This
@@ -1461,7 +1462,7 @@ public interface NodeFactory {
 	 * @return the new <code>do</code> loop node
 	 */
 	LoopNode newDoLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, ExpressionNode invariant);
+			StatementNode body, SequenceNode<ContractNode> contracts);
 
 	/**
 	 * Constructs a new node representing a <code>goto</code> statement.
@@ -2258,12 +2259,49 @@ public interface NodeFactory {
 	CompletenessNode newCompletenessNode(Source source, boolean isComplete,
 			SequenceNode<IdentifierNode> idList);
 
+	/**
+	 * Creates a new <code>assumes</code> clause node
+	 * 
+	 * @param source
+	 * @param predicate
+	 * @return
+	 */
 	AssumesNode newAssumesNode(Source source, ExpressionNode predicate);
 
+	/**
+	 * Creates a new <code>invariant</code> clause node
+	 * 
+	 * @param source
+	 * @param expression
+	 * @return
+	 */
+	InvariantNode newInvariantNode(Source source, boolean isLoopInvariant,
+			ExpressionNode expression);
+
+	/**
+	 * Creates a new <code>\noact</code> event node
+	 * 
+	 * @param source
+	 * @return
+	 */
 	NoactNode newNoactNode(Source source);
 
+	/**
+	 * Creates a new <code>\anyact</code> event node
+	 * 
+	 * @param source
+	 * @return
+	 */
 	AnyactNode newAnyactNode(Source source);
 
+	/**
+	 * Creates a new <code>\call</code> event node
+	 * 
+	 * @param source
+	 * @param function
+	 * @param args
+	 * @return
+	 */
 	CallEventNode newCallEventNode(Source source,
 			IdentifierExpressionNode function, SequenceNode<ExpressionNode> args);
 

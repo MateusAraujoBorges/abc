@@ -24,6 +24,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
@@ -129,6 +130,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompositeEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonDependsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonEnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonGuardNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonInvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIContractExpressionNode;
@@ -600,9 +602,9 @@ public class CommonNodeFactory implements NodeFactory {
 	public ForLoopNode newForLoopNode(Source source,
 			ForLoopInitializerNode initializer, ExpressionNode condition,
 			ExpressionNode incrementer, StatementNode body,
-			ExpressionNode invariant) {
+			SequenceNode<ContractNode> contracts) {
 		return new CommonForLoopNode(source, condition, body, initializer,
-				incrementer, invariant);
+				incrementer, contracts);
 	}
 
 	@Override
@@ -613,16 +615,16 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public LoopNode newWhileLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, ExpressionNode invariant) {
+			StatementNode body, SequenceNode<ContractNode> contracts) {
 		return new CommonLoopNode(source, LoopKind.WHILE, condition, body,
-				invariant);
+				contracts);
 	}
 
 	@Override
 	public LoopNode newDoLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, ExpressionNode invariant) {
+			StatementNode body, SequenceNode<ContractNode> contracts) {
 		return new CommonLoopNode(source, LoopKind.DO_WHILE, condition, body,
-				invariant);
+				contracts);
 	}
 
 	@Override
@@ -1138,4 +1140,9 @@ public class CommonNodeFactory implements NodeFactory {
 		return typeFactory;
 	}
 
+	@Override
+	public InvariantNode newInvariantNode(Source source,
+			boolean isLoopInvariant, ExpressionNode expression) {
+		return new CommonInvariantNode(source, isLoopInvariant, expression);
+	}
 }

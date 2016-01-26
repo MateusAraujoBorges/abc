@@ -214,7 +214,8 @@ public class FortranASTBuilderWorker {
 				type = nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
 				break;
 			case 401: /* REAL */
-				type = nodeFactory.newBasicTypeNode(source, BasicTypeKind.DOUBLE);
+				type = nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.DOUBLE);
 				break;
 			case 402: /* DOUBLE PRECISION */
 				type = nodeFactory.newBasicTypeNode(source,
@@ -389,11 +390,13 @@ public class FortranASTBuilderWorker {
 		return result;
 	}
 
-	private ExpressionNode adjustIndex(Source source, ExpressionNode indexNode) throws SyntaxException {
-		ExpressionNode intOneNode = nodeFactory.newIntegerConstantNode(source, "1");
+	private ExpressionNode adjustIndex(Source source, ExpressionNode indexNode)
+			throws SyntaxException {
+		ExpressionNode intOneNode = nodeFactory.newIntegerConstantNode(source,
+				"1");
 		Operator operator = Operator.MINUS;
 		List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
-		
+
 		arguments.add(indexNode);
 		arguments.add(intOneNode.copy());
 		return nodeFactory.newOperatorNode(source, operator, arguments);
@@ -688,7 +691,7 @@ public class FortranASTBuilderWorker {
 					.translateIdentifierLabeledStatement(blockItemNode, scope));
 			break;
 		case 912: /* PrintStatement */
-			//TODO: Print statement
+			// TODO: Print statement
 			break;
 		case 1236: /* ReturnStatement */
 			result = new ArrayList<BlockItemNode>();

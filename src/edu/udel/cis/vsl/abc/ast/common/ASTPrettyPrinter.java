@@ -24,6 +24,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
@@ -528,7 +529,7 @@ public class ASTPrettyPrinter {
 		SequenceNode<ContractNode> contracts = function.getContract();
 
 		if (contracts != null)
-			pPrintFunctionContract(out, prefix, contracts);
+			pPrintContracts(out, prefix, contracts);
 		if (function instanceof AbstractFunctionDefinitionNode)
 			out.print("$abstract ");
 		if (function.hasGlobalFunctionSpecifier())
@@ -563,7 +564,7 @@ public class ASTPrettyPrinter {
 		}
 	}
 
-	private static void pPrintFunctionContract(PrintStream out, String prefix,
+	private static void pPrintContracts(PrintStream out, String prefix,
 			SequenceNode<ContractNode> contracts) {
 		String newLinePrefix = prefix + "\n  @ ";
 		int numContracts = contracts.numChildren();
@@ -668,6 +669,16 @@ public class ASTPrettyPrinter {
 				out.print(indentedNewLinePrefix);
 				pPrintContractNode(out, indentedNewLinePrefix, clause);
 			}
+			break;
+		}
+		case INVARIANT: {
+			InvariantNode invariant = (InvariantNode) contract;
+
+			if (invariant.isLoopInvariant())
+				out.print("loop ");
+			out.print("invariant ");
+			out.print(expression2Pretty(invariant.getExpression()));
+			out.print(";");
 			break;
 		}
 		default:
@@ -1319,10 +1330,12 @@ public class ASTPrettyPrinter {
 		StringBuffer condition = new StringBuffer();
 		String myIndent = prefix + indention;
 		StatementNode bodyNode = loop.getBody();
+		SequenceNode<ContractNode> contracts = loop.loopContracts();
 
+		if (contracts != null)
+			pPrintContracts(out, prefix, contracts);
 		if (loop.getCondition() != null)
 			condition = expression2Pretty(loop.getCondition());
-
 		switch (loopKind) {
 		case WHILE:
 			out.print(prefix);
@@ -1488,7 +1501,10 @@ public class ASTPrettyPrinter {
 		ExpressionNode incrementer = loop.getIncrementer();
 		StatementNode body = loop.getBody();
 		String myIndent = prefix + indention;
+		SequenceNode<ContractNode> contracts = loop.loopContracts();
 
+		if (contracts != null)
+			pPrintContracts(out, prefix, contracts);
 		out.print(prefix);
 		out.print("for(");
 		if (init != null) {
