@@ -1470,7 +1470,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			entity_decl_Node.addChild(temp);
 		}
 		stack.push(entity_decl_Node);
-	} // Test
+	}
 
 	/**
 	 * R503 [Begin] Entity Declaration List
@@ -1496,7 +1496,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			counter--;
 		}
 		stack.push(entity_decl_list_Node);
-	} // Test
+	}
 
 	/**
 	 * R506 Initialization
@@ -3826,10 +3826,27 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 	} // TODO: Implement
 
+	/**
+	 * R912 Print Statement
+	 */
 	public void print_stmt(Token label, Token printKeyword, Token eos,
 			boolean hasOutputItemList) {
+		FortranTree temp = null;
+		FortranTree print_stmt_Node = new FortranTree(912, "PrintStmt");
+		FortranTree label_Node = new FortranTree("LabelDef", getCToken(label));
+		FortranTree PRINT_Node = new FortranTree("Keyword",
+				getCToken(printKeyword));
 
-	} // TODO: Implement
+		print_stmt_Node.addChild(label_Node);
+		print_stmt_Node.addChild(PRINT_Node);
+		if (hasOutputItemList) {
+			assert !stack.isEmpty();
+			temp = stack.pop();
+			assert temp.rule() == 916;
+			print_stmt_Node.addChild(temp);
+		}
+		stack.push(print_stmt_Node);
+	}
 
 	public void io_control_spec(boolean hasExpression, Token keyword,
 			boolean hasAsterisk) {
@@ -3860,17 +3877,48 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 	} // TODO: Implement
 
+	/**
+	 * R916 [Element] Output Item
+	 */
 	public void output_item() {
+		int rule = -1;
+		FortranTree temp = null;
+		FortranTree output_item_Node = new FortranTree(916, "OutputItem");
 
-	} // TODO: Implement
+		assert !stack.isEmpty();
+		temp = stack.pop();
+		rule = temp.rule();
+		assert rule == 701 /* PrimExpr */
+				|| rule == 917 /* IOImpliedDo */;
+		output_item_Node.addChild(temp);
+		stack.push(output_item_Node);
+	}
 
+	/**
+	 * R916 [Begin] Output Item List
+	 */
 	public void output_item_list__begin() {
 		// Do nothing
 	}
 
+	/**
+	 * R916 [List] Output Item List
+	 */
 	public void output_item_list(int count) {
+		FortranTree temp = null;
+		int counter = count;
+		FortranTree output_item_list_Node = new FortranTree(916,
+				"OutputItemList[" + counter + "]");
 
-	} // TODO: Implement
+		while (counter > 0) {
+			assert !stack.isEmpty();
+			temp = stack.pop();
+			assert temp.rule() == 916;
+			output_item_list_Node.addChild(0, temp);
+			counter--;
+		}
+		stack.push(output_item_list_Node);
+	}
 
 	public void io_implied_do() {
 
@@ -4741,7 +4789,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			inclusion = formations.peek();
 		} else {
 			// System.out.println("ParsingTree:");
-			//System.out.println(root.toString());
+			// System.out.println(root.toString());
 			if (isAST) {
 				TypeFactory typeFactory = Types.newTypeFactory();
 				ValueFactory valueFactory = Values.newValueFactory(null,
@@ -4753,6 +4801,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 				try {
 					ast = worker.generateAST();
+					//asts = worker.generateASTs();
 					// Configuration config =
 					// Configurations.newMinimalConfiguration();
 					// Analysis.performStandardAnalysis(config, ast);
