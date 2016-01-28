@@ -410,8 +410,8 @@ multiplicativeExpression
 	: (remoteExpression -> remoteExpression)
 	( STAR y=remoteExpression
 	  -> ^(OPERATOR STAR ^(ARGUMENT_LIST $multiplicativeExpression $y))
-	| DIV y=remoteExpression
-	  -> ^(OPERATOR DIV ^(ARGUMENT_LIST $multiplicativeExpression $y))
+	| DIVIDE y=remoteExpression
+	  -> ^(OPERATOR DIVIDE ^(ARGUMENT_LIST $multiplicativeExpression $y))
     | MOD y=remoteExpression
 	  -> ^(OPERATOR MOD ^(ARGUMENT_LIST $multiplicativeExpression $y))
     )*

@@ -1,6 +1,5 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VALID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AMPERSAND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ANYACT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARROW;
@@ -12,7 +11,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CAST;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHARACTER_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMMA;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMP;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DIV;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DIVIDE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOTDOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ELLIPSIS;
@@ -58,6 +57,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STRING_LITERAL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TERM_PARENTHESIZED;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TRUE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VALID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.WRITE;
 
 import java.util.ArrayList;
@@ -111,7 +111,6 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
-
 public class AcslContractWorker {
 
 	private CParseTree parseTree;
@@ -717,7 +716,7 @@ public class AcslContractWorker {
 		case STAR:
 			operator = numArgs == 1 ? Operator.DEREFERENCE : Operator.TIMES;
 			break;
-		case DIV:
+		case DIVIDE:
 			operator = Operator.DIV;
 			break;
 		case EQ:
