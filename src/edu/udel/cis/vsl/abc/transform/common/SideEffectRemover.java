@@ -1283,6 +1283,7 @@ public class SideEffectRemover extends BaseTransformer {
 	private ExprTriple translateQuantifiedExpression(
 			QuantifiedExpressionNode expression, boolean isVoid) {
 		// should never have side-effects: check it in Analyzer
+		assert (expression.isSideEffectFree(false));
 		return new ExprTriple(expression);
 	}
 
