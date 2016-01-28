@@ -97,6 +97,10 @@ $system void* $malloc($scope s, int size);
  * the standard "free" */
 $system void $free(void *p);
 
+/* Assigns arbitrary value to the memory location specified by the given pointer.
+ */
+void $havoc(void *ptr);
+
 /* *************************** Iterator Functions ************************** */
 
 /* Tells whether the integer iterator has any more elements */
