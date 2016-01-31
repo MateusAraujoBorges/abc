@@ -967,6 +967,9 @@ public class ExpressionAnalyzer {
 		case UNARYPLUS: // + numeric no-op
 			processUNARAYPLUSorUNARYMINUS(node);
 			break;
+		case VALID:
+			this.processValidExpression(node);
+			break;
 		default:
 			throw new RuntimeException("Unknown operator: " + operator);
 		}
@@ -1397,7 +1400,12 @@ public class ExpressionAnalyzer {
 		else if (type0 instanceof IntegerType
 				&& isPointerToCompleteObjectType(type1))
 			node.setInitialType(type1);
-		else
+		// TODO:experimental:
+		else if (isPointerToCompleteObjectType(type0)
+				&& type1.kind().equals(TypeKind.RANGE)) {
+			node.setInitialType(typeFactory
+					.incompleteArrayType((ObjectType) type0));
+		} else
 			throw error(
 					"Invalid arguments for +.  C requires either (1) both arguments\n"
 							+ "are numeric, or (2) one argument is numeric and the other is a pointer\n"
@@ -1935,6 +1943,14 @@ public class ExpressionAnalyzer {
 	private void processMPIContractExpression(MPIContractExpressionNode node)
 			throws SyntaxException {
 		int numArgs = node.numArguments();
+
+		for (int i = 0; i < numArgs; i++)
+			this.processExpression(node.getArgument(i));
+	}
+
+	private void processValidExpression(OperatorNode node)
+			throws SyntaxException {
+		int numArgs = node.getNumberOfArguments();
 
 		for (int i = 0; i < numArgs; i++)
 			this.processExpression(node.getArgument(i));

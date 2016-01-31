@@ -95,4 +95,10 @@ public class ACSLTest {
 			ParseException {
 		this.parse("loopInvariant.c");
 	}
+
+	@Test
+	public void validPointers() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("valid.c");
+	}
 }

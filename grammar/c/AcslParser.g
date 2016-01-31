@@ -379,7 +379,8 @@ unaryExpression
     | VALID LPAREN term RPAREN
         -> ^(VALID term)
 	;
-
+    
+    
 
 /* CIVL $spawn expression */
 //spawnExpression
@@ -612,7 +613,6 @@ mpi_expression
     | MPI_EQUALS LAPREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
       -> ^(MPI_EQUALS $a $b $c $d)
     ;
-    
 
 mpi_constant
     : MPI_COMM_RANK | MPI_COMM_SIZE

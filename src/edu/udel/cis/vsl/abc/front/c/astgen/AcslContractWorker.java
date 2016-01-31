@@ -111,6 +111,7 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+
 public class AcslContractWorker {
 
 	private CParseTree parseTree;
@@ -519,6 +520,8 @@ public class AcslContractWorker {
 			return translateMPIConstantNode(expressionTree, source);
 		case MPI_EXPRESSION:
 			return translateMPIExpressionNode(expressionTree, source, scope);
+		case VALID:
+			return this.translateValidNode(expressionTree, source, scope);
 		case SIZEOF:
 			// return translateSizeOf(source, expressionTree, scope);
 		case FORALL:
@@ -532,7 +535,6 @@ public class AcslContractWorker {
 			// scope),
 			// translateExpression(
 			// (CommonTree) expressionTree.getChild(1), scope));
-		case VALID:
 
 		default:
 			throw error("Unknown expression kind", expressionTree);
@@ -540,6 +542,23 @@ public class AcslContractWorker {
 	}
 
 	// ////////////////////////////////////
+	private ExpressionNode translateValidNode(CommonTree tree, Source source,
+			SimpleScope scope) throws SyntaxException {
+		CommonTree pointer = (CommonTree) tree.getChild(0);
+		ExpressionNode ptrNode;
+		ExpressionNode rangeNode;
+
+		ptrNode = translateExpression(pointer, scope);
+		if (tree.getChildCount() > 1) {
+			CommonTree range;
+
+			range = (CommonTree) tree.getChild(1);
+			rangeNode = translateExpression(range, scope);
+			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode,
+					rangeNode);
+		} else
+			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode);
+	}
 
 	private ExpressionNode translateWriteEvent(Source source,
 			CommonTree expressionTree, SimpleScope scope) {

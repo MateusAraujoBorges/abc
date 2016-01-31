@@ -290,7 +290,11 @@ public interface OperatorNode extends ExpressionNode {
 		 * The unary plus operator <code>+</code>, as in <code>+e</code>, which
 		 * returns <code>e</code>.
 		 */
-		UNARYPLUS
+		UNARYPLUS,
+		/**
+		 * ACSL Valid operator
+		 */
+		VALID
 	};
 
 	/**
