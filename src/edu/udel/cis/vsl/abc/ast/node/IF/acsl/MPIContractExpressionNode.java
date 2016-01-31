@@ -4,7 +4,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
 public interface MPIContractExpressionNode extends ExpressionNode {
 	public enum MPIContractExpressionKind {
-		MPI_EMPTY_IN, MPI_EMPTY_OUT, MPI_EQUALS, MPI_REGION, MPI_SIZE, MPI_CONSTANT
+		MPI_EMPTY_IN, MPI_EMPTY_OUT, MPI_EQUALS, MPI_REGION, MPI_SIZE, MPI_INTEGER_CONSTANT
 	}
 
 	MPIContractExpressionKind MPIContractExpressionKind();

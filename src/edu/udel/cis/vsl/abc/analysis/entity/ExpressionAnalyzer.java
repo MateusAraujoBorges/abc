@@ -16,6 +16,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
@@ -1940,20 +1941,68 @@ public class ExpressionAnalyzer {
 		node.setInitialType(typeFactory.rangeType());
 	}
 
+	/**
+	 * Process MPI contract expressions
+	 * 
+	 * @param node
+	 * @throws SyntaxException
+	 */
 	private void processMPIContractExpression(MPIContractExpressionNode node)
 			throws SyntaxException {
+		MPIContractExpressionKind kind = node.MPIContractExpressionKind();
 		int numArgs = node.numArguments();
 
-		for (int i = 0; i < numArgs; i++)
-			this.processExpression(node.getArgument(i));
+		switch (kind) {
+		case MPI_INTEGER_CONSTANT:
+			node.setInitialType(intType);
+			break;
+		case MPI_EMPTY_IN:
+		case MPI_EMPTY_OUT:
+			if (numArgs != 1)
+				throw error("MPI contract expression " + kind
+						+ "only takes one argument.", node);
+			processExpression(node.getArgument(0));
+			if (!node.getArgument(0).getType().equals(intType))
+				throw error("The argument of MPI contract expression " + kind
+						+ "must has an integer type", node);
+			node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
+			break;
+		default:
+			throw error("Unknown MPI contract expression kind: " + kind, node);
+		}
 	}
 
+	/**
+	 * Process <code>\valid( pointer-set )</code> expression. The argument must
+	 * has one of the following types:<br>
+	 * A pointer type or An array of pointer type.
+	 * 
+	 * @param node
+	 * @throws SyntaxException
+	 */
 	private void processValidExpression(OperatorNode node)
 			throws SyntaxException {
 		int numArgs = node.getNumberOfArguments();
+		ExpressionNode expr = node.getArgument(0);
 
-		for (int i = 0; i < numArgs; i++)
-			this.processExpression(node.getArgument(i));
+		if (numArgs != 1)
+			throw error("\\valid(tset) expression only takes one argument",
+					node);
+		if (expr.getType().kind().equals(TypeKind.ARRAY)) {
+			ArrayType arrayType = (ArrayType) expr.getType();
+
+			if (arrayType.getElementType().kind().equals(TypeKind.POINTER)) {
+				node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
+				return;
+			}
+		} else if (expr.getType().kind().equals(TypeKind.POINTER)) {
+			node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
+			return;
+		}
+
+		throw error(
+				"The argument of a \\valid expression must has an array of pointer type",
+				expr);
 	}
 
 	// Helper functions...

@@ -19,7 +19,7 @@ public class CommonMPIConstantNode extends CommonMPIContractExpressionNode
 	public CommonMPIConstantNode(Source source, String name,
 			MPIConstantKind kind, ConstantKind constKind) {
 		super(source, Arrays.asList((ExpressionNode) null),
-				MPIContractExpressionKind.MPI_CONSTANT, name);
+				MPIContractExpressionKind.MPI_INTEGER_CONSTANT, name);
 		this.kind = kind;
 		this.constKind = constKind;
 	}
