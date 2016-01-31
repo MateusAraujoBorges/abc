@@ -1906,7 +1906,9 @@ public class ASTPrettyPrinter {
 			result.append(expression2Pretty(quantified.restriction()));
 		}
 		result.append("} ");
+		result.append("(");
 		result.append(expression2Pretty(quantified.expression()));
+		result.append(")");
 		return result;
 	}
 
