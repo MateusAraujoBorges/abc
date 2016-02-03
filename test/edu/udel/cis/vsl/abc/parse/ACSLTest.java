@@ -99,6 +99,7 @@ public class ACSLTest {
 	@Test
 	public void validPointers() throws PreprocessorException, SyntaxException,
 			ParseException {
-		this.parse("valid.c");
+		//this.parse("valid.c");
+		parse("validPointers.c");
 	}
 }

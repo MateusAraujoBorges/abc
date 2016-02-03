@@ -969,7 +969,7 @@ public class ExpressionAnalyzer {
 			processUNARAYPLUSorUNARYMINUS(node);
 			break;
 		case VALID:
-			this.processValidExpression(node);
+			processValidExpression(node);
 			break;
 		default:
 			throw new RuntimeException("Unknown operator: " + operator);
