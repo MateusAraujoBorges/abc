@@ -6,7 +6,6 @@ import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
-import java.util.Stack;
 
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
@@ -67,8 +66,6 @@ public class FortranASTBuilderWorker {
 	private ASTFactory astFactory;
 
 	private SequenceNode<BlockItemNode> rootNode;
-
-	private Stack<FortranTree> gotoLabelStack = new Stack<FortranTree>();
 
 	/* Constructor */
 
@@ -392,6 +389,7 @@ public class FortranASTBuilderWorker {
 
 	private ExpressionNode adjustIndex(Source source, ExpressionNode indexNode)
 			throws SyntaxException {
+		// TODO: for starting index i is not 1, should minus i (not 1)
 		ExpressionNode intOneNode = nodeFactory.newIntegerConstantNode(source,
 				"1");
 		Operator operator = Operator.MINUS;
@@ -882,6 +880,10 @@ public class FortranASTBuilderWorker {
 		case 1231: /* Subroutine */
 			items.add((BlockItemNode) translateMainProgramUnit(programUnitNode,
 					scope, 1));
+			break;
+		case 1223: /* Function */
+			items.add((BlockItemNode) translateMainProgramUnit(programUnitNode,
+					scope, 2));
 			break;
 		default:
 			assert false;
