@@ -15,6 +15,7 @@ public class FortranASTBuilder implements ASTBuilder {
 	private ASTFactory astFactory;
 
 	public FortranASTBuilder(Configuration configuration, ASTFactory astFactory) {
+		this.configuration = configuration;
 		this.astFactory = astFactory;
 	}
 
@@ -35,5 +36,4 @@ public class FortranASTBuilder implements ASTBuilder {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
 }
