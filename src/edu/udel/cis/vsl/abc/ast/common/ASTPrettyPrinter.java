@@ -2209,6 +2209,11 @@ public class ASTPrettyPrinter {
 			result.append("+");
 			result.append(argWtP0);
 			break;
+		case VALID:
+			result.append("\\valid(");
+			result.append(arg0);
+			result.append(")");
+			break;
 		default:
 			throw new ABCUnsupportedException(
 					"pretty print of operator node of " + op + " kind");

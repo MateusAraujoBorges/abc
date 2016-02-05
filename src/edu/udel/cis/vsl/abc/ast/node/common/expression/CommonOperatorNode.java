@@ -171,6 +171,8 @@ public class CommonOperatorNode extends CommonExpressionNode implements
 		case UNARYPLUS:
 		case HASH:
 			break;
+		default:
+			break;
 		} // end of switch
 			// default case: check operands...
 		for (int i = 0; i < getNumberOfArguments(); i++) {

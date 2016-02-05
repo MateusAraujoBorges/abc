@@ -80,7 +80,8 @@ public class DeclarationAnalyzer {
 	DeclarationAnalyzer(EntityAnalyzer entityAnalyzer) {
 		this.entityAnalyzer = entityAnalyzer;
 		this.language = entityAnalyzer.language;
-		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer);
+		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer,
+				entityAnalyzer.conversionFactory);
 	}
 
 	// ************************* Exported Methods *************************

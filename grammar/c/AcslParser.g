@@ -24,6 +24,7 @@ tokens{
     BEHAVIOR_DISJOINT;
     BINDER;
     BINDER_LIST;
+    C_TYPE;
     CAST;
     CLAUSE_NORMAL;
     CLAUSE_BEHAVIOR;
@@ -40,6 +41,7 @@ tokens{
     FUNC_CONTRACT_BLOCK;
     ID_LIST;
     INDEX;
+    LOGIC_TYPE;
     LOOP_ALLOC;
     LOOP_ASSIGNS;
     LOOP_BEHAVIOR;
@@ -57,9 +59,12 @@ tokens{
     SIZEOF_EXPR;
     SIZEOF_TYPE;
     TERM_PARENTHESIZED;
-    TYPE;
     TYPE_BUILTIN;
     TYPE_ID;
+    VAR_ID;
+    VAR_ID_BASE;
+    VAR_ID_SQUARE;
+    VAR_ID_STAR;
 }
 
 @header
@@ -73,7 +78,6 @@ contract
     | loop_contract
         -> ^(CONTRACT loop_contract)
     ;
-
 
 loop_contract
     : LCOMMENT loop_contract_block RCOMMENT
@@ -125,9 +129,15 @@ loop_variant
 
 /* sec. 2.3 Function contracts */
 function_contract
-    : LCOMMENT full_contract_block RCOMMENT
-      -> ^(FUNC_CONTRACT full_contract_block)
+    : LCOMMENT pure_function? full_contract_block RCOMMENT
+      -> ^(FUNC_CONTRACT full_contract_block pure_function?)
     ;
+
+pure_function
+    : PURE SEMICOL
+      ->^(PURE)
+    ;
+
 /* a full contract block non-terminal represents an ACSL contract
  * block for a function */
 full_contract_block
@@ -192,8 +202,8 @@ binder
     ;
 
 type_expr
-    : logic_type_expr ->^(TYPE logic_type_expr)
-    | c_type ->^(TYPE c_type)
+    : logic_type_expr ->^(LOGIC_TYPE logic_type_expr)
+    | c_type ->^(C_TYPE c_type)
     ;
 
 logic_type_expr
@@ -206,18 +216,23 @@ c_type
     ;
 
 built_in_logic_type
-    : BOOLEAN | INTGER | REAL
+    : BOOLEAN | INTEGER | REAL
     ;
 
 variable_ident
     : STAR variable_ident_base
+        ->^(VAR_ID_STAR variable_ident_base)
     | variable_ident_base LSQUARE RSQUARE
+        ->^(VAR_ID_SQUARE variable_ident_base)
     | variable_ident_base
+        ->^(VAR_ID variable_ident_base)
     ;
 
 variable_ident_base
     : ID
+      ->^(ID)
     | LPAREN variable_ident RPAREN
+      ->^(VAR_ID_BASE variable_ident)
     ;
 
 guards_clause
@@ -286,8 +301,8 @@ event_base
 
 /* ACSL-MPI extensions: constructors */
 mpi_collective_block
-    : MPI_COLLECTIVE LPAREN comm = variable_ident COMMA kind=mpi_collective_kind  RPAREN COLON
-      c=partial_contract_block -> ^(MPI_COLLECTIVE $comm $kind $c)
+    : MPI_COLLECTIVE LPAREN ID COMMA kind=mpi_collective_kind  RPAREN COLON
+      c=partial_contract_block -> ^(MPI_COLLECTIVE ID $kind $c)
     ;
 
 
@@ -484,7 +499,7 @@ andExpression
 
 /* 6.5.11 */
 exclusiveOrExpression
-	: ( andExpression -> andExpression )
+: ( andExpression -> andExpression )
 	  ( BITXOR y=andExpression
 	    -> ^(OPERATOR BITXOR ^(ARGUMENT_LIST $exclusiveOrExpression $y))
 	  )*

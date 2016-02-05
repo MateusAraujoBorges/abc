@@ -93,7 +93,8 @@ public class StatementAnalyzer {
 		this.conversionFactory = conversionFactory;
 		this.typeFactory = typeFactory;
 		this.configuration = config;
-		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer);
+		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer,
+				conversionFactory);
 	}
 
 	// ************************* Private Methods **************************

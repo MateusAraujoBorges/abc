@@ -25,8 +25,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -2359,4 +2361,28 @@ public interface NodeFactory {
 	 * @return
 	 */
 	TypeFactory typeFactory();
+
+	/**
+	 * Creates a new "pure" node.
+	 * 
+	 * @param source
+	 * @return
+	 */
+	PureNode newPureNode(Source source);
+
+	/**
+	 * Creates a new memory set node.
+	 * 
+	 * @param source
+	 * @param term
+	 *            non-null
+	 * @param binders
+	 *            non-null
+	 * @param predicate
+	 *            could be null
+	 * @return
+	 */
+	MemorySetNode newMemorySetNode(Source source, ExpressionNode term,
+			SequenceNode<VariableDeclarationNode> binders,
+			ExpressionNode predicate);
 }

@@ -93,7 +93,9 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	void setGlobalFunctionSpecifier(boolean value);
 
 	/**
-	 * Does the declaration include the <code>$pure</code> function specifier?
+	 * Does the declaration include the <code>$pure</code> function specifier? A
+	 * pure function is a function where the return value is only determined by
+	 * its input values, without observable side effects.
 	 * 
 	 * @return <code>true</code> iff declaration contains <code>$pure</code>
 	 * @see #setPureFunctionSpeciier(boolean)

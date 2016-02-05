@@ -45,10 +45,12 @@ DISJOINT:   'disjoint';
 LOOP    :   'loop';
 VARIANT :   'variant';
 INVARIANT:  'invariant';
+FREES   :   'frees';
 //CIVL extensions
 DEPENDS :   'depends';
 READS   :   'reads';
-FREES   :   'frees';
+PURE    :   'pure';
+
 //CIVL-C constants
 SELF    :   '$self';
 //CIVL-MPI extensions

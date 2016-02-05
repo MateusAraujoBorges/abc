@@ -6,14 +6,18 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARROW;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ASSIGN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITXOR;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BOOLEAN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CAST;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHARACTER_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMMA;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMP;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.C_TYPE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DIVIDE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOTDOT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOUBLE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ELLIPSIS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EQ;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_BASE;
@@ -23,6 +27,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PLUS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EXISTS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FALSE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOAT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOATING_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FORALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GT;
@@ -31,8 +36,12 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.HASH;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLY;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INDEX;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LAND;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LOGIC_TYPE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LONG;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LTE;
@@ -47,17 +56,27 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.OPERATOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.PLUS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QUESTION;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.READ;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REAL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RESULT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SELF;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SET_BINDERS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHIFTLEFT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHIFTRIGHT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHORT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SIZEOF;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STRING_LITERAL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TERM_PARENTHESIZED;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TRUE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TYPE_BUILTIN;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TYPE_ID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VALID;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_BASE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_SQUARE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_STAR;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VOID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.WRITE;
 
 import java.util.ArrayList;
@@ -87,6 +106,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstant
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
@@ -97,6 +117,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType.SignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardUnsignedIntegerType.UnsignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
@@ -138,9 +160,16 @@ public class AcslContractWorker {
 		CommonTree contractTree = parseTree.getRoot();
 
 		switch (contractTree.getType()) {
-		case AcslParser.FUNC_CONTRACT:
-			return translateFunctionContractBlock(
+		case AcslParser.FUNC_CONTRACT: {
+			CommonTree pure = (CommonTree) contractTree.getChild(1);
+			List<ContractNode> result = translateFunctionContractBlock(
 					(CommonTree) contractTree.getChild(0), scope);
+
+			if (pure != null) {
+				result.add(this.nodeFactory.newPureNode(this.newSource(pure)));
+			}
+			return result;
+		}
 		case AcslParser.LOOP_CONTRACT:
 			return translateLoopContractBlock(
 					(CommonTree) contractTree.getChild(0), scope);
@@ -522,6 +551,8 @@ public class AcslContractWorker {
 			return translateMPIExpressionNode(expressionTree, source, scope);
 		case VALID:
 			return this.translateValidNode(expressionTree, source, scope);
+		case SET_BINDERS:
+			return this.translateSetBinders(expressionTree, source, scope);
 		case SIZEOF:
 			// return translateSizeOf(source, expressionTree, scope);
 		case FORALL:
@@ -535,10 +566,200 @@ public class AcslContractWorker {
 			// scope),
 			// translateExpression(
 			// (CommonTree) expressionTree.getChild(1), scope));
-
 		default:
 			throw error("Unknown expression kind", expressionTree);
 		} // end switch
+	}
+
+	/**
+	 * <pre>
+	 * LCURLY term BAR binders (SEMICOL term)? RCURLY 
+	 *   ->^(SET_BINDERS term binders term?)
+	 * </pre>
+	 * 
+	 * @param tree
+	 * @param source
+	 * @param scope
+	 * @return
+	 * @throws SyntaxException
+	 */
+	private ExpressionNode translateSetBinders(CommonTree tree, Source source,
+			SimpleScope scope) throws SyntaxException {
+		SimpleScope newScope = new SimpleScope(scope);
+		CommonTree termTree = (CommonTree) tree.getChild(0);
+		CommonTree bindersTree = (CommonTree) tree.getChild(1);
+		CommonTree predicateTree = tree.getChildCount() > 2 ? (CommonTree) tree
+				.getChild(2) : null;
+		ExpressionNode term = this.translateExpression(termTree, newScope), predicate = null;
+		SequenceNode<VariableDeclarationNode> binders = this.translateBinders(
+				bindersTree, source, newScope);
+
+		if (predicateTree != null)
+			predicate = this.translateExpression(predicateTree, newScope);
+		return this.nodeFactory.newMemorySetNode(source, term, binders,
+				predicate);
+	}
+
+	private SequenceNode<VariableDeclarationNode> translateBinders(
+			CommonTree tree, Source source, SimpleScope scope)
+			throws SyntaxException {
+		int count = tree.getChildCount();
+		List<VariableDeclarationNode> vars = new LinkedList<>();
+
+		for (int i = 0; i < count; i++) {
+			CommonTree binder = (CommonTree) tree.getChild(i);
+
+			vars.addAll(this.translateBinder(binder, scope));
+		}
+		return this.nodeFactory.newSequenceNode(source, "Binder List", vars);
+	}
+
+	private List<VariableDeclarationNode> translateBinder(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
+		CommonTree typeTree = (CommonTree) tree.getChild(0);
+		int numChild = tree.getChildCount();
+		TypeNode type = this.translateTypeExpr(typeTree, scope);
+		List<VariableDeclarationNode> result = new LinkedList<>();
+
+		for (int i = 1; i < numChild; i++) {
+			CommonTree varIdent = (CommonTree) tree.getChild(i);
+
+			result.add(this.translateVariableIdent(varIdent, scope, type.copy()));
+		}
+		return result;
+	}
+
+	private TypeNode translateTypeExpr(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
+		int kind = tree.getType();
+
+		switch (kind) {
+		case LOGIC_TYPE:
+			return this
+					.translateLogicType((CommonTree) tree.getChild(0), scope);
+		case C_TYPE:
+			return this.translateCType((CommonTree) tree.getChild(0), scope);
+		default:
+			throw this.error("unkown kind of tyep expression", tree);
+		}
+	}
+
+	private TypeNode translateCType(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
+		int kind = tree.getType();
+		Source source = this.newSource(tree);
+
+		switch (kind) {
+		case CHAR:
+			return this.nodeFactory
+					.newBasicTypeNode(source, BasicTypeKind.CHAR);
+		case DOUBLE:
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.DOUBLE);
+		case FLOAT:
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.FLOAT);
+		case INT:
+			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
+		case LONG:
+			return this.nodeFactory
+					.newBasicTypeNode(source, BasicTypeKind.LONG);
+		case SHORT:
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.SHORT);
+		case VOID:
+			return this.nodeFactory.newVoidTypeNode(source);
+		default:
+			throw this.error("unknown C type", tree);
+		}
+	}
+
+	private TypeNode translateLogicType(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
+		int kind = tree.getType();
+		Source source = this.newSource(tree);
+
+		switch (kind) {
+		case TYPE_BUILTIN: {
+			int typeKind = tree.getChild(0).getType();
+
+			switch (typeKind) {
+			case BOOLEAN:
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.BOOL);
+			case INTEGER:
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.INT);
+			case REAL:
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.REAL);
+			default:
+				throw this.error("unknown built-in logic type", tree);
+			}
+		}
+		case TYPE_ID:
+			return this.nodeFactory.newTypedefNameNode(
+					this.translateIdentifier((CommonTree) tree.getChild(0)),
+					null);
+		default:
+			throw this.error("unknown kind of logic type", tree);
+		}
+	}
+
+	private VariableDeclarationNode translateVariableIdent(CommonTree tree,
+			SimpleScope scope, TypeNode baseType) throws SyntaxException {
+		int kind = tree.getType();
+		Source source = this.newSource(tree);
+
+		switch (kind) {
+		case VAR_ID_STAR: {
+			VariableDeclarationNode baseVar = this.translateVariableIdentBase(
+					(CommonTree) tree.getChild(0), source, scope, baseType);
+			TypeNode baseVarType, type;
+
+			baseVarType = baseVar.getTypeNode();
+			baseVarType.remove();
+			type = this.nodeFactory.newPointerTypeNode(source, baseVarType);
+			baseVar.setTypeNode(type);
+			return baseVar;
+		}
+		case VAR_ID_SQUARE: {
+			VariableDeclarationNode baseVar = this.translateVariableIdentBase(
+					(CommonTree) tree.getChild(0), source, scope, baseType);
+			TypeNode baseVarType, type;
+
+			baseVarType = baseVar.getTypeNode();
+			baseVarType.remove();
+			type = this.nodeFactory.newArrayTypeNode(source, baseVarType, null);
+			baseVar.setTypeNode(type);
+			return baseVar;
+		}
+		case VAR_ID:
+			return this.translateVariableIdentBase(
+					(CommonTree) tree.getChild(0), source, scope, baseType);
+		default:
+			throw this.error("unknown kind of variable identity", tree);
+		}
+	}
+
+	private VariableDeclarationNode translateVariableIdentBase(CommonTree tree,
+			Source source, SimpleScope scope, TypeNode baseType)
+			throws SyntaxException {
+		int kind = tree.getType();
+
+		switch (kind) {
+		case ID: {
+			IdentifierNode identifier = this.translateIdentifier(tree);
+
+			return this.nodeFactory.newVariableDeclarationNode(
+					identifier.getSource(), identifier, baseType);
+		}
+		case VAR_ID_BASE:
+			return this.translateVariableIdent((CommonTree) tree.getChild(0),
+					scope, baseType);
+		default:
+			throw this.error("unknown kind of variable identity base", tree);
+		}
 	}
 
 	// ////////////////////////////////////

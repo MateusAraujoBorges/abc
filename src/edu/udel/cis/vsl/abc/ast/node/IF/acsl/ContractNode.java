@@ -54,15 +54,21 @@ public interface ContractNode extends ASTNode {
 		 */
 		INVARIANT,
 		/**
-		 * A "requires" node represents a pre-condition in a CIVL-C procedure
-		 * contract. May be safely cast to {@link RequiresNode}.
-		 */
-		REQUIRES,
-		/**
 		 * A "\mpi_collective" node introduces a block of contracts which should
 		 * satisfy mpi collective behaviors.
 		 */
-		MPI_COLLECTIVE
+		MPI_COLLECTIVE,
+		/**
+		 * A "pure" node represents the contract for specifying a pure function.
+		 * A node of this kind may be safely cast to {@link PureNode}.
+		 */
+		PURE,
+		/**
+		 * A "requires" node represents a pre-condition in a CIVL-C procedure
+		 * contract. May be safely cast to {@link RequiresNode}.
+		 */
+		REQUIRES
+
 	}
 
 	/**

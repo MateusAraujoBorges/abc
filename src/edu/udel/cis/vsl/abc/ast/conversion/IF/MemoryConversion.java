@@ -5,7 +5,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.MemoryType;
 /**
  * convert any lhs expression into a memory expression, only used for contracts
  * 
- * @author zmanchun
+ * @author Manchun Zheng
  *
  */
 public interface MemoryConversion extends Conversion {

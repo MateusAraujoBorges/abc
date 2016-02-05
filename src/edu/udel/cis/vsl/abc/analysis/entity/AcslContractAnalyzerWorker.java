@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.analysis.entity;
 import java.util.HashMap;
 import java.util.Map;
 
+import edu.udel.cis.vsl.abc.ast.conversion.IF.ConversionFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.BehaviorEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
@@ -36,8 +37,15 @@ public class AcslContractAnalyzerWorker {
 
 	private Map<String, BehaviorEntity> definedBehaviors = new HashMap<>();
 
-	AcslContractAnalyzerWorker(EntityAnalyzer entityAnalyzer) {
+	private ConversionFactory conversionFactory;
+
+	private ExpressionAnalyzer expressionAnalyzer;
+
+	AcslContractAnalyzerWorker(EntityAnalyzer entityAnalyzer,
+			ConversionFactory conversionFactory) {
 		this.entityAnalyzer = entityAnalyzer;
+		this.conversionFactory = conversionFactory;
+		this.expressionAnalyzer = this.entityAnalyzer.expressionAnalyzer;
 	}
 
 	/**
@@ -81,7 +89,9 @@ public class AcslContractAnalyzerWorker {
 			for (int i = 0; i < numExpressions; i++) {
 				ExpressionNode expression = expressionList.getSequenceChild(i);
 
-				entityAnalyzer.expressionAnalyzer.processExpression(expression);
+				expressionAnalyzer.processExpression(expression);
+				expression.addConversion(this.conversionFactory
+						.memoryConversion(expression.getConvertedType()));
 			}
 			break;
 		}
@@ -110,7 +120,7 @@ public class AcslContractAnalyzerWorker {
 			ExpressionNode expression = ((GuardNode) contractClause)
 					.getExpression();
 
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
+			expressionAnalyzer.processExpression(expression);
 			break;
 		}
 		/* *********************************************************** */
@@ -119,7 +129,7 @@ public class AcslContractAnalyzerWorker {
 			AssumesNode assumesNode = (AssumesNode) contractClause;
 			ExpressionNode expression = assumesNode.getPredicate();
 
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
+			expressionAnalyzer.processExpression(expression);
 			break;
 		}
 		case BEHAVIOR: {
@@ -161,21 +171,23 @@ public class AcslContractAnalyzerWorker {
 			ExpressionNode expression = ((RequiresNode) contractClause)
 					.getExpression();
 
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
+			expressionAnalyzer.processExpression(expression);
 			break;
 		}
 		case ENSURES: {
 			ExpressionNode expression = ((EnsuresNode) contractClause)
 					.getExpression();
 
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
+			expressionAnalyzer.processExpression(expression);
+			break;
+		}
+		case PURE: {
 			break;
 		}
 		case MPI_COLLECTIVE: {
 			MPICollectiveBlockNode collective_block = (MPICollectiveBlockNode) contractClause;
 
-			entityAnalyzer.expressionAnalyzer
-					.processExpression(collective_block.getMPIComm());
+			expressionAnalyzer.processExpression(collective_block.getMPIComm());
 			for (ContractNode colClause : collective_block.getBody())
 				processContractNode(colClause);
 			break;
@@ -195,8 +207,9 @@ public class AcslContractAnalyzerWorker {
 			SequenceNode<ExpressionNode> memoryList = rwEvent.getMemoryList();
 
 			for (ExpressionNode memory : memoryList) {
-				this.entityAnalyzer.expressionAnalyzer
-						.processExpression(memory);
+				this.expressionAnalyzer.processExpression(memory);
+				memory.addConversion(this.conversionFactory
+						.memoryConversion(memory.getConvertedType()));
 			}
 			break;
 		}
@@ -207,12 +220,11 @@ public class AcslContractAnalyzerWorker {
 			CallEventNode call = (CallEventNode) event;
 			SequenceNode<ExpressionNode> arguments = call.arguments();
 
-			this.entityAnalyzer.expressionAnalyzer.processIdentifierExpression(
+			this.expressionAnalyzer.processIdentifierExpression(
 					call.getFunction(), true, true);
 			if (arguments != null) {
 				for (ExpressionNode arg : arguments) {
-					this.entityAnalyzer.expressionAnalyzer
-							.processExpression(arg);
+					this.expressionAnalyzer.processExpression(arg);
 				}
 			}
 			break;

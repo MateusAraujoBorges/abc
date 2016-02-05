@@ -15,8 +15,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
@@ -250,6 +252,9 @@ public class ExpressionAnalyzer {
 			case MPI_CONTRACT_EXPRESSION:
 				processMPIContractExpression((MPIContractExpressionNode) node);
 				break;
+			case MEMORY_SET:
+				processMemorySet((MemorySetNode) node);
+				break;
 			default:
 				throw new ABCRuntimeException("Unreachable");
 
@@ -257,6 +262,31 @@ public class ExpressionAnalyzer {
 		} catch (ASTException e) {
 			throw new SyntaxException(e.getMessage(), node.getSource());
 		}
+	}
+
+	private void processMemorySet(MemorySetNode node) throws SyntaxException {
+		ExpressionNode element = node.getElements();
+		SequenceNode<VariableDeclarationNode> binders = node.getBinders();
+		ExpressionNode predicate = node.getPredicate();
+		Type elementType;
+
+		if (binders != null)
+			for (VariableDeclarationNode variable : binders)
+				entityAnalyzer.declarationAnalyzer
+						.processVariableDeclaration(variable);
+		this.processExpression(element);
+		if (predicate != null)
+			this.processExpression(predicate);
+		elementType = element.getConvertedType();
+		if (elementType instanceof ArithmeticType) {
+			if (((ArithmeticType) elementType).isInteger())
+				node.setInitialType(this.typeFactory.rangeType());
+		} else if (elementType instanceof PointerType) {
+			node.setInitialType(this.typeFactory.memoryType());
+		}
+		if (node.getConvertedType() == null)
+			throw this.error("set of " + elementType
+					+ " type is not supported yet", node);
 	}
 
 	/**
@@ -541,10 +571,12 @@ public class ExpressionAnalyzer {
 			// type is scope type, already set
 		} else if (node instanceof WildcardNode) {
 			node.setInitialType(typeFactory.voidType());
+		} else if (node instanceof NothingNode) {
+			node.setInitialType(this.typeFactory.memoryType());
 		}
 		// else
 		// throw new RuntimeException("Unknown kind of constant node: " + node);
-		if (node.getInitialType() == null && !(node instanceof NothingNode))
+		if (node.getInitialType() == null)
 			throw error("Internal error: did not set type", node);
 	}
 
@@ -1919,9 +1951,21 @@ public class ExpressionAnalyzer {
 		ExpressionNode arg = node.getArgument(0);
 		Type type = addStandardConversions(arg);
 
-		if (!(type instanceof PointerType))
+		if (type instanceof PointerType)
+			node.setInitialType(((PointerType) type).referencedType());
+		else if (type instanceof ArrayType) {
+			ArrayType arrayType = (ArrayType) type;
+
+			if (!(arrayType.getElementType() instanceof PointerType))
+				throw error("Argument to * has non-pointer set type: " + type,
+						node);
+			else
+				node.setInitialType(this.typeFactory
+						.incompleteArrayType((ObjectType) ((PointerType) arrayType
+								.getElementType()).referencedType()));
+		} else {
 			throw error("Argument to * has non-pointer type: " + type, node);
-		node.setInitialType(((PointerType) type).referencedType());
+		}
 	}
 
 	private void processRegularRange(RegularRangeNode node)
@@ -1999,7 +2043,6 @@ public class ExpressionAnalyzer {
 			node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
 			return;
 		}
-
 		throw error(
 				"The argument of a \\valid expression must has an array of pointer type",
 				expr);

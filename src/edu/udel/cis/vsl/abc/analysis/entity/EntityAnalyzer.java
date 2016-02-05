@@ -90,6 +90,8 @@ public class EntityAnalyzer implements Analyzer {
 
 	ValueFactory valueFactory;
 
+	ConversionFactory conversionFactory;
+
 	StandardTypes standardTypes;
 
 	Language language;
@@ -114,6 +116,7 @@ public class EntityAnalyzer implements Analyzer {
 		this.sourceFactory = astFactory.getTokenFactory();
 		this.entityFactory = entityFactory;
 		this.standardTypes = new StandardTypes(entityFactory, typeFactory);
+		this.conversionFactory = conversionFactory;
 		this.declarationAnalyzer = new DeclarationAnalyzer(this);
 		declarationAnalyzer.setIgnoredTypes(standardTypes
 				.getStandardTypeNames());

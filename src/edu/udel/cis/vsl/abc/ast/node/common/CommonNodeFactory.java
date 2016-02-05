@@ -31,8 +31,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -134,8 +136,10 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonInvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIContractExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonPureNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonRequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonArrayDesignatorNode;
@@ -1144,5 +1148,17 @@ public class CommonNodeFactory implements NodeFactory {
 	public InvariantNode newInvariantNode(Source source,
 			boolean isLoopInvariant, ExpressionNode expression) {
 		return new CommonInvariantNode(source, isLoopInvariant, expression);
+	}
+
+	@Override
+	public PureNode newPureNode(Source source) {
+		return new CommonPureNode(source);
+	}
+
+	@Override
+	public MemorySetNode newMemorySetNode(Source source, ExpressionNode term,
+			SequenceNode<VariableDeclarationNode> binders,
+			ExpressionNode predicate) {
+		return new CommonMemorySetNode(source, term, binders, predicate);
 	}
 }

@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.expression;
 
 import edu.udel.cis.vsl.abc.ast.conversion.IF.Conversion;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ForLoopInitializerNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
@@ -104,6 +105,10 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 * function name). Can be cast to {@link IdentifierExpressionNode}.
 		 */
 		IDENTIFIER_EXPRESSION,
+		/**
+		 * A memory set of ACSL contracts. Can be cast to {@link MemorySetNode}.
+		 */
+		MEMORY_SET,
 		/**
 		 * An operator expression: this includes a large set of expressions
 		 * formed by using an operator represented by some C symbol, such as
