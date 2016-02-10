@@ -718,7 +718,7 @@ public interface NodeFactory {
 	 *            pointer to function type
 	 * @param contextArguments
 	 *            the list of arguments passed as the execution context
-	 *            (appearing between <<< and >>>)
+	 *            (appearing between <<< and >>>) [It is only for CUDA programs]
 	 * @param arguments
 	 *            the list of actual arguments to be evaluated and passed to the
 	 *            function in this function call
