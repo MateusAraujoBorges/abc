@@ -17,7 +17,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
@@ -1805,7 +1805,7 @@ public interface NodeFactory {
 	 *            the boolean expression which specifies the the guard
 	 * @return the new <code>$guard</code> clause node
 	 */
-	GuardNode newGuardNode(Source source, ExpressionNode expression);
+	GuardsNode newGuardNode(Source source, ExpressionNode expression);
 
 	/**
 	 * Constructs a new node representing an ACSL <code>assigns</code> contract

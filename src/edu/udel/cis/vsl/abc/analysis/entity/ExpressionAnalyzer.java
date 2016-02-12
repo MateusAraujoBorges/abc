@@ -16,10 +16,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -255,6 +255,12 @@ public class ExpressionAnalyzer {
 			case MEMORY_SET:
 				processMemorySet((MemorySetNode) node);
 				break;
+			case WILDCARD:
+				node.setInitialType(typeFactory.voidType());
+				break;
+			case NOTHING:
+				node.setInitialType(this.typeFactory.memoryType());
+				break;
 			default:
 				throw new ABCRuntimeException("Unreachable");
 
@@ -348,6 +354,22 @@ public class ExpressionAnalyzer {
 					&& (boolean) unknownIdentiferAttribute)
 				this.processIdentifierExpression(
 						(IdentifierExpressionNode) node, false, false);
+		} else if (node instanceof WildcardNode) {
+			WildcardNode wildcard = (WildcardNode) node;
+
+			if (typeFactory.isVoidType(wildcard.getConvertedType())) {
+				ASTNode callEventNode0 = wildcard.parent().parent();
+
+				if (callEventNode0 instanceof CallEventNode) {
+					CallEventNode callEventNode = (CallEventNode) callEventNode0;
+					Function function = (Function) callEventNode.getFunction()
+							.getIdentifier().getEntity();
+					FunctionType functionType = function.getType();
+
+					wildcard.setInitialType(functionType
+							.getParameterType(wildcard.childIndex()));
+				}
+			}
 		} else {
 			for (ASTNode child : node.children()) {
 				if (child != null)
@@ -569,10 +591,6 @@ public class ExpressionAnalyzer {
 			// type is process type, already set
 		} else if (node instanceof HereOrRootNode) {
 			// type is scope type, already set
-		} else if (node instanceof WildcardNode) {
-			node.setInitialType(typeFactory.voidType());
-		} else if (node instanceof NothingNode) {
-			node.setInitialType(this.typeFactory.memoryType());
 		}
 		// else
 		// throw new RuntimeException("Unknown kind of constant node: " + node);

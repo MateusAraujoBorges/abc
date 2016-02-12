@@ -99,6 +99,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
@@ -335,9 +336,19 @@ public class AcslContractWorker {
 			return this.translateReadsOrAssigns(tree, scope, true);
 		case AcslParser.DEPENDS:
 			return this.translateDepends(tree, scope);
+		case AcslParser.GUARDS:
+			return this.translateGuards(tree, scope);
 		default:
 			throw this.error("Unknown contract clause kind", tree);
 		}
+	}
+
+	private GuardsNode translateGuards(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
+		CommonTree expressionTree = (CommonTree) tree.getChild(0);
+
+		return this.nodeFactory.newGuardNode(this.newSource(tree),
+				this.translateExpression(expressionTree, scope));
 	}
 
 	private AssumesNode translateAssumes(CommonTree tree, SimpleScope scope)

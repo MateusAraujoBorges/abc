@@ -13,8 +13,8 @@ public class CommonAnyactNode extends CommonDependsEventNode implements
 	}
 
 	@Override
-	public DependsEventKind getEventKind() {
-		return DependsEventKind.ANYACT;
+	public DependsEventNodeKind getEventKind() {
+		return DependsEventNodeKind.ANYACT;
 	}
 
 	@Override

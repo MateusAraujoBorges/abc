@@ -59,10 +59,10 @@ public class CommonCivlcToken extends CommonToken implements CivlcToken {
 	 * things I don't understand.
 	 */
 	private int tokenIndex = -1;
-	
+
 	/**
-	 * Created for fortran parser which derived from OpenFortranParser.
-	 * It requires a field with a type of String.
+	 * Created for Fortran parser which derived from OpenFortranParser. It
+	 * requires a field with a type of String.
 	 */
 	private String whiteText = "";
 
@@ -85,9 +85,9 @@ public class CommonCivlcToken extends CommonToken implements CivlcToken {
 		super(type, text);
 		this.formation = formation;
 	}
-	
-	public CommonCivlcToken(CharStream input, int type, int channel,
-			  int start, int stop, Formation formation){
+
+	public CommonCivlcToken(CharStream input, int type, int channel, int start,
+			int stop, Formation formation) {
 		super(input, type, channel, start, stop);
 		assert formation != null;
 		this.formation = formation;
@@ -117,6 +117,7 @@ public class CommonCivlcToken extends CommonToken implements CivlcToken {
 	public String toString() {
 		if (this.getType() == Token.EOF)
 			return "EOF";
+		// TODO make a special handling for special token "Program"
 		else {
 			// String result = TokenUtils.quotedText(this) + " in "
 			// + TokenUtils.location(this, false);
@@ -194,7 +195,7 @@ public class CommonCivlcToken extends CommonToken implements CivlcToken {
 	public Formation getFormation() {
 		return formation;
 	}
-	
+
 	/* Methods for Frotran parser */
 	@Override
 	public String getWhiteText() {

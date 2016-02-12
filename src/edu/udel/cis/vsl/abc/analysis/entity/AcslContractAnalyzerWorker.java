@@ -18,10 +18,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode.ContractKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventNodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
@@ -117,7 +117,7 @@ public class AcslContractAnalyzerWorker {
 			// }
 		}
 		case GUARDS: {
-			ExpressionNode expression = ((GuardNode) contractClause)
+			ExpressionNode expression = ((GuardsNode) contractClause)
 					.getExpression();
 
 			expressionAnalyzer.processExpression(expression);
@@ -199,7 +199,7 @@ public class AcslContractAnalyzerWorker {
 
 	private void processDependsEvent(DependsEventNode event)
 			throws SyntaxException {
-		DependsEventKind kind = event.getEventKind();
+		DependsEventNodeKind kind = event.getEventKind();
 
 		switch (kind) {
 		case READ_WRITE: {
@@ -222,6 +222,7 @@ public class AcslContractAnalyzerWorker {
 
 			this.expressionAnalyzer.processIdentifierExpression(
 					call.getFunction(), true, true);
+			
 			if (arguments != null) {
 				for (ExpressionNode arg : arguments) {
 					this.expressionAnalyzer.processExpression(arg);

@@ -26,9 +26,7 @@ public interface ConstantNode extends ExpressionNode {
 		 * safely cast to {@link SelfNode}.
 		 */
 		SELF, 
-		STRING,
-		NOTHING,
-		WILDCARD
+		STRING
 	}
 	
 	ConstantKind constantKind();

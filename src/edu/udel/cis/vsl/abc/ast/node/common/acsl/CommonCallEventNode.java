@@ -18,8 +18,8 @@ public class CommonCallEventNode extends CommonDependsEventNode implements
 	}
 
 	@Override
-	public DependsEventKind getEventKind() {
-		return DependsEventKind.CALL;
+	public DependsEventNodeKind getEventKind() {
+		return DependsEventNodeKind.CALL;
 	}
 
 	@Override

@@ -13,8 +13,8 @@ public class CommonNoactNode extends CommonDependsEventNode implements
 	}
 
 	@Override
-	public DependsEventKind getEventKind() {
-		return DependsEventKind.NOACT;
+	public DependsEventNodeKind getEventKind() {
+		return DependsEventNodeKind.NOACT;
 	}
 
 	@Override

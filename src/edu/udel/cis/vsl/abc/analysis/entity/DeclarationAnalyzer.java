@@ -439,6 +439,11 @@ public class DeclarationAnalyzer {
 		}
 		node.setEntity(entity);
 		identifier.setEntity(entity);
+		if (isFunction && name.equals("main")) {
+			if (scope.getParentScope() == null) {
+				ast.setMain((Function) entity);
+			}
+		}
 		return entity;
 	}
 

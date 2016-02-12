@@ -20,10 +20,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CompositeEventNode.EventOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode.ContractKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventNodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
@@ -629,7 +629,7 @@ public class ASTPrettyPrinter {
 			break;
 		}
 		case GUARDS: {
-			GuardNode guard = (GuardNode) contract;
+			GuardsNode guard = (GuardsNode) contract;
 
 			out.print("guards ");
 			out.print(expression2Pretty(guard.getExpression()));
@@ -704,7 +704,7 @@ public class ASTPrettyPrinter {
 	}
 
 	private static StringBuffer dependsEvent2Pretty(DependsEventNode event) {
-		DependsEventKind kind = event.getEventKind();
+		DependsEventNodeKind kind = event.getEventKind();
 		StringBuffer result = new StringBuffer();
 
 		switch (kind) {
@@ -819,7 +819,7 @@ public class ASTPrettyPrinter {
 			break;
 		}
 		case GUARDS: {
-			GuardNode guard = (GuardNode) contract;
+			GuardsNode guard = (GuardsNode) contract;
 
 			out.print("$guard");
 			out.print("{");

@@ -2,6 +2,7 @@ package edu.udel.cis.vsl.abc.ast.node.IF.expression;
 
 import edu.udel.cis.vsl.abc.ast.conversion.IF.Conversion;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ForLoopInitializerNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
@@ -164,7 +165,17 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 * An MPI-Contracts constructor expression, it can only appears in a
 		 * function contract block. see {@link MPIContractExpression}.
 		 */
-		MPI_CONTRACT_EXPRESSION
+		MPI_CONTRACT_EXPRESSION,
+		/**
+		 * An ACSL-CIVLC wildcard expression (<code>...</code>); can be cast to
+		 * {@link WildcardNode}.
+		 */
+		WILDCARD,
+		/**
+		 * An ACSL nothing expression (<code></code>); can be cast to
+		 * {@link NothingNode}.
+		 */
+		NOTHING
 	}
 
 	/**

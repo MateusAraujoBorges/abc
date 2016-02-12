@@ -24,6 +24,7 @@ import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter.CharacterKind;
  * @author siegel
  * 
  */
+// TODO fix javadocs
 public interface TokenFactory {
 
 	// Formations (records of history of token creation)...

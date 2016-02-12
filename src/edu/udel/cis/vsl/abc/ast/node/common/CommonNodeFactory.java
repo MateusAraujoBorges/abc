@@ -23,7 +23,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
@@ -1029,7 +1029,7 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public GuardNode newGuardNode(Source source, ExpressionNode expression) {
+	public GuardsNode newGuardNode(Source source, ExpressionNode expression) {
 		return new CommonGuardNode(source, expression);
 	}
 
@@ -1080,7 +1080,7 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public NothingNode newNothingNode(Source source) {
-		return new CommonNothingNode(source, null);
+		return new CommonNothingNode(source);
 	}
 
 	@Override

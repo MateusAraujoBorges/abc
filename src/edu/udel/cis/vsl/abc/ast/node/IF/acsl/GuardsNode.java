@@ -10,7 +10,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
  * @author Manchun Zheng
  *
  */
-public interface GuardNode extends ContractNode {
+public interface GuardsNode extends ContractNode {
 	/**
 	 * Gets the boolean expression of this guard.
 	 * 
@@ -19,5 +19,5 @@ public interface GuardNode extends ContractNode {
 	ExpressionNode getExpression();
 
 	@Override
-	GuardNode copy();
+	GuardsNode copy();
 }

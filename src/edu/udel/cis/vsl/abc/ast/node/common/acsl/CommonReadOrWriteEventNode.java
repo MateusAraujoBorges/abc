@@ -19,8 +19,8 @@ public class CommonReadOrWriteEventNode extends CommonDependsEventNode
 	}
 
 	@Override
-	public DependsEventKind getEventKind() {
-		return DependsEventKind.READ_WRITE;
+	public DependsEventNodeKind getEventKind() {
+		return DependsEventNodeKind.READ_WRITE;
 	}
 
 	@Override

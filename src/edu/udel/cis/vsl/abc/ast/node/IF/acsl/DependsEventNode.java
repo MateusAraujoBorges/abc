@@ -9,11 +9,11 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
  *
  */
 public interface DependsEventNode extends ASTNode {
-	public enum DependsEventKind {
+	public enum DependsEventNodeKind {
 		READ_WRITE, CALL, COMPOSITE, ANYACT, NOACT
 	}
 
-	DependsEventKind getEventKind();
+	DependsEventNodeKind getEventKind();
 
 	@Override
 	DependsEventNode copy();
