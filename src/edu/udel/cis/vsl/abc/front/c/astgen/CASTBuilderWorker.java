@@ -1428,7 +1428,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			declaration.setGlobalFunctionSpecifier(true);
 		if (analysis.pureSpecifier)
 			declaration.setPureFunctionSpeciier(true);
-		if (analysis.atomicQualifier)
+		if (analysis.fatomicSpecifier)
 			declaration.setAtomicFunctionSpeciier(true);
 		if (analysis.systemSpecifier)
 			declaration.setSystemFunctionSpeciier(true);

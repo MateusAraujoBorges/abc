@@ -527,6 +527,8 @@ public class DeclarationAnalyzer {
 				function.setIsInlined(true);
 			if (declaration.hasNoreturnFunctionSpecifier())
 				function.setDoesNotReturn(true);
+			if (declaration.hasAtomicFunctionSpeciier())
+				function.setAtomic(true);
 		} else {
 			// the standards never says that this is a problem, so commented it
 			// out

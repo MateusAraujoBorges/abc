@@ -22,7 +22,7 @@ public class CommonFunctionDeclarationNode extends
 
 	private boolean globalFunctionSpecifier = false;
 
-	private boolean atomicFunctionSpecifier = false;
+	private boolean atomicFunctionSpecifier = false;// $atomic_f
 	private boolean pureFunctionSpecifier = false;
 	private boolean systemFunctionSpecifier = false;
 

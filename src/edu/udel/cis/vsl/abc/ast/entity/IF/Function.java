@@ -36,6 +36,22 @@ public interface Function extends OrdinaryEntity {
 	void setIsInlined(boolean value);
 
 	/**
+	 * Is the function declared with the <code>$atomic_f</code> specifier,
+	 * indicating that this is an atomic function?
+	 * 
+	 * @return <code>true</code> iff the function is an atomic function
+	 */
+	boolean isAtomic();
+
+	/**
+	 * Sets whether this function is an atomic function
+	 * 
+	 * @param value
+	 *            <code>true</code> if atomic, <code>false</code> if not
+	 */
+	void setAtomic(boolean value);
+
+	/**
 	 * Is the function declared with the <code>_Noreturn</code> specifier,
 	 * indicating that the function does not return.
 	 * 

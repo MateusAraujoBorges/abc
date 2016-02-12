@@ -18,7 +18,7 @@ import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 
 public class CommonFunction extends CommonOrdinaryEntity implements Function {
 
-	private boolean isInlined, doesNotReturn;
+	private boolean isInlined, doesNotReturn, isAtomic = false;
 
 	private Set<Function> callers = new HashSet<>();
 	private Set<Function> callees = new HashSet<>();
@@ -94,5 +94,15 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	@Override
 	public Iterator<ContractNode> getContracts() {
 		return contracts.iterator();
+	}
+
+	@Override
+	public boolean isAtomic() {
+		return this.isAtomic;
+	}
+
+	@Override
+	public void setAtomic(boolean value) {
+		this.isAtomic = value;
 	}
 }
