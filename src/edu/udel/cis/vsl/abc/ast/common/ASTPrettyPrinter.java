@@ -681,6 +681,10 @@ public class ASTPrettyPrinter {
 			out.print(";");
 			break;
 		}
+		case PURE:{
+			out.print("pure;");
+			break;
+		}
 		default:
 			throw new ABCUnsupportedException(
 					"pretty printing contract node of " + kind + " kind");
@@ -1829,6 +1833,12 @@ public class ASTPrettyPrinter {
 			break;
 		case STATEMENT_EXPRESSION:
 			return statementExpression2Pretty((StatementExpressionNode) expression);
+		case NOTHING:
+			result.append("\\nothing");
+			break;
+		case WILDCARD:
+			result.append("...");
+			break;
 		default:
 			throw new ABCUnsupportedException(
 					"pretty print of expression node of " + kind + " kind");
