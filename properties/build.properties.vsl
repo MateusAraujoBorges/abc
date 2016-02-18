@@ -7,4 +7,4 @@ antlr.runtime.jar=${root}/lib/antlr-runtime.jar
 hamcrest.jar=${root}/lib/hamcrest-core.jar
 jacoco.jar=${root}/src/jacoco/lib/jacocoant.jar
 junit.jar=${root}/lib/junit.jar
-sarl.jar=/home/svn/work/sarl/trunk/latest/sarl.jar
+sarl.jar=/usa/svn/work/sarl/trunk/latest/sarl.jar
