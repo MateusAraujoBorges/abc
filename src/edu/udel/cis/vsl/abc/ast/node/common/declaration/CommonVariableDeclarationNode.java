@@ -31,6 +31,8 @@ public class CommonVariableDeclarationNode extends
 
 	private boolean sharedStorage = false;
 
+	private boolean isRefParameter = true;
+
 	public CommonVariableDeclarationNode(Source source,
 			IdentifierNode identifier, TypeNode type) {
 		super(source, identifier, type);
@@ -230,5 +232,15 @@ public class CommonVariableDeclarationNode extends
 				return null;
 		}
 		return new DifferenceObject(this, that);
+	}
+
+	@Override
+	public boolean isRefParameter() {
+		return isRefParameter;
+	}
+
+	@Override
+	public void setIsRefParameter(boolean isRefParameter) {
+		this.isRefParameter = isRefParameter;
 	}
 }

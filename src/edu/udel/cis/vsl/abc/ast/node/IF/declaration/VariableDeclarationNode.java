@@ -85,7 +85,8 @@ public interface VariableDeclarationNode extends OrdinaryDeclarationNode {
 	 * can be access by threads inside the workgroup, but not outside the
 	 * workgroup. Each workgroup has its own copy.
 	 * 
-	 * @return <code>true</code> iff declaration contains <code>__shared__</code>
+	 * @return <code>true</code> iff declaration contains
+	 *         <code>__shared__</code>
 	 */
 	boolean hasSharedStorage();
 
@@ -182,4 +183,24 @@ public interface VariableDeclarationNode extends OrdinaryDeclarationNode {
 	@Override
 	VariableDeclarationNode copy();
 
+	/**
+	 * Only used when this {@link VariableDeclarationNode} is used as a
+	 * parameter in FORTRAN program. Usually, the type of a parameter in FORTRAN
+	 * is call by reference. However, for improving the performance, ABC will
+	 * treat <strong>not-modified</strong> parameters as call by value.
+	 * 
+	 * @return </code>true
+	 *         <code>, if this parameter variable is called by reference; <br></code>
+	 *         false
+	 *         <code>, if it is called by value (or call by reference without being modified).
+	 */
+	public boolean isRefParameter();
+
+	/**
+	 * Sets the boolean field representing the type of this node. <br>
+	 * [Only when this node is used as a parameter in a FORTRAN program]
+	 * 
+	 * @param isRefParameter
+	 */
+	public void setIsRefParameter(boolean isRefParameter);
 }
