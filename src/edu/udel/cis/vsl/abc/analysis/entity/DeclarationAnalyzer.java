@@ -529,6 +529,8 @@ public class DeclarationAnalyzer {
 				function.setDoesNotReturn(true);
 			if (declaration.hasAtomicFunctionSpeciier())
 				function.setAtomic(true);
+			if (declaration.hasSystemFunctionSpeciier())
+				function.setSystemFunction(true);
 		} else {
 			// the standards never says that this is a problem, so commented it
 			// out

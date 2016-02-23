@@ -18,7 +18,8 @@ import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 
 public class CommonFunction extends CommonOrdinaryEntity implements Function {
 
-	private boolean isInlined, doesNotReturn, isAtomic = false;
+	private boolean isInlined, doesNotReturn, isAtomic,
+			isSystemFunction = false;
 
 	private Set<Function> callers = new HashSet<>();
 	private Set<Function> callees = new HashSet<>();
@@ -104,5 +105,15 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	@Override
 	public void setAtomic(boolean value) {
 		this.isAtomic = value;
+	}
+
+	@Override
+	public void setSystemFunction(boolean value) {
+		this.isSystemFunction = value;
+	}
+
+	@Override
+	public boolean isSystemFunction() {
+		return this.isSystemFunction;
 	}
 }

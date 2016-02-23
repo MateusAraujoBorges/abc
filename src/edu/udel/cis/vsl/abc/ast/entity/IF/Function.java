@@ -52,6 +52,23 @@ public interface Function extends OrdinaryEntity {
 	void setAtomic(boolean value);
 
 	/**
+	 * Is the function declared with the <code>$system</code> specifier,
+	 * indicating that this is a system function?
+	 * 
+	 * @return <code>true</code> iff the function is a system function
+	 */
+	boolean isSystemFunction();
+
+	/**
+	 * Sets whether this function is a system function
+	 * 
+	 * @param value
+	 *            <code>true</code> if this is a system function,
+	 *            <code>false</code> if not
+	 */
+	void setSystemFunction(boolean value);
+
+	/**
 	 * Is the function declared with the <code>_Noreturn</code> specifier,
 	 * indicating that the function does not return.
 	 * 
