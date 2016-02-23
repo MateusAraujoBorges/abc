@@ -32,6 +32,7 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
    public int needIdent;
    public int parserBacktracking;
    public boolean matchFailed;
+   @SuppressWarnings("rawtypes")
    private List currLine;
    private int lineLength;
    private Token eofToken = null;
@@ -415,6 +416,7 @@ END OBSOLETE*******/
    } // end lineToString()
 
 
+   @SuppressWarnings({ "unchecked", "rawtypes" })
    public List getTokens(int start, int stop) {
       return super.getTokens(start, stop);
    } // end getTokens()
@@ -657,6 +659,7 @@ OBSOLETE*****/
    } // end printPackedList()
 
 
+   @SuppressWarnings("rawtypes")
    public void outputTokenList(IFortranParserAction actions) {
       ArrayList<Token> tmpArrayList = null;
       List tmpList = null;

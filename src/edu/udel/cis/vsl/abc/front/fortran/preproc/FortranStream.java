@@ -18,6 +18,7 @@
 package edu.udel.cis.vsl.abc.front.fortran.preproc;
 
 import java.io.*;
+
 import org.antlr.runtime.*;
 
 public class FortranStream extends ANTLRFileStream
@@ -201,7 +202,7 @@ public class FortranStream extends ANTLRFileStream
       boolean continuation = false;
       int count = 0;
       int col   = 1;    // 1 based 
-      int line  = 1;    // 1 based
+      //int line  = 1;    // 1 based
 
       for (int i = 0; i < super.n; i++) {
          int ii;
@@ -337,7 +338,7 @@ public class FortranStream extends ANTLRFileStream
       char[] newData = new char[super.n];
       int count = 0;
       int col   = 1;    // 1 based 
-      int line  = 1;    // 1 based
+      //int line  = 1;    // 1 based
 
       for (int i = 0; i < super.n; i++) {
          int ii;
@@ -525,7 +526,8 @@ public class FortranStream extends ANTLRFileStream
     * Unused for now.  In future could be used to shorten code in made section
     * when processing comments.
     */
-   private int consumeFixedFormComments(int i, char buf[], StringBuffer comments)
+   @SuppressWarnings("unused")
+private int consumeFixedFormComments(int i, char buf[], StringBuffer comments)
    {
       if (i < super.n && buf[i] == '!') {
          // found comment character, copy characters up to '\n'

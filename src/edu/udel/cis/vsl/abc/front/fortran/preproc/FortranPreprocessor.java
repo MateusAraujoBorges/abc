@@ -28,6 +28,7 @@ public class FortranPreprocessor implements Preprocessor {
 
 	private ArrayList<SourceFile> sourceFiles = new ArrayList<>();
 
+	@SuppressWarnings("unused")
 	private Configuration config;
 
 	private TokenFactory tokenFactory;
@@ -112,7 +113,7 @@ public class FortranPreprocessor implements Preprocessor {
 		return new HashMap<String, Macro>();
 	}
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "unused" })
 	@Override
 	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
