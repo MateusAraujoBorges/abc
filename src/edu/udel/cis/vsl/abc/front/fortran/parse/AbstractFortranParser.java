@@ -51,7 +51,8 @@ public abstract class AbstractFortranParser extends Parser implements IFortranPa
    // TODO - does this state have to be shared?   
    protected boolean has_error_occurred = false;
    
-   protected AbstractFortranParser(TokenStream input, RecognizerSharedState state)
+   @SuppressWarnings("unchecked")
+protected AbstractFortranParser(TokenStream input, RecognizerSharedState state)
    {
       super(input, state);
 
@@ -72,7 +73,8 @@ public abstract class AbstractFortranParser extends Parser implements IFortranPa
    
    public boolean hasErrorOccurred() { return delegate.has_error_occurred; }
 
-   public void reportError(RecognitionException re) {
+   @SuppressWarnings("static-access")
+public void reportError(RecognitionException re) {
       super.reportError(re);
 
       // Change action class to FortranParserActionNull so that actions are no

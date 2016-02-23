@@ -30,7 +30,7 @@ public class FortranParserActionPrint implements IFortranParserAction {
    private int deletedFeature = -1;
    private int generatedRule = -2;
    private int unknownRule = -3;
-   private int f08Rule = -4;
+   //private int f08Rule = -4;
 	
    FortranParserActionPrint(String[] args, IFortranParser parser, String filename) {
       super();
