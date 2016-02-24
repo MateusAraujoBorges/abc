@@ -122,4 +122,9 @@ public class SideEffectRemoverTest {
 	public void stmtExpr() throws ABCException, IOException {
 		check("stmtExpression.c");
 	}
+
+	@Test
+	public void land() throws ABCException, IOException {
+		check("shortCircuit.c");
+	}
 }
