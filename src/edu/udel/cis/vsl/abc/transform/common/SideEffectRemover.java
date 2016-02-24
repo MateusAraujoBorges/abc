@@ -1602,6 +1602,27 @@ public class SideEffectRemover extends BaseTransformer {
 	private ExprTriple translate(ExpressionNode expression, boolean isVoid) {
 		ExpressionKind kind = expression.expressionKind();
 
+		// List<BlockItemNode> items = this
+		// .transformShortCircuitExpression(expression);
+		//
+		// if (items.size() > 0) {
+		// System.out.print("transform ");
+		// expression.prettyPrint(System.out);
+		// System.out.println(":");
+		// for (BlockItemNode item : items) {
+		// item.prettyPrint(System.out);
+		// System.out.println();
+		// }
+		//
+		// CompoundStatementNode compound = this.nodeFactory
+		// .newCompoundStatementNode(expression.getSource(), items);
+		//
+		// compound = this.transformCompound(compound);
+		// System.out.println("After sef:");
+		// compound.prettyPrint(System.out);
+		// return null;
+		// } else {
+
 		switch (kind) {
 		case CONSTANT: {
 			if (isVoid) {
@@ -1664,6 +1685,7 @@ public class SideEffectRemover extends BaseTransformer {
 			throw new ABCUnsupportedException("removing side-effects for "
 					+ kind + " expression");
 		}
+		// }
 	}
 
 	// Declarations...
@@ -2634,6 +2656,10 @@ public class SideEffectRemover extends BaseTransformer {
 		assert this.astFactory == ast.getASTFactory();
 		assert this.nodeFactory == astFactory.getNodeFactory();
 		ast.release();
+		transformShortCircuitWork(rootNode);
+		// rootNode.prettyPrint(System.out);
+		// newAST = astFactory.newAST(rootNode, ast.getSourceFiles(),
+		// ast.isWholeProgram());
 		for (int i = 0; i < rootNode.numChildren(); i++) {
 			BlockItemNode node = rootNode.getSequenceChild(i);
 			List<BlockItemNode> normalNodes = this.translateBlockItem(node);
@@ -2649,4 +2675,137 @@ public class SideEffectRemover extends BaseTransformer {
 		return newAST;
 	}
 
+	private void transformShortCircuitWork(ASTNode node) {
+		if ((node instanceof StatementNode)
+				&& !(node instanceof CompoundStatementNode)) {
+			List<BlockItemNode> items = new ArrayList<>();
+
+			for (ASTNode child : node.children()) {
+				if (child == null)
+					continue;
+				if (child instanceof ExpressionNode) {
+					List<BlockItemNode> childItems = this
+							.transformShortCircuitExpression((ExpressionNode) child);
+
+					items.addAll(childItems);
+				}
+			}
+			if (items.size() > 0) {
+				ASTNode parent = node.parent();
+				int statementIndex = node.childIndex();
+
+				node.remove();
+				items.add((StatementNode) node);
+
+				StatementNode compound = this.nodeFactory
+						.newCompoundStatementNode(node.getSource(), items);
+				parent.setChild(statementIndex, compound);
+			}
+		} else {
+			for (ASTNode child : node.children()) {
+				if (child != null)
+					this.transformShortCircuitWork(child);
+			}
+		}
+	}
+
+	/**
+	 * Transforms short circuit expressions with side-effects in the right
+	 * operand recursively.
+	 * 
+	 * A short circuit expression is an operator expression of logical and/or.
+	 * 
+	 * If the expression doesn't contain any short circuit
+	 * 
+	 * @param expression
+	 *            the expression to be transform
+	 * @return a sorted list of block item nodes which is an equivalent
+	 *         representation of the expression; if no transformation is
+	 *         applied, then an empty list is returned.
+	 */
+	private List<BlockItemNode> transformShortCircuitExpression(
+			ExpressionNode expression) {
+		if (expression instanceof QuantifiedExpressionNode)
+			return new ArrayList<>(0);
+
+		List<BlockItemNode> result = new ArrayList<>();
+		StatementNode ifElse = null;
+		VariableDeclarationNode tmpVar = null;
+
+		for (ASTNode child : expression.children()) {
+			if (child == null)
+				continue;
+			if (child instanceof ExpressionNode) {
+				List<BlockItemNode> subResult = transformShortCircuitExpression((ExpressionNode) child);
+
+				result.addAll(subResult);
+			}
+		}
+		if (expression instanceof OperatorNode) {
+			OperatorNode operator = (OperatorNode) expression;
+			Operator op = operator.getOperator();
+
+			if (op == Operator.LAND || op == Operator.LOR) {
+				ExpressionNode rhs = operator.getArgument(1);
+				boolean isAnd = op == Operator.LAND;
+				ExpressionNode lhs = operator.getArgument(0);
+
+				if (!rhs.isSideEffectFree(false)) {
+					// TODO transform
+					Source source = expression.getSource();
+					Source rhsSource = rhs.getSource();
+					Source lhsSource = lhs.getSource();
+					Type rhsType = rhs.getConvertedType();
+					ExpressionNode tmp;
+
+					tmpVar = newTempVariable(rhsSource, rhsType);
+
+					IdentifierExpressionNode tmpId = this.nodeFactory
+							.newIdentifierExpressionNode(rhsSource,
+									this.nodeFactory.newIdentifierNode(
+											rhsSource, tmpVar.getName()));
+					ExpressionNode condition;
+					ExpressionNode trueAssign, falseAssign;
+
+					// tmpId.setInitialType(rhsType);
+
+					tmp = lhs.copy();
+					tmp.setInitialType(lhs.getConvertedType());
+					if (isAnd)
+						condition = this.nodeFactory.newOperatorNode(lhsSource,
+								Operator.NOT, tmp);
+					else
+						condition = tmp;
+					trueAssign = this.nodeFactory.newOperatorNode(lhsSource,
+							Operator.ASSIGN, Arrays.asList(tmpId.copy(),
+									nodeFactory.newBooleanConstantNode(
+											lhsSource, !isAnd)));
+					// tmp = rhs.copy();
+					// tmp.setInitialType(rhsType);
+					rhs.remove();
+					falseAssign = this.nodeFactory.newOperatorNode(rhsSource,
+							Operator.ASSIGN, Arrays.asList(tmpId.copy(), rhs));
+					ifElse = nodeFactory.newIfNode(source, condition,
+							this.nodeFactory
+									.newExpressionStatementNode(trueAssign),
+							this.nodeFactory
+									.newExpressionStatementNode(falseAssign));
+					operator.parent().setChild(operator.childIndex(), tmpId);
+				}
+			}
+		}
+		if (tmpVar != null)
+			result.add(tmpVar);
+		if (ifElse != null)
+			result.add(ifElse);
+		return result;
+	}
+
+	private VariableDeclarationNode newTempVariable(Source source, Type type) {
+		String tmpId = tempVariablePrefix + (tempVariableCounter++);
+
+		return nodeFactory.newVariableDeclarationNode(source,
+				nodeFactory.newIdentifierNode(source, tmpId),
+				typeNode(source, type));
+	}
 }
