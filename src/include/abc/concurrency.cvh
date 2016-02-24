@@ -27,10 +27,10 @@ typedef struct $barrier * $barrier;
 /* Creates a new barrier object and returns a handle to it.
  * The barrier has the specified size.
  * The new object will be allocated in the given scope. */
-$gbarrier $gbarrier_create($scope scope, int size);
+$system $gbarrier $gbarrier_create($scope scope, int size);
 
 /* Destroys the gbarrier */
-void $gbarrier_destroy($gbarrier barrier);
+$system void $gbarrier_destroy($gbarrier barrier);
 
 /* Creates a new local barrier object and returns a handle to it.
  * The new barrier will be affiliated with the specified global
@@ -40,10 +40,10 @@ void $gbarrier_destroy($gbarrier barrier);
  * that will be occupied by the local barrier.  
  * Only one call to $barrier_create may occur for each barrier-place pair.
  * The new object will be allocated in the given scope. */
-$barrier $barrier_create($scope scope, $gbarrier gbarrier, int place);
+$system $barrier $barrier_create($scope scope, $gbarrier gbarrier, int place);
 
 /* Destroys the barrier. */
-void $barrier_destroy($barrier barrier);
+$system void $barrier_destroy($barrier barrier);
 
 /* Calls the barrier associated with this local barrier object.*/
 void $barrier_call($barrier barrier);
@@ -59,21 +59,21 @@ typedef struct $gcollect_checker * $gcollect_checker;
 typedef struct $collect_checker * $collect_checker;
 
 /* Creates and initializes the global collective operation checker */
-$gcollect_checker $gcollect_checker_create($scope scope);
+$system $gcollect_checker $gcollect_checker_create($scope scope);
 
 /* Destroy a global collective operation checker.  Returns number of
    junk records remaining in the checker. */
-int $gcollect_checker_destroy($gcollect_checker checker);
+$system int $gcollect_checker_destroy($gcollect_checker checker);
 
 /* Creates and initializes the local collective operation checker */
-$collect_checker $collect_checker_create($scope scope, 
+$system $collect_checker $collect_checker_create($scope scope, 
 				       $gcollect_checker gchecker);
 
 /* Destroy a local collective operation checker */
-void $collect_checker_destroy($collect_checker checker);
+$system void $collect_checker_destroy($collect_checker checker);
 
 /* Do a check for a collecive operation of one process */
-$bundle $collect_check($collect_checker checker, int place, int nprocs,
+$system $bundle $collect_check($collect_checker checker, int place, int nprocs,
 		    $bundle entries);
 
 #endif

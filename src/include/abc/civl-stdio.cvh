@@ -1,6 +1,6 @@
 #ifndef __CIVL_IO__
 #define __CIVL_IO__
 
-int $textFileLength(char* file);
+$system int $textFileLength(char* file);
 
 #endif

@@ -25,10 +25,10 @@ typedef unsigned long int size_t;
 void __VERIFIER_error(void);
 void __VERIFIER_assume(int);
 void __VERIFIER_assert(int);
-extern int printf(const char * restrict format, ...);
-extern void* malloc(size_t size);
-extern void assert(_Bool);
-extern void assume(_Bool);
+extern $system int printf(const char * restrict format, ...);
+extern $system void* malloc(size_t size);
+extern $system void assert(_Bool);
+extern $system void assume(_Bool);
 
 int __VERIFIER_nondet_int(void);
 unsigned int __VERIFIER_nondet_uint(void);

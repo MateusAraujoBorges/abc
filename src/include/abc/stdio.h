@@ -49,8 +49,8 @@ int remove(const char *filename);
 int rename(const char *old, const char *new);
 FILE *tmpfile(void);
 char *tmpnam(char *s);
-int fclose(FILE *stream);
-int fflush(FILE *stream);
+$system int fclose(FILE *stream);
+$system int fflush(FILE *stream);
 FILE *fopen(const char * restrict filename,
      const char * restrict mode);
 FILE *freopen(const char * restrict filename,
@@ -61,17 +61,17 @@ void setbuf(FILE * restrict stream,
 int setvbuf(FILE * restrict stream,
      char * restrict buf,
      int mode, size_t size);
-int fprintf(FILE * restrict stream,
+$system int fprintf(FILE * restrict stream,
      const char * restrict format, ...);
-int fscanf(FILE * restrict stream,
+$system int fscanf(FILE * restrict stream,
      const char * restrict format, ...);
-int printf(const char * restrict format, ...);
-int scanf(const char * restrict format, ...);
+$system int printf(const char * restrict format, ...);
+$system int scanf(const char * restrict format, ...);
 int snprintf(char * restrict s, size_t n,
      const char * restrict format, ...);
 int sprintf(char * restrict s,
      const char * restrict format, ...);
-int sscanf(const char * restrict s,
+$system int sscanf(const char * restrict s,
      const char * restrict format, ...);
 int vfprintf(FILE * restrict stream,
      const char * restrict format, va_list arg);

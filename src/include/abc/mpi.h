@@ -366,7 +366,7 @@ double MPI_Wtick(void);
 int MPI_Init(int *, char ***);
 int MPI_Finalize(void);
 int MPI_Initialized(int *);
-int MPI_Abort(MPI_Comm, int);
+$system int MPI_Abort(MPI_Comm, int);
 
 
 /* Note that we may need to define a @PCONTROL_LIST@ depending on whether 

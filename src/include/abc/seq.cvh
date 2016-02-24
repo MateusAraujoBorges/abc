@@ -9,7 +9,7 @@
 
 /* Given a pointer to an object of type "array-of-T", returns the
  * length of the array. */
-int $seq_length(void *array);
+$system int $seq_length(void *array);
 
 /* Given a pointer to an object of type "incomplete-array-of-T",
  * sets that object to be the array of length count in which every
@@ -20,7 +20,7 @@ int $seq_length(void *array);
  *   count: any integer type, must be nonnegative
  *   values: pointer-to-T
  */
-void $seq_init(void *array, int count, void *value);
+$system void $seq_init(void *array, int count, void *value);
 
 /* Given a pointer to an object of type "incomplete-array-of-T",
  * inserts count elements into the array starting at position
@@ -41,7 +41,7 @@ void $seq_init(void *array, int count, void *value);
  *   count: any integer type, count>=0
  *
  */
-void $seq_insert(void *array, int index, void *values, int count);
+$system void $seq_insert(void *array, int index, void *values, int count);
 
 /* Removes count elements from the array, starting at position
  * index. If values is not NULL, the removed elements will be copied
@@ -52,7 +52,7 @@ void $seq_insert(void *array, int index, void *values, int count);
  *   values: pointer-to-T
  *   count: any integer type, 0<=count<=length-index
  */
-void $seq_remove(void *array, int index, void *values, int count);
+$system void $seq_remove(void *array, int index, void *values, int count);
 
 /* Given a pointer to an object of type "incomplete-array-of-T",
  * appends count elements at the end of the array.   

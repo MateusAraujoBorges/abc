@@ -534,6 +534,14 @@ public class ASTPrettyPrinter {
 			out.print("$abstract ");
 		if (function.hasGlobalFunctionSpecifier())
 			out.print("__global__ ");
+		if (function.hasAtomicFunctionSpeciier())
+			out.print("$atomic_f ");
+		if (function.hasSystemFunctionSpeciier())
+			out.print("$system ");
+		if (function.hasInlineFunctionSpecifier())
+			out.print("inline ");
+		if (function.hasNoreturnFunctionSpecifier())
+			out.print("_Noreturn ");
 		out.print(prefix);
 		out.print(type2Pretty("", returnType, false));
 		out.print(" ");
@@ -681,7 +689,7 @@ public class ASTPrettyPrinter {
 			out.print(";");
 			break;
 		}
-		case PURE:{
+		case PURE: {
 			out.print("pure;");
 			break;
 		}

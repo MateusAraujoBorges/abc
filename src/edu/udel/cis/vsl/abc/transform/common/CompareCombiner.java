@@ -198,8 +198,11 @@ public class CompareCombiner implements Combiner {
 
 				, false);
 
-		return factory.newFunctionDeclarationNode(specSource, name, funcType,
-				null);
+		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
+				specSource, name, funcType, null);
+
+		function.setSystemFunctionSpeciier(true);
+		return function;
 	}
 
 	/**
@@ -238,8 +241,11 @@ public class CompareCombiner implements Combiner {
 
 		funcType.setVariableArgs(true);
 
-		return factory.newFunctionDeclarationNode(specSource, name, funcType,
-				null);
+		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
+				specSource, name, funcType, null);
+
+		function.setSystemFunctionSpeciier(true);
+		return function;
 	}
 
 	/**
@@ -266,9 +272,11 @@ public class CompareCombiner implements Combiner {
 														specSource,
 														factory.newVoidTypeNode(specSource))))),
 						false);
+		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
+				specSource, name, funcType, null);
 
-		return factory.newFunctionDeclarationNode(specSource, name, funcType,
-				null);
+		function.setSystemFunctionSpeciier(true);
+		return function;
 	}
 
 	/**

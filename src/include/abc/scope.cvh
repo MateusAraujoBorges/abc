@@ -11,6 +11,6 @@
 /* ******************************* Functions ******************************* */
 
 /* Returns the parent scope of the given scope */
-$scope $scope_parent($scope s);
+$system $scope $scope_parent($scope s);
 
 #endif

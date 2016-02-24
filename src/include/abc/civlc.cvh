@@ -69,9 +69,9 @@ the scope s is still valid) */
 */
 //_Bool $defined(void* obj);
 
-$system $pure void $assert(_Bool expr, ...);
+$system void $assert(_Bool expr, ...);
 
-$system $pure void $assume(_Bool expr);
+$system void $assume(_Bool expr);
 
 /* Elaborate tricks: elaborating a given variable */
 $system $pure void $elaborate(int x);
@@ -99,7 +99,7 @@ $system void $free(void *p);
 
 /* Assigns arbitrary value to the memory location specified by the given pointer.
  */
-void $havoc(void *ptr);
+$system void $havoc(void *ptr);
 
 /* *************************** Iterator Functions ************************** */
 
