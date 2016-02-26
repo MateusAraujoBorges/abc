@@ -4801,7 +4801,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 				try {
 					ast = worker.generateAST();
-					//asts = worker.generateASTs();
+					// asts = worker.generateASTs();
 					// Configuration config =
 					// Configurations.newMinimalConfiguration();
 					// Analysis.performStandardAnalysis(config, ast);
@@ -4942,7 +4942,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 	@Override
 	public void inclusion(String included, String source) {
-		FortranTree inclusion_Node = new FortranTree(-3, "Include_Stmt");
+		// FortranTree inclusion_Node = new FortranTree(-3, "Include_Stmt");
 
 	}
 
