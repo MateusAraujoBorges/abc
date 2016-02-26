@@ -124,7 +124,12 @@ public class SideEffectRemoverTest {
 	}
 
 	@Test
-	public void land() throws ABCException, IOException {
+	public void shortCircuit() throws ABCException, IOException {
 		check("shortCircuit.c");
+	}
+
+	@Test
+	public void loopShortCircuit() throws ABCException, IOException {
+		check("loopShortCircuit.c");
 	}
 }

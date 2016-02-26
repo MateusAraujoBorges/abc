@@ -63,6 +63,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.IfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.JumpNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode.LoopKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ReturnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
@@ -2048,6 +2049,31 @@ public class SideEffectRemover extends BaseTransformer {
 	 * Produces a list of block items in normal form that is equivalent to the
 	 * given while-loop node. The loop node may be modified.
 	 * 
+	 * Give the following while statement,
+	 * 
+	 * <pre>
+	 * while(e){
+	 * 	S;
+	 * }
+	 * </pre>
+	 * 
+	 * Let <code>S_be</code>, <code>S_af</code>, <code>x</code> be the
+	 * side-effect-free triple of <code>e</code>, and <code>e'</code> is the
+	 * side-effect-free translation of <code>e</code>. This function return the
+	 * following result:
+	 * 
+	 * <pre>
+	 * while(1){
+	 *  var x;
+	 * 	S_be;
+	 * 	x=e';
+	 * 	S_af;
+	 * 	if(!x)
+	 * 	  break;
+	 * 	S;
+	 * }
+	 * </pre>
+	 * 
 	 * @param loop
 	 *            a non-<code>null</code> while loop node
 	 * @return list of block items in normal form equivalent to original loop
@@ -2066,6 +2092,29 @@ public class SideEffectRemover extends BaseTransformer {
 	/**
 	 * Produces a list of block items in normal form that is equivalent to the
 	 * given do-while-loop node. The loop node may be modified.
+	 * 
+	 * Give the following do-while statement,
+	 * 
+	 * <pre>
+	 * do{
+	 * 	S;
+	 * }while(e);
+	 * </pre>
+	 * 
+	 * Let <code>S_be</code>, <code>S_af</code>, <code>x</code> be the
+	 * side-effect-free triple of <code>e</code>, and <code>e'</code> is the
+	 * side-effect-free translation of <code>e</code>. This function return the
+	 * following result:
+	 * 
+	 * <pre>
+	 * var x;
+	 * do{
+	 * 	S;
+	 * 	S_be;
+	 * 	x=e';
+	 * 	S_af;
+	 * }while(x);
+	 * </pre>
 	 * 
 	 * @param loop
 	 *            a non-<code>null</code> do loop node
@@ -2657,9 +2706,6 @@ public class SideEffectRemover extends BaseTransformer {
 		assert this.nodeFactory == astFactory.getNodeFactory();
 		ast.release();
 		transformShortCircuitWork(rootNode);
-		// rootNode.prettyPrint(System.out);
-		// newAST = astFactory.newAST(rootNode, ast.getSourceFiles(),
-		// ast.isWholeProgram());
 		for (int i = 0; i < rootNode.numChildren(); i++) {
 			BlockItemNode node = rootNode.getSequenceChild(i);
 			List<BlockItemNode> normalNodes = this.translateBlockItem(node);
@@ -2709,6 +2755,15 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 	}
 
+	private boolean isConditionOfLoop(ExpressionNode expression) {
+		ASTNode parent = expression.parent();
+
+		if (parent instanceof LoopNode) {
+			return expression.childIndex() == 0;
+		}
+		return false;
+	}
+
 	/**
 	 * Transforms short circuit expressions with side-effects in the right
 	 * operand recursively.
@@ -2731,6 +2786,8 @@ public class SideEffectRemover extends BaseTransformer {
 		List<BlockItemNode> result = new ArrayList<>();
 		StatementNode ifElse = null;
 		VariableDeclarationNode tmpVar = null;
+		boolean isLoopCond = this.isConditionOfLoop(expression);
+		ASTNode parent = expression.parent();
 
 		for (ASTNode child : expression.children()) {
 			if (child == null)
@@ -2751,7 +2808,6 @@ public class SideEffectRemover extends BaseTransformer {
 				ExpressionNode lhs = operator.getArgument(0);
 
 				if (!rhs.isSideEffectFree(false)) {
-					// TODO transform
 					Source source = expression.getSource();
 					Source rhsSource = rhs.getSource();
 					Source lhsSource = lhs.getSource();
@@ -2767,8 +2823,6 @@ public class SideEffectRemover extends BaseTransformer {
 					ExpressionNode condition;
 					ExpressionNode trueAssign, falseAssign;
 
-					// tmpId.setInitialType(rhsType);
-
 					tmp = lhs.copy();
 					tmp.setInitialType(lhs.getConvertedType());
 					if (isAnd)
@@ -2780,8 +2834,6 @@ public class SideEffectRemover extends BaseTransformer {
 							Operator.ASSIGN, Arrays.asList(tmpId.copy(),
 									nodeFactory.newBooleanConstantNode(
 											lhsSource, !isAnd)));
-					// tmp = rhs.copy();
-					// tmp.setInitialType(rhsType);
 					rhs.remove();
 					falseAssign = this.nodeFactory.newOperatorNode(rhsSource,
 							Operator.ASSIGN, Arrays.asList(tmpId.copy(), rhs));
@@ -2794,10 +2846,60 @@ public class SideEffectRemover extends BaseTransformer {
 				}
 			}
 		}
-		if (tmpVar != null)
-			result.add(tmpVar);
-		if (ifElse != null)
-			result.add(ifElse);
+
+		if ((result.size() > 0 || ifElse != null) && isLoopCond) {
+			Source condSource = expression.getSource();
+			LoopNode loop = (LoopNode) parent;
+			CompoundStatementNode body = makeCompound(loop.getBody());
+			ExpressionNode newCond = loop.getCondition();
+			List<BlockItemNode> newItems = new LinkedList<>();
+
+			loop.setBody(body);
+			if (loop.getKind() == LoopKind.DO_WHILE) {
+				// List<BlockItemNode> newCondItems = new LinkedList<>();
+				int loopIndex = loop.childIndex();
+				ASTNode loopParent = loop.parent();
+
+				if (tmpVar != null)
+					newItems.add(0, tmpVar);
+				if (ifElse != null)
+					result.add(ifElse);
+				// for (BlockItemNode item : result) {
+				// // if (item instanceof VariableDeclarationNode) {
+				// // VariableDeclarationNode variable =
+				// // (VariableDeclarationNode) item;
+				// // StatementNode assign = initializer2Assignment(variable);
+				// //
+				// // result.add(pureDeclaration(variable));
+				// // if (assign != null)
+				// // newCondItems.add(assign);
+				// // } else
+				// newCondItems.add(item);
+				// }
+				body.insertChildren(body.numChildren(), result);
+				newItems.add(loop);
+				loop.remove();
+				loopParent.setChild(loopIndex, nodeFactory
+						.newCompoundStatementNode(loop.getSource(), newItems));
+			} else {
+				if (tmpVar != null)
+					result.add(tmpVar);
+				if (ifElse != null)
+					result.add(ifElse);
+				newCond.remove();
+				result.add(nodeFactory.newIfNode(condSource, nodeFactory
+						.newOperatorNode(condSource, Operator.NOT, newCond),
+						nodeFactory.newBreakNode(condSource)));
+				body.insertChildren(0, result);
+				loop.setCondition(newOneNode(condSource));
+			}
+			result.clear();
+		} else {
+			if (tmpVar != null)
+				result.add(tmpVar);
+			if (ifElse != null)
+				result.add(ifElse);
+		}
 		return result;
 	}
 
