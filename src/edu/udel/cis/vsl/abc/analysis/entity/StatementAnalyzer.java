@@ -419,6 +419,10 @@ public class StatementAnalyzer {
 			ExpressionNode guard = ((WhenNode) statement).getGuard();
 			Type guardType;
 
+			if (!guard.isSideEffectFree(false))
+				throw this
+						.error("the guard of a $when statement is not allowed to have side effects.",
+								guard);
 			processExpression(guard);
 			guardType = guard.getConvertedType();
 			// check guardType can be converted to a boolean...
