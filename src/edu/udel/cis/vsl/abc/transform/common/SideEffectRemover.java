@@ -146,6 +146,26 @@ import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
  * goal is that the expression be side-effect-free.
  * </p>
  * 
+ * <p>
+ * Helper functions: <br>
+ * emptyAfter([a|e|b]): makes the triple's "after" component empty. If the after
+ * component is already empty, does nothing and returns <code>false</code>.
+ * Otherwise, the triple becomes [a,(var x=e),b|x|], i.e., introducing a
+ * temporary variable to store the value of e and shift the after component to
+ * the before component, and returns <code>true</code>. <br>
+ * <br>
+ * purify([a|e|b]): makes the triple side-effect-free and the "after" component
+ * empty. If the triple already satisfies those properties, this does nothing
+ * and returns <code>false</code>. Otherwise, the triple becomes [a,(var
+ * x=e),b|x|], i.e., introducing a temporary variable to store the value of e
+ * and shift the after component to the before component, and returns
+ * <code>true</code>.<br>
+ * <br>
+ * shift([a|e|b], isVoid): modifies the triple to an equivalent form but with a
+ * side-effect-free or <code>null</code> (if <code>isVoid</code>) expression,
+ * and an empty "after" component.
+ * </p>
+ * 
  * TODO: check if a contract contains side-effects and report an error
  * 
  * @author Timothy K. Zirkel
@@ -156,20 +176,40 @@ public class SideEffectRemover extends BaseTransformer {
 
 	/* Static Fields */
 
+	/**
+	 * The unique identifier of this transformer.
+	 */
 	public final static String CODE = "sef";
 
+	/**
+	 * The full name of this transformer.
+	 */
 	public final static String LONG_NAME = "SideEffectRemover";
 
+	/**
+	 * A short description of this transformer.
+	 */
 	public final static String SHORT_DESCRIPTION = "transforms program to side-effect-free form";
 
+	/**
+	 * The prefix for temporary variables created by this transformer.
+	 */
 	private final static String tempVariablePrefix = "$" + CODE + "$";
 
 	/* Instance Fields */
 
+	/**
+	 * The number of temporary variables created by this transformer.
+	 */
 	private int tempVariableCounter = 0;
 
 	/* Constructors */
 
+	/**
+	 * Creates a new instance of side effect remover.
+	 * 
+	 * @param astFactory
+	 */
 	public SideEffectRemover(ASTFactory astFactory) {
 		super(CODE, LONG_NAME, SHORT_DESCRIPTION, astFactory);
 	}
@@ -269,10 +309,6 @@ public class SideEffectRemover extends BaseTransformer {
 			return nodeFactory.newTypedefNameNode(
 					nodeFactory.newIdentifierNode(source, "$proc"), null);
 		}
-		case FUNCTION:
-			// TODO
-		case HEAP:
-			// TODO
 		case QUALIFIED: {
 			QualifiedObjectType qualifiedType = (QualifiedObjectType) type;
 			TypeNode baseTypeNode = this.typeNode(source,
@@ -289,6 +325,10 @@ public class SideEffectRemover extends BaseTransformer {
 					.isVolatileQualified());
 			return baseTypeNode;
 		}
+		case FUNCTION:
+			// TODO
+		case HEAP:
+			// TODO
 		default:
 			throw new ABCUnsupportedException("converting type " + type
 					+ " to a type node.", source.getSummary(false));
@@ -351,9 +391,6 @@ public class SideEffectRemover extends BaseTransformer {
 	 * 
 	 * @param triple
 	 *            any triple
-	 * @param isVoid
-	 *            is the result of the expression needed (and not just its
-	 *            side-effects)?
 	 * @return <code>true</code> iff the triple changed
 	 */
 	private boolean emptyAfter(ExprTriple triple) {
@@ -373,9 +410,6 @@ public class SideEffectRemover extends BaseTransformer {
 	 * 
 	 * @param triple
 	 *            any triple
-	 * @param isVoid
-	 *            is the result of the expression needed (and not just its
-	 *            side-effects)?
 	 * @return <code>true</code> iff the triple changed
 	 */
 	private boolean purify(ExprTriple triple) {
@@ -394,7 +428,8 @@ public class SideEffectRemover extends BaseTransformer {
 	 * Makes the triple expression side-effect-free. Transforms the triple into
 	 * an equivalent form in which the expression is side-effect-free. If the
 	 * expression is already side-effect-free, this does nothing and returns
-	 * false. Otherwise, it applies {@link #shift(ExprTriple)} and returns true.
+	 * false. Otherwise, it applies {@link #shift(ExprTriple, boolean)} and
+	 * returns true.
 	 * 
 	 * @param triple
 	 *            any triple
@@ -1250,6 +1285,24 @@ public class SideEffectRemover extends BaseTransformer {
 		return new ExprTriple(expression);
 	}
 
+	/**
+	 * Translates a regular range expression into an equivalent triple.
+	 * Strategy:
+	 * 
+	 * <pre>
+	 * (e1 .. e2 # e3):
+	 * let translate(expr1)   = [b1|e1|a1].
+	 * let translate(expr2)   = [b2|e2|a2].
+	 * let translate(expr3)   = [b3|e3|a3].
+	 * 
+	 * translate(expr1 .. expr2 # expr3) = [b1,b2,b3|(e1, e2, e3)|a1,a2,a3].
+	 * </pre>
+	 * 
+	 * @param expression
+	 * @param isVoid
+	 *            true if the expression is void, i.e., its value is never used
+	 * @return
+	 */
 	private ExprTriple translateRegularRange(RegularRangeNode expression,
 			boolean isVoid) {
 		ExpressionNode step = expression.getStep();
@@ -1281,6 +1334,13 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
+	/**
+	 * A quantified expression shouldn't have side-effects.
+	 * 
+	 * @param expression
+	 * @param isVoid
+	 * @return
+	 */
 	private ExprTriple translateQuantifiedExpression(
 			QuantifiedExpressionNode expression, boolean isVoid) {
 		// should never have side-effects: check it in Analyzer
@@ -1288,12 +1348,33 @@ public class SideEffectRemover extends BaseTransformer {
 		return new ExprTriple(expression);
 	}
 
+	/**
+	 * Not implemented yet.
+	 * 
+	 * @param expression
+	 * @return
+	 */
 	private ExprTriple translateGenericSelection(GenericSelectionNode expression) {
 		throw new ABCUnsupportedException(
 				"generic selections not yet implemented: " + expression
 						+ " in side-effect remover");
 	}
 
+	/**
+	 * Translates a dots expression into an equivalent triple.
+	 * 
+	 * Strategy:
+	 * 
+	 * <pre>
+	 * expr.f:
+	 * Let translate(expr)=[b,a|e|],
+	 * translate(expr.f) = [b,a|e.f|]
+	 * </pre>
+	 * 
+	 * @param expression
+	 * @param isVoid
+	 * @return
+	 */
 	private ExprTriple translateDot(DotNode expression, boolean isVoid) {
 		ExprTriple result = translate(expression.getStructure(), false);
 
@@ -1429,6 +1510,19 @@ public class SideEffectRemover extends BaseTransformer {
 	// return result;
 	// }
 
+	/**
+	 * Translates a cast expression. Strategy:
+	 * 
+	 * <pre>
+	 * (T)expr:
+	 * Let translate(expr)=[b,a|e|],
+	 * translate((T)expr) = [b,a,(T)e||] if isVoid, otherwise [b,a|(T)e|].
+	 * </pre>
+	 * 
+	 * @param expression
+	 * @param isVoid
+	 * @return
+	 */
 	private ExprTriple translateCast(CastNode expression, boolean isVoid) {
 		ExpressionNode arg = expression.getArgument();
 
@@ -1458,6 +1552,20 @@ public class SideEffectRemover extends BaseTransformer {
 		return triple;
 	}
 
+	/**
+	 * 
+	 * Translates an arrow expression. Strategy:
+	 * 
+	 * <pre>
+	 * expr->f:
+	 * Let translate(expr)=[b,a|e|],
+	 * translate(expr->f) = [b,a,e->f||] if isVoid, otherwise [b,a|e->f|].
+	 * </pre>
+	 * 
+	 * @param expression
+	 * @param isVoid
+	 * @return
+	 */
 	private ExprTriple translateArrow(ArrowNode expression, boolean isVoid) {
 		ExprTriple result = translate(expression.getStructurePointer(), false);
 
@@ -1603,27 +1711,6 @@ public class SideEffectRemover extends BaseTransformer {
 	private ExprTriple translate(ExpressionNode expression, boolean isVoid) {
 		ExpressionKind kind = expression.expressionKind();
 
-		// List<BlockItemNode> items = this
-		// .transformShortCircuitExpression(expression);
-		//
-		// if (items.size() > 0) {
-		// System.out.print("transform ");
-		// expression.prettyPrint(System.out);
-		// System.out.println(":");
-		// for (BlockItemNode item : items) {
-		// item.prettyPrint(System.out);
-		// System.out.println();
-		// }
-		//
-		// CompoundStatementNode compound = this.nodeFactory
-		// .newCompoundStatementNode(expression.getSource(), items);
-		//
-		// compound = this.transformCompound(compound);
-		// System.out.println("After sef:");
-		// compound.prettyPrint(System.out);
-		// return null;
-		// } else {
-
 		switch (kind) {
 		case CONSTANT: {
 			if (isVoid) {
@@ -1686,11 +1773,9 @@ public class SideEffectRemover extends BaseTransformer {
 			throw new ABCUnsupportedException("removing side-effects for "
 					+ kind + " expression");
 		}
-		// }
 	}
 
-	// Declarations...
-
+	// helper functions
 	/**
 	 * <p>
 	 * Translates any AST node into a pure side-effect-free triple. Pure means
@@ -1741,6 +1826,35 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 	}
 
+	// Declarations...
+
+	/**
+	 * Transforms an ordinary declaration into a list of statements whose
+	 * execution are equivalent to it.
+	 * 
+	 * @param ordinaryDecl
+	 * @return
+	 */
+	private List<BlockItemNode> translateOrdinaryDeclaration(
+			OrdinaryDeclarationNode ordinaryDecl) {
+		OrdinaryDeclarationKind kind = ordinaryDecl.ordinaryDeclarationKind();
+
+		switch (kind) {
+		case VARIABLE_DECLARATION:
+			return this
+					.translateVariableDeclaration((VariableDeclarationNode) ordinaryDecl);
+		case FUNCTION_DEFINITION:
+			this.normalizeFunctionDefinition((FunctionDefinitionNode) ordinaryDecl);
+		case FUNCTION_DECLARATION:
+		case ABSTRACT_FUNCTION_DEFINITION:
+			return Arrays.asList((BlockItemNode) ordinaryDecl);
+		default:
+			throw new ABCUnsupportedException(
+					"normalization of ordinary declaration of " + kind
+							+ " kind in side-effect remover");
+		}
+	}
+
 	/**
 	 * Returns a triple in which the after clause is empty and the node is the
 	 * variable declaration node, because we want the side-effects to complete
@@ -1778,6 +1892,16 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
+	/**
+	 * Places a function definition into normal form.
+	 * 
+	 * @param function
+	 *            a function definition node
+	 */
+	private void normalizeFunctionDefinition(FunctionDefinitionNode function) {
+		function.setBody(transformCompound(function.getBody()));
+	}
+
 	// statements
 
 	/**
@@ -1803,29 +1927,6 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
-	// private boolean containsEquiv(List<? extends ASTNode> nodes, ASTNode
-	// child) {
-	// for (ASTNode node : nodes) {
-	// if (containsEquiv(node, child))
-	// return true;
-	// }
-	// return false;
-	// }
-
-	// private boolean containsEquiv(ASTNode node, ASTNode child) {
-	// if (child == null)
-	// return false;
-	// for (ASTNode subNode : node.children()) {
-	// if (subNode == null)
-	// continue;
-	// if (subNode.equiv(child))
-	// return true;
-	// if (containsEquiv(subNode, child))
-	// return true;
-	// }
-	// return false;
-	// }
-
 	/**
 	 * Transforms an expression statement into a sequence of block items
 	 * equivalent to the original expression but in normal form.
@@ -1841,9 +1942,13 @@ public class SideEffectRemover extends BaseTransformer {
 
 	/**
 	 * If the given statement is already a compound statement (instance of
-	 * {@link CompoundStatementNode}), the given statement is returned
-	 * unmodified; otherwise, a new {@link CompoundStatementNode} is created
-	 * with a single child which is the given statement.
+	 * {@link CompoundStatementNode}), the given statement is removed from its
+	 * parent and is returned immediately; otherwise, a new
+	 * {@link CompoundStatementNode} is created with a single child which is the
+	 * given statement.
+	 * 
+	 * Post-condition: the parent of the result statement node is null, i.e.,
+	 * result.parent()==null.
 	 * 
 	 * @param stmt
 	 *            any non-null statement
@@ -1962,6 +2067,15 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 	}
 
+	/**
+	 * removes all direct null children node of a given compound statement.
+	 * 
+	 * Post-condition: all child nodes of the compound statement node are
+	 * non-null.
+	 * 
+	 * @param compound
+	 * @return
+	 */
 	private CompoundStatementNode normalizeCompoundStatement(
 			CompoundStatementNode compound) {
 		LinkedList<BlockItemNode> items = new LinkedList<>();
@@ -2039,7 +2153,7 @@ public class SideEffectRemover extends BaseTransformer {
 		normalizeForLoopIncrementer(forLoop);
 		if (newItems.size() > 1) {
 			removeNodes(newItems);
-			result.add(makeBlockItem(forLoop.getSource(), newItems));
+			result.add(makeOneBlockItem(forLoop.getSource(), newItems));
 		} else
 			result = newItems;
 		return result;
@@ -2167,6 +2281,14 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
+	/**
+	 * Creates an assignment statement node equivalent to the initializer of a
+	 * variable declaration. If the variable declaration has no initializer,
+	 * returns true.
+	 * 
+	 * @param variable
+	 * @return
+	 */
 	private StatementNode initializer2Assignment(
 			VariableDeclarationNode variable) {
 		InitializerNode initializer = variable.getInitializer();
@@ -2184,6 +2306,14 @@ public class SideEffectRemover extends BaseTransformer {
 		return nodeFactory.newExpressionStatementNode(assign);
 	}
 
+	/**
+	 * Returns a variable declaration without initializer for a given variable
+	 * declaration. If the variable declaration has no initializer, returns the
+	 * variable declaration immediately.
+	 * 
+	 * @param variable
+	 * @return
+	 */
 	private VariableDeclarationNode pureDeclaration(
 			VariableDeclarationNode variable) {
 		if (variable.getInitializer() == null)
@@ -2216,34 +2346,12 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 	}
 
-	// private List<BlockItemNode> translateAssert(AssertNode statement) {
-	// ExprTriple triple = translate(statement.getCondition());
-	//
-	// purify(triple);
-	//
-	// List<BlockItemNode> result = triple.getBefore();
-	//
-	// statement.setCondition(triple.getNode());
-	// result.add(statement);
-	// return result;
-	// }
-
-	// private List<BlockItemNode> translateAssume(AssumeNode statement) {
-	// ExprTriple triple = translate(statement.getExpression());
-	//
-	// purify(triple);
-	//
-	// List<BlockItemNode> result = triple.getBefore();
-	//
-	// statement.setExpression(triple.getNode());
-	// result.add(statement);
-	// return result;
-	// }
-
 	/**
+	 * Transforms an atomic statement into a sequence of block items equivalent
+	 * to the original statement but in normal form.
 	 * 
 	 * @param statement
-	 * @return
+	 * @return list of block items in normal form equivalent to original
 	 */
 	private List<BlockItemNode> translateAtomic(AtomicNode statement) {
 		StatementNode body = statement.getBody();
@@ -2285,7 +2393,7 @@ public class SideEffectRemover extends BaseTransformer {
 			blockItems.addAll(tmp);
 		}
 		removeNodes(blockItems);
-		result.add(makeBlockItem(compound.getSource(), blockItems));
+		result.add(makeOneBlockItem(compound.getSource(), blockItems));
 		if (result.size() == 1) {
 			BlockItemNode node = result.get(0);
 
@@ -2331,7 +2439,7 @@ public class SideEffectRemover extends BaseTransformer {
 	 *            a non-<code>null</code> statement node
 	 * @return list of block items in normal form equivalent to given statement
 	 */
-	List<BlockItemNode> translateStatement(StatementNode statement) {
+	private List<BlockItemNode> translateStatement(StatementNode statement) {
 		switch (statement.statementKind()) {
 		case ATOMIC:
 			return translateAtomic((AtomicNode) statement);
@@ -2369,6 +2477,20 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 	}
 
+	/**
+	 * Transforms a jump statement into list of statements whose execution are
+	 * equivalent to the jump statement.
+	 * 
+	 * <p>
+	 * If the jump statement is NOT a return statement with an expression, then
+	 * the jump node is returned immediately.
+	 * </p>
+	 * 
+	 * @param compound
+	 *            a non-<code>null</code> compound statement node
+	 * @return a compound statement node equivalent to original but in which all
+	 *         items are in normal form
+	 */
 	private List<BlockItemNode> translateJump(JumpNode jump) {
 		List<BlockItemNode> result = new LinkedList<>();
 
@@ -2391,19 +2513,36 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
+	/**
+	 * Transforms a guarded statement into list of statements whose execution
+	 * are equivalent to it. Note: the guard is not allowed to contain side
+	 * effects and if so, an error should have been reported by the standard
+	 * analyzer.
+	 * 
+	 * @param when
+	 * @return
+	 */
 	private List<BlockItemNode> translateWhen(WhenNode when) {
 		StatementNode body = when.getBody();
 		List<BlockItemNode> bodyItems = this.translateStatement(body);
 		List<BlockItemNode> result = new LinkedList<>();
 		int bodyIndex = body.childIndex();
 
+		assert when.getGuard().isSideEffectFree(false);
 		this.removeNodes(bodyItems);
 		when.setChild(bodyIndex,
-				this.makeBlockItem(body.getSource(), bodyItems));
+				this.makeOneBlockItem(body.getSource(), bodyItems));
 		result.add(when);
 		return result;
 	}
 
+	/**
+	 * Transforms a switch statement into list of statements whose execution are
+	 * equivalent to it.
+	 * 
+	 * @param switchNode
+	 * @return
+	 */
 	private List<BlockItemNode> translateSwitch(SwitchNode switchNode) {
 		List<BlockItemNode> result = new LinkedList<>();
 		ExpressionNode condition = switchNode.getCondition();
@@ -2418,11 +2557,18 @@ public class SideEffectRemover extends BaseTransformer {
 		switchNode.setChild(condIndex, condTriple.getNode());
 		removeNodes(bodyItems);
 		switchNode.setChild(bodyIndex,
-				this.makeBlockItem(body.getSource(), bodyItems));
+				this.makeOneBlockItem(body.getSource(), bodyItems));
 		result.add(switchNode);
 		return result;
 	}
 
+	/**
+	 * Transforms an OpenMP executable statement into list of statements whose
+	 * execution are equivalent to it.
+	 * 
+	 * @param ompExec
+	 * @return
+	 */
 	private List<BlockItemNode> translateOmpExecutable(OmpExecutableNode ompExec) {
 		StatementNode body = ompExec.statementNode();
 		List<BlockItemNode> result = new LinkedList<>();
@@ -2432,12 +2578,19 @@ public class SideEffectRemover extends BaseTransformer {
 
 			removeNodes(bodyItems);
 			ompExec.setChild(bodyIndex,
-					makeBlockItem(body.getSource(), bodyItems));
+					makeOneBlockItem(body.getSource(), bodyItems));
 		}
 		result.add(ompExec);
 		return result;
 	}
 
+	/**
+	 * Transforms a labeled statement into list of statements whose execution
+	 * are equivalent to it.
+	 * 
+	 * @param labeled
+	 * @return
+	 */
 	private List<BlockItemNode> translateLabeledStatement(
 			LabeledStatementNode labeled) {
 		StatementNode body = labeled.getStatement();
@@ -2447,11 +2600,18 @@ public class SideEffectRemover extends BaseTransformer {
 
 		removeNodes(bodyNormals);
 		labeled.setChild(bodyIndex,
-				makeBlockItem(body.getSource(), bodyNormals));
+				makeOneBlockItem(body.getSource(), bodyNormals));
 		result.add(labeled);
 		return result;
 	}
 
+	/**
+	 * Transforms a if (or if-else) statement into list of statements whose
+	 * execution are equivalent to it.
+	 * 
+	 * @param ifNode
+	 * @return
+	 */
 	private List<BlockItemNode> translateIf(IfNode ifNode) {
 		ExpressionNode condition = ifNode.getCondition();
 		StatementNode trueBranch = ifNode.getTrueBranch();
@@ -2467,26 +2627,46 @@ public class SideEffectRemover extends BaseTransformer {
 		ifNode.setChild(condIndex, condTriple.getNode());
 		removeNodes(trueNormalItems);
 		ifNode.setChild(trueIndex,
-				makeBlockItem(trueBranch.getSource(), trueNormalItems));
+				makeOneBlockItem(trueBranch.getSource(), trueNormalItems));
 		if (falseBranch != null) {
 			int falseIndex = falseBranch.childIndex();
 			List<BlockItemNode> falseNormalItems = translateStatement(falseBranch);
 
 			removeNodes(falseNormalItems);
 			ifNode.setChild(falseIndex,
-					makeBlockItem(falseBranch.getSource(), falseNormalItems));
+					makeOneBlockItem(falseBranch.getSource(), falseNormalItems));
 		}
 		result.add(ifNode);
 		return result;
 	}
 
-	private BlockItemNode makeBlockItem(Source source, List<BlockItemNode> nodes) {
+	/**
+	 * Creates one single block item node from a list of block item nodes. If
+	 * the given list contains exactly one block item, then that block item is
+	 * returned; otherwise, a compound statement node created using the list is
+	 * returned.
+	 * 
+	 * @param source
+	 * @param nodes
+	 * @return
+	 */
+	private BlockItemNode makeOneBlockItem(Source source,
+			List<BlockItemNode> nodes) {
 		if (nodes.size() == 1)
 			return nodes.get(0);
 		else
 			return nodeFactory.newCompoundStatementNode(source, nodes);
 	}
 
+	/**
+	 * Transforms a civl for statement into list of statements whose execution
+	 * are equivalent to it.
+	 * 
+	 * TODO: is the domain expression allowed to have side-effects?
+	 * 
+	 * @param civlFor
+	 * @return
+	 */
 	private List<BlockItemNode> translateCivlFor(CivlForNode civlFor) {
 		List<BlockItemNode> result = new LinkedList<>();
 		ExpressionNode domain = civlFor.getDomain();
@@ -2517,13 +2697,19 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
+	/**
+	 * Removes a collection of nodes from their parents.
+	 * 
+	 * @param nodes
+	 */
 	private void removeNodes(Collection<? extends ASTNode> nodes) {
 		for (ASTNode node : nodes)
 			node.remove();
 	}
 
 	/**
-	 * 
+	 * Transforms a civl choose statement into list of statements whose
+	 * execution are equivalent to it.
 	 * 
 	 * @param choose
 	 * @return
@@ -2657,70 +2843,7 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 	}
 
-	private List<BlockItemNode> translateOrdinaryDeclaration(
-			OrdinaryDeclarationNode ordinaryDecl) {
-		OrdinaryDeclarationKind kind = ordinaryDecl.ordinaryDeclarationKind();
-
-		switch (kind) {
-		case VARIABLE_DECLARATION:
-			return this
-					.translateVariableDeclaration((VariableDeclarationNode) ordinaryDecl);
-		case FUNCTION_DEFINITION:
-			this.normalizeFunctionDefinition((FunctionDefinitionNode) ordinaryDecl);
-		case FUNCTION_DECLARATION:
-		case ABSTRACT_FUNCTION_DEFINITION:
-			return Arrays.asList((BlockItemNode) ordinaryDecl);
-		default:
-			throw new ABCUnsupportedException(
-					"normalization of ordinary declaration of " + kind
-							+ " kind in side-effect remover");
-		}
-	}
-
-	/**
-	 * Places a function definition into normal form.
-	 * 
-	 * @param function
-	 *            a function definition node
-	 */
-	private void normalizeFunctionDefinition(FunctionDefinitionNode function) {
-		function.setBody(transformCompound(function.getBody()));
-	}
-
-	/* Public Methods */
-
-	/**
-	 * {@inheritDoc}
-	 * 
-	 * Transforms this AST by removing all side effects so the entire AST is in
-	 * normal form. The result is an equivalent AST. This method is destructive:
-	 * it may modify the given AST.
-	 */
-	@Override
-	public AST transform(AST ast) throws SyntaxException {
-		SequenceNode<BlockItemNode> rootNode = ast.getRootNode();
-		AST newAST;
-		List<BlockItemNode> newBlockItems = new ArrayList<>();
-
-		assert this.astFactory == ast.getASTFactory();
-		assert this.nodeFactory == astFactory.getNodeFactory();
-		ast.release();
-		transformShortCircuitWork(rootNode);
-		for (int i = 0; i < rootNode.numChildren(); i++) {
-			BlockItemNode node = rootNode.getSequenceChild(i);
-			List<BlockItemNode> normalNodes = this.translateBlockItem(node);
-
-			removeNodes(normalNodes);
-			newBlockItems.addAll(normalNodes);
-		}
-		rootNode = nodeFactory.newTranslationUnitNode(rootNode.getSource(),
-				newBlockItems);
-		newAST = astFactory.newAST(rootNode, ast.getSourceFiles(),
-				ast.isWholeProgram());
-		// newAST.prettyPrint(System.out, true);
-		return newAST;
-	}
-
+	// special handling: short circuit expressions ...
 	private void transformShortCircuitWork(ASTNode node) {
 		if ((node instanceof StatementNode)
 				&& !(node instanceof CompoundStatementNode)) {
@@ -2856,7 +2979,6 @@ public class SideEffectRemover extends BaseTransformer {
 
 			loop.setBody(body);
 			if (loop.getKind() == LoopKind.DO_WHILE) {
-				// List<BlockItemNode> newCondItems = new LinkedList<>();
 				int loopIndex = loop.childIndex();
 				ASTNode loopParent = loop.parent();
 
@@ -2864,18 +2986,6 @@ public class SideEffectRemover extends BaseTransformer {
 					newItems.add(0, tmpVar);
 				if (ifElse != null)
 					result.add(ifElse);
-				// for (BlockItemNode item : result) {
-				// // if (item instanceof VariableDeclarationNode) {
-				// // VariableDeclarationNode variable =
-				// // (VariableDeclarationNode) item;
-				// // StatementNode assign = initializer2Assignment(variable);
-				// //
-				// // result.add(pureDeclaration(variable));
-				// // if (assign != null)
-				// // newCondItems.add(assign);
-				// // } else
-				// newCondItems.add(item);
-				// }
 				body.insertChildren(body.numChildren(), result);
 				newItems.add(loop);
 				loop.remove();
@@ -2909,5 +3019,40 @@ public class SideEffectRemover extends BaseTransformer {
 		return nodeFactory.newVariableDeclarationNode(source,
 				nodeFactory.newIdentifierNode(source, tmpId),
 				typeNode(source, type));
+	}
+
+	/* Public Methods */
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * Transforms this AST by removing all side effects so the entire AST is in
+	 * normal form. The result is an equivalent AST. This method is destructive:
+	 * it may modify the given AST.
+	 */
+	@Override
+	public AST transform(AST ast) throws SyntaxException {
+		SequenceNode<BlockItemNode> rootNode = ast.getRootNode();
+		AST newAST;
+		List<BlockItemNode> newBlockItems = new ArrayList<>();
+
+		assert this.astFactory == ast.getASTFactory();
+		assert this.nodeFactory == astFactory.getNodeFactory();
+		ast.release();
+		transformShortCircuitWork(rootNode);
+		// rootNode.prettyPrint(System.out);
+		for (int i = 0; i < rootNode.numChildren(); i++) {
+			BlockItemNode node = rootNode.getSequenceChild(i);
+			List<BlockItemNode> normalNodes = this.translateBlockItem(node);
+
+			removeNodes(normalNodes);
+			newBlockItems.addAll(normalNodes);
+		}
+		rootNode = nodeFactory.newTranslationUnitNode(rootNode.getSource(),
+				newBlockItems);
+		newAST = astFactory.newAST(rootNode, ast.getSourceFiles(),
+				ast.isWholeProgram());
+		// newAST.prettyPrint(System.out, true);
+		return newAST;
 	}
 }
