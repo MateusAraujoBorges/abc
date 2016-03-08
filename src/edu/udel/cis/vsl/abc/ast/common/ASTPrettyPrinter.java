@@ -920,6 +920,7 @@ public class ASTPrettyPrinter {
 		case STRUCT_OR_UNION:
 			out.print(structOrUnion2Pretty(prefix,
 					(StructureOrUnionTypeNode) block));
+			out.print(";");
 			break;
 		default:
 			throw new ABCUnsupportedException(
