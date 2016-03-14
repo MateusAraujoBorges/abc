@@ -1326,7 +1326,7 @@ public class ASTPrettyPrinter {
 			out.print("$parfor");
 		else
 			out.print("$for");
-		out.print("(int ");
+		out.print(" (int ");
 		for (int i = 0; i < numVars; i++) {
 			if (i != 0)
 				out.print(", ");
@@ -1352,7 +1352,7 @@ public class ASTPrettyPrinter {
 		switch (loopKind) {
 		case WHILE:
 			out.print(prefix);
-			out.print("while(");
+			out.print("while (");
 			out.print(condition);
 			out.print(")");
 			if (bodyNode == null)
@@ -1377,7 +1377,7 @@ public class ASTPrettyPrinter {
 				out.print("\n");
 				out.print(prefix);
 			}
-			out.print("while(");
+			out.print("while (");
 			out.print(condition);
 			out.print(");");
 			break;
@@ -1442,7 +1442,7 @@ public class ASTPrettyPrinter {
 	private static void pPrintSwitch(PrintStream out, String prefix,
 			SwitchNode switchNode) {
 		out.print(prefix);
-		out.print("switch(");
+		out.print("switch (");
 		out.print(expression2Pretty(switchNode.getCondition()));
 		out.println(")");
 		pPrintStatement(out, prefix + indention, switchNode.getBody(), true,
@@ -1489,7 +1489,7 @@ public class ASTPrettyPrinter {
 		String myIndent = prefix + indention;
 
 		out.print(prefix);
-		out.print("if(");
+		out.print("if (");
 		if (condition != null)
 			out.print(expression2Pretty(condition));
 		out.print(")");
@@ -1519,7 +1519,7 @@ public class ASTPrettyPrinter {
 		if (contracts != null)
 			pPrintContracts(out, prefix, contracts);
 		out.print(prefix);
-		out.print("for(");
+		out.print("for (");
 		if (init != null) {
 			if (init instanceof ExpressionNode)
 				out.print(expression2Pretty((ExpressionNode) init));
@@ -1570,7 +1570,7 @@ public class ASTPrettyPrinter {
 		String myIndent = prefix + indention;
 
 		out.print(prefix);
-		out.print("$when(");
+		out.print("$when (");
 		out.print(expression2Pretty(when.getGuard()));
 		out.print(")\n");
 		pPrintStatement(out, myIndent, when.getBody(), true, false);

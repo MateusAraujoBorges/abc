@@ -197,6 +197,17 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 	ExpressionNode copy();
 
 	/**
+	 * TODO Returns a new expression node which has the same type and
+	 * conversions and children. The type is shared between the original node
+	 * and the new node, so if the type is modified, both nodes are affected.
+	 * Currently, type is immutable except for struct or union types which can
+	 * be completed.
+	 * 
+	 * @return
+	 */
+	// ExpressionNode copyWithType();
+
+	/**
 	 * Returns the kind of this expression. Every expression belongs to exactly
 	 * one kind.
 	 * 

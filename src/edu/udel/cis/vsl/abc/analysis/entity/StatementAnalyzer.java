@@ -397,24 +397,6 @@ public class StatementAnalyzer {
 			break;
 		case NULL:
 			break;
-		// case ASSUME:
-		// processExpression(((AssumeNode) statement).getExpression());
-		// break;
-		// case ASSERT: {
-		// AssertNode assertNode = (AssertNode) statement;
-		// SequenceNode<ExpressionNode> explanation = assertNode
-		// .getExplanation();
-		//
-		// processExpression(assertNode.getCondition());
-		// if (explanation != null) {
-		// int numArgs = explanation.numChildren();
-		//
-		// for (int i = 0; i < numArgs; i++) {
-		// processExpression(explanation.getSequenceChild(i));
-		// }
-		// }
-		// break;
-		// }
 		case WHEN: {
 			ExpressionNode guard = ((WhenNode) statement).getGuard();
 			Type guardType;
@@ -447,53 +429,6 @@ public class StatementAnalyzer {
 		default:
 			throw error("Unknown kind of statement", statement);
 		}
-
-		// if (statement instanceof CompoundStatementNode)
-		// processCompoundStatement((CompoundStatementNode) statement);
-		// else if (statement instanceof ExpressionStatementNode)
-		// processExpression(((ExpressionStatementNode) statement)
-		// .getExpression());
-		// else if (statement instanceof IfNode) {
-		// processIf((IfNode) statement);
-		// } else if (statement instanceof JumpNode) {
-		// processJump((JumpNode) statement);
-		// } else if (statement instanceof LabeledStatementNode) {
-		// processLabeledStatement((LabeledStatementNode) statement);
-		// } else if (statement instanceof LoopNode) {
-		// processLoop((LoopNode) statement);
-		// } else if (statement instanceof SwitchNode) {
-		// processExpression(((SwitchNode) statement).getCondition());
-		// processStatement(((SwitchNode) statement).getBody());
-		// } else if (statement instanceof PragmaNode) {
-		// entityAnalyzer.processPragma((PragmaNode) statement);
-		// } else if (statement instanceof OmpStatementNode) {
-		// processOmpStatement((OmpStatementNode) statement);
-		// } else if (statement instanceof NullStatementNode) {
-		// // nothing to do
-		// } else if (statement instanceof AssumeNode) {
-		// processExpression(((AssumeNode) statement).getExpression());
-		// } else if (statement instanceof WhenNode) {
-		// ExpressionNode guard = ((WhenNode) statement).getGuard();
-		// Type guardType;
-		//
-		// processExpression(guard);
-		// guardType = guard.getConvertedType();
-		// // check guardType can be converted to a boolean...
-		// if (!guardType.isScalar())
-		// throw error("Guard has non-scalar type " + guardType, guard);
-		// processStatement(((WhenNode) statement).getBody());
-		// } else if (statement instanceof ChooseStatementNode) {
-		// ChooseStatementNode chooseStatement = (ChooseStatementNode)
-		// statement;
-		//
-		// for (StatementNode child : chooseStatement)
-		// processStatement(child);
-		// } else if (statement instanceof AtomicNode) {
-		// processStatement(((AtomicNode) statement).getBody());
-		// } else if (statement instanceof CivlForNode) {
-		// processCivlFor((CivlForNode) statement);
-		// } else
-		// throw error("Unknown kind of statement", statement);
 	}
 
 	private void processOmpNode(OmpNode ompNode) throws SyntaxException {
