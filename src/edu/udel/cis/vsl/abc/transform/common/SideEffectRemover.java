@@ -2844,7 +2844,7 @@ public class SideEffectRemover extends BaseTransformer {
 	}
 
 	// special handling: short circuit expressions ...
-	private void transformShortCircuitWork(ASTNode node) {
+	private void transformShortCircuitWork(ASTNode node) throws SyntaxException {
 		if ((node instanceof StatementNode)
 				&& !(node instanceof CompoundStatementNode)) {
 			List<BlockItemNode> items = new ArrayList<>();
@@ -2900,9 +2900,10 @@ public class SideEffectRemover extends BaseTransformer {
 	 * @return a sorted list of block item nodes which is an equivalent
 	 *         representation of the expression; if no transformation is
 	 *         applied, then an empty list is returned.
+	 * @throws SyntaxException
 	 */
 	private List<BlockItemNode> transformShortCircuitExpression(
-			ExpressionNode expression) {
+			ExpressionNode expression) throws SyntaxException {
 		if (expression instanceof QuantifiedExpressionNode)
 			return new ArrayList<>(0);
 
@@ -2935,7 +2936,6 @@ public class SideEffectRemover extends BaseTransformer {
 					Source rhsSource = rhs.getSource();
 					Source lhsSource = lhs.getSource();
 					Type rhsType = rhs.getConvertedType();
-					ExpressionNode tmp;
 
 					tmpVar = newTempVariable(rhsSource, rhsType);
 
@@ -2946,17 +2946,16 @@ public class SideEffectRemover extends BaseTransformer {
 					ExpressionNode condition;
 					ExpressionNode trueAssign, falseAssign;
 
-					tmp = lhs.copy();
-					tmp.setInitialType(lhs.getConvertedType());
+					lhs.remove();
 					if (isAnd)
 						condition = this.nodeFactory.newOperatorNode(lhsSource,
-								Operator.NOT, tmp);
+								Operator.NOT, lhs);
 					else
-						condition = tmp;
+						condition = lhs;
 					trueAssign = this.nodeFactory.newOperatorNode(lhsSource,
 							Operator.ASSIGN, Arrays.asList(tmpId.copy(),
-									nodeFactory.newBooleanConstantNode(
-											lhsSource, !isAnd)));
+									nodeFactory.newIntegerConstantNode(
+											lhsSource, isAnd ? "0" : "1")));
 					rhs.remove();
 					falseAssign = this.nodeFactory.newOperatorNode(rhsSource,
 							Operator.ASSIGN, Arrays.asList(tmpId.copy(), rhs));
@@ -2981,12 +2980,28 @@ public class SideEffectRemover extends BaseTransformer {
 			if (loop.getKind() == LoopKind.DO_WHILE) {
 				int loopIndex = loop.childIndex();
 				ASTNode loopParent = loop.parent();
+				VariableDeclarationNode condVar = this.newTempVariable(
+						condSource, expression.getConvertedType());
 
+				newItems.add(condVar);
 				if (tmpVar != null)
 					newItems.add(0, tmpVar);
 				if (ifElse != null)
 					result.add(ifElse);
+				// insert new variable
+				expression.remove();
+				result.add(this.nodeFactory
+						.newExpressionStatementNode(this.nodeFactory
+								.newOperatorNode(condSource, Operator.ASSIGN,
+										Arrays.asList(nodeFactory
+												.newIdentifierExpressionNode(
+														condSource,
+														condVar.getIdentifier()
+																.copy()),
+												expression))));
 				body.insertChildren(body.numChildren(), result);
+				loop.setCondition(nodeFactory.newIdentifierExpressionNode(
+						condSource, condVar.getIdentifier().copy()));
 				newItems.add(loop);
 				loop.remove();
 				loopParent.setChild(loopIndex, nodeFactory
