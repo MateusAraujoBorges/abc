@@ -42,6 +42,12 @@ public abstract class CommonTypeNode extends CommonASTNode implements TypeNode {
 		this.typeNodeKind = kind;
 	}
 
+	public CommonTypeNode(Source source, TypeNodeKind kind, ASTNode child0,
+			ASTNode child1, ASTNode child2) {
+		super(source, child0, child1, child2);
+		this.typeNodeKind = kind;
+	}
+
 	@Override
 	public TypeNodeKind kind() {
 		return typeNodeKind;
