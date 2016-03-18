@@ -34,6 +34,17 @@ public interface ArrayTypeNode extends TypeNode {
 	void setExtent(ExpressionNode extent);
 
 	/**
+	 * The expression appearing in square brackets that specifies the starting
+	 * index of the array. This is optional. If absent, this method will return
+	 * null, which represents 0-index as default.
+	 * 
+	 * @return the array extent expression
+	 */
+	ExpressionNode getStartIndex();
+
+	void setStartIndex(ExpressionNode startIndex);
+
+	/**
 	 * In C11, a star ("*") may appear between the square brackets instead of an
 	 * integer expression. The star represents "a variable length array type of
 	 * unspecified size, which can only be used in declarations or type names
@@ -68,6 +79,8 @@ public interface ArrayTypeNode extends TypeNode {
 	boolean hasAtomicInBrackets();
 
 	void setAtomicInBrackets(boolean value);
+	
+	boolean hasStartIndex();
 
 	@Override
 	ArrayTypeNode copy();

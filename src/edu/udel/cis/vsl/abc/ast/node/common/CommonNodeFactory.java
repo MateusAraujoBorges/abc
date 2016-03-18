@@ -1161,4 +1161,10 @@ public class CommonNodeFactory implements NodeFactory {
 			ExpressionNode predicate) {
 		return new CommonMemorySetNode(source, term, binders, predicate);
 	}
+
+	@Override
+	public ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType,
+			ExpressionNode extent, ExpressionNode startIndex) {
+		return new CommonArrayTypeNode(source, elementType, extent, startIndex);
+	}
 }

@@ -281,6 +281,24 @@ public interface NodeFactory {
 			ExpressionNode extent);
 
 	/**
+	 * Constructs and returns a new array type node.
+	 * 
+	 * @param source
+	 *            source information for the occurrence of the array type
+	 * @param elementType
+	 *            the node representing the element type
+	 * @param extent
+	 *            the node representing the expression in square brackets, i.e.,
+	 *            the array length or "extent"
+	 * @param startIndex
+	 *            the node representing the expression in square brackets, i.e,
+	 *            the array starting index
+	 * @return the new array type node
+	 */
+	ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType,
+			ExpressionNode extent, ExpressionNode startIndex);
+
+	/**
 	 * Constructs and returns a new atomic type node.
 	 * 
 	 * @param source

@@ -21,10 +21,18 @@ public class CommonArrayTypeNode extends CommonTypeNode implements
 	private boolean restrictInBrackets = false;
 
 	private boolean atomicInBrackets = false;
+	
+	private boolean hasStartIndex = false;
 
 	public CommonArrayTypeNode(Source source, TypeNode elementType,
 			ExpressionNode extent) {
 		super(source, TypeNodeKind.ARRAY, elementType, extent);
+	}
+
+	public CommonArrayTypeNode(Source source, TypeNode elementType,
+			ExpressionNode extent, ExpressionNode startIndex) {
+		super(source, TypeNodeKind.ARRAY, elementType, extent, startIndex);
+		this.hasStartIndex = true;
 	}
 
 	@Override
@@ -140,6 +148,22 @@ public class CommonArrayTypeNode extends CommonTypeNode implements
 		result.setUnspecifiedVariableLength(this.hasUnspecifiedVariableLength());
 		result.setVolatileInBrackets(this.hasVolatileInBrackets());
 		return result;
+	}
+
+	@Override
+	public ExpressionNode getStartIndex() {
+		return (ExpressionNode) child(2);
+	}
+
+	@Override
+	public void setStartIndex(ExpressionNode startIndex) {
+		setChild(2, startIndex);
+		this.hasStartIndex = true;
+	}
+
+	@Override
+	public boolean hasStartIndex() {
+		return hasStartIndex;
 	}
 
 }
