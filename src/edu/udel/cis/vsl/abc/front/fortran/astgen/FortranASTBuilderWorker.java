@@ -35,6 +35,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.ForLoopInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
@@ -81,6 +82,8 @@ public class FortranASTBuilderWorker {
 	private ArrayList<BlockItemNode> programUnits;
 
 	private boolean hasSTDIO = false;
+
+	private Map<String, TypeNode> localMap = new HashMap<String, TypeNode>();
 
 	/* Constructor */
 
@@ -242,7 +245,7 @@ public class FortranASTBuilderWorker {
 	}
 
 	private FunctionTypeNode translateFunctionCallType(Source source,
-			List<ExpressionNode> argumentList, Map<String, TypeNode> typesMap) {
+			List<ExpressionNode> argumentList) {
 		FunctionTypeNode functionType = null;
 		TypeNode returnType = nodeFactory.newVoidTypeNode(source);
 		List<VariableDeclarationNode> formalList = new LinkedList<VariableDeclarationNode>();
@@ -253,7 +256,7 @@ public class FortranASTBuilderWorker {
 			ExpressionNode actual = argumentList.get(i);
 			IdentifierNode formalIdNode = nodeFactory.newIdentifierNode(source,
 					"_dummy_arg_" + i);
-			TypeNode formalTypeNode = generateType(actual, typesMap);
+			TypeNode formalTypeNode = generateType(actual);
 
 			if (actual.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
 				// formalIdNode = ((IdentifierNode) actual.child(0)).copy();
@@ -315,8 +318,8 @@ public class FortranASTBuilderWorker {
 
 	private List<BlockItemNode> translateTypeDeclaration(
 			FortranTree declarationNode, SimpleScope scope,
-			Map<String, VariableDeclarationNode> argsMap,
-			Map<String, TypeNode> typesMap) throws SyntaxException {
+			Map<String, VariableDeclarationNode> argsMap)
+			throws SyntaxException {
 		ArrayList<BlockItemNode> definitionList = new ArrayList<BlockItemNode>();
 		// FortranTree labelDefinition = declarationNode.getChildByIndex(0);
 		FortranTree declarationSpecifier = declarationNode.getChildByIndex(1);
@@ -345,7 +348,9 @@ public class FortranASTBuilderWorker {
 					break;
 				case 506:
 					hasInit = true;
+					break;
 				default:
+					assert false;
 				}
 			}
 			if (isArray) {
@@ -353,14 +358,61 @@ public class FortranASTBuilderWorker {
 				int arity = arrayInfoNode.numChildren();
 
 				for (int j = arity - 1; j >= 0; j--) {
-					FortranTree indexExprNode = arrayInfoNode
-							.getChildByIndex(j).getChildByIndex(0);
-					ExpressionNode extent = translateExpression(source,
-							indexExprNode, scope);
-					type = nodeFactory.newArrayTypeNode(source, type, extent);
+					FortranTree arityInfo = arrayInfoNode.getChildByIndex(j);
+					int numOfIndexes = arityInfo.numChildren();
+					ExpressionNode startIndexExprNode = null; // 1 by default.
+
+					if (numOfIndexes == 0) {
+						// For endIndex is '*'
+						startIndexExprNode = nodeFactory
+								.newIntegerConstantNode(source, "1");
+						type = nodeFactory.newArrayTypeNode(source, type, null,
+								startIndexExprNode);
+						((ArrayTypeNode) type)
+								.setUnspecifiedVariableLength(true);
+						continue;
+					}
+
+					ExpressionNode endIndexExprNode = null;
+					Operator operator = Operator.MINUS;
+					List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
+					ExpressionNode intOneConstNode = nodeFactory
+							.newIntegerConstantNode(source, "1");
+
+					if (numOfIndexes == 1) {
+						// For only single endIndex
+						startIndexExprNode = nodeFactory
+								.newIntegerConstantNode(source, "1");
+						endIndexExprNode = translateExpression(source,
+								arityInfo.getChildByIndex(0), scope);
+
+					} else if (numOfIndexes == 2) {
+						// For two indexes
+						startIndexExprNode = translateExpression(source,
+								arityInfo.getChildByIndex(0), scope);
+						endIndexExprNode = translateExpression(source,
+								arityInfo.getChildByIndex(1), scope);
+					} else {
+						System.out.println(numOfIndexes);
+					}
+					arguments.add(endIndexExprNode);
+					arguments.add(startIndexExprNode);
+
+					OperatorNode extentNode = nodeFactory.newOperatorNode(
+							source, operator, arguments);
+
+					operator = Operator.PLUS;
+					arguments.clear();
+					arguments.add(extentNode);
+					arguments.add(intOneConstNode);
+					extentNode = nodeFactory.newOperatorNode(source, operator,
+							arguments);
+					type = nodeFactory.newArrayTypeNode(source, type,
+							extentNode, startIndexExprNode.copy());
 				}
 				declaration = nodeFactory.newVariableDeclarationNode(source,
 						name, type);
+				localMap.put(name.name(), type);
 			} else if (hasInit) {
 				FortranTree initNode = entityNode.getChildByIndex(1)
 						.getChildByIndex(0);
@@ -370,12 +422,13 @@ public class FortranASTBuilderWorker {
 				declaration = nodeFactory.newVariableDeclarationNode(source,
 						name, type);
 				declaration.setInitializer(initializer);
+				localMap.put(name.name(), type);
 			} else {
 				declaration = nodeFactory.newVariableDeclarationNode(source,
 						name, type);
+				localMap.put(name.name(), type);
 			}
 
-			typesMap.put(name.name(), type.copy());
 			if (argsMap != null) {
 				String formalName = name.name();
 				VariableDeclarationNode argNode = argsMap.get(formalName);
@@ -412,28 +465,36 @@ public class FortranASTBuilderWorker {
 
 		switch (rule) {
 		case 613: /* PartRef(ArrayUnit) */
-			FortranTree idNode = exprNode.getChildByIndex(0);
+			FortranTree id = exprNode.getChildByIndex(0);
 			FortranTree indexUnitsNode = exprNode.getChildByIndex(1);
 			int arity = indexUnitsNode.numChildren();
-			ExpressionNode tempNode = nodeFactory.newIdentifierExpressionNode(
-					source, translateIdentifier(idNode));
+			IdentifierNode idNode = translateIdentifier(id);
+			ExpressionNode idExprNode = nodeFactory
+					.newIdentifierExpressionNode(source, idNode);
 			ExpressionNode indexNode = null;
 			ExpressionNode adjustedIndexNode = null;
 
 			for (int i = 0; i < arity; i++) {
 				FortranTree indexUnitNode = indexUnitsNode.getChildByIndex(i)
 						.getChildByIndex(0);
+				TypeNode arrayType = localMap.get(idNode.name());
+				ExpressionNode startIndexNode = null;
 
+				for (int j = 1; j <= i; j++) {
+					arrayType = (TypeNode) arrayType.child(0);
+				}
+				startIndexNode = (ExpressionNode) arrayType.child(2);
 				operator = Operator.SUBSCRIPT;
 				arguments = new LinkedList<ExpressionNode>();
 				indexNode = translateExpression(source, indexUnitNode, scope);
-				adjustedIndexNode = adjustIndex(source, indexNode);
-				arguments.add(tempNode);
+				adjustedIndexNode = adjustIndex(source, indexNode,
+						startIndexNode);
+				arguments.add(idExprNode);
 				arguments.add(adjustedIndexNode);
-				tempNode = nodeFactory.newOperatorNode(source, operator,
+				idExprNode = nodeFactory.newOperatorNode(source, operator,
 						arguments);
 			}
-			return (OperatorNode) tempNode;
+			return (OperatorNode) idExprNode;
 		case 734: /* Assign */
 			operator = Operator.ASSIGN;
 			arguments = new LinkedList<ExpressionNode>();
@@ -515,16 +576,13 @@ public class FortranASTBuilderWorker {
 		return result;
 	}
 
-	private ExpressionNode adjustIndex(Source source, ExpressionNode indexNode)
-			throws SyntaxException {
-		// TODO: for starting index i is not 1, should minus i (not 1)
-		ExpressionNode intOneNode = nodeFactory.newIntegerConstantNode(source,
-				"1");
+	private ExpressionNode adjustIndex(Source source, ExpressionNode indexNode,
+			ExpressionNode startIndexNode) throws SyntaxException {
 		Operator operator = Operator.MINUS;
 		List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
 
 		arguments.add(indexNode);
-		arguments.add(intOneNode.copy());
+		arguments.add(startIndexNode.copy());
 		return nodeFactory.newOperatorNode(source, operator, arguments);
 	}
 
@@ -584,7 +642,8 @@ public class FortranASTBuilderWorker {
 						for (int i = 0; i < 2; i++) {
 							ExpressionNode argument = translateExpression(
 									source, refNode.getChildByIndex(1)
-											.getChildByIndex(i).getChildByIndex(0), scope);
+											.getChildByIndex(i)
+											.getChildByIndex(0), scope);
 
 							arguments.add(argument);
 						}
@@ -681,8 +740,7 @@ public class FortranASTBuilderWorker {
 	}
 
 	private StatementNode translateStatement(FortranTree blockItemNode,
-			SimpleScope scope, Map<String, TypeNode> typesMap)
-			throws SyntaxException {
+			SimpleScope scope) throws SyntaxException {
 		int rule = blockItemNode.rule();
 		StatementNode result = null;
 
@@ -704,7 +762,7 @@ public class FortranASTBuilderWorker {
 			break;
 		case 1218: /* CallStatement */
 			result = translateCall(generateSource(blockItemNode),
-					blockItemNode, scope, typesMap);
+					blockItemNode, scope);
 			break;
 		case 1236: /* ReaturnStatement */
 			// TODO: Return Statement for Fortran represents a exit for a
@@ -779,8 +837,8 @@ public class FortranASTBuilderWorker {
 	}
 
 	private StatementNode translateCall(Source source,
-			FortranTree blockItemNode, SimpleScope scope,
-			Map<String, TypeNode> typesMap) throws SyntaxException {
+			FortranTree blockItemNode, SimpleScope scope)
+			throws SyntaxException {
 		FortranTree functionTree = blockItemNode.getChildByIndex(1);
 		FortranTree functionIdNode = functionTree.getChildByIndex(0)
 				.getChildByIndex(0);
@@ -813,7 +871,7 @@ public class FortranASTBuilderWorker {
 		FunctionCallNode callNode = nodeFactory.newFunctionCallNode(source,
 				functionNode, argumentList, null);
 		FunctionTypeNode typeNode = translateFunctionCallType(source,
-				argumentList, typesMap);
+				argumentList);
 		FunctionDeclarationNode declNode = nodeFactory
 				.newFunctionDeclarationNode(source, idNode.copy(), typeNode,
 						null);
@@ -822,15 +880,14 @@ public class FortranASTBuilderWorker {
 		return nodeFactory.newExpressionStatementNode(callNode);
 	}
 
-	private TypeNode generateType(ExpressionNode argumentNode,
-			Map<String, TypeNode> typesMap) {
+	private TypeNode generateType(ExpressionNode argumentNode) {
 		TypeNode argType = null;
 		ExpressionKind exprKind = argumentNode.expressionKind();
 
 		if (exprKind == ExpressionKind.IDENTIFIER_EXPRESSION) {
 			String key = ((IdentifierNode) argumentNode.child(0)).name();
 
-			argType = typesMap.get(key);
+			argType = localMap.get(key);
 			if (argType == null) {
 				String pattern = "^(I|J|K|L|M|N|i|j|k|l|m|n).*$";
 
@@ -843,6 +900,7 @@ public class FortranASTBuilderWorker {
 				}
 			} else {
 				argType = argType.copy();
+				argType.remove();
 			}
 
 			TypeNode tempNode = argType;
@@ -967,15 +1025,15 @@ public class FortranASTBuilderWorker {
 	}
 
 	private List<BlockItemNode> translateBlockItem(FortranTree blockItemNode,
-			SimpleScope scope, Map<String, VariableDeclarationNode> argsMap,
-			Map<String, TypeNode> typesMap) throws SyntaxException {
+			SimpleScope scope, Map<String, VariableDeclarationNode> argsMap)
+			throws SyntaxException {
 		List<BlockItemNode> result = null;
 		int rule = blockItemNode.rule();
 
 		switch (rule) {
 		case 501: /* TypeDeclarationStatement */
 			result = this.translateTypeDeclaration(blockItemNode, scope,
-					argsMap, typesMap);
+					argsMap);
 			break;
 		case 538: /* ParameterStatement */
 			result = this.translateParameterStatement(blockItemNode, scope);
@@ -983,22 +1041,22 @@ public class FortranASTBuilderWorker {
 		case 734: /* AssignmentStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope, null));
+					scope));
 			break;
 		case 827: /* DoStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope, null));
+					scope));
 			break;
 		case 845: /* GotoStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope, null));
+					scope));
 			break;
 		case 846: /* ComputedGotoStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope, null));
+					scope));
 			break;
 		case 848: /* ContinueStatement */
 			result = new ArrayList<BlockItemNode>();
@@ -1013,12 +1071,12 @@ public class FortranASTBuilderWorker {
 		case 1218: /* CallStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope, typesMap));
+					scope));
 			break;
 		case 1236: /* ReturnStatement */
 			result = new ArrayList<BlockItemNode>();
 			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope, null));
+					scope));
 			break;
 		default:
 			System.out.println(rule);
@@ -1116,7 +1174,7 @@ public class FortranASTBuilderWorker {
 		labelName = translateIdentifier(labelIdNode);
 		if (rule == 214) {
 			statement = translateStatement(
-					labeledStatementNode.getChildByIndex(0), scope, null);
+					labeledStatementNode.getChildByIndex(0), scope);
 		} else if (rule == 825) {
 			statement = translateDoStatement(labeledStatementNode, scope);
 		} else {
@@ -1140,7 +1198,6 @@ public class FortranASTBuilderWorker {
 		SimpleScope newScope = new SimpleScope(scope);
 		Source source = null;
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
-		Map<String, TypeNode> typesMap = new HashMap<String, TypeNode>();
 
 		if (specificationPartNode != null) {
 			int numOfSpecification = specificationPartNode.numChildren();
@@ -1156,7 +1213,7 @@ public class FortranASTBuilderWorker {
 							.getChildByIndex(0);
 					List<BlockItemNode> blockItemNodes = this
 							.translateBlockItem(declarationNode, newScope,
-									argsMap, typesMap);
+									argsMap);
 
 					items.addAll(blockItemNodes);
 					break;
@@ -1188,8 +1245,7 @@ public class FortranASTBuilderWorker {
 					case 214: /* Assignment */
 						FortranTree stmtNode = stmtTypeNode.getChildByIndex(0);
 						List<BlockItemNode> blockItemNodes = this
-								.translateBlockItem(stmtNode, newScope, null,
-										typesMap);
+								.translateBlockItem(stmtNode, newScope, null);
 						items.addAll(blockItemNodes);
 						if (execConstNode.getChildByIndex(0).getChildByIndex(0)
 								.rule() == 848) {
@@ -1197,13 +1253,11 @@ public class FortranASTBuilderWorker {
 						}
 						break;
 					case 802: /* If Construct */
-						items.add(translateStatement(stmtTypeNode, scope,
-								typesMap));
+						items.add(translateStatement(stmtTypeNode, scope));
 						break;
 					case 825: /* Do Construct */
 						items.add(translateStatement(
-								stmtTypeNode.getChildByIndex(0), scope,
-								typesMap));
+								stmtTypeNode.getChildByIndex(0), scope));
 						break;
 					default:
 						System.out.println(rule);
@@ -1253,6 +1307,7 @@ public class FortranASTBuilderWorker {
 				newScope, argsMap);
 		result = nodeFactory.newFunctionDefinitionNode(source, name, type,
 				null, body);
+		localMap.clear();
 		return result;
 	}
 
@@ -1287,6 +1342,7 @@ public class FortranASTBuilderWorker {
 				newScope, argsMap);
 		result = nodeFactory.newFunctionDefinitionNode(source, name,
 				functionType, null, body);
+		localMap.clear();
 		return result;
 	}
 

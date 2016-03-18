@@ -1609,12 +1609,16 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			temp = stack.pop();
 			rule = temp.rule();
 			assert rule == 701 /* Primary */
+					|| rule == 704 /* MultOperand */
+					|| rule == 705 /* AddOperand */
 					|| rule == 717 /* Lv5Expr */;
 			array_spec_element_Node.addChild(temp);
 			assert !stack.isEmpty();
 			temp = stack.pop();
 			rule = temp.rule();
 			assert rule == 701 /* Primary */
+					|| rule == 704 /* MultOperand */
+					|| rule == 705 /* AddOperand */
 					|| rule == 717 /* Lv5Expr */;
 			array_spec_element_Node.addChild(0, temp);
 		} else {
@@ -2625,30 +2629,30 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	 * R704 [List] Multiply Operand List
 	 */
 	public void mult_operand(int numMultOps) {
-		//if (numMultOps > 0) {
-		//	int rule = -1;
-		//	int counter = numMultOps;
-		//	FortranTree temp = null;
-		//	FortranTree mult_operand_Node = new FortranTree(704,
-		//			"MultOperands[" + counter + "]");
+		// if (numMultOps > 0) {
+		// int rule = -1;
+		// int counter = numMultOps;
+		// FortranTree temp = null;
+		// FortranTree mult_operand_Node = new FortranTree(704,
+		// "MultOperands[" + counter + "]");
 
-		//	while (counter > 0) {
-		//		assert !stack.isEmpty();
-		//		temp = stack.pop();
-		//		rule = temp.rule();
-		//		if (rule == 601) {
-		//			stack.push(temp);
-		//			break;
-		//		}
-		//		assert rule == 701 /* Primary */
-		//				|| rule == 702 /* Lv1Expr */
-		//				|| rule == 704 /* MultOperand */
-		//				|| rule == 705 /* AddOperandAddOp */;
-		//		mult_operand_Node.addChild(0, temp);
-		//		counter--;
-		//	}
-		//	stack.push(mult_operand_Node);
-		//}
+		// while (counter > 0) {
+		// assert !stack.isEmpty();
+		// temp = stack.pop();
+		// rule = temp.rule();
+		// if (rule == 601) {
+		// stack.push(temp);
+		// break;
+		// }
+		// assert rule == 701 /* Primary */
+		// || rule == 702 /* Lv1Expr */
+		// || rule == 704 /* MultOperand */
+		// || rule == 705 /* AddOperandAddOp */;
+		// mult_operand_Node.addChild(0, temp);
+		// counter--;
+		// }
+		// stack.push(mult_operand_Node);
+		// }
 	} // Test
 
 	/**
@@ -2718,22 +2722,22 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	 * R705 [List] Add Operand List
 	 */
 	public void add_operand(int numAddOps) {
-		//if (numAddOps > 0) {
-		//	int rule = -1;
-		//	int counter = numAddOps;
-		//	FortranTree temp = null;
-		//	FortranTree add_operand_Node = new FortranTree(705, "AddOperands["
-		//			+ counter + "]");
-		//	assert !stack.isEmpty();
-		//	temp = stack.pop();
-		//	rule = temp.rule();
-		//	assert rule == 701 /* Primary */
-		//			|| rule == 702 /* Lv1Expr */
-		//			|| rule == 704 /* MultOperand */
-		//			|| rule == 705 /* AddOperandAddOp */;
-		//	add_operand_Node.addChild(0, temp);
-		//	stack.push(add_operand_Node);
-		//}
+		// if (numAddOps > 0) {
+		// int rule = -1;
+		// int counter = numAddOps;
+		// FortranTree temp = null;
+		// FortranTree add_operand_Node = new FortranTree(705, "AddOperands["
+		// + counter + "]");
+		// assert !stack.isEmpty();
+		// temp = stack.pop();
+		// rule = temp.rule();
+		// assert rule == 701 /* Primary */
+		// || rule == 702 /* Lv1Expr */
+		// || rule == 704 /* MultOperand */
+		// || rule == 705 /* AddOperandAddOp */;
+		// add_operand_Node.addChild(0, temp);
+		// stack.push(add_operand_Node);
+		// }
 	} // Test
 
 	/**
