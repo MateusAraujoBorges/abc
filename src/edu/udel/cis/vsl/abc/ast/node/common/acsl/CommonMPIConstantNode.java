@@ -25,7 +25,7 @@ public class CommonMPIConstantNode extends CommonMPIContractExpressionNode
 	}
 
 	@Override
-	public MPIConstantKind getConstantKind() {
+	public MPIConstantKind getMPIConstantKind() {
 		return kind;
 	}
 

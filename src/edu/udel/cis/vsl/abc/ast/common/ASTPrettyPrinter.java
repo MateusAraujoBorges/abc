@@ -26,6 +26,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -1797,6 +1798,10 @@ public class ASTPrettyPrinter {
 		case IDENTIFIER_EXPRESSION:
 			result.append(((IdentifierExpressionNode) expression)
 					.getIdentifier().name());
+			break;
+		case MPI_CONTRACT_EXPRESSION:
+			result.append(((MPIContractExpressionNode) expression)
+					.MPIContractExpressionKind());
 			break;
 		case OPERATOR:
 			return operator2Pretty((OperatorNode) expression);

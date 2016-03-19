@@ -97,5 +97,4 @@ public interface Transformer {
 	 */
 	StringLiteralNode newStringLiteralNode(String method, String representation)
 			throws SyntaxException;
-
 }
