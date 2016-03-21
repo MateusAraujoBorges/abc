@@ -61,6 +61,7 @@ public class FortranStream extends ANTLRFileStream
       
       this.sourceForm = determineSourceForm(filename);
       convertInputBuffer();
+      line = 1;
    }
 
    public FortranStream(String filename, String path, int sourceForm) throws IOException
@@ -69,7 +70,6 @@ public class FortranStream extends ANTLRFileStream
       this.filename = filename;
       this.filepath = path;
       this.sourceForm = sourceForm;
-      convertInputBuffer();
    }
 
 
