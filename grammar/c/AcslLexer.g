@@ -84,12 +84,14 @@ SIZEOF  :   'sizeof';
 FOR     :   'for';
 READ    :   '\\read';
 WRITE   :   '\\write';
+REACH :   '\\reach';
 CALL    :   '\\call';
 NOACT   :   '\\noact';
 ANYACT  :   '\\anyact';
 FORALL  :   '\\forall';
 EXISTS  :   '\\exists';
 VALID   :   '\\valid';
+NULL    :   '\\null';
 
 /* operators */
 PLUS    :   '+';

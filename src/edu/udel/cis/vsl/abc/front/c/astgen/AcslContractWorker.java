@@ -55,6 +55,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOTHING;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.OPERATOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.PLUS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QUESTION;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REACH;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.READ;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REAL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RESULT;
@@ -106,6 +107,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
@@ -455,13 +457,23 @@ public class AcslContractWorker {
 			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
 					(CommonTree) tree.getChild(0), scope);
 
-			return nodeFactory.newReadOrWriteEventNode(source, true, memList);
+			return nodeFactory.newMemoryEventNode(source,
+					MemoryEventNodeKind.READ, memList);
 		}
 		case WRITE: {
 			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
 					(CommonTree) tree.getChild(0), scope);
 
-			return nodeFactory.newReadOrWriteEventNode(source, false, memList);
+			return nodeFactory.newMemoryEventNode(source,
+					MemoryEventNodeKind.WRITE, memList);
+		}
+		case REACH: {
+			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
+					(CommonTree) tree.getChild(0), scope);
+
+			return nodeFactory.newMemoryEventNode(source,
+					MemoryEventNodeKind.REACH, memList);
+
 		}
 		case CALL: {
 			IdentifierNode function = this

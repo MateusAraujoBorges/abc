@@ -20,13 +20,22 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
  * @author Manchun Zheng
  *
  */
-public interface ReadOrWriteEventNode extends DependsEventNode {
+public interface MemoryEventNode extends DependsEventNode {
+
+	public enum MemoryEventNodeKind {
+		READ, WRITE, REACH
+	}
+
 	boolean isRead();
 
 	boolean isWrite();
 
+	boolean isReach();
+
+	MemoryEventNodeKind memoryEventKind();
+
 	SequenceNode<ExpressionNode> getMemoryList();
 
 	@Override
-	ReadOrWriteEventNode copy();
+	MemoryEventNode copy();
 }

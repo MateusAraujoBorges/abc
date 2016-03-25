@@ -50,11 +50,10 @@ public class AcslContractHandler {
 		ANTLRStringStream input = new ANTLRStringStream(text);
 		AcslLexer lexer = new AcslLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
-
-		updateLineNumber(startLine - 1, tokens);
 		AcslParser parser = new AcslParser(tokens);
 		CommonTree tree;
 
+		updateLineNumber(startLine - 1, tokens);
 		try {
 			switch (kind) {
 			case FUNCTION_CONTRACT:

@@ -264,7 +264,11 @@ allocation_clause
 reads_clause
     : READS argumentExpressionList ->^(READS argumentExpressionList)
     ;
-
+/*
+reaches_clause
+    : REACHES argumentExpressionList ->^(REACHES argumentExpressionList)
+    ;
+*/
 depends_clause
     : DEPENDS event_list ->^(DEPENDS event_list)
     ;
@@ -289,6 +293,8 @@ event_base
         -> ^(READ argumentExpressionList)
     | WRITE LPAREN argumentExpressionList RPAREN
         -> ^(WRITE argumentExpressionList)
+    | REACH LPAREN argumentExpressionList RPAREN
+        -> ^(REACH argumentExpressionList)
     | CALL LPAREN ID (COMMA argumentExpressionList)? RPAREN
         -> ^(CALL ID argumentExpressionList?)
     | NOACT
@@ -611,7 +617,7 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| TRUE | FALSE | RESULT | NOTHING | ELLIPSIS
-    | SELF
+    | SELF | NULL
     | mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
 

@@ -23,7 +23,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
@@ -202,8 +202,8 @@ public class AcslContractAnalyzerWorker {
 		DependsEventNodeKind kind = event.getEventKind();
 
 		switch (kind) {
-		case READ_WRITE: {
-			ReadOrWriteEventNode rwEvent = (ReadOrWriteEventNode) event;
+		case MEMORY: {
+			MemoryEventNode rwEvent = (MemoryEventNode) event;
 			SequenceNode<ExpressionNode> memoryList = rwEvent.getMemoryList();
 
 			for (ExpressionNode memory : memoryList) {

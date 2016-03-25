@@ -31,11 +31,12 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
@@ -136,11 +137,11 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonInvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPIContractExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonPureNode;
-import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonRequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonCompoundInitializerNode;
@@ -1067,9 +1068,9 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public ReadOrWriteEventNode newReadOrWriteEventNode(Source source,
-			boolean isRead, SequenceNode<ExpressionNode> memoryList) {
-		return new CommonReadOrWriteEventNode(source, isRead, memoryList);
+	public MemoryEventNode newMemoryEventNode(Source source,
+			MemoryEventNodeKind kind, SequenceNode<ExpressionNode> memoryList) {
+		return new CommonMemoryEventNode(source, kind, memoryList);
 	}
 
 	@Override

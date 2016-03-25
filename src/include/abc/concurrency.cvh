@@ -27,6 +27,11 @@ typedef struct $barrier * $barrier;
 /* Creates a new barrier object and returns a handle to it.
  * The barrier has the specified size.
  * The new object will be allocated in the given scope. */
+/*@ requires size >= 0;
+  @ depends \noact;
+  @ guards \true;
+  @ assigns \nothing;
+  @ */
 $system $gbarrier $gbarrier_create($scope scope, int size);
 
 /* Destroys the gbarrier */
@@ -40,6 +45,9 @@ $system void $gbarrier_destroy($gbarrier barrier);
  * that will be occupied by the local barrier.  
  * Only one call to $barrier_create may occur for each barrier-place pair.
  * The new object will be allocated in the given scope. */
+/*@ depends \noact;
+  @ assigns \nothing;
+  */
 $system $barrier $barrier_create($scope scope, $gbarrier gbarrier, int place);
 
 /* Destroys the barrier. */

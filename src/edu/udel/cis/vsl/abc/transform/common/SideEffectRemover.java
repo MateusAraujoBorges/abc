@@ -153,14 +153,14 @@ import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
  * Otherwise, the triple becomes [a,(var x=e),b|x|], i.e., introducing a
  * temporary variable to store the value of e and shift the after component to
  * the before component, and returns <code>true</code>. <br>
- * <br>
+ * //TODO why do we need this function? <br>
  * purify([a|e|b]): makes the triple side-effect-free and the "after" component
  * empty. If the triple already satisfies those properties, this does nothing
  * and returns <code>false</code>. Otherwise, the triple becomes [a,(var
  * x=e),b|x|], i.e., introducing a temporary variable to store the value of e
  * and shift the after component to the before component, and returns
  * <code>true</code>.<br>
- * <br>
+ * //TODO check it <br>
  * shift([a|e|b], isVoid): modifies the triple to an equivalent form but with a
  * side-effect-free or <code>null</code> (if <code>isVoid</code>) expression,
  * and an empty "after" component.
@@ -681,12 +681,12 @@ public class SideEffectRemover extends BaseTransformer {
 
 		assign.setArgument(0, newLhs);
 		assign.setArgument(1, newRhs);
-		assign.remove();
 
 		ExprTriple result = new ExprTriple(isVoid ? null : newLhs.copy());
 
 		result.addAllBefore(leftTriple.getBefore());
 		result.addAllBefore(rightTriple.getBefore());
+		assign.remove();
 		result.addBefore(nodeFactory.newExpressionStatementNode(assign));
 		return result;
 	}
@@ -698,7 +698,10 @@ public class SideEffectRemover extends BaseTransformer {
 	 * <pre>
 	 * Pointer dereference *(expr):
 	 * Let purify(translate(expr))=[b|e|].
-	 * translate(*(expr))=[b|*e|].
+	 * if !isVoid
+	 * translate(*(expr))=[b|*e|];
+	 * else
+	 * translate(*(expr))=[b,*e||];
 	 * </pre>
 	 * 
 	 * @param dereference
@@ -808,6 +811,7 @@ public class SideEffectRemover extends BaseTransformer {
 	 * <pre>
 	 * -expr:
 	 * Let makesef(translate(expr))=[b1|e1|a1].
+	 * TODO update it with isVoid
 	 * translate(-expr)=[b1|-e1|a1].
 	 * Replace - with any side-effect-free unary operator.
 	 * </pre>
@@ -1843,6 +1847,7 @@ public class SideEffectRemover extends BaseTransformer {
 		case VARIABLE_DECLARATION:
 			return this
 					.translateVariableDeclaration((VariableDeclarationNode) ordinaryDecl);
+			// TODO code review stops here 03/23/2016
 		case FUNCTION_DEFINITION:
 			this.normalizeFunctionDefinition((FunctionDefinitionNode) ordinaryDecl);
 		case FUNCTION_DECLARATION:

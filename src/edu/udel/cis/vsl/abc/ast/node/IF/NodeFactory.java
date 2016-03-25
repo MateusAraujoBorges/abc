@@ -25,11 +25,12 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ReadOrWriteEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
@@ -2237,6 +2238,12 @@ public interface NodeFactory {
 	 */
 	Configuration configuration();
 
+	/**
+	 * creates a new wildcard (<code>...</code>) node.
+	 * 
+	 * @param source
+	 * @return
+	 */
 	WildcardNode newWildcardNode(Source source);
 
 	/**
@@ -2252,16 +2259,57 @@ public interface NodeFactory {
 	StatementExpressionNode newStatementExpressionNode(Source source,
 			CompoundStatementNode statement);
 
+	/**
+	 * creates a new typeof node (GNU C extension)
+	 * 
+	 * @param source
+	 * @param expression
+	 * @return
+	 */
 	TypeofNode newTypeofNode(Source source, ExpressionNode expression);
 
-	ReadOrWriteEventNode newReadOrWriteEventNode(Source source, boolean isRead,
+	/**
+	 * creates a new memory event node, which could be either <code>\read</code>
+	 * , <code>write</code> or <code>reach</code>.
+	 * 
+	 * @param source
+	 * @param kind
+	 * @param memoryList
+	 * @return
+	 */
+	MemoryEventNode newMemoryEventNode(Source source, MemoryEventNodeKind kind,
 			SequenceNode<ExpressionNode> memoryList);
 
+	/**
+	 * creates a new composite event node, which is composed by two events node
+	 * and an operator.
+	 * 
+	 * @param source
+	 * @param op
+	 * @param left
+	 * @param right
+	 * @return
+	 */
 	CompositeEventNode newOperatorEventNode(Source source, EventOperator op,
 			DependsEventNode left, DependsEventNode right);
 
+	/**
+	 * creates a <code>\nothing</code> node which represents an empty set of
+	 * memory units.
+	 * 
+	 * @param source
+	 * @return
+	 */
 	NothingNode newNothingNode(Source source);
 
+	/**
+	 * creates a behavior node. (ACSL contract)
+	 * 
+	 * @param source
+	 * @param name
+	 * @param body
+	 * @return
+	 */
 	BehaviorNode newBehaviorNode(Source source, IdentifierNode name,
 			SequenceNode<ContractNode> body);
 

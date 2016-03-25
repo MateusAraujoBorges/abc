@@ -15,7 +15,7 @@ public class CommonNothingNode extends CommonExpressionNode implements
 
 	@Override
 	public NothingNode copy() {
-		return null;
+		return new CommonNothingNode(this.getSource());
 	}
 
 	@Override

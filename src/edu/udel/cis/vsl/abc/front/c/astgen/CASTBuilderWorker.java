@@ -99,6 +99,8 @@ import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
  */
 public class CASTBuilderWorker extends ASTBuilderWorker {
 
+	private boolean debug = false;
+
 	/* ************************** Instance Fields ************************* */
 
 	private CParseTree parseTree;
@@ -1093,6 +1095,12 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					declaration = nodeFactory.newFunctionDeclarationNode(
 							source, data.identifier, typeNode, contract);
 				}
+				if (debug)
+					System.out.println("processing function "
+							+ data.identifier.name());
+				declaration.setContract(translateAcslContract(
+						AcslContractKind.FUNCTION_CONTRACT, declarationTree,
+						scope));
 				setFunctionSpecifiers(declaration, analysis);
 				setStorageSpecifiers(declaration, analysis, scope);
 				if (initializer != null)
