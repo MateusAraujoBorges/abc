@@ -85,6 +85,8 @@ public class FortranASTBuilderWorker {
 
 	private Map<String, TypeNode> localMap = new HashMap<String, TypeNode>();
 
+	private List<BlockItemNode> tempItems = null;
+
 	/* Constructor */
 
 	public FortranASTBuilderWorker(Configuration config, FortranTree parseTree,
@@ -496,13 +498,38 @@ public class FortranASTBuilderWorker {
 			}
 			return (OperatorNode) idExprNode;
 		case 734: /* Assign */
+			ExpressionNode lhsArgExprNode = translateExpression(source,
+					exprNode.getChildByIndex(1), scope);
+			ExpressionNode rhsArgExprNode = translateExpression(source,
+					exprNode.getChildByIndex(2), scope);
+
 			operator = Operator.ASSIGN;
 			arguments = new LinkedList<ExpressionNode>();
-			for (int i = 1; i < 3; i++) {
-				ExpressionNode argument = translateExpression(source,
-						exprNode.getChildByIndex(i), scope);
-				arguments.add(argument);
+			if (lhsArgExprNode.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
+				IdentifierNode assignedIdNode = (IdentifierNode) lhsArgExprNode
+						.child(0);
+				String assignedIdName = assignedIdNode.name();
+
+				if (!localMap.containsKey(assignedIdName)) {
+					String pattern = "^(I|J|K|L|M|N|i|j|k|l|m|n).*$";
+					TypeNode type = null;
+					VariableDeclarationNode varDeclNode = null;
+
+					if (assignedIdName.matches(pattern)) {
+						type = nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.INT);
+					} else {
+						type = nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.DOUBLE);
+					}
+					varDeclNode = nodeFactory.newVariableDeclarationNode(
+							source, assignedIdNode.copy(), type);
+					localMap.put(assignedIdName, type);
+					tempItems.add(0, varDeclNode);
+				}
 			}
+			arguments.add(lhsArgExprNode);
+			arguments.add(rhsArgExprNode);
 			return nodeFactory.newOperatorNode(source, operator, arguments);
 		case 710: /* Lv3 Expression */
 			String opStr = exprNode.getChildByIndex(0).cTokens()[0].getText();
@@ -947,9 +974,28 @@ public class FortranASTBuilderWorker {
 		Source stepSource = generateSource(doVariableNode);// TODO: Fix no step
 															// defined
 		List<ExpressionNode> stepArgs = new LinkedList<ExpressionNode>();
+		IdentifierNode doVarIdNode = translateIdentifier(doVariableNode);
+		String assignedIdName = doVarIdNode.name();
 
+		if (!localMap.containsKey(assignedIdName)) {
+			String pattern = "^(I|J|K|L|M|N|i|j|k|l|m|n).*$";
+			TypeNode type = null;
+			VariableDeclarationNode varDeclNode = null;
+
+			if (assignedIdName.matches(pattern)) {
+				type = nodeFactory.newBasicTypeNode(initSource,
+						BasicTypeKind.INT);
+			} else {
+				type = nodeFactory.newBasicTypeNode(initSource,
+						BasicTypeKind.DOUBLE);
+			}
+			varDeclNode = nodeFactory.newVariableDeclarationNode(initSource,
+					doVarIdNode.copy(), type);
+			localMap.put(assignedIdName, type);
+			tempItems.add(0, varDeclNode);
+		}
 		initArgs.add(nodeFactory.newIdentifierExpressionNode(doVariableSource,
-				translateIdentifier(doVariableNode)));
+				doVarIdNode));
 		initArgs.add(translateExpression(initSource, initExprNode, scope));
 		condArgs.add(nodeFactory.newIdentifierExpressionNode(doVariableSource,
 				translateIdentifier(doVariableNode)));
@@ -1202,6 +1248,7 @@ public class FortranASTBuilderWorker {
 		if (specificationPartNode != null) {
 			int numOfSpecification = specificationPartNode.numChildren();
 
+			tempItems = items;
 			source = generateSource(specificationPartNode);
 			for (int i = 0; i < numOfSpecification; i++) {
 				FortranTree specificationNode = specificationPartNode
