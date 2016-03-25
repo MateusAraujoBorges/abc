@@ -1,6 +1,8 @@
 #include <civlc.cvh>
 #include <seq.cvh>
 
+$scope root = $here;
+
 typedef struct cqueue_t{
   int data[];
   $proc owner;
@@ -12,7 +14,7 @@ typedef struct cqueue_t{
   @*/
 $atomic_f void create(cqueue* q)
 {
-  q = (cqueue*)$malloc($root, sizeof(cqueue));
+  q = (cqueue*)$malloc(root, sizeof(cqueue));
   q->owner=$proc_null;
   $seq_init(&q->data, 0, NULL);
 }

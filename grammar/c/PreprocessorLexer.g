@@ -166,7 +166,6 @@ RSLIST		:	'|>';  // LSLIST and RSLIST enclose a scope list
 SCOPEOF		:	'$scopeof';
 SELF		:	'$self';
 READS       :   '$reads';
-ROOT		:	'$root';
 SPAWN		:	'$spawn';
 SYSTEM      :   '$system';
 TRUE		:	'$true';
