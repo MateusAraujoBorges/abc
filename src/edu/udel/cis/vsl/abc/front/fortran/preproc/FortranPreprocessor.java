@@ -155,7 +155,8 @@ public class FortranPreprocessor implements Preprocessor {
 	@Override
 	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			String filename) throws PreprocessorException, IOException {
+			String filename, boolean isSystem) throws PreprocessorException,
+			IOException {
 		File file = new File(filename);
 
 		return outputTokenSource(systemIncludePaths, userIncludePaths,

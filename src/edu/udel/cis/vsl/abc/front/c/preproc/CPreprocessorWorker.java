@@ -236,7 +236,7 @@ public class CPreprocessorWorker {
 	 * @throws PreprocessorException
 	 *             if an I/O error occurs
 	 */
-	CivlcTokenSource outputTokenSource(String filename)
+	CivlcTokenSource outputTokenSource(boolean isSystem, String filename)
 			throws PreprocessorException, IOException {
 		Map<String, Macro> macroMap = new HashMap<String, Macro>();
 
@@ -251,7 +251,13 @@ public class CPreprocessorWorker {
 
 		try {
 			file = new File(filename);
-			charStream = PreprocessorUtils.newFilteredCharStreamFromFile(file);
+			if (isSystem) {
+				charStream = findInternalSystemFile(filename);
+				if (charStream == null)
+					return null;
+			} else
+				charStream = PreprocessorUtils
+						.newFilteredCharStreamFromFile(file);
 		} catch (FileNotFoundException fof) {
 			file = findFile(userIncludePaths, filename);
 			if (file == null)

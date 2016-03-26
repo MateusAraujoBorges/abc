@@ -255,11 +255,12 @@ public class CPreprocessor implements Preprocessor {
 	@Override
 	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			String filename) throws PreprocessorException, IOException {
+			String filename, boolean isSystem) throws PreprocessorException,
+			IOException {
 		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
 				systemIncludePaths, userIncludePaths, implicitMacros);
 
-		return worker.outputTokenSource(filename);
+		return worker.outputTokenSource(isSystem, filename);
 	}
 
 	/**

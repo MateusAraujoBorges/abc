@@ -151,6 +151,9 @@ public interface Preprocessor {
 	 *            line
 	 * @param filename
 	 *            The name of the file to be preprocessed.
+	 * @param isSystem
+	 *            Flag denotes weather the implementation is system
+	 *            implementation.
 	 * @return a token source for the token resulting from preprocessing the
 	 *         file
 	 * @throws PreprocessorException
@@ -159,7 +162,8 @@ public interface Preprocessor {
 	 */
 	CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			String filename) throws PreprocessorException, IOException;
+			String filename, boolean isSystem) throws PreprocessorException,
+			IOException;
 
 	/**
 	 * Prints the list of tokens that result from preprocessing the file. One
