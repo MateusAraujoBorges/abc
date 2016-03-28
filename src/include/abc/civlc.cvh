@@ -101,13 +101,9 @@ $system void $free(void *p);
  */
 $system void $havoc(void *ptr);
 
-/* Returns the value of integer number power operation with the given base and exponent.
- */
-$system int $pow(int base, int exp);
-
 /* Returns the value of real number power operation with the given base and exponent.
  */
-$system double $powr(double base, double exp);
+$system double $pow(double base, double exp);
 
 /* *************************** Iterator Functions ************************** */
 
