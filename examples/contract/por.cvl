@@ -1,6 +1,10 @@
 #include <civlc.cvh>
 #include <memory.cvh>
 
+void inc(int n);
+
+void dec(int n);
+
 /*@ depends \anyact;
   @ assigns a, b;
   @*/

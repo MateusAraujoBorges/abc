@@ -31,11 +31,12 @@ $atomic_f _Bool lock(cqueue* q)
   }else
     return $false;
 }
-/*@ depends \call(enqueue, q, ...), \call(dequeue,q, ...);
+/*@ pure;
+  @ depends \call(enqueue, q, ...), \call(dequeue,q, ...);
   @ reads q->data;
   @ assigns \nothing;
   @*/
-$pure $atomic_f int size(cqueue* q)
+$atomic_f int size(cqueue* q)
 {
   return $seq_length(&q->data); 
 }

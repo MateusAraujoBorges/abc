@@ -566,7 +566,7 @@ public class ExpressionAnalyzer {
 		} else if (node instanceof EnumerationConstantNode) {
 			String name = node.getStringRepresentation();
 			OrdinaryEntity entity = node.getScope().getLexicalOrdinaryEntity(
-					name);
+					false, name);
 			EntityKind kind;
 			EnumerationType type;
 
@@ -815,7 +815,8 @@ public class ExpressionAnalyzer {
 			boolean isFirstRound, boolean isContract) throws SyntaxException {
 		IdentifierNode identifierNode = node.getIdentifier();
 		String name = identifierNode.name();
-		OrdinaryEntity entity = node.getScope().getLexicalOrdinaryEntity(name);
+		OrdinaryEntity entity = node.getScope().getLexicalOrdinaryEntity(false,
+				name);
 		EntityKind kind;
 
 		if (entity == null) {

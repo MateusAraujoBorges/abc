@@ -302,7 +302,7 @@ event_base
     | ANYACT
         -> ^(ANYACT)
     | LPAREN event RPAREN
-        -> ^(EVENT_PARENTHESIZED)
+        -> ^(EVENT_PARENTHESIZED event)
     ;
 
 /* ACSL-MPI extensions: constructors */

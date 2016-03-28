@@ -42,7 +42,8 @@ public class ACSLTest {
 		// implicitMacros, file);
 		result = frontEnd.compile(file, Language.CIVL_C);
 		if (debug) {
-			result.prettyPrint(out, true);
+			result.print(out);
+			// result.prettyPrint(out, true);
 			out.println();
 			out.flush();
 		}
@@ -99,7 +100,13 @@ public class ACSLTest {
 	@Test
 	public void validPointers() throws PreprocessorException, SyntaxException,
 			ParseException {
-		//this.parse("valid.c");
+		// this.parse("valid.c");
 		parse("validPointers.c");
+	}
+
+	@Test
+	public void memLocation1() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("memLocation1.c");
 	}
 }

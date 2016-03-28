@@ -193,4 +193,14 @@ public class CTranslationTest {
 	public void assigns() throws ABCException, IOException {
 		check("c/assigns");
 	}
+
+	@Test
+	public void identifier() throws ABCException, IOException {
+		check("c/ident");
+	}
+
+	@Test
+	public void identifier2() throws ABCException, IOException {
+		check("c/ident2");
+	}
 }

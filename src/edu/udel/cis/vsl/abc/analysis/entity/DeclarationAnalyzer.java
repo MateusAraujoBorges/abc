@@ -112,7 +112,7 @@ public class DeclarationAnalyzer {
 
 		if (// scope.getScopeKind() == ScopeKind.FILE &&
 		ignoredTypes != null && ignoredTypes.contains(name)) {
-			OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(name); // scope.getOrdinaryEntity(name);
+			OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(false, name); // scope.getOrdinaryEntity(name);
 
 			if (entity == null)
 				throw error("Cannot find definition of system typedef", node);
@@ -125,7 +125,7 @@ public class DeclarationAnalyzer {
 				throw error("Expected system typedef, got " + entity, node);
 		} else {
 			Type type = entityAnalyzer.typeAnalyzer.processTypeNode(typeNode);
-			OrdinaryEntity entity = scope.getOrdinaryEntity(name);
+			OrdinaryEntity entity = scope.getOrdinaryEntity(false, name);
 			Typedef typedef;
 
 			if (entity != null) {
@@ -311,7 +311,8 @@ public class DeclarationAnalyzer {
 		hasNoStorageClass = hasNoStorageClass(node);
 		if (node.hasExternStorage()
 				|| (isFunction && hasNoStorageClass && (isFileScope || !civl()))) {
-			OrdinaryEntity previous = scope.getLexicalOrdinaryEntity(name);
+			OrdinaryEntity previous = scope.getLexicalOrdinaryEntity(false,
+					name);
 
 			if (previous == null) {
 				return LinkageKind.EXTERNAL;
@@ -390,7 +391,7 @@ public class DeclarationAnalyzer {
 		isFunction = node instanceof FunctionDeclarationNode;
 		linkage = computeLinkage(node);
 		name = identifier.name();
-		entity = scope.getOrdinaryEntity(name);
+		entity = scope.getOrdinaryEntity(false, name);
 		// CIVL allows multiple function declarations in block
 		// scope with no linkage and same identifier, all signifying
 		// the same function

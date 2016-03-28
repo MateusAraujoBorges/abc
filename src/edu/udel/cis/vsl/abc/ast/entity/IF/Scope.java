@@ -201,12 +201,16 @@ public interface Scope {
 	 * in this scope with the given name, or <code>null</code> if there is not
 	 * one. This does not look in ancestor or descendant scopes.
 	 * 
+	 * @param isType
+	 *            true iff this is to get an entity of typedef; if false then
+	 *            the first entity from the bottom of the scope is returned,
+	 *            regardless of whether it is typedef or not
 	 * @param name
 	 *            the name of the ordinary entity
 	 * @return the ordinary entity in this scope with that name or
 	 *         <code>null</code> if none exists
 	 */
-	OrdinaryEntity getOrdinaryEntity(String name);
+	OrdinaryEntity getOrdinaryEntity(boolean isType, String name);
 
 	/**
 	 * Performs search for ordinary entity with given name using lexical
@@ -215,10 +219,16 @@ public interface Scope {
 	 * searching in that order. If not found all the way up the scopes, returns
 	 * <code>null</code>.
 	 * 
+	 * @param isType
+	 *            true iff this is to get an entity of typedef; if false then
+	 *            the first entity from the bottom of the scope is returned,
+	 *            regardless of whether it is typedef or not
+	 * @param name
+	 *            name of the entity
 	 * @return the first ordinary entity encountered with given name looking up
 	 *         the scope tree, or <code>null</code>
 	 */
-	OrdinaryEntity getLexicalOrdinaryEntity(String name);
+	OrdinaryEntity getLexicalOrdinaryEntity(boolean isType, String name);
 
 	/**
 	 * Returns the number of variables declared in this scope. The set of

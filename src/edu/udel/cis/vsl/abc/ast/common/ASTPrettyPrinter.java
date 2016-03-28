@@ -775,6 +775,9 @@ public class ASTPrettyPrinter {
 		case NOACT:
 			result.append("\\noact");
 			break;
+		case ANYACT:
+			result.append("\\anyact");
+			break;
 		default:
 			throw new ABCUnsupportedException(
 					"pretty printing depends event node of " + kind + " kind");
@@ -1852,6 +1855,9 @@ public class ASTPrettyPrinter {
 			break;
 		case WILDCARD:
 			result.append("...");
+			break;
+		case MEMORY_SET:
+			result.append("MEMORY_SET in progress...");
 			break;
 		default:
 			throw new ABCUnsupportedException(

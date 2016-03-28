@@ -100,6 +100,7 @@ scope Symbols {
 
 scope DeclarationScope {
     boolean isTypedef; // is the current declaration a typedef
+    boolean typedefNameUsed;
 }
 
 @header
@@ -298,6 +299,11 @@ argumentExpressionList
 
 /* 6.5.3 */
 unaryExpression
+scope DeclarationScope;
+@init {
+  $DeclarationScope::isTypedef = false;
+  $DeclarationScope::typedefNameUsed=false;
+}
 	: postfixExpression
 	| p=PLUSPLUS unaryExpression
 	  -> ^(OPERATOR PRE_INCREMENT[$p]
@@ -346,6 +352,11 @@ unaryOperator
 // ambiguity 1: (expr) is a unary expression and looks like (typeName).
 // ambiguity 2: (typeName){...} is a compound literal and looks like cast
 castExpression
+scope DeclarationScope;
+@init{
+	$DeclarationScope::isTypedef = false;
+	$DeclarationScope::typedefNameUsed=false;
+}
 	: (LPAREN typeName RPAREN ~LCURLY)=> l=LPAREN typeName RPAREN castExpression
 	  -> ^(CAST typeName castExpression $l)
 	| unaryExpression
@@ -595,6 +606,7 @@ declaration
 scope DeclarationScope;
 @init {
   $DeclarationScope::isTypedef = false;
+  $DeclarationScope::typedefNameUsed=false;
 }
 	: d=declarationSpecifiers
 	  ( 
@@ -681,7 +693,7 @@ typeSpecifier
 	| enumSpecifier
 	| typedefName
 	| domainSpecifier
-    | typeofSpecifier
+    	| typeofSpecifier
 	;
 
 /* GNU C extension: 
@@ -751,6 +763,7 @@ structDeclaration
 scope DeclarationScope;
 @init {
   $DeclarationScope::isTypedef = false;
+  $DeclarationScope::typedefNameUsed = false;
 }
     : s=specifierQualifierList
       ( -> ^(STRUCT_DECLARATION $s ABSENT)
@@ -910,8 +923,10 @@ directDeclaratorPrefix
 		{
 			if ($DeclarationScope::isTypedef) {
 				$Symbols::types.add($IDENTIFIER.text);
-				//System.err.println("define type "+$IDENTIFIER.text);
-			}
+                //System.err.println("define type "+$IDENTIFIER.text);
+			}else{
+                //$Symbols::types.remove($IDENTIFIER.text);
+            }
 		}
 	| LPAREN! declarator RPAREN!
 	;
@@ -955,6 +970,11 @@ directDeclaratorArraySuffix
  * child 2: RPAREN (for source information)
  */
 directDeclaratorFunctionSuffix
+scope DeclarationScope;
+@init {
+    $DeclarationScope::isTypedef = false;
+    $DeclarationScope::typedefNameUsed = false;
+}
 	: LPAREN
 	  ( parameterTypeList RPAREN 
 	    -> ^(FUNCTION_SUFFIX LPAREN parameterTypeList  RPAREN)
@@ -1056,7 +1076,9 @@ parameterList
 parameterDeclaration
 scope DeclarationScope;
 @init {
-	$DeclarationScope::isTypedef = false;
+    $DeclarationScope::isTypedef = false;
+    $DeclarationScope::typedefNameUsed = false;
+    //System.err.println("parameter declaration start");
 }
     : declarationSpecifiers
       ( -> ^(PARAMETER_DECLARATION declarationSpecifiers ABSENT)
@@ -1155,7 +1177,11 @@ directAbstractDeclarator
  * to be present in a typedef.  See declarationSpecifierList.
  */
 typedefName
-    : {isTypeName(input.LT(1).getText())}?
+@after{
+    if(!$DeclarationScope::typedefNameUsed)
+    	$DeclarationScope::typedefNameUsed=true;
+} 
+    : {!$DeclarationScope::typedefNameUsed && isTypeName(input.LT(1).getText())}?
       IDENTIFIER
       -> ^(TYPEDEF_NAME IDENTIFIER)
     ;
@@ -1309,10 +1335,13 @@ labeledStatement
  */
 compoundStatement
 scope Symbols;
+scope DeclarationScope;
 @init {
 	$Symbols::types = new HashSet<String>();
 	$Symbols::enumerationConstants = new HashSet<String>();
         $Symbols::isFunctionDefinition = false;
+        $DeclarationScope::isTypedef = false;
+        $DeclarationScope::typedefNameUsed = false;	
 }
     : LCURLY
       ( RCURLY
@@ -1536,10 +1565,13 @@ datomicStatement
  */
 functionDefinition
 scope Symbols; // "function scope"
+scope DeclarationScope;
 @init {
     $Symbols::types = new HashSet<String>();
     $Symbols::enumerationConstants = new HashSet<String>();
     $Symbols::isFunctionDefinition = true;
+    $DeclarationScope::isTypedef = false;
+    $DeclarationScope::typedefNameUsed=false;
 }
 	: declarator
 	  contract
@@ -1609,6 +1641,7 @@ blockItemWithScope
 scope DeclarationScope;
 @init {
   $DeclarationScope::isTypedef = false;
+  $DeclarationScope::typedefNameUsed = false;
 }
 	: blockItem;
 
@@ -1649,6 +1682,7 @@ scope DeclarationScope; // just to have an outermost one with isTypedef false
     $Symbols::enumerationConstants = new HashSet<String>();
     $Symbols::isFunctionDefinition = false;
     $DeclarationScope::isTypedef = false;
+    $DeclarationScope::typedefNameUsed = false;
 }
 	:	blockItem* EOF
 		-> ^(TRANSLATION_UNIT blockItem*)

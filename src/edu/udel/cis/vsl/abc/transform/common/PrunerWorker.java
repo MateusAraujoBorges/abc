@@ -170,7 +170,7 @@ public class PrunerWorker {
 	 */
 	private void search() throws SyntaxException {
 		Scope rootScope = root.getScope();
-		Function main = (Function) rootScope.getOrdinaryEntity("main");
+		Function main = (Function) rootScope.getOrdinaryEntity(false, "main");
 		Iterable<ASTNode> children = root.children();
 
 		for (Variable variable : rootScope.getVariables()) {

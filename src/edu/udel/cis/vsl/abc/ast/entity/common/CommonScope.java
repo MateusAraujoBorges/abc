@@ -151,14 +151,19 @@ public class CommonScope implements Scope {
 	}
 
 	@Override
-	public OrdinaryEntity getOrdinaryEntity(String name) {
-		return ordinaryEntityMap.get(name);
+	public OrdinaryEntity getOrdinaryEntity(boolean isType, String name) {
+		OrdinaryEntity entity = ordinaryEntityMap.get(name);
+
+		if (entity != null && isType
+				&& entity.getEntityKind() != EntityKind.TYPEDEF)
+			return null;
+		return entity;
 	}
 
 	@Override
-	public OrdinaryEntity getLexicalOrdinaryEntity(String name) {
+	public OrdinaryEntity getLexicalOrdinaryEntity(boolean isType, String name) {
 		for (Scope scope = this; scope != null; scope = scope.getParentScope()) {
-			OrdinaryEntity result = scope.getOrdinaryEntity(name);
+			OrdinaryEntity result = scope.getOrdinaryEntity(isType, name);
 
 			if (result != null)
 				return result;

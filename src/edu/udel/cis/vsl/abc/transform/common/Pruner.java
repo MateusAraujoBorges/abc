@@ -113,7 +113,8 @@ public class Pruner extends BaseTransformer {
 	@Override
 	public AST transform(AST ast) throws SyntaxException {
 		SequenceNode<BlockItemNode> root = ast.getRootNode();
-		Function main = (Function) root.getScope().getOrdinaryEntity("main");
+		Function main = (Function) root.getScope().getOrdinaryEntity(false,
+				"main");
 
 		assert this.astFactory == ast.getASTFactory();
 		assert this.nodeFactory == astFactory.getNodeFactory();

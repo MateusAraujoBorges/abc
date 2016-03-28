@@ -266,7 +266,7 @@ public class TypeAnalyzer {
 			boolean isParameter) throws SyntaxException {
 		String name = typeNode.getName().name();
 		Scope scope = typeNode.getScope();
-		OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(name);
+		OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(true, name);
 		EntityKind kind = entity.getEntityKind();
 		Typedef typedef;
 		Type result;
