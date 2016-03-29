@@ -2014,24 +2014,45 @@ public class ExpressionAnalyzer {
 			throws SyntaxException {
 		MPIContractExpressionKind kind = node.MPIContractExpressionKind();
 		int numArgs = node.numArguments();
+		Type[] formalTypes;
 
+		if (kind.equals(MPIContractExpressionKind.MPI_INTEGER_CONSTANT)) {
+			assert node.getType().equals(intType);
+			return;
+		}
+		formalTypes = new Type[numArgs];
 		switch (kind) {
-		case MPI_INTEGER_CONSTANT:
-			node.setInitialType(intType);
-			break;
 		case MPI_EMPTY_IN:
 		case MPI_EMPTY_OUT:
-			if (numArgs != 1)
-				throw error("MPI contract expression " + kind
-						+ "only takes one argument.", node);
-			processExpression(node.getArgument(0));
-			if (!node.getArgument(0).getType().equals(intType))
-				throw error("The argument of MPI contract expression " + kind
-						+ "must has an integer type", node);
-			node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
+			formalTypes[0] = intType;
+			break;
+		case MPI_SIZE:
+			formalTypes[0] = intType;
+			formalTypes[1] = intType;
+			break;
+		case MPI_REGION:
+			formalTypes[0] = typeFactory.pointerType(typeFactory.voidType());
+			formalTypes[1] = intType;
+			formalTypes[2] = intType;
+			break;
+		case MPI_EQUALS:
+			formalTypes[0] = typeFactory.pointerType(typeFactory.voidType());
+			formalTypes[1] = intType;
+			formalTypes[2] = intType;
 			break;
 		default:
 			throw error("Unknown MPI contract expression kind: " + kind, node);
+		}
+		if (numArgs < 1)
+			throw error("MPI contract expression " + kind
+					+ " takes at least one argument.", node);
+		for (int i = 0; i < numArgs; i++) {
+			ExpressionNode argument = node.getArgument(i);
+			processExpression(argument);
+			if (!argument.getType().equals(formalTypes[i]))
+				throw error("The " + i
+						+ "th argument of MPI contract expression " + kind
+						+ "must has an " + formalTypes[i], node);
 		}
 	}
 
