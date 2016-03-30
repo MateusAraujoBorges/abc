@@ -132,4 +132,10 @@ public class SideEffectRemoverTest {
 	public void loopShortCircuit() throws ABCException, IOException {
 		check("loopShortCircuit.c");
 	}
+
+	@Test
+	public void nestedLoop() throws ABCException, IOException {
+		check("nestedLoop.c");
+	}
+
 }
