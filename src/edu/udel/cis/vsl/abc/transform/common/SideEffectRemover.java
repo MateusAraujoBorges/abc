@@ -2862,6 +2862,8 @@ public class SideEffectRemover extends BaseTransformer {
 							.transformShortCircuitExpression((ExpressionNode) child);
 
 					items.addAll(childItems);
+				} else if (child instanceof StatementNode) {
+					transformShortCircuitWork(child);
 				}
 			}
 			if (items.size() > 0) {
