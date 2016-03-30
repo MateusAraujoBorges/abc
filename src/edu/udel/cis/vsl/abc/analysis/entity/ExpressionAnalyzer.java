@@ -33,6 +33,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ContractVerifyNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
@@ -202,6 +203,9 @@ public class ExpressionAnalyzer {
 				break;
 			case CONSTANT:
 				processConstant((ConstantNode) node);
+				break;
+			case CONTRACT_VERIFY:
+				processContractVerify((ContractVerifyNode) node);
 				break;
 			case DERIVATIVE_EXPRESSION:
 				processDerivativeExpression((DerivativeExpressionNode) node);
@@ -693,6 +697,101 @@ public class ExpressionAnalyzer {
 			else
 				throw error(
 						"Function expression in function call does not have function "
+								+ "type or pointer to function type",
+						functionNode);
+		}
+
+		// TODO: Sanity checks on kernel functions
+		// Check that context arg 0 is an int or dim3
+		// Check that context arg 1 is an int or dim3
+		// Check that context arg 2, if present, is a pointer to a stream
+		// It might be appropriate to factor out these Cuda-specific checks into
+		// a separate function
+
+		if (functionNode instanceof IdentifierExpressionNode) {
+			functionName = ((IdentifierExpressionNode) functionNode)
+					.getIdentifier().name();
+		}
+		if (functionName != null)
+			specialCallAnalyzer.hasSufficientArgumentsForPrintf(node,
+					functionName, node.getArguments());
+		if (functionType != null) {
+			expectedNumArgs = functionType.getNumParameters();
+			hasVariableNumArgs = functionType.hasVariableArgs();
+			if (hasVariableNumArgs) {
+				// if function has variable number of args then the number of
+				// actual parameters must be at least the number expected
+				if (numArgs < expectedNumArgs)
+					throw error("Expected at least " + expectedNumArgs
+							+ " arguments, saw " + numArgs, node);
+				isSpecialFunction = this.specialCallAnalyzer
+						.isSpecialFunction(functionName);
+			} else {
+				if (numArgs != expectedNumArgs)
+					throw error("Expected " + expectedNumArgs
+							+ " arguments but saw " + numArgs, node);
+			}
+		}
+		for (int i = 0; i < numContextArgs; i++) {
+			ExpressionNode argument = node.getContextArgument(i);
+
+			processExpression(argument);
+		}
+		for (int i = 0; i < numArgs; i++) {
+			ExpressionNode argument = node.getArgument(i);
+
+			processExpression(argument);
+			addStandardConversions(argument);
+			specialCallAnalyzer.addConversionsForSpecialFunctions(functionName,
+					argument);
+			if ((functionType != null && (!hasVariableNumArgs || i < expectedNumArgs))
+					|| isSpecialFunction) {
+				ObjectType lhsType;
+				UnqualifiedObjectType type;
+
+				if (i < expectedNumArgs)
+					lhsType = functionType.getParameterType(i);
+				else
+					lhsType = this.specialCallAnalyzer.variableParameterType(
+							functionName, i);
+				type = conversionFactory.lvalueConversionType(lhsType);
+				try {
+					convertRHS(argument, type);
+				} catch (UnsourcedException e) {
+					throw error(e, argument);
+				}
+			}
+		}
+		node.setInitialType(functionType == null ? this.typeFactory
+				.basicType(BasicTypeKind.INT) : functionType.getReturnType());
+	}
+
+	private void processContractVerify(ContractVerifyNode node)
+			throws SyntaxException {
+		ExpressionNode functionNode = node.getFunction();
+		int numArgs = node.getNumberOfArguments();
+		int numContextArgs = node.getNumberOfContextArguments();
+		FunctionType functionType;
+		int expectedNumArgs = -1;
+		boolean hasVariableNumArgs = false;
+		boolean isSpecialFunction = false;
+		String functionName = null;
+
+		processExpression(functionNode);
+		{
+			Type tmpType = functionNode.getType();
+			TypeKind tmpKind = tmpType == null ? TypeKind.FUNCTION : tmpType
+					.kind();
+
+			if (tmpKind == TypeKind.POINTER) {
+				tmpType = ((PointerType) tmpType).referencedType();
+				tmpKind = tmpType.kind();
+			}
+			if (tmpKind == TypeKind.FUNCTION)
+				functionType = (FunctionType) tmpType;
+			else
+				throw error(
+						"Function expression in contract verify call does not have function "
 								+ "type or pointer to function type",
 						functionNode);
 		}

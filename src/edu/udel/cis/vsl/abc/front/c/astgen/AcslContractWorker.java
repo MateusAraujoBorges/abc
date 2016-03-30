@@ -58,6 +58,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QUESTION;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REACH;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.READ;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REAL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REMOTE_ACCESS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RESULT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SELF;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SET_BINDERS;
@@ -114,8 +115,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
@@ -576,6 +579,8 @@ public class AcslContractWorker {
 			return this.translateValidNode(expressionTree, source, scope);
 		case SET_BINDERS:
 			return this.translateSetBinders(expressionTree, source, scope);
+		case REMOTE_ACCESS:
+			return translateRemoteExpression(expressionTree, source, scope);
 		case SIZEOF:
 			// return translateSizeOf(source, expressionTree, scope);
 		case FORALL:
@@ -621,6 +626,25 @@ public class AcslContractWorker {
 			predicate = this.translateExpression(predicateTree, newScope);
 		return this.nodeFactory.newMemorySetNode(source, term, binders,
 				predicate);
+	}
+
+	private ExpressionNode translateRemoteExpression(CommonTree tree,
+			Source source, SimpleScope scope) throws SyntaxException {
+		SimpleScope newScope = new SimpleScope(scope);
+		CommonTree var = (CommonTree) tree.getChild(0);
+		CommonTree proc = (CommonTree) tree.getChild(1);
+		ExpressionNode varExpr, procExpr;
+
+		varExpr = translateExpression(var, newScope);
+		procExpr = translateExpression(proc, newScope);
+		if (!varExpr.expressionKind().equals(
+				ExpressionKind.IDENTIFIER_EXPRESSION))
+			this.error(
+					"The first operand of a remote access operator must be an identifier: "
+							+ varExpr, var);
+		return nodeFactory.newRemoteExpressionNode(source, procExpr,
+				(IdentifierExpressionNode) varExpr);
+
 	}
 
 	private SequenceNode<VariableDeclarationNode> translateBinders(

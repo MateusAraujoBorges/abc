@@ -31,6 +31,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ContractVerifyNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind;
@@ -906,6 +907,35 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
+	private ExprTriple translateContractVerify(ContractVerifyNode conVeri,
+			boolean isVoid) {
+		ExprTriple functionTriple = translate(conVeri.getFunction(), false);
+		int numContextArgs = conVeri.getNumberOfContextArguments();
+		int numArgs = conVeri.getNumberOfArguments();
+		ExprTriple result = new ExprTriple(conVeri);
+
+		// you need the result of the function expression (even if isVoid)...
+		purify(functionTriple);
+		conVeri.setFunction(functionTriple.getNode());
+		result.addAllBefore(functionTriple.getBefore());
+		for (int i = 0; i < numContextArgs; i++) {
+			ExprTriple triple = translate(conVeri.getContextArgument(i), false);
+
+			purify(triple);
+			result.addAllBefore(triple.getBefore());
+			conVeri.setContextArgument(i, triple.getNode());
+		}
+		for (int i = 0; i < numArgs; i++) {
+			ExprTriple triple = translate(conVeri.getArgument(i), false);
+
+			purify(triple);
+			result.addAllBefore(triple.getBefore());
+			conVeri.setArgument(i, triple.getNode());
+		}
+		result.addAfter(nodeFactory.newExpressionStatementNode(conVeri));
+		return result;
+	}
+
 	/**
 	 * Translates a spawn expression. A spawn expression simply wraps a function
 	 * call expression, so the specification is exactly the same as that of
@@ -1752,6 +1782,9 @@ public class SideEffectRemover extends BaseTransformer {
 			return translateDot((DotNode) expression, isVoid);
 		case FUNCTION_CALL:
 			return translateFunctionCall((FunctionCallNode) expression, isVoid);
+		case CONTRACT_VERIFY:
+			return translateContractVerify((ContractVerifyNode) expression,
+					isVoid);
 		case GENERIC_SELECTION:
 			return translateGenericSelection((GenericSelectionNode) expression);
 		case OPERATOR:

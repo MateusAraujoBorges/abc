@@ -354,6 +354,8 @@ primaryExpression
 	| LPAREN term RPAREN 
 	  -> ^(TERM_PARENTHESIZED term)
     | mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
+    | REMOTE_ACCESS LPAREN a=ID COMMA b=primaryExpression RPAREN
+      -> ^(REMOTE_ACCESS $a $b)
 	;
 
 /* 6.5.2 */
@@ -629,9 +631,9 @@ mpi_expression
       -> ^(MPI_EMPTY_OUT primaryExpression)
     | MPI_SIZE LPAREN a=primaryExpression COMMA b=primaryExpression RPAREN
       -> ^(MPI_SIZE $a $b) 
-    | MPI_REGION LAPREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
+    | MPI_REGION LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
       -> ^(MPI_REGION $a $b $c)
-    | MPI_EQUALS LAPREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
+    | MPI_EQUALS LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
       -> ^(MPI_EQUALS $a $b $c $d)
     ;
 

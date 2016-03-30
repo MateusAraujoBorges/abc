@@ -81,7 +81,7 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 * A constant node; can be cast to {@link ConstantNode}. Note there are
 		 * many subtypes.
 		 */
-		CONSTANT,
+		CONSTANT, CONTRACT_VERIFY,
 		/**
 		 * A CIVL-C derivative expression; can be cast to
 		 * {@link DerivativeExpressionNode}.

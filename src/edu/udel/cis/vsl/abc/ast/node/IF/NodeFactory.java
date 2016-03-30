@@ -53,6 +53,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ContractVerifyNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
@@ -2451,4 +2452,8 @@ public interface NodeFactory {
 	MemorySetNode newMemorySetNode(Source source, ExpressionNode term,
 			SequenceNode<VariableDeclarationNode> binders,
 			ExpressionNode predicate);
+
+	ContractVerifyNode newContractVerifyNode(Source source,
+			ExpressionNode function, List<ExpressionNode> arguments,
+			SequenceNode<ExpressionNode> scopeList);
 }

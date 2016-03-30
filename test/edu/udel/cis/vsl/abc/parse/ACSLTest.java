@@ -105,6 +105,13 @@ public class ACSLTest {
 	}
 
 	@Test
+	public void remoteAccess() throws PreprocessorException, SyntaxException,
+			ParseException {
+		// this.parse("valid.c");
+		parse("remoteAccess.c");
+	}
+
+	@Test
 	public void memLocation1() throws PreprocessorException, SyntaxException,
 			ParseException {
 		this.parse("memLocation1.c");

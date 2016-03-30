@@ -68,6 +68,7 @@ MPI_EMPTY_OUT : '\\mpi_empty_out';
 MPI_SIZE : '\\mpi_size';
 MPI_REGION : '\\mpi_region';
 MPI_EQUALS : '\\mpi_equals';
+REMOTE_ACCESS : '\\remote' ;
 
 /* keywords of terms */
 EMPTY   :   '\\empty';

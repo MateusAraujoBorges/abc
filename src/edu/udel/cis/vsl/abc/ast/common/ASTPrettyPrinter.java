@@ -48,6 +48,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ContractVerifyNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -1838,12 +1839,19 @@ public class ASTPrettyPrinter {
 					.getCall()));
 			result.append(")");
 			break;
+		case CONTRACT_VERIFY:
+			result.append("$contractVerify ");
+			result.append(contractVerify2Pretty(((ContractVerifyNode) expression)));
+			result.append(")");
+			break;
 		case REMOTE_REFERENCE:
-			result.append(expression2Pretty(((RemoteExpressionNode) expression)
-					.getProcessExpression()));
-			result.append("@");
+			result.append("\\remote(");
 			result.append(expression2Pretty(((RemoteExpressionNode) expression)
 					.getIdentifierNode()));
+			result.append(" , ");
+			result.append(expression2Pretty(((RemoteExpressionNode) expression)
+					.getProcessExpression()));
+			result.append(")");
 			break;
 		case RESULT:
 			result.append("\\result");
@@ -1980,6 +1988,30 @@ public class ASTPrettyPrinter {
 	}
 
 	private static StringBuffer functionCall2Pretty(FunctionCallNode call) {
+		int argNum = call.getNumberOfArguments();
+		StringBuffer result = new StringBuffer();
+
+		result.append(expression2Pretty(call.getFunction()));
+		if (call.getNumberOfContextArguments() > 0) {
+			result.append("<<<");
+			for (int i = 0; i < call.getNumberOfContextArguments(); i++) {
+				if (i > 0)
+					result.append(", ");
+				result.append(expression2Pretty(call.getContextArgument(i)));
+			}
+			result.append(">>>");
+		}
+		result.append("(");
+		for (int i = 0; i < argNum; i++) {
+			if (i > 0)
+				result.append(", ");
+			result.append(expression2Pretty(call.getArgument(i)));
+		}
+		result.append(")");
+		return result;
+	}
+
+	private static StringBuffer contractVerify2Pretty(ContractVerifyNode call) {
 		int argNum = call.getNumberOfArguments();
 		StringBuffer result = new StringBuffer();
 
