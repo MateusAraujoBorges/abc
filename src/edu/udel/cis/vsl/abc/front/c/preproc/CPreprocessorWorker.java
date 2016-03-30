@@ -252,29 +252,17 @@ public class CPreprocessorWorker {
 		try {
 			file = new File(filename);
 			if (isSystem) {
-				charStream = findInternalSystemFile(filename);
+				charStream = getCharStreamFromSystem(filename);
+				// no such file:
 				if (charStream == null)
 					return null;
 			} else
 				charStream = PreprocessorUtils
 						.newFilteredCharStreamFromFile(file);
 		} catch (FileNotFoundException fof) {
-			file = findFile(userIncludePaths, filename);
-			if (file == null)
-				file = findFile(systemIncludePaths, filename);
-			if (file == null) {
-				// charStream =
-				// PreprocessorUtils.newFilteredCharStreamFromResource(
-				// filename, "/" + filename);
-				charStream = findInternalSystemFile(filename);
-
-				if (charStream == null)
-					return null;
-				file = new File(filename);
-			} else {
-				charStream = PreprocessorUtils
-						.newFilteredCharStreamFromFile(file);
-			}
+			// If the target file is not in the current directory, search as a
+			// system library file
+			charStream = getCharStreamFromSystem(filename);
 		}
 		lexer = new PreprocessorLexer(charStream);
 		parser = new PreprocessorParser(new CommonTokenStream(lexer));
@@ -289,6 +277,39 @@ public class CPreprocessorWorker {
 				userIncludePaths, macroMap, tokenFactory, this, false);
 
 		return tokenSource;
+	}
+
+	/**
+	 * This method loads char stream for system implementation files. Paths are
+	 * searched with following rules:
+	 * <ol>
+	 * <li>
+	 * The first priority is user defined include paths and system paths (which
+	 * is outside of the jar file)</li>
+	 * <li>The second priority is internal resources in the jar file</li>
+	 * <li>The lowest priority is the current path</li>
+	 * </ol>
+	 * 
+	 * @param filename
+	 * @return
+	 * @throws IOException
+	 */
+	private CharStream getCharStreamFromSystem(String filename)
+			throws IOException {
+		File file = findFile(userIncludePaths, filename);
+		CharStream charStream;
+
+		if (file == null)
+			file = findFile(systemIncludePaths, filename);
+		if (file == null) {
+			charStream = findInternalSystemFile(filename);
+			if (charStream == null)
+				return null;
+			file = new File(filename);
+		} else {
+			charStream = PreprocessorUtils.newFilteredCharStreamFromFile(file);
+		}
+		return charStream;
 	}
 
 	CivlcTokenSource tokenSourceOfLibrary(String name) {
