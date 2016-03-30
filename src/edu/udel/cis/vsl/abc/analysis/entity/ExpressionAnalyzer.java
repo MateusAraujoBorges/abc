@@ -1041,10 +1041,6 @@ public class ExpressionAnalyzer {
 
 	private void processQuantifiedExpression(QuantifiedExpressionNode node)
 			throws SyntaxException {
-		if (!node.isSideEffectFree(false))
-			throw this
-					.error("quantified expressions are not allowed to have side effects.",
-							node);
 		entityAnalyzer.declarationAnalyzer.processVariableDeclaration(node
 				.variable());
 		if (node.isRange()) {
@@ -1055,6 +1051,10 @@ public class ExpressionAnalyzer {
 		}
 		processExpression(node.expression());
 		node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
+		if (!node.isSideEffectFree(false))
+			throw this
+					.error("quantified expressions are not allowed to have side effects.",
+							node);
 	}
 
 	private void processDerivativeExpression(DerivativeExpressionNode node)
