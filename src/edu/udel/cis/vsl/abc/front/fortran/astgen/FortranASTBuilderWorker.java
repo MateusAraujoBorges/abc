@@ -84,6 +84,7 @@ public class FortranASTBuilderWorker {
 	private boolean hasSTDIO = false;
 
 	private Map<String, TypeNode> localMap = new HashMap<String, TypeNode>();
+	//private Map<String, VariableDeclarationNode> localMap2 = new HashMap<String, VariableDeclarationNode>();
 
 	private List<BlockItemNode> tempItems = null;
 
@@ -212,8 +213,6 @@ public class FortranASTBuilderWorker {
 			int numOfFormals = parameterNode.numChildren();
 
 			for (int i = 0; i < numOfFormals; i++) {
-				// TODO: Can't solve formals with inappropriate order.
-				// Such as: init(array, array_length);
 				/*
 				 * A first letter of I, J, K, L, M, or N implies type integer
 				 * and any other letter type real, unless an IMPLICIT statement
@@ -793,7 +792,7 @@ public class FortranASTBuilderWorker {
 			break;
 		case 1236: /* ReaturnStatement */
 			// TODO: Return Statement for Fortran represents a exit for a
-			// subprogram.
+			// subprogram such as subroutines or functions.
 			result = nodeFactory.newReturnNode(generateSource(blockItemNode),
 					null);
 			break;
@@ -1144,7 +1143,7 @@ public class FortranASTBuilderWorker {
 		int numOfOutputItem = outputListTree.numChildren();
 		List<ExpressionNode> argumentList = new LinkedList<ExpressionNode>();
 		FunctionCallNode callNode = null;
-		// Dummy: TODO: Format Analysis
+		// TODO: All variables use "%s" (CIVL doesn't analysis the format.)
 		String formatStr = "\"";
 		CivlcToken cToken = null;
 		StringToken strToken = null;
