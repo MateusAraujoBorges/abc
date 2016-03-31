@@ -530,8 +530,9 @@ public class ASTPrettyPrinter {
 		int numOfParas = paras.numChildren();
 		SequenceNode<ContractNode> contracts = function.getContract();
 
-		if (contracts != null)
+		if (contracts != null && contracts.numChildren() > 0)
 			pPrintContracts(out, prefix, contracts);
+		out.print(prefix);
 		if (function instanceof AbstractFunctionDefinitionNode)
 			out.print("$abstract ");
 		if (function.hasGlobalFunctionSpecifier())
@@ -544,7 +545,6 @@ public class ASTPrettyPrinter {
 			out.print("inline ");
 		if (function.hasNoreturnFunctionSpecifier())
 			out.print("_Noreturn ");
-		out.print(prefix);
 		out.print(type2Pretty("", returnType, false));
 		out.print(" ");
 		out.print(function.getName());
