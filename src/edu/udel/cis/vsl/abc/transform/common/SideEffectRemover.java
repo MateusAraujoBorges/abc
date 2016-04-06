@@ -1880,7 +1880,6 @@ public class SideEffectRemover extends BaseTransformer {
 		case VARIABLE_DECLARATION:
 			return this
 					.translateVariableDeclaration((VariableDeclarationNode) ordinaryDecl);
-			// TODO code review stops here 03/23/2016
 		case FUNCTION_DEFINITION:
 			this.normalizeFunctionDefinition((FunctionDefinitionNode) ordinaryDecl);
 		case FUNCTION_DECLARATION:
@@ -2285,9 +2284,7 @@ public class SideEffectRemover extends BaseTransformer {
 		List<BlockItemNode> condItems = condTriple.getBefore();
 		List<BlockItemNode> result = new LinkedList<>();
 
-		if (condItems.isEmpty()) {
-			// nothing to do
-		} else {
+		if (!condItems.isEmpty()) {
 			CompoundStatementNode body = makeCompound(doLoop.getBody());
 			List<BlockItemNode> newCondItems = new LinkedList<>();
 
@@ -2497,6 +2494,7 @@ public class SideEffectRemover extends BaseTransformer {
 			return translateLabeledStatement((LabeledStatementNode) statement);
 		case LOOP:
 			return translateLoop((LoopNode) statement);
+			// code review stops here on 04/06/2016
 		case NULL:
 			return Arrays.asList((BlockItemNode) statement);
 		case OMP:
@@ -2702,6 +2700,9 @@ public class SideEffectRemover extends BaseTransformer {
 	 * 
 	 * TODO: is the domain expression allowed to have side-effects?
 	 * 
+	 * FIXME: the invariant shouldn't have side effects, make the expression
+	 * analyzer report an error
+	 * 
 	 * @param civlFor
 	 * @return
 	 */
@@ -2761,13 +2762,9 @@ public class SideEffectRemover extends BaseTransformer {
 			StatementNode child = choose.getSequenceChild(i);
 			List<BlockItemNode> normalItems = translateStatement(child);
 
-			for (BlockItemNode normalItem : normalItems)
-				normalItem.remove();
-			if (normalItems.size() == 1)
-				choose.setChild(i, normalItems.get(0));
-			else
-				choose.setChild(i, nodeFactory.newCompoundStatementNode(
-						child.getSource(), normalItems));
+			removeNodes(normalItems);
+			choose.setChild(i,
+					this.makeOneBlockItem(child.getSource(), normalItems));
 		}
 		return result;
 	}
@@ -2882,6 +2879,12 @@ public class SideEffectRemover extends BaseTransformer {
 	}
 
 	// special handling: short circuit expressions ...
+	/**
+	 * transforms short circuit expressions recursively.
+	 * 
+	 * @param node
+	 * @throws SyntaxException
+	 */
 	private void transformShortCircuitWork(ASTNode node) throws SyntaxException {
 		if ((node instanceof StatementNode)
 				&& !(node instanceof CompoundStatementNode)) {
@@ -2918,10 +2921,17 @@ public class SideEffectRemover extends BaseTransformer {
 		}
 	}
 
+	/**
+	 * checks if the given expression node is the condition of a loop node
+	 * 
+	 * @param expression
+	 * @return
+	 */
 	private boolean isConditionOfLoop(ExpressionNode expression) {
 		ASTNode parent = expression.parent();
 
 		if (parent instanceof LoopNode) {
+			// return expression.equals(((LoopNode)parent).getCondition());
 			return expression.childIndex() == 0;
 		}
 		return false;
@@ -2933,7 +2943,8 @@ public class SideEffectRemover extends BaseTransformer {
 	 * 
 	 * A short circuit expression is an operator expression of logical and/or.
 	 * 
-	 * If the expression doesn't contain any short circuit
+	 * If the expression doesn't contain any short circuit sub-expression, then
+	 * this is a no-op.
 	 * 
 	 * @param expression
 	 *            the expression to be transform
@@ -3068,6 +3079,13 @@ public class SideEffectRemover extends BaseTransformer {
 		return result;
 	}
 
+	/**
+	 * creates a new temporary variable with unique name.
+	 * 
+	 * @param source
+	 * @param type
+	 * @return
+	 */
 	private VariableDeclarationNode newTempVariable(Source source, Type type) {
 		String tmpId = tempVariablePrefix + (tempVariableCounter++);
 
