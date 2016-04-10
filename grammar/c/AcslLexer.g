@@ -65,7 +65,7 @@ MPI_COLLECTIVE : '\\mpi_collective';
 //---expressions:
 MPI_EMPTY_IN : '\\mpi_empty_in';
 MPI_EMPTY_OUT : '\\mpi_empty_out';
-MPI_SIZE : '\\mpi_size';
+MPI_AGREE : '\\mpi_agree';
 MPI_REGION : '\\mpi_region';
 MPI_EQUALS : '\\mpi_equals';
 REMOTE_ACCESS : '\\remote' ;

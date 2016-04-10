@@ -114,6 +114,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
@@ -1161,21 +1162,43 @@ public class AcslContractWorker {
 			mpiExprKind = MPIContractExpressionKind.MPI_REGION;
 			initialType = typeFactory.pointerType(typeFactory.voidType());
 			break;
-		case AcslParser.MPI_SIZE:
-			numArgs = 2;
-			mpiExprKind = MPIContractExpressionKind.MPI_SIZE;
-			initialType = typeFactory.signedIntegerType(SignedIntKind.INT);
+		case AcslParser.MPI_AGREE:
+			numArgs = 1;
+			mpiExprKind = MPIContractExpressionKind.MPI_AGREE;
+			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
 		default:
 			throw error("Unknown MPI expression " + exprName, expressionTree);
 		}
-		for (int i = 0; i < numArgs; i++)
-			args.add(this.translateExpression(
-					(CommonTree) expression.getChild(i), scope));
+		for (int i = 0; i < numArgs; i++) {
+			if (i == 2 && kind == AcslParser.MPI_EQUALS) {
+				args.add(this.translateEnumerationConstantNode(
+						(CommonTree) expression.getChild(i), source, scope));
+			} else
+				args.add(this.translateExpression(
+						(CommonTree) expression.getChild(i), scope));
+		}
 		result = nodeFactory.newMPIExpressionNode(source, args, mpiExprKind,
 				exprName);
 		result.setInitialType(initialType);
 		return result;
+	}
+
+	private EnumerationConstantNode translateEnumerationConstantNode(
+			CommonTree expressionTree, Source source, SimpleScope scope)
+			throws SyntaxException {
+		ExpressionNode identifierExpr = this.translateExpression(
+				expressionTree, scope);
+
+		if (identifierExpr.expressionKind().equals(
+				ExpressionKind.IDENTIFIER_EXPRESSION)) {
+			IdentifierNode ident = ((IdentifierExpressionNode) identifierExpr)
+					.getIdentifier();
+
+			return nodeFactory.newEnumerationConstantNode(ident.copy());
+		}
+		throw error("Expecting an identifer for an enumeration constant.",
+				expressionTree);
 	}
 
 	private SyntaxException error(String message, CommonTree tree) {

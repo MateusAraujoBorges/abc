@@ -629,8 +629,8 @@ mpi_expression
       -> ^(MPI_EMPTY_IN primaryExpression)
     | MPI_EMPTY_OUT LPAREN primaryExpression RPAREN
       -> ^(MPI_EMPTY_OUT primaryExpression)
-    | MPI_SIZE LPAREN a=primaryExpression COMMA b=primaryExpression RPAREN
-      -> ^(MPI_SIZE $a $b) 
+    | MPI_AGREE LPAREN a=variable_ident_base RPAREN /* seems variable_ident not ready yet */
+      -> ^(MPI_AGREE $a) 
     | MPI_REGION LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
       -> ^(MPI_REGION $a $b $c)
     | MPI_EQUALS LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN

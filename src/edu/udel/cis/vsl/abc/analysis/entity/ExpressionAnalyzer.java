@@ -74,6 +74,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.IntegerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.PointerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.QualifiedObjectType;
+import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType.SignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StructureOrUnionType;
@@ -142,6 +143,8 @@ public class ExpressionAnalyzer {
 
 	private IntegerType intType;
 
+	private StandardBasicType boolType;
+
 	private SpecialFunctionCallAnalyzer specialCallAnalyzer;
 
 	private Configuration config;
@@ -161,6 +164,7 @@ public class ExpressionAnalyzer {
 		this.conversionFactory = conversionFactory;
 		this.typeFactory = typeFactory;
 		this.intType = typeFactory.signedIntegerType(SignedIntKind.INT);
+		this.boolType = typeFactory.basicType(BasicTypeKind.BOOL);
 		this.astFactory = entityAnalyzer.astFactory;
 		this.nodeFactory = astFactory.getNodeFactory();
 		// this.language = entityAnalyzer.configuration.getLanguage();
@@ -2114,6 +2118,7 @@ public class ExpressionAnalyzer {
 		MPIContractExpressionKind kind = node.MPIContractExpressionKind();
 		int numArgs = node.numArguments();
 		Type[] formalTypes;
+		Type exprType;
 
 		if (kind.equals(MPIContractExpressionKind.MPI_INTEGER_CONSTANT)) {
 			assert node.getType().equals(intType);
@@ -2124,20 +2129,24 @@ public class ExpressionAnalyzer {
 		case MPI_EMPTY_IN:
 		case MPI_EMPTY_OUT:
 			formalTypes[0] = intType;
+			exprType = boolType;
 			break;
-		case MPI_SIZE:
-			formalTypes[0] = intType;
-			formalTypes[1] = intType;
+		case MPI_AGREE:
+			formalTypes[0] = null;
+			exprType = boolType;
 			break;
 		case MPI_REGION:
 			formalTypes[0] = typeFactory.pointerType(typeFactory.voidType());
 			formalTypes[1] = intType;
 			formalTypes[2] = intType;
+			exprType = typeFactory.voidType();
 			break;
 		case MPI_EQUALS:
-			formalTypes[0] = typeFactory.pointerType(typeFactory.voidType());
+			formalTypes[0] = null;
 			formalTypes[1] = intType;
-			formalTypes[2] = intType;
+			formalTypes[2] = null;
+			formalTypes[3] = null;
+			exprType = boolType;
 			break;
 		default:
 			throw error("Unknown MPI contract expression kind: " + kind, node);
@@ -2148,11 +2157,21 @@ public class ExpressionAnalyzer {
 		for (int i = 0; i < numArgs; i++) {
 			ExpressionNode argument = node.getArgument(i);
 			processExpression(argument);
-			if (!argument.getType().equals(formalTypes[i]))
-				throw error("The " + i
-						+ "th argument of MPI contract expression " + kind
-						+ "must has an " + formalTypes[i], node);
+			if (formalTypes[i] != null) {
+				if (!argument.getType().equals(formalTypes[i]))
+					throw error("The argument in " + i
+							+ " position of MPI contract expression " + kind
+							+ " must has an " + formalTypes[i], node);
+			} else if (i == 0 && kind == MPIContractExpressionKind.MPI_EQUALS) {
+				if (argument.getType().compatibleWith(
+						typeFactory.pointerType(typeFactory.voidType())))
+					throw error("The argument in " + 0
+							+ " position of MPI contract expression " + kind
+							+ " must has a pointer type", node);
+			}
+
 		}
+		node.setInitialType(exprType);
 	}
 
 	/**

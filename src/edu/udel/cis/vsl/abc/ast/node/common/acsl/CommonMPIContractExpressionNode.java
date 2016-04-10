@@ -72,8 +72,8 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 			case MPI_EMPTY_OUT:
 				numArgs = 1;
 				break;
-			case MPI_SIZE:
-				numArgs = 2;
+			case MPI_AGREE:
+				numArgs = 1;
 				break;
 			case MPI_REGION:
 				numArgs = 3;
