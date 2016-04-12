@@ -126,8 +126,8 @@ public class CommonFunctionDeclarationNode extends
 		result.setInlineFunctionSpecifier(hasInlineFunctionSpecifier());
 		result.setNoreturnFunctionSpecifier(hasNoreturnFunctionSpecifier());
 		result.setGlobalFunctionSpecifier(hasGlobalFunctionSpecifier());
-		result.setAtomicFunctionSpeciier(this.hasAtomicFunctionSpeciier());
-		result.setSystemFunctionSpeciier(this.hasSystemFunctionSpeciier());
+		result.setAtomicFunctionSpecifier(this.hasAtomicFunctionSpecifier());
+		result.setSystemFunctionSpecifier(this.hasSystemFunctionSpecifier());
 		copyStorage(result);
 		return result;
 	}
@@ -159,32 +159,32 @@ public class CommonFunctionDeclarationNode extends
 	}
 
 	@Override
-	public void setPureFunctionSpeciier(boolean value) {
+	public void setPureFunctionSpecifier(boolean value) {
 		this.pureFunctionSpecifier = value;
 	}
 
 	@Override
-	public void setAtomicFunctionSpeciier(boolean value) {
+	public void setAtomicFunctionSpecifier(boolean value) {
 		this.atomicFunctionSpecifier = value;
 	}
 
 	@Override
-	public void setSystemFunctionSpeciier(boolean value) {
+	public void setSystemFunctionSpecifier(boolean value) {
 		this.systemFunctionSpecifier = value;
 	}
 
 	@Override
-	public boolean hasPureFunctionSpeciier() {
+	public boolean hasPureFunctionSpecifier() {
 		return this.pureFunctionSpecifier;
 	}
 
 	@Override
-	public boolean hasAtomicFunctionSpeciier() {
+	public boolean hasAtomicFunctionSpecifier() {
 		return this.atomicFunctionSpecifier;
 	}
 
 	@Override
-	public boolean hasSystemFunctionSpeciier() {
+	public boolean hasSystemFunctionSpecifier() {
 		return this.systemFunctionSpecifier;
 	}
 }

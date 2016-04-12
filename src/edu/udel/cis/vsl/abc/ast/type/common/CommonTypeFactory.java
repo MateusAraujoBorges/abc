@@ -91,12 +91,6 @@ public class CommonTypeFactory implements TypeFactory {
 		((CommonType) type).setId(typeMap.size());
 		typeMap.put(type, type);
 		typeList.add(type);
-
-		// Debugging:
-
-		// System.out.println("Adding type: "+type.toString());
-		// System.out.flush();
-
 	}
 
 	private Type canonicalize(Type type) {

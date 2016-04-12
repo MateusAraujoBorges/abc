@@ -201,7 +201,7 @@ public class CompareCombiner implements Combiner {
 		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
 				specSource, name, funcType, null);
 
-		function.setSystemFunctionSpeciier(true);
+		function.setSystemFunctionSpecifier(true);
 		return function;
 	}
 
@@ -244,7 +244,7 @@ public class CompareCombiner implements Combiner {
 		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
 				specSource, name, funcType, null);
 
-		function.setSystemFunctionSpeciier(true);
+		function.setSystemFunctionSpecifier(true);
 		return function;
 	}
 
@@ -275,7 +275,7 @@ public class CompareCombiner implements Combiner {
 		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
 				specSource, name, funcType, null);
 
-		function.setSystemFunctionSpeciier(true);
+		function.setSystemFunctionSpecifier(true);
 		return function;
 	}
 

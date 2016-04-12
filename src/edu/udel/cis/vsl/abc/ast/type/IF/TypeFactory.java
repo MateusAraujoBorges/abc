@@ -408,15 +408,19 @@ public interface TypeFactory {
 			boolean inputQualified, boolean outputQualified);
 
 	/**
+	 * <p>
 	 * Given two compatible types, returns the "composite type" obtained by
 	 * combining features of both types. If the two types are not compatible,
 	 * the behavior is undefined. Hence, you should always check compatibility
 	 * before invoking this method (i.e., check that type1.compatibleWith(type2)
 	 * is true).
+	 * </p>
 	 * 
+	 * <p>
 	 * Implementation: there are special rules for array and function types
 	 * described in C11 Sec. 6.2.7(3). For all other types, the types have to be
 	 * basically equivalent, so we just return type1.
+	 * </p>
 	 * 
 	 * @param type1
 	 *            a type

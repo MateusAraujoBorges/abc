@@ -537,9 +537,9 @@ public class ASTPrettyPrinter {
 			out.print("$abstract ");
 		if (function.hasGlobalFunctionSpecifier())
 			out.print("__global__ ");
-		if (function.hasAtomicFunctionSpeciier())
+		if (function.hasAtomicFunctionSpecifier())
 			out.print("$atomic_f ");
-		if (function.hasSystemFunctionSpeciier())
+		if (function.hasSystemFunctionSpecifier())
 			out.print("$system ");
 		if (function.hasInlineFunctionSpecifier())
 			out.print("inline ");

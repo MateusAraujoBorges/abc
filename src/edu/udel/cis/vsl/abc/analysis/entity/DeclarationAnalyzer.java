@@ -137,10 +137,11 @@ public class DeclarationAnalyzer {
 				typedef = (Typedef) entity;
 				oldType = typedef.getType();
 				if (!type.equals(oldType))
-					throw entityAnalyzer
-							.error("Redefiniton of typedef name with different type.  "
+					throw entityAnalyzer.error(
+							"Redefiniton of typedef name with different type.  "
 									+ "Original definition was at "
-									+ typedef.getDefinition().getSource(), node);
+									+ typedef.getDefinition().getSource(),
+							node);
 			} else {
 				typedef = entityAnalyzer.entityFactory.newTypedef(name, type);
 				try {
@@ -161,13 +162,19 @@ public class DeclarationAnalyzer {
 		return processVariableDeclaration(node, false);
 	}
 
-	// TODO: problem is contract uses variables x declared
-	// as formal parameters but scope is outside of that scope.
-	// function scope: contract, type
-
+	/**
+	 * Processes a function declaration. The declaration's type node is
+	 * processed. If the {@link Function} entity does not already exist, it is
+	 * created and added to the current scope. The declaration is added to the
+	 * entity's list of declarations.
+	 * 
+	 * @param node
+	 * @return
+	 * @throws SyntaxException
+	 */
 	Function processFunctionDeclaration(FunctionDeclarationNode node)
 			throws SyntaxException {
-		Function result = (Function) processOrdinaryDeclaration(node);
+		Function result = (Function) processOrdinaryDeclaration(node, false);
 		SequenceNode<ContractNode> contract = node.getContract();
 
 		addDeclarationToFunction(result, node);
@@ -186,9 +193,9 @@ public class DeclarationAnalyzer {
 	}
 
 	/**
-	 * Processes a variable declaration node, creating the Variable entity if
-	 * this is the definition, adding it to the appropriate scope, processing
-	 * the type node, etc.
+	 * Processes a variable declaration node, creating the {@link Variable}
+	 * entity if this is the definition, adding it to the appropriate scope,
+	 * processing the type node, etc.
 	 * 
 	 * @param node
 	 *            a variable declaration node
@@ -202,11 +209,15 @@ public class DeclarationAnalyzer {
 	Variable processVariableDeclaration(VariableDeclarationNode node,
 			boolean isParameter) throws SyntaxException {
 		Variable result = (Variable) processOrdinaryDeclaration(node,
-				isParameter);
+				isParameter); // result has type and linkage
 		InitializerNode initializer = node.getInitializer();
 
 		if (result != null) {
 			ObjectType type;
+
+			// problem: if the entity is new, then you do not need to form
+			// composite
+			// of declaration type and entity type
 
 			addDeclarationToVariable(result, node);
 			type = result.getType();
@@ -232,8 +243,8 @@ public class DeclarationAnalyzer {
 			entityAnalyzer.expressionAnalyzer
 					.processExpression((ExpressionNode) initializer);
 			try {
-				entityAnalyzer.expressionAnalyzer.processAssignment(
-						currentType, rhs);
+				entityAnalyzer.expressionAnalyzer.processAssignment(currentType,
+						rhs);
 			} catch (UnsourcedException e) {
 				throw error(e, initializer);
 			}
@@ -309,8 +320,8 @@ public class DeclarationAnalyzer {
 			return LinkageKind.INTERNAL;
 		}
 		hasNoStorageClass = hasNoStorageClass(node);
-		if (node.hasExternStorage()
-				|| (isFunction && hasNoStorageClass && (isFileScope || !civl()))) {
+		if (node.hasExternStorage() || (isFunction && hasNoStorageClass
+				&& (isFileScope || !civl()))) {
 			OrdinaryEntity previous = scope.getLexicalOrdinaryEntity(false,
 					name);
 
@@ -341,37 +352,58 @@ public class DeclarationAnalyzer {
 		return LinkageKind.NONE;
 	}
 
-	private OrdinaryEntity processOrdinaryDeclaration(
-			OrdinaryDeclarationNode node) throws SyntaxException {
-		return processOrdinaryDeclaration(node, false);
-	}
-
 	/**
+	 * <p>
 	 * Processes an ordinary declaration, i.e., one which declares a variable or
-	 * function. (And not a structure/union member, enumerator, or typedef.) If
-	 * the declared entity has not yet been encountered, and Entity object is
-	 * created and added to the appropriate scope.
+	 * function (and not a structure/union member, enumerator, or typedef), and
+	 * returns the corresponding {@link Entity}. Does all of the following:
+	 * </p>
 	 * 
-	 * This method does not do everything needed to process an ordinary
+	 * <ul>
+	 * <li>processes the declaration node's type node</li>
+	 * <li>if the declaration node's identifier is <code>null</code>, returns
+	 * <code>null</code></li>
+	 * <li>if the declared {@link Entity} has not yet been encountered, an
+	 * {@link Entity} object is created and added to the appropriate scope. The
+	 * new entity will have type and linkage as specified by the declaration.
+	 * </li>
+	 * <li>if on the other hand the entity already exists, the declaration's
+	 * linkage is checked for consistency with that of the existing entity, the
+	 * entity's type is updated to be the composite type of its current type and
+	 * the type of the declaration</li>
+	 * <li>in either case, the declaration node and its identifier node will
+	 * have the entity field set, and this method returns the entity (old or
+	 * new).</li>
+	 * <li>if this declares a function called "main", the AST to which the
+	 * declaration node belong has its "main function" field set to the function
+	 * entity.</li>
+	 * </ul>
+	 * 
+	 * <p>
+	 * Note: This method does not do everything needed to process an ordinary
 	 * declaration. It just does the stuff that is common to both an object and
 	 * function declaration.
+	 * </p>
 	 * 
+	 * <p>
 	 * Note that an entity can belong to multiple scopes! It is added to every
-	 * scope in which it is declared. An entity with no linkage can belong to
-	 * only one scope. An Entity with internal or external linkage can belong to
-	 * multiple scopes.
+	 * scope in which it is declared. An {@link Entity} with no linkage can
+	 * belong to only one scope. An {@link Entity} with internal or external
+	 * linkage can belong to multiple scopes.
+	 * </p>
 	 * 
 	 * 
 	 * @param node
 	 *            the declaration node
 	 * @param isParameter
-	 *            is the declaration the declaration of a function parameter or
-	 *            scope parameter?
+	 *            is the declaration the declaration of a function parameter?
 	 * @throws SyntaxException
+	 *             if the type or linkage specified by the declaration node is
+	 *             not compatible with that of earlier declarations
 	 */
 	private OrdinaryEntity processOrdinaryDeclaration(
 			OrdinaryDeclarationNode node, boolean isParameter)
-			throws SyntaxException {
+					throws SyntaxException {
 		AST ast = node.getOwner();
 		IdentifierNode identifier = node.getIdentifier();
 		TypeNode typeNode = node.getTypeNode();
@@ -382,6 +414,7 @@ public class DeclarationAnalyzer {
 		LinkageKind linkage;
 		String name;
 		OrdinaryEntity entity;
+		boolean isNew = false;
 
 		if (identifier == null)
 			return null;
@@ -392,43 +425,52 @@ public class DeclarationAnalyzer {
 		linkage = computeLinkage(node);
 		name = identifier.name();
 		entity = scope.getOrdinaryEntity(false, name);
-		// CIVL allows multiple function declarations in block
+		// CIVL, but not C, allows multiple function declarations in block
 		// scope with no linkage and same identifier, all signifying
 		// the same function
 		if (linkage == LinkageKind.NONE) {
 			if (entity != null) {
-				if (!(civl() && isFunction && scope.getScopeKind() == ScopeKind.BLOCK))
-					throw error("Redeclaration of identifier with no linkage. "
-							+ "Original declaration was at "
-							+ entity.getDeclaration(0).getSource(), identifier);
+				if (!(civl() && isFunction
+						&& scope.getScopeKind() == ScopeKind.BLOCK))
+					throw error(
+							"Redeclaration of identifier with no linkage. "
+									+ "Original declaration was at "
+									+ entity.getDeclaration(0).getSource(),
+							identifier);
 			} else {
-				entity = isFunction ? entityAnalyzer.entityFactory.newFunction(
-						name, linkage, type) : entityAnalyzer.entityFactory
-						.newVariable(name, linkage, type);
+				entity = isFunction
+						? entityAnalyzer.entityFactory.newFunction(name,
+								linkage, type)
+						: entityAnalyzer.entityFactory.newVariable(name,
+								linkage, type);
+				isNew = true;
 				try {
 					scope.add(entity);
 				} catch (UnsourcedException e) {
 					throw error(e, identifier);
 				}
 			}
-		} else {
-			if (entity != null) {
+		} else { // declaration node's linkage is EXTERNAL or INTERNAL
+			if (entity != null) { // entity found in current scope
 				if (entity.getLinkage() != linkage)
 					throw error(
 							"Disagreement on internal/external linkage between two declarations",
 							node);
-			} else {
-				entity = ast.getInternalOrExternalEntity(name);
-				if (entity != null) {
+			} else { // entity not in current scope, look elsewhere...
+				entity = ast.getInternalOrExternalEntity(name); // find the
+																// entity
+				if (entity != null) { // entity found in different scope
 					if (entity.getLinkage() != linkage)
 						throw error(
 								"Disagreement on internal/external linkage between two declarations",
 								node);
-				} else {
-					entity = isFunction ? entityAnalyzer.entityFactory
-							.newFunction(name, linkage, type)
+				} else { // entity does not yet exist
+					entity = isFunction
+							? entityAnalyzer.entityFactory.newFunction(name,
+									linkage, type)
 							: entityAnalyzer.entityFactory.newVariable(name,
 									linkage, type);
+					isNew = true;
 					ast.add(entity);
 				}
 				try {
@@ -445,6 +487,8 @@ public class DeclarationAnalyzer {
 				ast.setMain((Function) entity);
 			}
 		}
+		if (!isNew)
+			addTypeToVariableOrFunction(typeNode, entity);
 		return entity;
 	}
 
@@ -458,32 +502,66 @@ public class DeclarationAnalyzer {
 				throw error("Internal error: type not processed", typeNode);
 			if (oldType == null)
 				entity.setType(type);
-			else
-				entity.setType(entityAnalyzer.typeFactory.compositeType(
-						oldType, type));
+			else {
+				if (!oldType.compatibleWith(type))
+					throw error(
+							"Redeclaration of entity with incompatible type: "
+									+ entity.getName() + "\nOriginal type: "
+									+ oldType + "\nNew type: " + type,
+							typeNode);
+				entity.setType(entityAnalyzer.typeFactory.compositeType(oldType,
+						type));
+			}
 		}
 	}
 
-	// precondition: type has already been set in decl and
-	// linkage has been computed.
+	/**
+	 * <p>
+	 * Adds a declaration of a variable to that variable.
+	 * </p>
+	 * 
+	 * <p>
+	 * Preconditions: the {@link TypeNode} of <code>declaration</code> has
+	 * already been processed and its {@link Type} set. If the declaration has a
+	 * non-<code>null</code> {@link InitializerNode}, the initializer node has
+	 * been processed. The linkage of <code>variable</code> has been set
+	 * appropriately.
+	 * </p>
+	 * 
+	 * <p>
+	 * Each variable maintains a list of all of its declarations. This method
+	 * will do the following: (1) if the initializer is present, checks that
+	 * there is no previous initializer for <code>variable</code>, and then make
+	 * this declaration the definition. (2) if the initializer is not present
+	 * but the linkage of <code>variable</code> is {@link LinkageKind#NONE}, the
+	 * declaration is also the definition and the definition of the variable is
+	 * set to the declaration as well. (3) the alignment specifiers of the
+	 * declaration are processed and added to the variable's lists.
+	 * </p>
+	 * 
+	 * @param variable
+	 *            a non-<code>null</code> {@link Variable}
+	 * @param declaration
+	 *            a declaration of <code>variable</code>
+	 * @throws SyntaxException
+	 *             if the type of <code>declaration</code> is incompatible with
+	 *             that of <code>variable</code>
+	 */
 	private void addDeclarationToVariable(Variable variable,
 			VariableDeclarationNode declaration) throws SyntaxException {
-		TypeNode typeNode = declaration.getTypeNode();
 		InitializerNode initializer = declaration.getInitializer();
 		SequenceNode<TypeNode> typeAlignmentSpecifiers = declaration
 				.typeAlignmentSpecifiers();
 		SequenceNode<ExpressionNode> constantAlignmentSpecifiers = declaration
 				.constantAlignmentSpecifiers();
 
-		addTypeToVariableOrFunction(typeNode, variable);
 		if (initializer != null) {
 			InitializerNode oldInitializer = variable.getInitializer();
 
 			if (oldInitializer != null)
-				throw error(
-						"Re-initialization of variable " + variable.getName()
-								+ ". First was at "
-								+ oldInitializer.getSource() + ".", initializer);
+				throw error("Re-initialization of variable "
+						+ variable.getName() + ". First was at "
+						+ oldInitializer.getSource() + ".", initializer);
 			variable.setInitializer(initializer);
 			variable.setDefinition(declaration);
 			declaration.setIsDefinition(true);
@@ -493,8 +571,8 @@ public class DeclarationAnalyzer {
 		}
 		if (typeAlignmentSpecifiers != null) {
 			for (TypeNode child : typeAlignmentSpecifiers)
-				variable.addTypeAlignment(entityAnalyzer.typeAnalyzer
-						.processTypeNode(child));
+				variable.addTypeAlignment(
+						entityAnalyzer.typeAnalyzer.processTypeNode(child));
 		}
 		if (constantAlignmentSpecifiers != null) {
 			for (ExpressionNode expression : constantAlignmentSpecifiers) {
@@ -512,7 +590,6 @@ public class DeclarationAnalyzer {
 
 	private void addDeclarationToFunction(Function function,
 			FunctionDeclarationNode declaration) throws SyntaxException {
-		TypeNode typeNode = declaration.getTypeNode();
 		OrdinaryDeclarationNode previousDeclaration;
 		Iterator<DeclarationNode> declarationIter = function.getDeclarations()
 				.iterator();
@@ -522,31 +599,23 @@ public class DeclarationAnalyzer {
 					.next();
 		else
 			previousDeclaration = null;
-		addTypeToVariableOrFunction(typeNode, function);
 		if (previousDeclaration == null) {
 			if (declaration.hasInlineFunctionSpecifier())
 				function.setIsInlined(true);
 			if (declaration.hasNoreturnFunctionSpecifier())
 				function.setDoesNotReturn(true);
-			if (declaration.hasAtomicFunctionSpeciier())
+			if (declaration.hasAtomicFunctionSpecifier())
 				function.setAtomic(true);
-			if (declaration.hasSystemFunctionSpeciier())
+			if (declaration.hasSystemFunctionSpecifier())
 				function.setSystemFunction(true);
 		} else {
-			// the standards never says that this is a problem, so commented it
-			// out
-			// if (declaration.hasInlineFunctionSpecifier() != function
-			// .isInlined())
-			// throw error(
-			// "Disagreement on inline function specifier at function declaration."
-			// + "  Previous declaration was at "
-			// + previousDeclaration.getSource(), declaration);
 			if (declaration.hasNoreturnFunctionSpecifier() != function
 					.doesNotReturn())
 				throw error(
-						"Disagreement on Noreturn function specifier at function declaration."
+						"Disagreement on Noreturn function specifier at function declaration.\n"
 								+ "  Previous declaration was at "
-								+ previousDeclaration.getSource(), declaration);
+								+ previousDeclaration.getSource(),
+						declaration);
 		}
 		if (declaration instanceof FunctionDefinitionNode) {
 			FunctionDefinitionNode previousDefinition = function
@@ -555,7 +624,8 @@ public class DeclarationAnalyzer {
 			if (previousDefinition != null)
 				throw error(
 						"Redefinition of function.  Previous definition was at "
-								+ previousDefinition.getSource(), declaration);
+								+ previousDefinition.getSource(),
+						declaration);
 			function.setDefinition(declaration);
 		}
 		function.addDeclaration(declaration);
@@ -565,8 +635,8 @@ public class DeclarationAnalyzer {
 		if (node.hasExternStorage() || node.hasStaticStorage())
 			return false;
 		if (node instanceof VariableDeclarationNode)
-			return !(((VariableDeclarationNode) node).hasRegisterStorage() || ((VariableDeclarationNode) node)
-					.hasAutoStorage());
+			return !(((VariableDeclarationNode) node).hasRegisterStorage()
+					|| ((VariableDeclarationNode) node).hasAutoStorage());
 		return true;
 	}
 

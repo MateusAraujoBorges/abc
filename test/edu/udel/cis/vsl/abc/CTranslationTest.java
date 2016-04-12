@@ -31,7 +31,7 @@ public class CTranslationTest {
 	 * Turn on a lot of output for debugging? Set this to true only in your
 	 * local copy. Be sure to set it back to false before committing!
 	 */
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	private static File root = new File("examples");
 
@@ -202,5 +202,10 @@ public class CTranslationTest {
 	@Test
 	public void identifier2() throws ABCException, IOException {
 		check("c/ident2");
+	}
+
+	@Test(expected = SyntaxException.class)
+	public void incompatibleFunctions() throws ABCException, IOException {
+		check("c/incompatibleFunctions");
 	}
 }

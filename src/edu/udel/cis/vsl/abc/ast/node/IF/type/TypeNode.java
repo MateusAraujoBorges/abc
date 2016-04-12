@@ -20,7 +20,16 @@ public interface TypeNode extends SizeableNode {
 	TypeNode copy();
 
 	/**
+	 * <p>
 	 * Returns the conceptual C type associated to this type node.
+	 * </p>
+	 * 
+	 * <p>
+	 * NOTE: for structure or union types, the type qualifier is stripped before
+	 * this method returns the type. So, for example, if you declared a variable
+	 * x as "const struct S", the type returned by this method will just be
+	 * "struct S".
+	 * </p>
 	 * 
 	 * @return the C type defined by this type node
 	 */

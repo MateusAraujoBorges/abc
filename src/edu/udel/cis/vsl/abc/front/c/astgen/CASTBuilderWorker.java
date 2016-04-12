@@ -1435,11 +1435,11 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		if (analysis.globalSpecifier)
 			declaration.setGlobalFunctionSpecifier(true);
 		if (analysis.pureSpecifier)
-			declaration.setPureFunctionSpeciier(true);
+			declaration.setPureFunctionSpecifier(true);
 		if (analysis.fatomicSpecifier)
-			declaration.setAtomicFunctionSpeciier(true);
+			declaration.setAtomicFunctionSpecifier(true);
 		if (analysis.systemSpecifier)
-			declaration.setSystemFunctionSpeciier(true);
+			declaration.setSystemFunctionSpecifier(true);
 	}
 
 	private void checkFunctionSpecifiers(VariableDeclarationNode declaration,

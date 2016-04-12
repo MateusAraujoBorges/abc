@@ -98,9 +98,9 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	 * its input values, without observable side effects.
 	 * 
 	 * @return <code>true</code> iff declaration contains <code>$pure</code>
-	 * @see #setPureFunctionSpeciier(boolean)
+	 * @see #setPureFunctionSpecifier(boolean)
 	 */
-	boolean hasPureFunctionSpeciier();
+	boolean hasPureFunctionSpecifier();
 
 	/**
 	 * Set the pure function specifier bit to the given value.
@@ -109,18 +109,18 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	 *            if <code>true</code>, says that this function declaration
 	 *            contains the <code>$pure</code> specifier, if
 	 *            <code>false</code>, it doesn't
-	 * @see #hasPureFunctionSpeciier()
+	 * @see #hasPureFunctionSpecifier()
 	 */
-	void setPureFunctionSpeciier(boolean value);
+	void setPureFunctionSpecifier(boolean value);
 
 	/**
 	 * Does the declaration include the <code>$atomic_f</code> function
 	 * specifier?
 	 * 
 	 * @return <code>true</code> iff declaration contains <code>$atomic_f</code>
-	 * @see #setAtomicFunctionSpeciier(boolean)
+	 * @see #setAtomicFunctionSpecifier(boolean)
 	 */
-	boolean hasAtomicFunctionSpeciier();
+	boolean hasAtomicFunctionSpecifier();
 
 	/**
 	 * Set the atomic function specifier bit to the given value.
@@ -129,17 +129,17 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	 *            if <code>true</code>, says that this function declaration
 	 *            contains the <code>$atomic_f</code> specifier, if
 	 *            <code>false</code>, it doesn't
-	 * @see #hasAtomicFunctionSpeciier()
+	 * @see #hasAtomicFunctionSpecifier()
 	 */
-	void setAtomicFunctionSpeciier(boolean value);
+	void setAtomicFunctionSpecifier(boolean value);
 
 	/**
 	 * Does the declaration include the <code>$system</code> function specifier?
 	 * 
 	 * @return <code>true</code> iff declaration contains <code>$system</code>
-	 * @see #setSystemFunctionSpeciier(boolean)
+	 * @see #setSystemFunctionSpecifier(boolean)
 	 */
-	boolean hasSystemFunctionSpeciier();
+	boolean hasSystemFunctionSpecifier();
 
 	/**
 	 * Set the system function specifier bit to the given value.
@@ -148,9 +148,9 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	 *            if <code>true</code>, says that this function declaration
 	 *            contains the <code>$system</code> specifier, if
 	 *            <code>false</code>, it doesn't
-	 * @see #hasSystemFunctionSpeciier()
+	 * @see #hasSystemFunctionSpecifier()
 	 */
-	void setSystemFunctionSpeciier(boolean value);
+	void setSystemFunctionSpecifier(boolean value);
 
 	/**
 	 * Returns the contract node for this function declaration. May be
