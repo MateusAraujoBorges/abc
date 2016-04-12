@@ -49,21 +49,6 @@ public class CommonStructureOrUnionTypeNode extends CommonTypeNode
 		this.isDefinition = value;
 	}
 
-	// @Override
-	// public StructureOrUnionType getType() {
-	// Type type = super.getType();
-	//
-	// // TODO: not sure of the reason for this.
-	// // Commenting out for now until the reason is better understood.
-	// // Eventually delete.
-	//
-	// // if (type instanceof QualifiedObjectType) {
-	// // return (StructureOrUnionType) ((QualifiedObjectType) type)
-	// // .getBaseType();
-	// // }
-	// return (StructureOrUnionType) type;
-	// }
-
 	@Override
 	public StructureOrUnionType getEntity() {
 		Type type = super.getType();

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Label;
 import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
@@ -22,7 +23,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.OrdinaryDeclarationNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.ScopeParameterizedDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -43,7 +43,6 @@ import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
  * A tool to analyze declarations in an AST.
  * 
  * @author siegel
- * 
  */
 public class DeclarationAnalyzer {
 
@@ -54,19 +53,15 @@ public class DeclarationAnalyzer {
 	 */
 	private EntityAnalyzer entityAnalyzer;
 
-	private AcslContractAnalyzer acslAnalyzer;
-
 	/**
-	 * Is the compilation mode CIVL-C?
+	 * Analyzer used to analyze the ACSL specifications in the code.
 	 */
-	// private boolean civl;
+	private AcslContractAnalyzer acslAnalyzer;
 
 	/**
 	 * Typedefs which name types in this set will be ignored in file scope.
 	 */
 	private Collection<String> ignoredTypes = null;
-
-	private Language language;
 
 	// ************************** Constructors ****************************
 
@@ -79,7 +74,6 @@ public class DeclarationAnalyzer {
 	 */
 	DeclarationAnalyzer(EntityAnalyzer entityAnalyzer) {
 		this.entityAnalyzer = entityAnalyzer;
-		this.language = entityAnalyzer.language;
 		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer,
 				entityAnalyzer.conversionFactory);
 	}
@@ -102,6 +96,7 @@ public class DeclarationAnalyzer {
 	 * @param node
 	 *            a typedef declaration node that has not yet been processes
 	 * @throws SyntaxException
+	 *             if anything is wrong with the typedef declaration
 	 */
 	void processTypedefDeclaration(TypedefDeclarationNode node)
 			throws SyntaxException {
@@ -110,9 +105,8 @@ public class DeclarationAnalyzer {
 		Scope scope = node.getScope();
 		TypeNode typeNode = node.getTypeNode();
 
-		if (// scope.getScopeKind() == ScopeKind.FILE &&
-		ignoredTypes != null && ignoredTypes.contains(name)) {
-			OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(false, name); // scope.getOrdinaryEntity(name);
+		if (ignoredTypes != null && ignoredTypes.contains(name)) {
+			OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(false, name);
 
 			if (entity == null)
 				throw error("Cannot find definition of system typedef", node);
@@ -157,6 +151,19 @@ public class DeclarationAnalyzer {
 		}
 	}
 
+	/**
+	 * Processes a variable declaration node. The declaration must not be for a
+	 * function parameter.
+	 * 
+	 * @param node
+	 *            a variable declaration node
+	 * @return the {@link Variable} declared, which is either created by this
+	 *         method if this is the first declaration of that variable, or is
+	 *         the existing variable if this is not the first declaration of the
+	 *         variable
+	 * @throws SyntaxException
+	 *             if anything is wrong with the declaration
+	 */
 	Variable processVariableDeclaration(VariableDeclarationNode node)
 			throws SyntaxException {
 		return processVariableDeclaration(node, false);
@@ -210,17 +217,13 @@ public class DeclarationAnalyzer {
 			boolean isParameter) throws SyntaxException {
 		Variable result = (Variable) processOrdinaryDeclaration(node,
 				isParameter); // result has type and linkage
-		InitializerNode initializer = node.getInitializer();
 
 		if (result != null) {
-			ObjectType type;
-
-			// problem: if the entity is new, then you do not need to form
-			// composite
-			// of declaration type and entity type
-
 			addDeclarationToVariable(result, node);
-			type = result.getType();
+
+			ObjectType type = result.getType();
+			InitializerNode initializer = node.getInitializer();
+
 			if (initializer != null) {
 				processInitializer(initializer, type);
 				// if this is a compound initializer, the type
@@ -234,6 +237,19 @@ public class DeclarationAnalyzer {
 		return result;
 	}
 
+	/**
+	 * Processes and initializer node in a variable declaration.
+	 * 
+	 * @param initializer
+	 *            the initializer node
+	 * @param currentType
+	 *            the type of the variable being initialized before processing
+	 *            this initializer; must be non-<code>null</code>. Note the type
+	 *            may change as the initializer is processed
+	 * @throws SyntaxException
+	 *             if anything is wrong with this initializer, for example, if
+	 *             it has the wrong type
+	 */
 	public void processInitializer(InitializerNode initializer,
 			ObjectType currentType) throws SyntaxException {
 		assert currentType != null;
@@ -262,47 +278,56 @@ public class DeclarationAnalyzer {
 		}
 	}
 
-	public void processScopeParameterizedDeclaration(
-			ScopeParameterizedDeclarationNode decl) throws SyntaxException {
-		DeclarationNode baseDecl = decl.baseDeclaration();
-		SequenceNode<VariableDeclarationNode> scopeList = decl.parameters();
-		int numVars = scopeList.numChildren();
-
-		for (int i = 0; i < numVars; i++) {
-			VariableDeclarationNode varDecl = scopeList.getSequenceChild(i);
-
-			processVariableDeclaration(varDecl, true);
-		}
-		if (baseDecl instanceof TypedefDeclarationNode)
-			processTypedefDeclaration((TypedefDeclarationNode) baseDecl);
-		else if (baseDecl instanceof FunctionDeclarationNode)
-			processFunctionDeclaration((FunctionDeclarationNode) baseDecl);
-		else
-			throw error("Unexpected scoped declaration", decl);
-		// Note: the declaration node for f will be the function declaration
-		// node, not the scope parameterized declaration node.
-	}
-
 	// ************************* Private Methods **************************
 
+	/**
+	 * Creates a sourced static exception.
+	 * 
+	 * @param message
+	 *            the error message
+	 * @param node
+	 *            the node responsible for leading to the error
+	 * @return the new exception
+	 */
 	private SyntaxException error(String message, ASTNode node) {
 		return entityAnalyzer.error(message, node);
 	}
 
+	/**
+	 * Creates a new sourced static exception from an unsourced exception by
+	 * adding the source information from a given node.
+	 * 
+	 * @param e
+	 *            the unsourced exception
+	 * @param node
+	 *            the node responsible for leading to the error, whose source
+	 *            will be used to form the sourced exception
+	 * @return the new sourced static exception
+	 */
 	private SyntaxException error(UnsourcedException e, ASTNode node) {
 		return entityAnalyzer.error(e, node);
 	}
 
 	/**
-	 * See C11 6.2.2 for the rules on determining linkage.
+	 * <p>
+	 * Computes the linkage specified by an ordinary declaration. See C11 6.2.2
+	 * for the rules on determining linkage.
+	 * </p>
 	 * 
+	 * <p>
 	 * Note: "The declaration of an identifier for a function that has block
 	 * scope shall have no explicit storage-class specifier other than extern."
-	 * (C11 6.7.1(7))
+	 * (C11 6.7.1(7)).
+	 * </p>
 	 * 
 	 * @param node
-	 * @return
+	 *            an ordinary declaration
+	 * @return the kind of linkage
 	 * @throws SyntaxException
+	 *             if the language is C and this is the declaration of a
+	 *             block-scope function and the declaration contains a storage
+	 *             class specifier that is not "extern". (This is prohibited by
+	 *             C11, but is allowed in CIVL-C.)
 	 */
 	private LinkageKind computeLinkage(OrdinaryDeclarationNode node)
 			throws SyntaxException {
@@ -492,6 +517,21 @@ public class DeclarationAnalyzer {
 		return entity;
 	}
 
+	/**
+	 * Given a type node and an existing {@link Function} or {@link Variable}
+	 * entity, this method adds the type specified by the type node to the
+	 * existing type of the entity. By "add" we mean it forms the
+	 * "composite type" and updates the type of the entity to that composite
+	 * type.
+	 * 
+	 * @param typeNode
+	 *            a type node
+	 * @param entity
+	 *            a {@link Function} or {@link Variable}
+	 * @throws SyntaxException
+	 *             if the type specified by the type node and the type of the
+	 *             entity are not compatible
+	 */
 	private void addTypeToVariableOrFunction(TypeNode typeNode,
 			OrdinaryEntity entity) throws SyntaxException {
 		if (typeNode != null) {
@@ -588,18 +628,51 @@ public class DeclarationAnalyzer {
 		variable.addDeclaration(declaration);
 	}
 
+	/**
+	 * <p>
+	 * Adds a declaration of a function to the {@link Function} entity. Each
+	 * {@link Entity} maintains a list of the declarations of that entity. This
+	 * method adds the given declaration to that list.
+	 * </p>
+	 * 
+	 * <p>
+	 * It also does the following:
+	 * </p>
+	 * 
+	 * <p>
+	 * If this is the first declaration of the function, it sets the flags for
+	 * the inline, Noreturn, Atomic, and CIVL's "system" function specifiers in
+	 * the {@link Function} to the values specified in the declaration.
+	 * </p>
+	 * 
+	 * <p>
+	 * If this is not the first declaration of the function, this method checks
+	 * that the Noreturn specifiers on the previous declaration and this
+	 * declaration agree.
+	 * </p>
+	 * 
+	 * <p>
+	 * If this is a function definition (not just declaration), this method
+	 * checks that there is no previous definition of this function (a function
+	 * can have only one definition). It then sets the definition field of the
+	 * {@link Function} to this declaration.
+	 * </p>
+	 * 
+	 * @param function
+	 *            the {@link Function} entity
+	 * @param declaration
+	 *            a declaration of that function
+	 * @throws SyntaxException
+	 *             if there is disagreement on the Noreturn specifier among the
+	 *             declarations of the function, or if this is a second
+	 *             definition of that function
+	 */
 	private void addDeclarationToFunction(Function function,
 			FunctionDeclarationNode declaration) throws SyntaxException {
-		OrdinaryDeclarationNode previousDeclaration;
 		Iterator<DeclarationNode> declarationIter = function.getDeclarations()
 				.iterator();
 
-		if (declarationIter.hasNext())
-			previousDeclaration = (OrdinaryDeclarationNode) declarationIter
-					.next();
-		else
-			previousDeclaration = null;
-		if (previousDeclaration == null) {
+		if (!declarationIter.hasNext()) {
 			if (declaration.hasInlineFunctionSpecifier())
 				function.setIsInlined(true);
 			if (declaration.hasNoreturnFunctionSpecifier())
@@ -608,14 +681,14 @@ public class DeclarationAnalyzer {
 				function.setAtomic(true);
 			if (declaration.hasSystemFunctionSpecifier())
 				function.setSystemFunction(true);
-		} else {
-			if (declaration.hasNoreturnFunctionSpecifier() != function
-					.doesNotReturn())
-				throw error(
-						"Disagreement on Noreturn function specifier at function declaration.\n"
-								+ "  Previous declaration was at "
-								+ previousDeclaration.getSource(),
-						declaration);
+		} else if (declaration.hasNoreturnFunctionSpecifier() != function
+				.doesNotReturn()) {
+			// all declarations must agree on the Noreturn specifier...
+			throw error(
+					"Disagreement on Noreturn function specifier at function declaration.\n"
+							+ "  Previous declaration was at "
+							+ declarationIter.next().getSource(),
+					declaration);
 		}
 		if (declaration instanceof FunctionDefinitionNode) {
 			FunctionDefinitionNode previousDefinition = function
@@ -640,6 +713,17 @@ public class DeclarationAnalyzer {
 		return true;
 	}
 
+	/**
+	 * Processes all the "goto" nodes that are in the sub-tree rooted at
+	 * <code>node</code>. The {@link IdentifierNode}s in those goto statements
+	 * have their entity fields set to the {@link Label} entity specified by the
+	 * identifier.
+	 * 
+	 * @param node
+	 *            a node in the AST
+	 * @throws SyntaxException
+	 *             if a "goto" statement refers to a label which does not exist
+	 */
 	private void processGotos(ASTNode node) throws SyntaxException {
 		Iterable<ASTNode> childIter = node.children();
 
@@ -660,8 +744,13 @@ public class DeclarationAnalyzer {
 		}
 	}
 
+	/**
+	 * Is the language being processed CIVL-C?
+	 * 
+	 * @return <code>true</code> iff the language is CIVL-C
+	 */
 	private boolean civl() {
-		return language == Language.CIVL_C;
+		return entityAnalyzer.language == Language.CIVL_C;
 	}
 
 }

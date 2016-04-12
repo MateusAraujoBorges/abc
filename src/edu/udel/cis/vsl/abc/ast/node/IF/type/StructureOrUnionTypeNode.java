@@ -6,8 +6,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 
-public interface StructureOrUnionTypeNode extends TypeNode, DeclarationNode,
-		BlockItemNode {
+public interface StructureOrUnionTypeNode
+		extends TypeNode, DeclarationNode, BlockItemNode {
 	/**
 	 * Is this a struct, not a union?
 	 * 
@@ -46,6 +46,4 @@ public interface StructureOrUnionTypeNode extends TypeNode, DeclarationNode,
 	@Override
 	StructureOrUnionTypeNode copy();
 
-	// @Override
-	// StructureOrUnionType getType();
 }
