@@ -236,7 +236,7 @@ MPI_Comm MPI_COMM_TYPE_SHARED;
 
 /* We require that the C compiler support prototypes */
 /* Begin Prototypes */
-int MPI_Send(void*, int, MPI_Datatype, int, int, MPI_Comm);
+int MPI_Send(const void*, int, MPI_Datatype, int, int, MPI_Comm);
 int MPI_Recv(void*, int, MPI_Datatype, int, int, MPI_Comm, MPI_Status *);
 int MPI_Get_count( MPI_Status *, MPI_Datatype, int *);
 int MPI_Bsend(void*, int, MPI_Datatype, int, int, MPI_Comm);
@@ -290,22 +290,22 @@ int MPI_Unpack(void*, int, int *, void *, int, MPI_Datatype, MPI_Comm);
 int MPI_Pack_size(int, MPI_Datatype, MPI_Comm, int *);
 int MPI_Barrier(MPI_Comm );
 int MPI_Bcast(void*, int, MPI_Datatype, int, MPI_Comm);
-int MPI_Gather(void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm);
-int MPI_Gatherv(void* , int, MPI_Datatype, void*, int *,
-                int *, MPI_Datatype, int, MPI_Comm);
-int MPI_Scatter(void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm);
-int MPI_Scatterv(void* , int *,int *,  MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm);
-int MPI_Allgather(void* , int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm);
+int MPI_Gather(const void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm);
+int MPI_Gatherv(const void* , int, MPI_Datatype, void*, const int *,
+                const int *, MPI_Datatype, int, MPI_Comm);
+int MPI_Scatter(const void* , int, MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm);
+int MPI_Scatterv(const void* , const int *, const int *,  MPI_Datatype, void*, int, MPI_Datatype, int, MPI_Comm);
+int MPI_Allgather(const void* , int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm);
 int MPI_Allgatherv(void* , int, MPI_Datatype, void*, int *,
                    int *, MPI_Datatype, MPI_Comm);
-int MPI_Alltoall(void* , int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm);
-int MPI_Alltoallv( void* ,  int *,  int *, MPI_Datatype,
-		   void*,  int *,  int *, MPI_Datatype, MPI_Comm);
-int MPI_Reduce( void* , void*, int, MPI_Datatype, MPI_Op, int, MPI_Comm);
+int MPI_Alltoall(const void* , int, MPI_Datatype, void*, int, MPI_Datatype, MPI_Comm);
+int MPI_Alltoallv(const void* ,const  int *,  const int *, MPI_Datatype,
+		   void*,  const int *,  const int *, MPI_Datatype, MPI_Comm);
+int MPI_Reduce(const void* , void*, int, MPI_Datatype, MPI_Op, int, MPI_Comm);
 int MPI_Op_create(MPI_User_function *, int, MPI_Op *);
 int MPI_Op_free( MPI_Op *);
-int MPI_Allreduce( void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
-int MPI_Reduce_scatter(  void* , void*,   int *, MPI_Datatype, MPI_Op, MPI_Comm);
+int MPI_Allreduce(const void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
+int MPI_Reduce_scatter(const void* , void*, const int *, MPI_Datatype, MPI_Op, MPI_Comm);
 int MPI_Scan(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
 int MPI_Group_size(MPI_Group, int *);
 int MPI_Group_rank(MPI_Group, int *);
@@ -414,9 +414,9 @@ int MPI_Win_unlock(int, MPI_Win);
 int MPI_Win_wait(MPI_Win);
 
 /* Extended Collective Operations */
-int MPI_Alltoallw(  void *,   int [],   int [],
-                    MPI_Datatype [], void *,   int [],
-		    int [],   MPI_Datatype [], MPI_Comm);
+int MPI_Alltoallw(const  void *, const  int [], const  int [],
+                  const  MPI_Datatype [], void *, const int [],
+		  const  int [], const MPI_Datatype [], MPI_Comm);
 int MPI_Exscan(  void *, void *, int, MPI_Datatype, MPI_Op, MPI_Comm);
  
 /* External Interfaces */
