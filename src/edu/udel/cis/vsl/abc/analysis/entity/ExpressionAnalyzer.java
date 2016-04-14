@@ -2192,9 +2192,9 @@ public class ExpressionAnalyzer {
 					throw error("The argument in " + i
 							+ " position of MPI contract expression " + kind
 							+ " must has an " + formalTypes[i], node);
-			} else if (i == 0 && kind == MPIContractExpressionKind.MPI_EQUALS) {
-				if (argument.getType().compatibleWith(
-						typeFactory.pointerType(typeFactory.voidType())))
+			} else if ((i == 0 || i == 3)
+					&& kind == MPIContractExpressionKind.MPI_EQUALS) {
+				if (!(argument.getType() instanceof PointerType))
 					throw error("The argument in " + 0
 							+ " position of MPI contract expression " + kind
 							+ " must has a pointer type", node);
