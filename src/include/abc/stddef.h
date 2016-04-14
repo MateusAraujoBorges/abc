@@ -4,6 +4,7 @@ Many of these definitions also appear in other headers. */
 #define __STDDEF__
 typedef unsigned long int size_t;
 typedef signed long int ptrdiff_t;
+typedef long int wchar_t;
 
 #ifndef NULL
 #define NULL ((void*)0)
