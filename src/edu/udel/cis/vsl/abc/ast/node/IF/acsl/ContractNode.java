@@ -67,7 +67,12 @@ public interface ContractNode extends ASTNode {
 		 * A "requires" node represents a pre-condition in a CIVL-C procedure
 		 * contract. May be safely cast to {@link RequiresNode}.
 		 */
-		REQUIRES
+		REQUIRES,
+		/**
+		 * A "waitsfor" node represents a synchronization clause in a CIVL-C
+		 * procedure contract. May be safe cast to {@link WaitsforNode}.
+		 */
+		WAITSFOR
 
 	}
 

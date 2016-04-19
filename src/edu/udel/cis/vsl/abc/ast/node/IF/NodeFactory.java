@@ -32,6 +32,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
@@ -2456,4 +2457,15 @@ public interface NodeFactory {
 	ContractVerifyNode newContractVerifyNode(Source source,
 			ExpressionNode function, List<ExpressionNode> arguments,
 			SequenceNode<ExpressionNode> scopeList);
+
+	/**
+	 * Creates a new "waitsfor" clause node. Such a node takes a set of
+	 * expressions as arguments.
+	 * 
+	 * @param source
+	 * @param arguments
+	 * @return
+	 */
+	WaitsforNode newWaitsforNode(Source source,
+			SequenceNode<ExpressionNode> arguments);
 }

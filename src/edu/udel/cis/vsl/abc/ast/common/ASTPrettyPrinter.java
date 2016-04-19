@@ -29,6 +29,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
@@ -693,6 +694,13 @@ public class ASTPrettyPrinter {
 		}
 		case PURE: {
 			out.print("pure;");
+			break;
+		}
+		case WAITSFOR: {
+			WaitsforNode waitsforNode = (WaitsforNode) contract;
+
+			out.print("waitsfor ");
+			pPrintSequenceNode(waitsforNode.getArguments(), out);
 			break;
 		}
 		default:

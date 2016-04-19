@@ -246,6 +246,7 @@ simple_clause
     | reads_clause
     | depends_clause
     | guards_clause
+    | waitsfor_clause
     ;
 
 assigns_clause
@@ -263,6 +264,10 @@ allocation_clause
 
 reads_clause
     : READS argumentExpressionList ->^(READS argumentExpressionList)
+    ;
+
+waitsfor_clause
+    : WAITSFOR argumentExpressionList -> ^(WAITSFOR argumentExpressionList)
     ;
 /*
 reaches_clause

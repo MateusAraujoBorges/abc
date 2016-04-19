@@ -109,6 +109,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -343,6 +344,8 @@ public class AcslContractWorker {
 			return this.translateDepends(tree, scope);
 		case AcslParser.GUARDS:
 			return this.translateGuards(tree, scope);
+		case AcslParser.WAITSFOR:
+			return this.translateWaitsfor(tree, scope);
 		default:
 			throw this.error("Unknown contract clause kind", tree);
 		}
@@ -354,6 +357,15 @@ public class AcslContractWorker {
 
 		return this.nodeFactory.newGuardNode(this.newSource(tree),
 				this.translateExpression(expressionTree, scope));
+	}
+
+	private WaitsforNode translateWaitsfor(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
+		CommonTree expressionTree = (CommonTree) tree.getChild(0);
+		SequenceNode<ExpressionNode> arguments = translateArgumentList(
+				expressionTree, scope);
+
+		return nodeFactory.newWaitsforNode(newSource(tree), arguments);
 	}
 
 	private AssumesNode translateAssumes(CommonTree tree, SimpleScope scope)

@@ -50,6 +50,7 @@ FREES   :   'frees';
 DEPENDS :   'depends_on';
 READS   :   'reads';
 PURE    :   'pure';
+WAITSFOR   : 'waitsfor';
 
 //CIVL-C constants
 SELF    :   '$self';

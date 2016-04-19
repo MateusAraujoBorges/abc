@@ -38,6 +38,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
@@ -144,6 +145,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonPureNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonRequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonWaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonCompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonDesignationNode;
@@ -1180,5 +1182,11 @@ public class CommonNodeFactory implements NodeFactory {
 
 		return new CommonContractVerifyNode(source, function, null,
 				argumentSequenceNode, scopeList);
+	}
+
+	@Override
+	public WaitsforNode newWaitsforNode(Source source,
+			SequenceNode<ExpressionNode> arguments) {
+		return new CommonWaitsforNode(source, arguments);
 	}
 }

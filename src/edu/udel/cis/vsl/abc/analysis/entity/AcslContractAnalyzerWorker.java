@@ -25,6 +25,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
@@ -192,6 +193,13 @@ public class AcslContractAnalyzerWorker {
 				processContractNode(colClause);
 			break;
 		}
+		case WAITSFOR: {
+			WaitsforNode waitsforNode = (WaitsforNode) contractClause;
+
+			for (ExpressionNode arg : waitsforNode.getArguments())
+				expressionAnalyzer.processExpression(arg);
+			break;
+		}
 		default:
 			throw error("Unknown kind of contract clause", contractClause);
 		}
@@ -222,7 +230,7 @@ public class AcslContractAnalyzerWorker {
 
 			this.expressionAnalyzer.processIdentifierExpression(
 					call.getFunction(), true, true);
-			
+
 			if (arguments != null) {
 				for (ExpressionNode arg : arguments) {
 					this.expressionAnalyzer.processExpression(arg);
