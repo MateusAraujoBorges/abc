@@ -53,43 +53,43 @@ typedef struct $comm * $comm;
 
 /* creates a new message, copying data from the specified buffer */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $message $message_pack(int source, int dest, int tag, void *data, int size);
   
 /* returns the message source */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \nothing;
+  @ executes_when \true;
   @*/
 int $message_source($message message);
 
 /* returns the message tag */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \nothing;
+  @ executes_when \true;
   @*/
 int $message_tag($message message) ;
 
 /* returns the message destination */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \nothing;
+  @ executes_when \true;
   @*/
 int $message_dest($message message) ;
 
 /* returns the message size */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \nothing;
+  @ executes_when \true;
   @*/
 int $message_size($message message); 
 
 /* transfers message data to buf, throwing exception if message
  * size exceeds specified size */
-/*@ depends \reach(buf);
-  @ guards \true;
+/*@ depends_on \access(buf);
+  @ executes_when \true;
   @*/
 void $message_unpack($message message, void *buf, int size);
 
@@ -100,8 +100,8 @@ void $message_unpack($message message, void *buf, int size);
  * global communicator defines a communication "universe" and encompasses
  * message buffers and all other components of the state associated to
  * message-passing.  The new object will be allocated in the given scope. */
-/*@ depends \noact;
-  @ guards \true;
+/*@ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $system $gcomm $gcomm_create($scope scope, int size);
 
@@ -112,16 +112,16 @@ $system $gcomm $gcomm_create($scope scope, int size);
  * Parameter junkMsgs: Output argument, a pointer to a CIVL-C sequence ($seq) 
  * of $messages.
  */
-/*@ depends \noact;
-  @ guards \true;
+/*@ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $system int $gcomm_destroy($gcomm gcomm, void * junkMsgs);
 
 /* Returns $true iff gcomm points to a valid object. */
 //_Bool $gcomm_defined($gcomm gcomm);
 
-/*@ depends \noact;
-  @ guards \true;
+/*@ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $system void $gcomm_dup($comm comm, $comm newcomm);
 
@@ -137,38 +137,38 @@ $system void $gcomm_dup($comm comm, $comm newcomm);
  * processes will be viewed as occupying the same place.
  * Only one call to $comm_create may occur for each gcomm-place pair.
  * The new object will be allocated in the given scope. */
-/*@ depends \noact;
-  @ guards \true;
+/*@ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $system $comm $comm_create($scope scope, $gcomm gcomm, int place);
 
 /* De-allocation a __comm__ object */
-/*@ depends \noact;
-  @ guards \true;
+/*@ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $system void $comm_destroy($comm comm);
 
 /* Returns the size (number of places) in the global communicator associated
  * to the given comm. */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $system int $comm_size($comm comm);
 
 /* Returns the place of the local communicator.  This is the same as the
  * place argument used to create the local communicator. */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \nothing;
+  @ executes_when \true;
   @*/
 $system int $comm_place($comm comm);
 
 /* Adds the message to the appropriate message queue in the communication
  * universe specified by the comm.  The source of the message must equal
  * the place of the comm. */
-/*@ depends \reach(comm);
-  @ guards \true;
+/*@ depends_on \access(comm);
+  @ executes_when \true;
   @*/
 $system void $comm_enqueue($comm comm, $message message);
 
@@ -176,8 +176,8 @@ $system void $comm_enqueue($comm comm, $message message);
  * specified by the comm.  A message matches the arguments if the destination
  * of the message is the place of the comm, and the sources and tags match. */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \access(comm);
+  @ executes_when \true;
   @*/
 $system _Bool $comm_probe($comm comm, int source, int tag);
 
@@ -185,15 +185,14 @@ $system _Bool $comm_probe($comm comm, int source, int tag);
  * the communication universe.  If no matching message exists, returns a message
  * with source, dest, and tag all negative. */
 /*@ pure;
-  @ depends \noact;
-  @ guards \true;
+  @ depends_on \access(comm);
+  @ executes_when \true;
   @*/
 $system $message $comm_seek($comm comm, int source, int tag);
 
 /* Finds the first matching message, removes it from the communicator,
  * and returns the message */
-/*@ pure;
-  @ depends \reach(comm);
+/*@ depends_on \access(comm);
   @*/
 $system $message $comm_dequeue($comm comm, int source, int tag);
 

@@ -5,11 +5,11 @@ void inc(int n);
 
 void dec(int n);
 
-/*@ depends \anyact;
+/*@ depends_on \anyact;
   @ assigns a, b;
   @*/
 void test(int a, int b);
 
-/*@ depends (\write(n)+\read(n))-(\call(inc, n)+\call(dec, n));
+/*@ depends_on (\write(n)+\read(n))-(\call(inc, n)+\call(dec, n));
   @*/
 void foo(int n);

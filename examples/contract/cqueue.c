@@ -8,7 +8,7 @@ typedef struct cqueue_t{
   $proc owner;
 } cqueue;
 
-/*@ depends \noact;  
+/*@ depends_on \nothing;  
   @ assigns \nothing;
   @ reads \nothing; 
   @*/
@@ -18,7 +18,7 @@ $atomic_f void create(cqueue* q)
   q->owner=$proc_null;
   $seq_init(&q->data, 0, NULL);
 }
-/*@ depends \read(q->owner);
+/*@ depends_on \read(q->owner);
   @ assigns q->owner;
 */
 $atomic_f _Bool lock(cqueue* q)
@@ -32,7 +32,7 @@ $atomic_f _Bool lock(cqueue* q)
     return $false;
 }
 /*@ pure;
-  @ depends \call(enqueue, q, ...), \call(dequeue,q, ...);
+  @ depends_on \call(enqueue, q, ...), \call(dequeue,q, ...);
   @ reads q->data;
   @ assigns \nothing;
   @*/
@@ -43,11 +43,11 @@ $atomic_f int size(cqueue* q)
 /*@ reads q->owner;
   @ behavior success:
   @   assumes q->owner==$self;
-  @   depends \read(q->owner) + \write(q->owner);
+  @   depends_on \read(q->owner) + \write(q->owner);
   @   assigns q->owner;
   @ behavior failure:
   @   assumes q->owner!=$self;
-  @   depends \noact;
+  @   depends_on \nothing;
   @   assigns \nothing;
   @*/
 $atomic_f _Bool unlock(cqueue* q)
@@ -59,14 +59,14 @@ $atomic_f _Bool unlock(cqueue* q)
   }
   return $false;
 }
-/*@ depends \call(enqueue,q, ...);
+/*@ depends_on \call(enqueue,q, ...);
   @ assigns q->data;
   @*/
 $atomic_f _Bool enqueue(cqueue* q, int v)
 {
   $seq_append(&q->data, &v, 1);
 }
-/*@ depends \call(enqueue, q, ...);
+/*@ depends_on \call(enqueue, q, ...);
   @ assigns q->data;
   @*/
 $atomic_f _Bool dequeue(cqueue* q, int* res)

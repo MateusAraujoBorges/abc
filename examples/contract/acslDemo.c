@@ -1,7 +1,7 @@
 
 /*@ requires a>0;
   @ ensures \result==a*2;
-  @ depends \write(a), \read(a);
+  @ depends_on \write(a), \read(a);
   @ behavior aaa:
   @   assumes a<0;
   @   ensures \result < 0;

@@ -297,8 +297,8 @@ event_base
         -> ^(REACH argumentExpressionList)
     | CALL LPAREN ID (COMMA argumentExpressionList)? RPAREN
         -> ^(CALL ID argumentExpressionList?)
-    | NOACT
-        -> ^(NOACT)
+    | NOTHING
+        -> ^(NOTHING)
     | ANYACT
         -> ^(ANYACT)
     | LPAREN event RPAREN

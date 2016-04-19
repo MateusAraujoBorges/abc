@@ -49,7 +49,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MOD;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MPI_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MPI_EXPRESSION;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NEQ;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOACT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOTHING;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.OPERATOR;
@@ -490,7 +489,7 @@ public class AcslContractWorker {
 					this.nodeFactory.newIdentifierExpressionNode(
 							function.getSource(), function), args);
 		}
-		case NOACT:
+		case NOTHING:
 			return nodeFactory.newNoactNode(source);
 		case ANYACT:
 			return nodeFactory.newAnyactNode(source);

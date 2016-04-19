@@ -33,7 +33,7 @@ VOID		:	'void';
 REQUIRES:   'requires';
 TERMINATES: 'terminates';
 DECREASES:  'decreases';
-GUARDS  :   'guards';
+GUARDS  :   'executes_when';
 ASSIGNS :   'assigns';
 ENSURES :   'ensures';
 ALLOC   :   'allocates';
@@ -47,7 +47,7 @@ VARIANT :   'variant';
 INVARIANT:  'invariant';
 FREES   :   'frees';
 //CIVL extensions
-DEPENDS :   'depends';
+DEPENDS :   'depends_on';
 READS   :   'reads';
 PURE    :   'pure';
 
@@ -85,9 +85,8 @@ SIZEOF  :   'sizeof';
 FOR     :   'for';
 READ    :   '\\read';
 WRITE   :   '\\write';
-REACH :   '\\reach';
+REACH :   '\\access';
 CALL    :   '\\call';
-NOACT   :   '\\noact';
 ANYACT  :   '\\anyact';
 FORALL  :   '\\forall';
 EXISTS  :   '\\exists';
