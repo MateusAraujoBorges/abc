@@ -71,7 +71,8 @@ import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 public interface Scope {
 
 	/**
-	 * These are the four different kinds of scopes.
+	 * The different kinds of scopes: file, block, function, function-prototype,
+	 * and contract.
 	 */
 	public enum ScopeKind {
 		/**
@@ -103,7 +104,7 @@ public interface Scope {
 	 * Returns the kind of scope this is.
 	 * 
 	 * @return the scope kind
-	 * */
+	 */
 	ScopeKind getScopeKind();
 
 	/**
@@ -127,7 +128,7 @@ public interface Scope {
 	 * Returns the AST to which this scope belongs.
 	 * 
 	 * @return the AST to which this scope belongs
-	 * */
+	 */
 	AST getAST();
 
 	/**

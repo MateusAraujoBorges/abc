@@ -7,6 +7,7 @@ import java.util.Map;
 import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.type.IF.FunctionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
+import edu.udel.cis.vsl.abc.ast.type.IF.QualifiedObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 
 /**
@@ -56,9 +57,8 @@ public class CommonFunctionType extends CommonType implements FunctionType {
 	 *            does the function have a variable number of arguments
 	 *            (indicated by a "..." in the parameter type list)?
 	 */
-	public CommonFunctionType(ObjectType returnType,
-			boolean fromIdentifierList, Iterable<ObjectType> parameterTypes,
-			boolean hasVariableArgs) {
+	public CommonFunctionType(ObjectType returnType, boolean fromIdentifierList,
+			Iterable<ObjectType> parameterTypes, boolean hasVariableArgs) {
 		super(TypeKind.FUNCTION);
 		this.returnType = returnType;
 		this.fromIdentifierList = fromIdentifierList;
@@ -86,7 +86,8 @@ public class CommonFunctionType extends CommonType implements FunctionType {
 		// throw new ASTException(
 		// "The parameters for the function have not been specified."
 		// +
-		// "\nNote that a prototype for a function with 0 parameters must have the form \"f(void)\"");
+		// "\nNote that a prototype for a function with 0 parameters must have
+		// the form \"f(void)\"");
 		return parameterTypes.size();
 	}
 
@@ -229,6 +230,17 @@ public class CommonFunctionType extends CommonType implements FunctionType {
 							.getParameterType(i);
 					ObjectType parameterType2 = that.getParameterType(i);
 
+					// C11 6.7.6.3(15):
+					// "In the determination of type compatibility and of a
+					// composite type, ... each parameter declared with
+					// qualified type is taken as having the unqualified
+					// version of its declared type."
+					if (parameterType1 instanceof QualifiedObjectType)
+						parameterType1 = (CommonObjectType) ((QualifiedObjectType) parameterType1)
+								.getBaseType();
+					if (parameterType2 instanceof QualifiedObjectType)
+						parameterType2 = ((QualifiedObjectType) parameterType2)
+								.getBaseType();
 					if (!parameterType1.similar(parameterType2, false, seen))
 						return false;
 				}
@@ -259,7 +271,7 @@ public class CommonFunctionType extends CommonType implements FunctionType {
 				// parameters, and the type of each prototype parameter shall be
 				// compatible with the type that results from the application of
 				// the default argument promotions to the type of the
-				// corresponding identifier."  In other words, the "real" type
+				// corresponding identifier." In other words, the "real" type
 				// of the parameter is the one in the parameter-type list; the
 				// type specified in the function definition has to be
 				// compatible with that after it is promoted.
@@ -326,8 +338,8 @@ public class CommonFunctionType extends CommonType implements FunctionType {
 	@Override
 	protected boolean similar(Type other, boolean equivalent,
 			Map<TypeKey, Type> seen) {
-		return equivalent ? equivalentTo(other, seen) : compatibleWith(other,
-				seen);
+		return equivalent ? equivalentTo(other, seen)
+				: compatibleWith(other, seen);
 	}
 
 	@Override

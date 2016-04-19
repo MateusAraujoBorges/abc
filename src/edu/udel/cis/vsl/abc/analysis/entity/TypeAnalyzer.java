@@ -53,7 +53,7 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
 /**
- * Analyzes types nodes in the AST, sets the type of the type node and processes
+ * Analyzes type nodes in the AST, sets the type of the type node and processes
  * all children.
  * 
  * @author siegel
@@ -71,7 +71,6 @@ public class TypeAnalyzer {
 
 	private ValueFactory valueFactory;
 
-	// private Configuration configuration;
 	private Language language;
 
 	/**
@@ -103,8 +102,8 @@ public class TypeAnalyzer {
 	}
 
 	private Type processBasicType(BasicTypeNode node) throws SyntaxException {
-		UnqualifiedObjectType unqualifiedType = typeFactory.basicType(node
-				.getBasicTypeKind());
+		UnqualifiedObjectType unqualifiedType = typeFactory
+				.basicType(node.getBasicTypeKind());
 		boolean constQ = node.isConstQualified();
 		boolean volatileQ = node.isVolatileQualified();
 		boolean inputQ = node.isInputQualified();
@@ -115,8 +114,8 @@ public class TypeAnalyzer {
 		if (node.isAtomicQualified())
 			unqualifiedType = typeFactory.atomicType(unqualifiedType);
 		if (constQ || volatileQ || inputQ || outputQ)
-			return typeFactory.qualifiedType(unqualifiedType, constQ,
-					volatileQ, false, inputQ, outputQ);
+			return typeFactory.qualifiedType(unqualifiedType, constQ, volatileQ,
+					false, inputQ, outputQ);
 		else
 			return unqualifiedType;
 	}
@@ -164,15 +163,16 @@ public class TypeAnalyzer {
 		// but don't apply that rule to $input and $output
 		elementType = typeFactory.qualify(elementType, constQ, volatileQ,
 				restrictQ, false, false);
-		if (restrictQ
-				&& elementType instanceof QualifiedObjectType
-				&& ((QualifiedObjectType) elementType).getBaseType().kind() != TypeKind.POINTER)
-			throw error("Use of restrict qualifier with non-pointer type", node);
+		if (restrictQ && elementType instanceof QualifiedObjectType
+				&& ((QualifiedObjectType) elementType).getBaseType()
+						.kind() != TypeKind.POINTER)
+			throw error("Use of restrict qualifier with non-pointer type",
+					node);
 		if (isParameter) {
 			// no scope restriction on pointer given, so use null...
 			PointerType pointerType = typeFactory.pointerType(elementType);
-			UnqualifiedObjectType unqualifiedType = (node.hasAtomicInBrackets() ? typeFactory
-					.atomicType(pointerType) : pointerType);
+			UnqualifiedObjectType unqualifiedType = (node.hasAtomicInBrackets()
+					? typeFactory.atomicType(pointerType) : pointerType);
 
 			// need to process size expression, but ignore it...
 			sizeExpression = node.getExtent();
@@ -185,8 +185,9 @@ public class TypeAnalyzer {
 		}
 		if (node.hasAtomicInBrackets() || node.hasConstInBrackets()
 				|| node.hasVolatileInBrackets() || node.hasRestrictInBrackets())
-			throw error("Type qualifiers in [...] in an array declarator "
-					+ "can only appear in a parameter declaration",
+			throw error(
+					"Type qualifiers in [...] in an array declarator "
+							+ "can only appear in a parameter declaration",
 					elementTypeNode);
 		if (node.hasUnspecifiedVariableLength()) { // "*"
 			result = typeFactory
@@ -207,9 +208,10 @@ public class TypeAnalyzer {
 					// an integer constant expression: if it occurs in a
 					// declaration at function prototype scope, it is treated as
 					// if it were replaced by *"
-					if (node.getScope().getScopeKind() == ScopeKind.FUNCTION_PROTOTYPE)
-						result = typeFactory
-								.unspecifiedVariableLengthArrayType(elementType);
+					if (node.getScope()
+							.getScopeKind() == ScopeKind.FUNCTION_PROTOTYPE)
+						result = typeFactory.unspecifiedVariableLengthArrayType(
+								elementType);
 					else
 						result = typeFactory.variableLengthArrayType(
 								elementType, sizeExpression);
@@ -279,8 +281,8 @@ public class TypeAnalyzer {
 		typeNode.getName().setEntity(typedef);
 		result = typedef.getType();
 		if (isParameter && result.kind() == TypeKind.ARRAY) {
-			result = typeFactory.pointerType(((ArrayType) result)
-					.getElementType());
+			result = typeFactory
+					.pointerType(((ArrayType) result).getElementType());
 		}
 		return result;
 	}
@@ -404,8 +406,8 @@ public class TypeAnalyzer {
 		Scope scope = node.getScope();
 		String tag = node.getName(); // could be null
 		List<Enumerator> enumeratorList = new LinkedList<>();
-		EnumerationType enumerationType = typeFactory
-				.enumerationType(node, tag);
+		EnumerationType enumerationType = typeFactory.enumerationType(node,
+				tag);
 		IntegerValue value = null;
 
 		// clear it, in case it was used in previous analysis pass
@@ -435,11 +437,12 @@ public class TypeAnalyzer {
 				if (!(tmpValue instanceof IntegerValue))
 					throw error(
 							"Constant expression of concrete integer type expected, not "
-									+ tmpValue, constantNode);
+									+ tmpValue,
+							constantNode);
 				value = (IntegerValue) tmpValue;
 			}
-			enumerator = typeFactory
-					.newEnumerator(decl, enumerationType, value);
+			enumerator = typeFactory.newEnumerator(decl, enumerationType,
+					value);
 			enumerator.addDeclaration(decl);
 			enumerator.setDefinition(decl);
 			decl.setEntity(enumerator);
@@ -531,7 +534,8 @@ public class TypeAnalyzer {
 		if (su.getType().isComplete() && node.getStructDeclList() != null)
 			throw error(
 					"Re-definition of structure or union.  Previous definition at "
-							+ old.getFirstDeclaration().getSource(), node);
+							+ old.getFirstDeclaration().getSource(),
+					node);
 	}
 
 	/**
@@ -571,8 +575,7 @@ public class TypeAnalyzer {
 				Type tempType = processTypeNode(fieldTypeNode);
 
 				if (!(tempType instanceof ObjectType))
-					throw error(
-							"Non-object type for structure or union member",
+					throw error("Non-object type for structure or union member",
 							fieldTypeNode);
 				fieldType = (ObjectType) tempType;
 			}
@@ -587,7 +590,7 @@ public class TypeAnalyzer {
 			}
 			field = typeFactory.newField(decl, fieldType, bitWidth
 			// ,structureOrUnion
-					);
+			);
 			decl.setEntity(field);
 			if (decl.getIdentifier() != null)
 				decl.getIdentifier().setEntity(field);
@@ -686,10 +689,12 @@ public class TypeAnalyzer {
 			type = processArrayType((ArrayTypeNode) typeNode, isParameter);
 			break;
 		case STRUCTURE_OR_UNION:
-			type = processStructureOrUnionType((StructureOrUnionTypeNode) typeNode);
+			type = processStructureOrUnionType(
+					(StructureOrUnionTypeNode) typeNode);
 			break;
 		case FUNCTION:
-			type = processFunctionType((FunctionTypeNode) typeNode, isParameter);
+			type = processFunctionType((FunctionTypeNode) typeNode,
+					isParameter);
 			break;
 		case POINTER:
 			type = processPointerType((PointerTypeNode) typeNode);
@@ -737,15 +742,14 @@ public class TypeAnalyzer {
 	 * <p>
 	 * If there is a tag, proceed as follows:
 	 * <ul>
-	 * <li>
-	 * If there is an enumerator list: check that there is no tagged entity with
-	 * the same tag in the current scope. If this check fails, syntax error.
-	 * Create a new enumeration entity and type, add it to the current scope.</li>
-	 * <li>
-	 * If there is not an enumerator list: check (1) there is a visible tagged
-	 * entity with the same tag; (2) that tagged entity is an enum; and (3) that
-	 * previous enum is complete. If any of these fails: syntax error. Else, use
-	 * the old entity and type.</li>
+	 * <li>If there is an enumerator list: check that there is no tagged entity
+	 * with the same tag in the current scope. If this check fails, syntax
+	 * error. Create a new enumeration entity and type, add it to the current
+	 * scope.</li>
+	 * <li>If there is not an enumerator list: check (1) there is a visible
+	 * tagged entity with the same tag; (2) that tagged entity is an enum; and
+	 * (3) that previous enum is complete. If any of these fails: syntax error.
+	 * Else, use the old entity and type.</li>
 	 * </ul>
 	 * </p>
 	 * 
@@ -772,7 +776,8 @@ public class TypeAnalyzer {
 		Type result;
 
 		if (node.isRestrictQualified())
-			throw error("Use of restrict qualifier with non-pointer type", node);
+			throw error("Use of restrict qualifier with non-pointer type",
+					node);
 		if (tag != null) {
 			if (enumerators != null) {
 				TaggedEntity oldEntity = scope.getTaggedEntity(tag);
@@ -780,7 +785,8 @@ public class TypeAnalyzer {
 				if (oldEntity != null)
 					throw error("Re-use of tag " + tag
 							+ " for enumeration.  Previous use was at "
-							+ oldEntity.getFirstDeclaration().getSource(), node);
+							+ oldEntity.getFirstDeclaration().getSource(),
+							node);
 				enumeration = createEnumeration(node);
 			} else {
 				TaggedEntity oldEntity = scope.getLexicalTaggedEntity(tag);
@@ -790,14 +796,13 @@ public class TypeAnalyzer {
 							"See C11 6.7.2.3(3):\n\"A type specifier of the form\n"
 									+ "    enum identifier\n"
 									+ "without an enumerator list shall only appear after the type\n"
-									+ "it specifies is complete.\"", node);
+									+ "it specifies is complete.\"",
+							node);
 				if (!(oldEntity instanceof EnumerationType))
-					throw error(
-							"Re-use of tag "
-									+ tag
-									+ " for enumeration when tag is visible with different kind.  Previous use was at "
-									+ oldEntity.getFirstDeclaration()
-											.getSource(), node);
+					throw error("Re-use of tag " + tag
+							+ " for enumeration when tag is visible with different kind.  Previous use was at "
+							+ oldEntity.getFirstDeclaration().getSource(),
+							node);
 				enumeration = (EnumerationType) oldEntity;
 				assert enumeration.isComplete();
 				// if not, you would have caught the earlier incomplete use
@@ -844,9 +849,8 @@ public class TypeAnalyzer {
 	 * <p>
 	 * If there is a tag, proceed as follows:
 	 * <ul>
-	 * <li>
-	 * If there is a declarator list: see if there exists a tagged entity with
-	 * the same tag in current scope.
+	 * <li>If there is a declarator list: see if there exists a tagged entity
+	 * with the same tag in current scope.
 	 * <ul>
 	 * <li>If there does, check it has the same kind (struct or union) as this
 	 * one, and check that it is incomplete. If either check fails, throw a
@@ -857,8 +861,7 @@ public class TypeAnalyzer {
 	 * it to the current scope.</li>
 	 * </ul>
 	 * </li>
-	 * <li>
-	 * If there is no declarator list: see if there exists a visible tagged
+	 * <li>If there is no declarator list: see if there exists a visible tagged
 	 * entity with the same tag. If there does exist such an entity, check it
 	 * has the same kind as this one (struct or union), and use it. If there
 	 * does not exist such an entity, create a new incomplete struct or union
@@ -883,7 +886,8 @@ public class TypeAnalyzer {
 		Type result;
 
 		if (node.isRestrictQualified())
-			throw error("Use of restrict qualifier with non-pointer type", node);
+			throw error("Use of restrict qualifier with non-pointer type",
+					node);
 		if (tag == null) {
 			if (fieldDecls == null)
 				throw error(

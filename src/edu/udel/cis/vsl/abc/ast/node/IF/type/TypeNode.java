@@ -6,7 +6,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 public interface TypeNode extends SizeableNode {
 
 	/**
-	 * The different kinds of type names.
+	 * The different kinds of type nodes.
 	 */
 	public static enum TypeNodeKind {
 		ARRAY, ATOMIC, BASIC, DOMAIN, ENUMERATION, FUNCTION, POINTER, RANGE, SCOPE, STRUCTURE_OR_UNION, TYPEDEF_NAME, VOID,
