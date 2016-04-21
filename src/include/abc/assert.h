@@ -1,5 +1,5 @@
-#ifndef __ASSERT__
-#define __ASSERT__
+#ifndef _ASSERT_
+#define _ASSERT_
 /*@ pure;
   @ depends_on \nothing;
   @ executes_when \true;
