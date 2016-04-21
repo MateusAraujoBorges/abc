@@ -1,5 +1,5 @@
-#ifndef __CIVLPTHREAD__
-#define __CIVLPTHREAD__
+#ifndef _CIVLPTHREAD_
+#define _CIVLPTHREAD_
 
 #include <civlc.cvh>
 #include <pthread.h>
