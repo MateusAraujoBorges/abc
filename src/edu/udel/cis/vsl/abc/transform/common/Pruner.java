@@ -20,7 +20,7 @@ import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
  * following children other than ordinary declarations and typedef declarations.
  * When an identifier is encountered, the definition or declaration of the
  * entity to which it refers is also searched. Hence only those
- * declarations/definitions that are actually used will be enountered in the
+ * declarations/definitions that are actually used will be encountered in the
  * search.
  * 
  * Once the reachable nodes have been determined, the set of reachable nodes is
@@ -28,12 +28,12 @@ import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
  * 
  * This transformer assumes the given AST is a closed program. It also assumes
  * that the standard analysis has been performed, so that identifiers have
- * entities associted to them.
+ * entities associated to them.
  * 
  * The AST nodes are modified and re-used. If you want to keep the original AST
  * intact, you should clone it before performing this transformation.
  * 
- * The AST returned will be pruned, but will have not the standard analyses
+ * The AST returned will be pruned, but will not have the standard analyses
  * encoded in it. If you want them, they should be invoked on the new AST.
  * 
  * @author siegel
@@ -53,7 +53,8 @@ public class Pruner extends BaseTransformer {
 		UNREACHABLE,
 		/**
 		 * Indicates this node is reachable and must therefore be kept in the
-		 * AST.
+		 * AST. This is a temporary state. Eventually, any node marked REACHABLE
+		 * will eventually be marked KEEP.
 		 */
 		REACHABLE,
 		/**
