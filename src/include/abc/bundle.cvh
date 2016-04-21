@@ -1,8 +1,8 @@
 /* This header file contains the data types and function prototypes for bundle.
  */
 
-#ifndef __BUNDLE__
-#define __BUNDLE__
+#ifndef _BUNDLE_
+#define _BUNDLE_
 
 /* includes civlc.cvh because this library references $operation */
 #include<civlc.cvh>
