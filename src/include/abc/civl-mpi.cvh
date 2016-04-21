@@ -1,5 +1,5 @@
-#ifndef __CIVLMPI__
-#define __CIVLMPI__
+#ifndef _CIVLMPI_
+#define _CIVLMPI_
 
 #include <civlc.cvh>
 #include <comm.cvh>
