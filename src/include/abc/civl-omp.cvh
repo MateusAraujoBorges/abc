@@ -1,7 +1,7 @@
 // civlc-omp.cvh: header file for CIVL-C support functions for OpenMP.
 
-#ifndef __CIVLC_OMP__
-#define __CIVLC_OMP__
+#ifndef _CIVLC_OMP_
+#define _CIVLC_OMP_
 
 #include <civlc.cvh>
 #include <domain.cvh>
