@@ -1,7 +1,7 @@
 #ifndef _COMPLEX_
 #define _COMPLEX_  
 
-#define _Complex __COMPLEX__
+#define _Complex _COMPLEX_
 #define complex _Complex
 #define _Complex_I (const float _Complex)
 #define imaginary _Imaginary
