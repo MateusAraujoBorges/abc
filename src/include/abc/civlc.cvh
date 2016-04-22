@@ -2,8 +2,8 @@
  * including standard types and function prototypes.
  */
 
-#ifndef __CIVLC__
-#define __CIVLC__
+#ifndef _CIVLC_
+#define _CIVLC_
 
 #include<op.h>
 

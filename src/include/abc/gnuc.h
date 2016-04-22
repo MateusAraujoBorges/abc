@@ -1,5 +1,5 @@
-#ifndef __GNU_C__
-#define __GNU_C__
+#ifndef _GNU_C_
+#define _GNU_C_
 
 #define alloca(size)   __builtin_alloca (size)
 

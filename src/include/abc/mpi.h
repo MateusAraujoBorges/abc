@@ -1,5 +1,5 @@
-#ifndef __MPI__
-#define __MPI__
+#ifndef _MPI_
+#define _MPI_
 #include <op.h>
 #ifndef NULL
 #define NULL ((void*)0)

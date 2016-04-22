@@ -2,8 +2,8 @@
  * Nonlocal jumps <setjmp.h> 7.13.
  * Based on C11 Standard.
  */
-#ifndef __SETJMP__
-#define __SETJMP__
+#ifndef _SETJMP_
+#define _SETJMP_
 
 typedef int jmp_buf[2];
 

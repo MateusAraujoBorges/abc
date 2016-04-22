@@ -2,8 +2,8 @@
  * pointer operations.
  */
 
-#ifndef __POINTER__
-#define __POINTER__
+#ifndef _POINTER_
+#define _POINTER_
 
 #include<civlc.cvh>
 

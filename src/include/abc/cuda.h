@@ -5,8 +5,8 @@
  * for its Cuda counterpart.
  */
 
-#ifndef __CUDA
-#define __CUDA
+#ifndef _CUDA
+#define _CUDA
 
 #include <civl-cuda.cvh>
 

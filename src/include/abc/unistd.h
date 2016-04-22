@@ -1,5 +1,5 @@
-#ifndef __UNISTD__
-#define __UNISTD__
+#ifndef _UNISTD_
+#define _UNISTD_
 
 int sleep(int n);
 

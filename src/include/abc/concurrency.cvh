@@ -2,8 +2,8 @@
  * concurrency.
  */
 
-#ifndef __CONCURRENCY__
-#define __CONCURRENCY__
+#ifndef _CONCURRENCY_
+#define _CONCURRENCY_
 
 /* includes civlc.cvh because this library references $scope */
 #include <civlc.cvh>

@@ -1,5 +1,5 @@
-#ifndef __COMPLEX__
-#define __COMPLEX__  
+#ifndef _COMPLEX_
+#define _COMPLEX_  
 
 #define _Complex __COMPLEX__
 #define complex _Complex

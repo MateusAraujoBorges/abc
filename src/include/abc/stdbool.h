@@ -1,6 +1,6 @@
 /* stdbool.h - Standard header for booleans */
-#ifndef __STDBOOL__
-#define __STDBOOL__
+#ifndef _STDBOOL_
+#define _STDBOOL_
 #define bool _Bool
 #define true 1
 #define false 0

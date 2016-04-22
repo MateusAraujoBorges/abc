@@ -1,7 +1,7 @@
-#ifndef __CUDA_RUNTIME
-#define __CUDA_RUNTIME
+#ifndef _CUDA_RUNTIME
+#define _CUDA_RUNTIME
 
-#ifndef __CUDA
+#ifndef _CUDA
 #include <cuda.h>
 #endif
 

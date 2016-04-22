@@ -2,8 +2,8 @@
  * Alternative spellings <iso646.h>
  * Based on C11 Standard 7.9.
  */
-#ifndef __ISO646__
-#define __ISO646__
+#ifndef _ISO646_
+#define _ISO646_
 
 /* Defines the following eleven macros (on the left) that expand
  * to the corresponding tokens (on the right):

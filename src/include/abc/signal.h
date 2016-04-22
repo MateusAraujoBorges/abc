@@ -2,8 +2,8 @@
  * Signal handling.
  * Based on C11 Standard 7.14.
  */
-#ifndef __SIGNAL__
-#define __SIGNAL__
+#ifndef _SIGNAL_
+#define _SIGNAL_
 
 /* Macros */
 #define SIGABRT 2

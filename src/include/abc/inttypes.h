@@ -3,8 +3,8 @@
  * Based on C11 Standard.
  */
 
-#ifndef __INTTYPES__
-#define __INTTYPES__
+#ifndef _INTTYPES_
+#define _INTTYPES_
 
 
 /* Needed from stdint.h, stddef.h: */

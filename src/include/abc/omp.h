@@ -1,5 +1,5 @@
-#ifndef __OMP__
-#define __OMP__
+#ifndef _OMP_
+#define _OMP_
 
 typedef struct omp_lock_t omp_lock_t;
 

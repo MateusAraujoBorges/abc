@@ -1,8 +1,8 @@
 /* stdio.h: The ABC representation of standard C library stdio.
  * Based on C11 Standard.
  */
-#ifndef __STDIO__
-#define __STDIO__
+#ifndef _STDIO_
+#define _STDIO_
 
 /* Needed from stdarg.h: */
 

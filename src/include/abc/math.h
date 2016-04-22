@@ -1,5 +1,5 @@
-#ifndef __MATH__
-#define __MATH__
+#ifndef _MATH_
+#define _MATH_
 //two types
 #define float_t float      // floating-point type at least 
                            //as wide as 'float' used to evaluate 

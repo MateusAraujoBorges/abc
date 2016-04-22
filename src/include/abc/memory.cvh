@@ -1,5 +1,5 @@
-#ifndef __MEMORY__
-#define __MEMORY__
+#ifndef _MEMORY_
+#define _MEMORY_
 typedef struct $memory $memory;
 #define $nothing ($memory)0
 

@@ -2,8 +2,8 @@
  * communication.
  */
 
-#ifndef __COMM__
-#define __COMM__
+#ifndef _COMM_
+#define _COMM_
 
 /* includes civlc.cvh because this library references $scope */
 #include <civlc.cvh>

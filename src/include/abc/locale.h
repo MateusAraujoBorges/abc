@@ -2,8 +2,8 @@
  * Localization <locale.h>.
  * Based on C11 Standard 7.11.
  */
-#ifndef __LOCALE__
-#define __LOCALE__
+#ifndef _LOCALE_
+#define _LOCALE_
 
 /* Macros,  integer constant expression */
 #define LC_ALL           0

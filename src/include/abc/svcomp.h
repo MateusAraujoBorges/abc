@@ -1,5 +1,5 @@
-#ifndef __SVCOMP__
-#define __SVCOMP__
+#ifndef _SVCOMP_
+#define _SVCOMP_
 #include<gnuc.h>
 
 /**************************** macros *****************************/
