@@ -110,18 +110,27 @@ $system _Bool $is_concrete_int(int value);
 /* **************************** Memory Functions *************************** */
 
 /* The CIVL-C malloc function, which takes a reference to a scope */
+/*@ depends_on \nothing;
+  @*/
 $system void* $malloc($scope s, int size);
 
 /* The CIVL-C de-allocation function, which takes a pointer, just like 
  * the standard "free" */
+/*@ depends_on \nothing;
+  @*/
 $system void $free(void *p);
 
 /* Assigns arbitrary value to the memory location specified by the given pointer.
  */
+/*@ depends_on \nothing;
+  @*/
 $system void $havoc(void *ptr);
 
 /* Returns the value of real number power operation with the given base and exponent.
  */
+/*@ pure;
+  @ depends_on \nothing;
+  @*/
 $system double $pow(double base, double exp);
 
 /* *************************** Iterator Functions ************************** */
