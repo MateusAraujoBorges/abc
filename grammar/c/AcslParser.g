@@ -54,6 +54,7 @@ tokens{
     MPI_CONSTANT;
     MPI_EXPRESSION;
     OPERATOR;
+    QUANTIFIED;
     SET_BINDERS;
     SET_SIMPLE;
     SIZEOF_EXPR;
@@ -347,23 +348,305 @@ id_list
     | ID (COMMA ID)* ->^(ID_LIST ID+)
     ;
 
-/* 6.5.1 */
-primaryExpression
-	: constant
-    | ID
-	| STRING_LITERAL
-    | LCURLY term BAR binders (SEMICOL term)? RCURLY
-        ->^(SET_BINDERS term binders term?)
-    | LCURLY term RCURLY
-        ->^(SET_SIMPLE term)
-	| LPAREN term RPAREN 
-	  -> ^(TERM_PARENTHESIZED term)
-    | mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
-    | REMOTE_ACCESS LPAREN a=ID COMMA b=primaryExpression RPAREN
-      -> ^(REMOTE_ACCESS $a $b)
+/* C11 section 6.5 Expressions: Grammar here is organized with a
+ * backwards order against the order of sub-sections in C11 standard,
+ * because it's amore viewful way to illustrate how expressions will
+ * be derived
+ */
+
+/* 6.5.17 
+ * expression:
+ *    assignment-expression 
+ *    expression list (connected by COMMAs)
+ */
+term
+    : assignmentExpression
+    ;
+
+/* 6.5.16 
+ * assignment-expression
+ *   conditional-expression
+ *   unary-expression assignment-operator assignment-expression
+ * Tree:
+ * Root: OPERATOR
+ * Child 0: ASSIGN, in ACSL other side-effective assign operators 
+ *          are not allowed
+ * Child 1: ARGUMENT_LIST
+ * Child 1.0: unaryExpression
+ * Child 1.1: assignmentExpression
+ */
+assignmentExpression
+	: (unaryExpression ASSIGN)=>
+	  unaryExpression ASSIGN assignmentExpression
+	  -> ^(OPERATOR ASSIGN
+	       ^(ARGUMENT_LIST unaryExpression assignmentExpression))
+	| conditionalExpression
 	;
 
-/* 6.5.2 */
+/* 6.5.15 *
+ * In C11 it is
+ * conditional-expression:
+ *   logical-OR-expression
+ *   logical-OR-expression ? expression : conditional-expression
+ * 
+ * CIVL-C ACSL parser extends the grammer. see. logical-implies-expression.
+ * conditional-expression:
+ *   logical-implies-expression
+ *   logical-implies-expression ? expression : conditional-expression
+ */
+conditionalExpression
+	: quantifierExpression
+	( -> quantifierExpression
+    	| QUESTION term COLON conditionalExpression
+    	  -> ^(OPERATOR QUESTION
+    	       ^(ARGUMENT_LIST
+    	         quantifierExpression
+    	         term
+    	         conditionalExpression))
+    	)
+	;
+
+/* DEV: put quantifiedExpression a higher precedence than logicalImpliesExpression */
+quantifierExpression
+	: logicalImpliesExpression
+    | quantifier binders SEMICOL a=logicalOrExpression IMPLY b=logicalOrExpression
+	   -> ^(QUANTIFIED quantifier binders $a $b)
+	//| quantifier LCURLY id=IDENTIFIER ASSIGN
+	  //lower=additiveExpression DOTDOT upper=additiveExpression
+	  //RCURLY cond=assignmentExpression
+	  //-> ^(quantifier $id $lower $upper $cond)
+// eventually change to the following:
+//	| quantifier LCURLY id=IDENTIFIER ASSIGN rangeExpression
+//	  RCURLY cond=assignmentExpression
+//	  -> ^(quantifier $id rangeExpression $cond)
+	;
+
+
+/* 6.5.14.5. Extended by CIVL-C and ACSL. *
+ * logical-implies-expression:
+ *   logical-or-expression
+ *   logical-or-expression IMPLY logical-or-expression
+ */
+logicalImpliesExpression
+	: ( logicalOrExpression -> logicalOrExpression )
+	  ( IMPLY y=logicalOrExpression
+	    -> ^(OPERATOR IMPLY ^(ARGUMENT_LIST $logicalImpliesExpression $y))
+	  )*
+    ;
+
+/* 6.5.14 *
+ * logical-OR-expression:
+ *   logical-AND-expression 
+ *   logical-OR-expression || logical-AND-expression
+ */
+logicalOrExpression
+	: ( logicalAndExpression -> logicalAndExpression )
+	  ( LOR y=logicalAndExpression
+	    -> ^(OPERATOR LOR ^(ARGUMENT_LIST $logicalOrExpression $y))
+	  )*
+	;	
+
+/* 6.5.13 *
+ * logical-AND-expression:
+ *   inclusive-OR-expression
+ *   logical-AND-expression && inclusive-OR-expression
+ */
+logicalAndExpression
+	: ( inclusiveOrExpression -> inclusiveOrExpression )
+	  ( LAND y=inclusiveOrExpression
+	    -> ^(OPERATOR LAND ^(ARGUMENT_LIST $logicalAndExpression $y))
+	  )*
+	;
+
+/* 6.5.12 *
+ * Bitwise inclusive OR
+ * inclusive-OR-expression:
+ *   exclusive-OR-expression
+ *   inclusive-OR-expression | exclusive-OR-expression
+ */
+inclusiveOrExpression
+	: ( exclusiveOrExpression -> exclusiveOrExpression )
+	  ( BAR y=exclusiveOrExpression
+	    -> ^(OPERATOR BAR ^(ARGUMENT_LIST $inclusiveOrExpression $y))
+	  )*
+	;
+
+/* 6.5.11 *
+ * Bitwise exclusive OR
+ * exclusive-OR-expression:
+ *   AND-expression
+ *   exclusive-OR-expression ^ AND-expression
+ */
+exclusiveOrExpression
+    : ( andExpression -> andExpression )
+	  ( BITXOR y=andExpression
+	    -> ^(OPERATOR BITXOR ^(ARGUMENT_LIST $exclusiveOrExpression $y))
+	  )*
+	;
+
+/* 6.5.10 *
+ * Bitwise AND
+ * AND-expression
+ *   equality-expression
+ *   AND-expression & equality-expression
+ */
+andExpression
+	: ( equalityExpression -> equalityExpression )
+	  ( AMPERSAND y=equalityExpression
+	    -> ^(OPERATOR AMPERSAND ^(ARGUMENT_LIST $andExpression $y))
+	  )*
+	;
+
+/* 6.5.9 *
+ * equality-expression:
+ *   relational-expression
+ *   equality-expression ==/!= relational-expression
+ */
+equalityExpression
+	: ( relationalExpression -> relationalExpression )
+	  ( equalityOperator y=relationalExpression
+	    -> ^(OPERATOR equalityOperator ^(ARGUMENT_LIST $equalityExpression $y))
+	  )*
+	;
+
+equalityOperator
+	: EQ | NEQ
+	;
+
+/* 6.5.8 *
+ * relational-expression:
+ *   shift-expression
+ *   relational-expression relationalOperator shift-expression
+ */
+relationalExpression
+	: ( shiftExpression -> shiftExpression )
+	  ( relationalOperator y=shiftExpression
+	    -> ^(OPERATOR relationalOperator ^(ARGUMENT_LIST $relationalExpression $y))
+	  )* 
+	;
+
+relationalOperator
+	: LT | GT | LTE | GTE
+	;
+
+/* 6.5.7 *
+ * In C11:
+ * shift-expression:
+ *   additive-expression
+ *   shift-expression <</>> additive-expression
+ *
+ * CIVL-C extends C11 with a range-expression. see range-expression
+ * shift-expression:
+ *   range-expression:
+ *   shift-expression <</>> range-expression
+ */
+shiftExpression
+	: (rangeExpression -> rangeExpression)
+        ( SHIFTLEFT y=rangeExpression
+          -> ^(OPERATOR SHIFTLEFT ^(ARGUMENT_LIST $shiftExpression $y))
+        | SHIFTRIGHT y=rangeExpression
+          -> ^(OPERATOR SHIFTRIGHT ^(ARGUMENT_LIST $shiftExpression $y))
+        )*
+	;
+
+/* 6.5.6.5 *
+ *
+ * CIVL-C range expression "lo .. hi" or "lo .. hi # step" 
+ * a + b .. c + d is equivalent to (a + b) .. (c + d) 
+ * (*,/,%) > (+,-) > range > shift > ...
+ */
+rangeExpression
+	: (additiveExpression -> additiveExpression)
+      ( DOTDOT y=additiveExpression
+        ( -> ^(DOTDOT $rangeExpression $y)
+        | HASH z=additiveExpression
+          -> ^(DOTDOT $rangeExpression $y $z)
+        )
+      )?
+    ;
+
+/* 6.5.6 *
+ * additive-expression:
+ *   multiplicative-expression
+ *   additive-expression +/- multiplicative-expression
+ *
+ **/
+additiveExpression
+	: (multiplicativeExpression -> multiplicativeExpression)
+        ( PLUS y=multiplicativeExpression
+          -> ^(OPERATOR PLUS ^(ARGUMENT_LIST $additiveExpression $y))
+        | SUB y=multiplicativeExpression
+          -> ^(OPERATOR SUB ^(ARGUMENT_LIST $additiveExpression $y))
+        )*
+	;
+
+/* 6.5.5 * 
+ * In C11:
+ * multiplicative-expression:
+ *   cast-expression
+ *   multiplicative-expression STAR/DIVIDE/MOD cast-expression
+ *
+ */
+multiplicativeExpression
+	: (castExpression -> castExpression)
+	( STAR y=castExpression
+	  -> ^(OPERATOR STAR ^(ARGUMENT_LIST $multiplicativeExpression $y))
+	| DIVIDE y=castExpression
+	  -> ^(OPERATOR DIVIDE ^(ARGUMENT_LIST $multiplicativeExpression $y))
+    | MOD y=castExpression
+	  -> ^(OPERATOR MOD ^(ARGUMENT_LIST $multiplicativeExpression $y))
+    )*
+	;
+
+/* 6.5.4 *
+ * cast-expression:
+ *   unary-expression
+ *   (type-name) cast-expression
+ *
+ */
+// ambiguity 1: (expr) is a unary expression and looks like (typeName).
+// ambiguity 2: (typeName){...} is a compound literal and looks like cast
+castExpression
+	: (LPAREN type_expr RPAREN)=> l=LPAREN type_expr RPAREN castExpression
+	  -> ^(CAST type_expr castExpression)
+	| unaryExpression
+	;
+
+/* 6.5.3 *
+ * unary-expression:
+ *   postfix-expression
+ *   ++/--/sizeof unary-expression
+ *   unary-operator cast-expression
+ *   sizeof (type-name)
+ **/
+unaryExpression
+	: postfixExpression
+	| unary_op castExpression
+	  -> ^(OPERATOR unary_op ^(ARGUMENT_LIST castExpression))
+	| (SIZEOF LPAREN type_expr)=> SIZEOF LPAREN type_expr RPAREN
+	  -> ^(SIZEOF_TYPE type_expr)
+	| SIZEOF unaryExpression
+	  -> ^(SIZEOF_EXPR unaryExpression)
+    | UNION LPAREN argumentExpressionList RPAREN
+        -> ^(UNION argumentExpressionList)
+    | INTER LPAREN argumentExpressionList RPAREN
+        -> ^(INTER argumentExpressionList)
+    | VALID LPAREN term RPAREN
+        -> ^(VALID term)
+	;
+
+/* 6.5.2 *
+ * postfix-expression:
+ *   primary-expression
+ *   postfix-expression [expression]
+ *   postfix-expression (argument-expression-list)
+ *   postfix-expression . identifier
+ *   postfix-expression -> identifier
+ *   postfix-expression ++
+ *   postfix-expression --
+ *   (type-name) {initializer-list}
+ *   (type-name) {initializer-list, }
+ **/
 postfixExpression
 	: (primaryExpression -> primaryExpression)
 		// array index operator:
@@ -381,7 +664,7 @@ postfixExpression
 	  | ARROW ID
 	    -> ^(ARROW $postfixExpression ID)
 	  )*
-	;
+	 ;
 
 /* 6.5.2 */
 argumentExpressionList
@@ -390,22 +673,31 @@ argumentExpressionList
 	  -> ^(ARGUMENT_LIST assignmentExpression+)
 	;
 
-/* 6.5.3 */
-unaryExpression
-	: postfixExpression
-	| unary_op castExpression
-	  -> ^(OPERATOR unary_op ^(ARGUMENT_LIST castExpression))
-	| (SIZEOF LPAREN type_expr)=> SIZEOF LPAREN type_expr RPAREN
-	  -> ^(SIZEOF_TYPE type_expr)
-	| SIZEOF unaryExpression
-	  -> ^(SIZEOF_EXPR unaryExpression)
-	//| spawnExpression
-    | UNION LPAREN argumentExpressionList RPAREN
-        -> ^(UNION argumentExpressionList)
-    | INTER LPAREN argumentExpressionList RPAREN
-        -> ^(INTER argumentExpressionList)
-    | VALID LPAREN term RPAREN
-        -> ^(VALID term)
+/* 6.5.1 */
+primaryExpression
+	: constant
+    | ID
+	| STRING_LITERAL
+    | LCURLY term BAR binders (SEMICOL term)? RCURLY
+        ->^(SET_BINDERS term binders term?)
+    | LCURLY term RCURLY
+        ->^(SET_SIMPLE term)
+	| LPAREN term RPAREN 
+	  -> ^(TERM_PARENTHESIZED term)
+    | mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
+    | remoteExpression
+	;
+
+
+/* 6.5.0.1 *
+ * remote-expression:
+ *    REMOTE_ACCESS ( identifier , shiftExpression ).
+ * A remote-expression should be used in the same way as a variable 
+ * identifier.
+ */
+remoteExpression
+    : REMOTE_ACCESS LPAREN a=ID COMMA b=shiftExpression RPAREN
+	  -> ^(REMOTE_ACCESS  $a $b)
 	;
     
     
@@ -418,188 +710,11 @@ unaryExpression
 	   //    argumentExpressionList RPAREN)
 	//;
 
-/* 6.5.4 */
-// ambiguity 1: (expr) is a unary expression and looks like (typeName).
-// ambiguity 2: (typeName){...} is a compound literal and looks like cast
-castExpression
-	: (LPAREN type_expr RPAREN)=> l=LPAREN type_expr RPAREN castExpression
-	  -> ^(CAST type_expr castExpression)
-	| unaryExpression
-	;
-
-remoteExpression
-	:(castExpression -> castExpression)
-	( HASH y=castExpression
-	  -> ^(OPERATOR HASH ^(ARGUMENT_LIST $remoteExpression $y))
-    )*
-	;
-
-/* 6.5.5 */
-multiplicativeExpression
-	: (remoteExpression -> remoteExpression)
-	( STAR y=remoteExpression
-	  -> ^(OPERATOR STAR ^(ARGUMENT_LIST $multiplicativeExpression $y))
-	| DIVIDE y=remoteExpression
-	  -> ^(OPERATOR DIVIDE ^(ARGUMENT_LIST $multiplicativeExpression $y))
-    | MOD y=remoteExpression
-	  -> ^(OPERATOR MOD ^(ARGUMENT_LIST $multiplicativeExpression $y))
-    )*
-	;
-
-/* 6.5.6 */
-additiveExpression
-	: (multiplicativeExpression -> multiplicativeExpression)
-        ( PLUS y=multiplicativeExpression
-          -> ^(OPERATOR PLUS ^(ARGUMENT_LIST $additiveExpression $y))
-        | SUB y=multiplicativeExpression
-          -> ^(OPERATOR SUB ^(ARGUMENT_LIST $additiveExpression $y))
-        )*
-	;
-
-/* CIVL-C range expression "lo .. hi" or "lo .. hi # step" */
-// a + b .. c + d is equivalent to (a + b) .. (c + d)
-rangeExpression
-	: (additiveExpression -> additiveExpression)
-      ( DOTDOT y=additiveExpression
-        ( -> ^(DOTDOT $rangeExpression $y)
-        | HASH z=additiveExpression
-          -> ^(DOTDOT $rangeExpression $y $z)
-        )
-      )?
-    ;
-
-/* 6.5.7 */
-shiftExpression
-	: (rangeExpression -> rangeExpression)
-        ( SHIFTLEFT y=rangeExpression
-          -> ^(OPERATOR SHIFTLEFT ^(ARGUMENT_LIST $shiftExpression $y))
-        | SHIFTRIGHT y=rangeExpression
-          -> ^(OPERATOR SHIFTRIGHT ^(ARGUMENT_LIST $shiftExpression $y))
-        )*
-	;
-
-/* 6.5.8 */
-relationalExpression
-	: ( shiftExpression -> shiftExpression )
-	  ( relationalOperator y=shiftExpression
-	    -> ^(OPERATOR relationalOperator ^(ARGUMENT_LIST $relationalExpression $y))
-	  )* 
-	;
-
-relationalOperator
-	: LT | GT | LTE | GTE
-	;
-
-/* 6.5.9 */
-equalityExpression
-	: ( relationalExpression -> relationalExpression )
-	  ( equalityOperator y=relationalExpression
-	    -> ^(OPERATOR equalityOperator ^(ARGUMENT_LIST $equalityExpression $y))
-	  )*
-	;
-
-equalityOperator
-	: EQ | NEQ
-	;
-
-/* 6.5.10 */
-andExpression
-	: ( equalityExpression -> equalityExpression )
-	  ( AMPERSAND y=equalityExpression
-	    -> ^(OPERATOR AMPERSAND ^(ARGUMENT_LIST $andExpression $y))
-	  )*
-	;
-
-/* 6.5.11 */
-exclusiveOrExpression
-: ( andExpression -> andExpression )
-	  ( BITXOR y=andExpression
-	    -> ^(OPERATOR BITXOR ^(ARGUMENT_LIST $exclusiveOrExpression $y))
-	  )*
-	;
-
-/* 6.5.12 */
-inclusiveOrExpression
-	: ( exclusiveOrExpression -> exclusiveOrExpression )
-	  ( BAR y=exclusiveOrExpression
-	    -> ^(OPERATOR BAR ^(ARGUMENT_LIST $inclusiveOrExpression $y))
-	  )*
-	;
-
-/* 6.5.13 */
-logicalAndExpression
-	: ( inclusiveOrExpression -> inclusiveOrExpression )
-	  ( LAND y=inclusiveOrExpression
-	    -> ^(OPERATOR LAND ^(ARGUMENT_LIST $logicalAndExpression $y))
-	  )*
-	;
-
-/* 6.5.14 */
-logicalOrExpression
-	: ( logicalAndExpression -> logicalAndExpression )
-	  ( LOR y=logicalAndExpression
-	    -> ^(OPERATOR LOR ^(ARGUMENT_LIST $logicalOrExpression $y))
-	  )*
-	;
-	
-/* Added for CIVL-C.  Usually 6.5.15 would use logicalOrExpression. */
-logicalImpliesExpression
-	: ( logicalOrExpression -> logicalOrExpression )
-	  ( IMPLY y=logicalOrExpression
-	    -> ^(OPERATOR IMPLY ^(ARGUMENT_LIST $logicalImpliesExpression $y))
-	  )*
-    	;
-
-/* 6.5.15 */
-conditionalExpression
-	: logicalImpliesExpression
-	( -> logicalImpliesExpression
-    	| QUESTION term COLON conditionalExpression
-    	  -> ^(OPERATOR QUESTION
-    	       ^(ARGUMENT_LIST
-    	         logicalImpliesExpression
-    	         term
-    	         conditionalExpression))
-    	)
-	;
-
-/* A CIVL-C quantified expression using $exists or $forall.
- */
-quantifierExpression
-	: quantifier binders SEMICOL assignmentExpression
-	  -> ^(quantifier binders assignmentExpression)
-	//| quantifier LCURLY id=IDENTIFIER ASSIGN
-	  //lower=additiveExpression DOTDOT upper=additiveExpression
-	  //RCURLY cond=assignmentExpression
-	  //-> ^(quantifier $id $lower $upper $cond)
-// eventually change to the following:
-//	| quantifier LCURLY id=IDENTIFIER ASSIGN rangeExpression
-//	  RCURLY cond=assignmentExpression
-//	  -> ^(quantifier $id rangeExpression $cond)
-	;
-
 /* One of the CIVL-C first-order quantifiers.
  * UNIFORM represents uniform continuity.  
  */	
 quantifier
 	: FORALL | EXISTS
-	;
-
-/* 6.5.16
- * conditionalExpression or
- * Root: OPERATOR
- * Child 0: assignmentOperator
- * Child 1: ARGUMENT_LIST
- * Child 1.0: unaryExpression
- * Child 1.1: assignmentExpression
- */
-assignmentExpression
-	: (unaryExpression ASSIGN)=>
-	  unaryExpression ASSIGN assignmentExpression
-	  -> ^(OPERATOR ASSIGN
-	       ^(ARGUMENT_LIST unaryExpression assignmentExpression))
-	| conditionalExpression
-	| quantifierExpression
 	;
 
 /* 6.5.17
@@ -609,10 +724,10 @@ assignmentExpression
  * Child 1: ARGUMENT_LIST
  * Child 1.0: arg0
  * Child 1.1: arg1
- */
+ *
 term
 	: assignmentExpression
-    ;
+    ;*/
 			
 /* 6.6 */
 constantExpression

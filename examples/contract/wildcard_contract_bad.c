@@ -19,7 +19,7 @@ void recv(int iter)
 }
 
 /*@ \mpi_collective(comm, P2P):
-  @   ensures x#root == msg;
+  @   ensures \remote(x, root) == msg;
   @
 */
 void send(int msg) 
