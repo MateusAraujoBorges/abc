@@ -16,10 +16,14 @@ typedef struct $bundle $bundle;
 /* *********************** Functions *********************** */
 
 /* Returns the size of the given bundle b. */
-$pure $system int $bundle_size($bundle b);
+/*@ pure;
+  @*/
+$system int $bundle_size($bundle b);
 
 /* Creates a bundle from the memory region specified by
  * ptr and size, copying the data into the new bundle */
+/*@ pure;
+  @*/
 $system $bundle $bundle_pack(void *ptr, int size);
 
 /* Copies the data out of the bundle into the region specified */

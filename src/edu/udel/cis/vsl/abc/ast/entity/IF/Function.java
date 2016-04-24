@@ -52,6 +52,22 @@ public interface Function extends OrdinaryEntity {
 	void setAtomic(boolean value);
 
 	/**
+	 * Is the function declared with the <code>$abstract</code> specifier,
+	 * indicating that this is an abstract function?
+	 * 
+	 * @return <code>true</code> iff the function is an abstract function
+	 */
+	boolean isAbstract();
+
+	/**
+	 * Sets whether this function is an abstract function
+	 * 
+	 * @param value
+	 *            <code>true</code> if abstract, <code>false</code> if not
+	 */
+	void setAbstract(boolean value);
+
+	/**
 	 * Is the function declared with the <code>$system</code> specifier,
 	 * indicating that this is a system function?
 	 * 
@@ -146,7 +162,7 @@ public interface Function extends OrdinaryEntity {
 	 * 
 	 * @return
 	 */
-	Iterator<ContractNode> getContracts();
+	Iterable<ContractNode> getContracts();
 	// TODO: perhaps more information is needed. About each parameter:
 	// does it have static extent? What is the extent (constant
 	// or expression)?

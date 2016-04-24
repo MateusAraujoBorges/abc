@@ -2,11 +2,12 @@ package edu.udel.cis.vsl.abc.ast.node.common.expression;
 
 import java.io.PrintStream;
 
-import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode.ContractKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
@@ -112,32 +113,52 @@ public class CommonFunctionCallNode extends CommonExpressionNode implements
 
 	@Override
 	public boolean isSideEffectFree(boolean errorsAreSideEffects) {
-		ExpressionNode function = getFunction();
+		ExpressionNode functionExpr = getFunction();
 		boolean result = true;
 
-		if (function instanceof IdentifierExpressionNode) {
-			IdentifierNode functionIdentifier = ((IdentifierExpressionNode) function)
+		if (functionExpr instanceof IdentifierExpressionNode) {
+			IdentifierNode functionIdentifier = ((IdentifierExpressionNode) functionExpr)
 					.getIdentifier();
-			DeclarationNode functionDeclaration;
 
 			if (functionIdentifier.getEntity() == null) {
 				// FIXME: Why do we need this? Not having this check was
 				// causing a failure with ring2.cvl
 				return false;
 			}
-			functionDeclaration = ((OrdinaryEntity) functionIdentifier
-					.getEntity()).getFirstDeclaration();
-			// Check if this is an abstract function.
-			if (functionDeclaration instanceof AbstractFunctionDefinitionNode) {
-				for (int i = 0; i < getNumberOfContextArguments(); i++) {
-					result = result
-							&& getContextArgument(i).isSideEffectFree(
-									errorsAreSideEffects);
+
+			boolean isAtomicPureFunction = false;
+			Entity functionEntity = functionIdentifier.getEntity();
+
+			if (functionEntity instanceof Function) {
+				Function function = (Function) functionEntity;
+
+				if (function.isAbstract())
+					isAtomicPureFunction = true;
+				else if (function.isSystemFunction()) {
+					for (ContractNode contract : function.getContracts()) {
+						if (contract.contractKind() == ContractKind.PURE) {
+							isAtomicPureFunction = true;
+							break;
+						}
+					}
 				}
-				for (int i = 0; i < getNumberOfArguments(); i++) {
-					result = result
-							&& getArgument(i).isSideEffectFree(
-									errorsAreSideEffects);
+			}
+			if (isAtomicPureFunction) {
+				for (int i = 0; i < getNumberOfContextArguments(); i++) {
+					boolean argSEF = getContextArgument(i).isSideEffectFree(
+							errorsAreSideEffects);
+
+					if (!argSEF)
+						return false;
+				}
+				if (result) {
+					for (int i = 0; i < getNumberOfArguments(); i++) {
+						boolean argSEF = getArgument(i).isSideEffectFree(
+								errorsAreSideEffects);
+
+						if (!argSEF)
+							return false;
+					}
 				}
 			} else {
 				result = false;

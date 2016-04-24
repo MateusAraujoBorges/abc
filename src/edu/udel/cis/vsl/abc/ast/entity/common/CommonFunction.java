@@ -1,7 +1,6 @@
 package edu.udel.cis.vsl.abc.ast.entity.common;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -18,8 +17,8 @@ import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 
 public class CommonFunction extends CommonOrdinaryEntity implements Function {
 
-	private boolean isInlined, doesNotReturn, isAtomic,
-			isSystemFunction = false;
+	private boolean isInlined, doesNotReturn, isAtomic, isSystemFunction,
+			isAbstract = false;
 
 	private Set<Function> callers = new HashSet<>();
 	private Set<Function> callees = new HashSet<>();
@@ -93,8 +92,8 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	}
 
 	@Override
-	public Iterator<ContractNode> getContracts() {
-		return contracts.iterator();
+	public Iterable<ContractNode> getContracts() {
+		return contracts;
 	}
 
 	@Override
@@ -115,5 +114,15 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	@Override
 	public boolean isSystemFunction() {
 		return this.isSystemFunction;
+	}
+
+	@Override
+	public boolean isAbstract() {
+		return this.isAbstract;
+	}
+
+	@Override
+	public void setAbstract(boolean value) {
+		this.isAbstract = value;
 	}
 }

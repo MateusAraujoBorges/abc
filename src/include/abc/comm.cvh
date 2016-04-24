@@ -56,42 +56,42 @@ typedef struct $comm * $comm;
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-$message $message_pack(int source, int dest, int tag, void *data, int size);
+$atomic_f $message $message_pack(int source, int dest, int tag, void *data, int size);
   
 /* returns the message source */
 /*@ pure;
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-int $message_source($message message);
+$atomic_f int $message_source($message message);
 
 /* returns the message tag */
 /*@ pure;
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-int $message_tag($message message) ;
+$atomic_f int $message_tag($message message) ;
 
 /* returns the message destination */
 /*@ pure;
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-int $message_dest($message message) ;
+$atomic_f int $message_dest($message message) ;
 
 /* returns the message size */
 /*@ pure;
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-int $message_size($message message); 
+$atomic_f int $message_size($message message); 
 
 /* transfers message data to buf, throwing exception if message
  * size exceeds specified size */
 /*@ depends_on \access(buf);
   @ executes_when \true;
   @*/
-void $message_unpack($message message, void *buf, int size);
+$atomic_f void $message_unpack($message message, void *buf, int size);
 
 /* ************************** Functions of $gcomm ************************** */
 
@@ -162,7 +162,7 @@ $system int $comm_size($comm comm);
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-$system int $comm_place($comm comm);
+$atomic_f int $comm_place($comm comm);
 
 /* Adds the message to the appropriate message queue in the communication
  * universe specified by the comm.  The source of the message must equal
