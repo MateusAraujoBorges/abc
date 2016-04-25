@@ -18,6 +18,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
@@ -131,11 +132,10 @@ public class DeclarationAnalyzer {
 				typedef = (Typedef) entity;
 				oldType = typedef.getType();
 				if (!type.equals(oldType))
-					throw entityAnalyzer.error(
-							"Redefiniton of typedef name with different type.  "
+					throw entityAnalyzer
+							.error("Redefiniton of typedef name with different type.  "
 									+ "Original definition was at "
-									+ typedef.getDefinition().getSource(),
-							node);
+									+ typedef.getDefinition().getSource(), node);
 			} else {
 				typedef = entityAnalyzer.entityFactory.newTypedef(name, type);
 				try {
@@ -192,6 +192,16 @@ public class DeclarationAnalyzer {
 			node.setIsDefinition(true);
 			entityAnalyzer.statementAnalyzer.processCompoundStatement(body);
 			processGotos(body);
+			// for (DeclarationNode declaration : result.getDeclarations()) {
+			// FunctionDeclarationNode funcDecl = (FunctionDeclarationNode)
+			// declaration;
+			//
+			// if (funcDecl != node && funcDecl.getContract() != null) {
+			// throw this
+			// .error("for a non-system/abstract function, only the function definition is allowed to have contracts",
+			// funcDecl);
+			// }
+			// }
 		}
 		if (contract != null) {
 			this.acslAnalyzer.processContractNodes(contract, result);
@@ -259,8 +269,8 @@ public class DeclarationAnalyzer {
 			entityAnalyzer.expressionAnalyzer
 					.processExpression((ExpressionNode) initializer);
 			try {
-				entityAnalyzer.expressionAnalyzer.processAssignment(currentType,
-						rhs);
+				entityAnalyzer.expressionAnalyzer.processAssignment(
+						currentType, rhs);
 			} catch (UnsourcedException e) {
 				throw error(e, initializer);
 			}
@@ -345,8 +355,8 @@ public class DeclarationAnalyzer {
 			return LinkageKind.INTERNAL;
 		}
 		hasNoStorageClass = hasNoStorageClass(node);
-		if (node.hasExternStorage() || (isFunction && hasNoStorageClass
-				&& (isFileScope || !civl()))) {
+		if (node.hasExternStorage()
+				|| (isFunction && hasNoStorageClass && (isFileScope || !civl()))) {
 			OrdinaryEntity previous = scope.getLexicalOrdinaryEntity(false,
 					name);
 
@@ -390,8 +400,7 @@ public class DeclarationAnalyzer {
 	 * <code>null</code></li>
 	 * <li>if the declared {@link Entity} has not yet been encountered, an
 	 * {@link Entity} object is created and added to the appropriate scope. The
-	 * new entity will have type and linkage as specified by the declaration.
-	 * </li>
+	 * new entity will have type and linkage as specified by the declaration.</li>
 	 * <li>if on the other hand the entity already exists, the declaration's
 	 * linkage is checked for consistency with that of the existing entity, the
 	 * entity's type is updated to be the composite type of its current type and
@@ -428,7 +437,7 @@ public class DeclarationAnalyzer {
 	 */
 	private OrdinaryEntity processOrdinaryDeclaration(
 			OrdinaryDeclarationNode node, boolean isParameter)
-					throws SyntaxException {
+			throws SyntaxException {
 		AST ast = node.getOwner();
 		IdentifierNode identifier = node.getIdentifier();
 		TypeNode typeNode = node.getTypeNode();
@@ -455,19 +464,14 @@ public class DeclarationAnalyzer {
 		// the same function
 		if (linkage == LinkageKind.NONE) {
 			if (entity != null) {
-				if (!(civl() && isFunction
-						&& scope.getScopeKind() == ScopeKind.BLOCK))
-					throw error(
-							"Redeclaration of identifier with no linkage. "
-									+ "Original declaration was at "
-									+ entity.getDeclaration(0).getSource(),
-							identifier);
+				if (!(civl() && isFunction && scope.getScopeKind() == ScopeKind.BLOCK))
+					throw error("Redeclaration of identifier with no linkage. "
+							+ "Original declaration was at "
+							+ entity.getDeclaration(0).getSource(), identifier);
 			} else {
-				entity = isFunction
-						? entityAnalyzer.entityFactory.newFunction(name,
-								linkage, type)
-						: entityAnalyzer.entityFactory.newVariable(name,
-								linkage, type);
+				entity = isFunction ? entityAnalyzer.entityFactory.newFunction(
+						name, linkage, type) : entityAnalyzer.entityFactory
+						.newVariable(name, linkage, type);
 				isNew = true;
 				try {
 					scope.add(entity);
@@ -490,9 +494,8 @@ public class DeclarationAnalyzer {
 								"Disagreement on internal/external linkage between two declarations",
 								node);
 				} else { // entity does not yet exist
-					entity = isFunction
-							? entityAnalyzer.entityFactory.newFunction(name,
-									linkage, type)
+					entity = isFunction ? entityAnalyzer.entityFactory
+							.newFunction(name, linkage, type)
 							: entityAnalyzer.entityFactory.newVariable(name,
 									linkage, type);
 					isNew = true;
@@ -547,10 +550,9 @@ public class DeclarationAnalyzer {
 					throw error(
 							"Redeclaration of entity with incompatible type: "
 									+ entity.getName() + "\nOriginal type: "
-									+ oldType + "\nNew type: " + type,
-							typeNode);
-				entity.setType(entityAnalyzer.typeFactory.compositeType(oldType,
-						type));
+									+ oldType + "\nNew type: " + type, typeNode);
+				entity.setType(entityAnalyzer.typeFactory.compositeType(
+						oldType, type));
 			}
 		}
 	}
@@ -599,9 +601,10 @@ public class DeclarationAnalyzer {
 			InitializerNode oldInitializer = variable.getInitializer();
 
 			if (oldInitializer != null)
-				throw error("Re-initialization of variable "
-						+ variable.getName() + ". First was at "
-						+ oldInitializer.getSource() + ".", initializer);
+				throw error(
+						"Re-initialization of variable " + variable.getName()
+								+ ". First was at "
+								+ oldInitializer.getSource() + ".", initializer);
 			variable.setInitializer(initializer);
 			variable.setDefinition(declaration);
 			declaration.setIsDefinition(true);
@@ -611,8 +614,8 @@ public class DeclarationAnalyzer {
 		}
 		if (typeAlignmentSpecifiers != null) {
 			for (TypeNode child : typeAlignmentSpecifiers)
-				variable.addTypeAlignment(
-						entityAnalyzer.typeAnalyzer.processTypeNode(child));
+				variable.addTypeAlignment(entityAnalyzer.typeAnalyzer
+						.processTypeNode(child));
 		}
 		if (constantAlignmentSpecifiers != null) {
 			for (ExpressionNode expression : constantAlignmentSpecifiers) {
@@ -681,14 +684,15 @@ public class DeclarationAnalyzer {
 				function.setAtomic(true);
 			if (declaration.hasSystemFunctionSpecifier())
 				function.setSystemFunction(true);
+			if (declaration instanceof AbstractFunctionDefinitionNode)
+				function.setAbstract(true);
 		} else if (declaration.hasNoreturnFunctionSpecifier() != function
 				.doesNotReturn()) {
 			// all declarations must agree on the Noreturn specifier...
 			throw error(
 					"Disagreement on Noreturn function specifier at function declaration.\n"
 							+ "  Previous declaration was at "
-							+ declarationIter.next().getSource(),
-					declaration);
+							+ declarationIter.next().getSource(), declaration);
 		}
 		if (declaration instanceof FunctionDefinitionNode) {
 			FunctionDefinitionNode previousDefinition = function
@@ -697,8 +701,7 @@ public class DeclarationAnalyzer {
 			if (previousDefinition != null)
 				throw error(
 						"Redefinition of function.  Previous definition was at "
-								+ previousDefinition.getSource(),
-						declaration);
+								+ previousDefinition.getSource(), declaration);
 			function.setDefinition(declaration);
 		}
 		function.addDeclaration(declaration);
@@ -708,8 +711,8 @@ public class DeclarationAnalyzer {
 		if (node.hasExternStorage() || node.hasStaticStorage())
 			return false;
 		if (node instanceof VariableDeclarationNode)
-			return !(((VariableDeclarationNode) node).hasRegisterStorage()
-					|| ((VariableDeclarationNode) node).hasAutoStorage());
+			return !(((VariableDeclarationNode) node).hasRegisterStorage() || ((VariableDeclarationNode) node)
+					.hasAutoStorage());
 		return true;
 	}
 

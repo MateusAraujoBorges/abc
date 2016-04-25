@@ -299,9 +299,8 @@ public class ExpressionAnalyzer {
 			node.setInitialType(this.typeFactory.memoryType());
 		}
 		if (node.getConvertedType() == null)
-			throw this.error(
-					"set of " + elementType + " type is not supported yet",
-					node);
+			throw this.error("set of " + elementType
+					+ " type is not supported yet", node);
 	}
 
 	/**
@@ -311,12 +310,11 @@ public class ExpressionAnalyzer {
 	 * @throws SyntaxException
 	 */
 	private void processStatementExpression(
-			StatementExpressionNode statementExpression)
-					throws SyntaxException {
-		this.statementAnalyzer.processCompoundStatement(
-				statementExpression.getCompoundStatement());
-		statementExpression
-				.setInitialType(statementExpression.getExpression().getType());
+			StatementExpressionNode statementExpression) throws SyntaxException {
+		this.statementAnalyzer.processCompoundStatement(statementExpression
+				.getCompoundStatement());
+		statementExpression.setInitialType(statementExpression.getExpression()
+				.getType());
 	}
 
 	/**
@@ -496,8 +494,7 @@ public class ExpressionAnalyzer {
 		ExpressionNode pointerNode = node.getStructurePointer();
 		String fieldName = identifier.name();
 		StructureOrUnionType structureOrUnionType;
-		boolean atomicQ = false, restrictQ = false, constQ = false,
-				volatileQ = false;
+		boolean atomicQ = false, restrictQ = false, constQ = false, volatileQ = false;
 		Field field;
 		Type tempType, type;
 		ObjectType fieldType;
@@ -527,8 +524,9 @@ public class ExpressionAnalyzer {
 					pointerNode);
 		structureOrUnionType = (StructureOrUnionType) tempType;
 		if (!structureOrUnionType.isComplete())
-			throw error("Structure or union type "
-					+ structureOrUnionType.getTag() + " is incomplete", node);
+			throw error(
+					"Structure or union type " + structureOrUnionType.getTag()
+							+ " is incomplete", node);
 		field = structureOrUnionType.getField(fieldName);
 		if (field == null)
 			throw error(
@@ -554,8 +552,8 @@ public class ExpressionAnalyzer {
 
 	private void processCompoundLiteral(CompoundLiteralNode node)
 			throws SyntaxException {
-		Type type = entityAnalyzer.typeAnalyzer
-				.processTypeNode(node.getTypeNode());
+		Type type = entityAnalyzer.typeAnalyzer.processTypeNode(node
+				.getTypeNode());
 		CompoundInitializerNode initNode = node.getInitializerList();
 
 		if (!(type instanceof ObjectType))
@@ -563,8 +561,8 @@ public class ExpressionAnalyzer {
 		if (type.kind() == TypeKind.DOMAIN)
 			processCartesianDomainInitializer(initNode, (DomainType) type);
 		else
-			entityAnalyzer.compoundLiteralAnalyzer
-					.processCompoundInitializer(initNode, (ObjectType) type);
+			entityAnalyzer.compoundLiteralAnalyzer.processCompoundInitializer(
+					initNode, (ObjectType) type);
 		node.setInitialType(initNode.getType());
 	}
 
@@ -575,8 +573,8 @@ public class ExpressionAnalyzer {
 			// type should already be set.
 		} else if (node instanceof EnumerationConstantNode) {
 			String name = node.getStringRepresentation();
-			OrdinaryEntity entity = node.getScope()
-					.getLexicalOrdinaryEntity(false, name);
+			OrdinaryEntity entity = node.getScope().getLexicalOrdinaryEntity(
+					false, name);
 			EntityKind kind;
 			EnumerationType type;
 
@@ -589,8 +587,8 @@ public class ExpressionAnalyzer {
 			type = ((Enumerator) entity).getType();
 			node.setInitialType(type);
 			((EnumerationConstantNode) node).getName().setEntity(entity);
-			nodeFactory.setConstantValue(node,
-					((Enumerator) entity).getValue());
+			nodeFactory
+					.setConstantValue(node, ((Enumerator) entity).getValue());
 		} else if (node instanceof FloatingConstantNode) {
 			// type should already be set
 		} else if (node instanceof StringLiteralNode) {
@@ -628,8 +626,7 @@ public class ExpressionAnalyzer {
 		ExpressionNode expression = node.getStructure();
 		IdentifierNode identifier = node.getFieldName();
 		String fieldName = identifier.name();
-		boolean atomicQ = false, restrictQ = false, constQ = false,
-				volatileQ = false;
+		boolean atomicQ = false, restrictQ = false, constQ = false, volatileQ = false;
 		StructureOrUnionType structureOrUnionType;
 		ObjectType fieldType;
 		Type tempType, type;
@@ -655,9 +652,9 @@ public class ExpressionAnalyzer {
 					expression);
 		structureOrUnionType = (StructureOrUnionType) tempType;
 		if (!structureOrUnionType.isComplete())
-			throw error("Structure or union type "
-					+ structureOrUnionType.getTag() + " is incomplete",
-					expression);
+			throw error(
+					"Structure or union type " + structureOrUnionType.getTag()
+							+ " is incomplete", expression);
 		field = structureOrUnionType.getField(fieldName);
 		if (field == null)
 			throw error(
@@ -692,8 +689,8 @@ public class ExpressionAnalyzer {
 		processExpression(functionNode);
 		{
 			Type tmpType = functionNode.getType();
-			TypeKind tmpKind = tmpType == null ? TypeKind.FUNCTION
-					: tmpType.kind();
+			TypeKind tmpKind = tmpType == null ? TypeKind.FUNCTION : tmpType
+					.kind();
 
 			if (tmpKind == TypeKind.POINTER) {
 				tmpType = ((PointerType) tmpType).referencedType();
@@ -751,8 +748,7 @@ public class ExpressionAnalyzer {
 			addStandardConversions(argument);
 			specialCallAnalyzer.addConversionsForSpecialFunctions(functionName,
 					argument);
-			if ((functionType != null
-					&& (!hasVariableNumArgs || i < expectedNumArgs))
+			if ((functionType != null && (!hasVariableNumArgs || i < expectedNumArgs))
 					|| isSpecialFunction) {
 				ObjectType lhsType;
 				UnqualifiedObjectType type;
@@ -760,8 +756,8 @@ public class ExpressionAnalyzer {
 				if (i < expectedNumArgs)
 					lhsType = functionType.getParameterType(i);
 				else
-					lhsType = this.specialCallAnalyzer
-							.variableParameterType(functionName, i);
+					lhsType = this.specialCallAnalyzer.variableParameterType(
+							functionName, i);
 				type = conversionFactory.lvalueConversionType(lhsType);
 				try {
 					convertRHS(argument, type);
@@ -770,9 +766,8 @@ public class ExpressionAnalyzer {
 				}
 			}
 		}
-		node.setInitialType(functionType == null
-				? this.typeFactory.basicType(BasicTypeKind.INT)
-				: functionType.getReturnType());
+		node.setInitialType(functionType == null ? this.typeFactory
+				.basicType(BasicTypeKind.INT) : functionType.getReturnType());
 	}
 
 	private void processContractVerify(ContractVerifyNode node)
@@ -789,8 +784,8 @@ public class ExpressionAnalyzer {
 		processExpression(functionNode);
 		{
 			Type tmpType = functionNode.getType();
-			TypeKind tmpKind = tmpType == null ? TypeKind.FUNCTION
-					: tmpType.kind();
+			TypeKind tmpKind = tmpType == null ? TypeKind.FUNCTION : tmpType
+					.kind();
 
 			if (tmpKind == TypeKind.POINTER) {
 				tmpType = ((PointerType) tmpType).referencedType();
@@ -848,8 +843,7 @@ public class ExpressionAnalyzer {
 			addStandardConversions(argument);
 			specialCallAnalyzer.addConversionsForSpecialFunctions(functionName,
 					argument);
-			if ((functionType != null
-					&& (!hasVariableNumArgs || i < expectedNumArgs))
+			if ((functionType != null && (!hasVariableNumArgs || i < expectedNumArgs))
 					|| isSpecialFunction) {
 				ObjectType lhsType;
 				UnqualifiedObjectType type;
@@ -857,8 +851,8 @@ public class ExpressionAnalyzer {
 				if (i < expectedNumArgs)
 					lhsType = functionType.getParameterType(i);
 				else
-					lhsType = this.specialCallAnalyzer
-							.variableParameterType(functionName, i);
+					lhsType = this.specialCallAnalyzer.variableParameterType(
+							functionName, i);
 				type = conversionFactory.lvalueConversionType(lhsType);
 				try {
 					convertRHS(argument, type);
@@ -867,9 +861,8 @@ public class ExpressionAnalyzer {
 				}
 			}
 		}
-		node.setInitialType(functionType == null
-				? this.typeFactory.basicType(BasicTypeKind.INT)
-				: functionType.getReturnType());
+		node.setInitialType(functionType == null ? this.typeFactory
+				.basicType(BasicTypeKind.INT) : functionType.getReturnType());
 	}
 
 	private void processSpawn(SpawnNode node) throws SyntaxException {
@@ -930,7 +923,8 @@ public class ExpressionAnalyzer {
 		EntityKind kind;
 
 		if (entity == null) {
-			if (isFirstRound && (config.svcomp() || isContract)) {
+			if (isFirstRound && (config.svcomp() || isContract)
+					&& (node.parent() instanceof FunctionCallNode)) {
 				node.setAttribute(unknownIdentifier, true);
 				return;
 			} else {
@@ -946,8 +940,8 @@ public class ExpressionAnalyzer {
 				throw error("Undeclared identifier " + name, node);
 			break;
 		case FUNCTION:
-			node.setInitialType(
-					getFunctionExpressionType(node, (Function) entity));
+			node.setInitialType(getFunctionExpressionType(node,
+					(Function) entity));
 			break;
 		default:
 			throw error("Use of " + kind + " " + name + " as expression", node);
@@ -971,15 +965,14 @@ public class ExpressionAnalyzer {
 	 */
 	private void checkExternalDefinitionOfIdentifier(
 			IdentifierExpressionNode identifierExpression)
-					throws SyntaxException {
+			throws SyntaxException {
 		ASTNode parent = identifierExpression.parent();
 
 		if (parent instanceof ExpressionNode) {
 			ExpressionNode expression = (ExpressionNode) parent;
 			ExpressionKind kind = expression.expressionKind();
 
-			if (kind != ExpressionKind.ALIGNOF
-					&& kind != ExpressionKind.SIZEOF) {
+			if (kind != ExpressionKind.ALIGNOF && kind != ExpressionKind.SIZEOF) {
 				Entity entity = identifierExpression.getIdentifier()
 						.getEntity();
 
@@ -1032,8 +1025,8 @@ public class ExpressionAnalyzer {
 			ExpressionNode child = node.getArgument(i);
 
 			if (child == null)
-				throw new ASTException(
-						"Child " + i + " of operator node is null:\n" + node);
+				throw new ASTException("Child " + i
+						+ " of operator node is null:\n" + node);
 			processExpression(child);
 		}
 		switch (operator) {
@@ -1141,8 +1134,7 @@ public class ExpressionAnalyzer {
 	private void processHash(OperatorNode node) throws SyntaxException {
 		ExpressionNode arg0 = node.getArgument(0);
 		ExpressionNode arg1 = node.getArgument(1);
-		Type type0 = addStandardConversions(arg0),
-				type1 = addStandardConversions(arg1);
+		Type type0 = addStandardConversions(arg0), type1 = addStandardConversions(arg1);
 
 		if (!(type1 instanceof IntegerType))
 			throw error(
@@ -1153,8 +1145,8 @@ public class ExpressionAnalyzer {
 
 	private void processQuantifiedExpression(QuantifiedExpressionNode node)
 			throws SyntaxException {
-		entityAnalyzer.declarationAnalyzer
-				.processVariableDeclaration(node.variable());
+		entityAnalyzer.declarationAnalyzer.processVariableDeclaration(node
+				.variable());
 		if (node.isRange()) {
 			processExpression(node.lower());
 			processExpression(node.upper());
@@ -1164,9 +1156,9 @@ public class ExpressionAnalyzer {
 		processExpression(node.expression());
 		node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
 		if (!node.isSideEffectFree(false))
-			throw this.error(
-					"quantified expressions are not allowed to have side effects.",
-					node);
+			throw this
+					.error("quantified expressions are not allowed to have side effects.",
+							node);
 	}
 
 	private void processDerivativeExpression(DerivativeExpressionNode node)
@@ -1194,8 +1186,7 @@ public class ExpressionAnalyzer {
 		else
 			throw error(
 					"Function expression in derivative expression does not have function "
-							+ "type or pointer to function type",
-					functionNode);
+							+ "type or pointer to function type", functionNode);
 		node.setInitialType(functionType.getReturnType());
 	}
 
@@ -1312,11 +1303,9 @@ public class ExpressionAnalyzer {
 		ExpressionNode lhs = node.getArgument(0);
 
 		if (!this.isLvalue(lhs)) {
-			throw error(
-					"The expression " + lhs.prettyRepresentation()
-							+ " doesn't designate an object and thus "
-							+ "can't be used as the left argument of assignment",
-					node);
+			throw error("The expression " + lhs.prettyRepresentation()
+					+ " doesn't designate an object and thus "
+					+ "can't be used as the left argument of assignment", node);
 		}
 
 		ExpressionNode rhs = node.getArgument(1);
@@ -1385,14 +1374,13 @@ public class ExpressionAnalyzer {
 	 * only if the corresponding bit in the converted operand is not set). The
 	 * integer promotions are performed on the operand, and the result has the
 	 * promoted type. If the promoted type is an unsigned type, the expression
-	 * ~E is equivalent to the maximum value representable in that type minus
-	 * E. </blockquote>
+	 * ~E is equivalent to the maximum value representable in that type minus E.
+	 * </blockquote>
 	 * 
 	 * @param node
 	 * @throws SyntaxException
 	 */
-	private void processBITCOMPLEMENT(OperatorNode node)
-			throws SyntaxException {
+	private void processBITCOMPLEMENT(OperatorNode node) throws SyntaxException {
 		node.setInitialType(doIntegerPromotion(node.getArgument(0)));
 	}
 
@@ -1462,12 +1450,10 @@ public class ExpressionAnalyzer {
 		if (!isScalar(type0))
 			throw error(
 					"First argument of conditional operator has non-scalar type: "
-							+ type0,
-					arg0);
-		if (type1 instanceof ArithmeticType
-				&& type2 instanceof ArithmeticType) {
-			type = typeFactory.usualArithmeticConversion((ArithmeticType) type1,
-					(ArithmeticType) type2);
+							+ type0, arg0);
+		if (type1 instanceof ArithmeticType && type2 instanceof ArithmeticType) {
+			type = typeFactory.usualArithmeticConversion(
+					(ArithmeticType) type1, (ArithmeticType) type2);
 		} else if (type1 instanceof StructureOrUnionType) {
 			if (!type1.equals(type2))
 				throw error(
@@ -1483,12 +1469,10 @@ public class ExpressionAnalyzer {
 		} else if (conversionFactory.isNullPointerConstant(arg2)
 				&& type1 instanceof PointerType) {
 			type = type1;
-		} else if (type1 instanceof PointerType
-				&& type2 instanceof PointerType) {
+		} else if (type1 instanceof PointerType && type2 instanceof PointerType) {
 			PointerType p0 = (PointerType) type1;
 			PointerType p1 = (PointerType) type2;
-			boolean atomicQ = false, constQ = false, volatileQ = false,
-					restrictQ = false;
+			boolean atomicQ = false, constQ = false, volatileQ = false, restrictQ = false;
 			Type base0 = p0.referencedType();
 			Type base1 = p1.referencedType();
 
@@ -1530,13 +1514,12 @@ public class ExpressionAnalyzer {
 			type = typeFactory.qualify((ObjectType) type, constQ, volatileQ,
 					restrictQ, false, false);
 		} else {
-			if (this.config == null || !config.svcomp()
-					|| (type1.kind() != TypeKind.VOID
-							&& type2.kind() != TypeKind.VOID))
+			if (this.config == null
+					|| !config.svcomp()
+					|| (type1.kind() != TypeKind.VOID && type2.kind() != TypeKind.VOID))
 				throw error(
 						"Incompatible types for second and third arguments of conditional operator:\n"
-								+ type1 + "\n" + type2,
-						node);
+								+ type1 + "\n" + type2, node);
 			if (type1.kind() == TypeKind.VOID)
 				type = type2;
 			else
@@ -1576,15 +1559,14 @@ public class ExpressionAnalyzer {
 		// TODO:experimental:
 		else if (isPointerToCompleteObjectType(type0)
 				&& type1.kind().equals(TypeKind.RANGE)) {
-			node.setInitialType(
-					typeFactory.incompleteArrayType((ObjectType) type0));
+			node.setInitialType(typeFactory
+					.incompleteArrayType((ObjectType) type0));
 		} else
 			throw error(
 					"Invalid arguments for +.  C requires either (1) both arguments\n"
 							+ "are numeric, or (2) one argument is numeric and the other is a pointer\n"
 							+ "to a complete object type.  The argument types are:\n"
-							+ type0 + "\n" + type1,
-					node);
+							+ type0 + "\n" + type1, node);
 	}
 
 	/**
@@ -1662,10 +1644,8 @@ public class ExpressionAnalyzer {
 				&& rightType instanceof ArithmeticType)
 			doArithmeticCompoundAssign((ArithmeticType) type, rhs);
 		else
-			throw error(
-					"Inappropriate arguments to += operator.  "
-							+ "Argument types:\n" + type + "\n" + rightType,
-					node);
+			throw error("Inappropriate arguments to += operator.  "
+					+ "Argument types:\n" + type + "\n" + rightType, node);
 		node.setInitialType(type);
 	}
 
@@ -1674,8 +1654,7 @@ public class ExpressionAnalyzer {
 		Operator operator = node.getOperator();
 		ExpressionNode arg0 = node.getArgument(0);
 		ExpressionNode arg1 = node.getArgument(1);
-		Type type0 = addStandardConversions(arg0),
-				type1 = addStandardConversions(arg1);
+		Type type0 = addStandardConversions(arg0), type1 = addStandardConversions(arg1);
 
 		if (operator == Operator.MOD) {
 			if (!(type0 instanceof IntegerType))
@@ -1745,8 +1724,8 @@ public class ExpressionAnalyzer {
 	 * an assignment expression is the type the left operand would have after
 	 * lvalue conversion. The side effect of updating the stored value of the
 	 * left operand is sequenced after the value computations of the left and
-	 * right operands. The evaluations of the operands are
-	 * unsequenced. </blockquote>
+	 * right operands. The evaluations of the operands are unsequenced.
+	 * </blockquote>
 	 * 
 	 * and
 	 * 
@@ -1847,9 +1826,8 @@ public class ExpressionAnalyzer {
 		if (!(type1 instanceof IntegerType)
 				&& !(type1.equals(typeFactory.rangeType()))
 				&& !(arg1 instanceof WildcardNode))
-			throw error(
-					"Subscript does not have integer or range type:\n" + type1,
-					arg1);
+			throw error("Subscript does not have integer or range type:\n"
+					+ type1, arg1);
 		// the following will check pointer in any case
 		// if strict C, must also be pointer to complete object type:
 		if (isPointerToCompleteObjectType(type0))
@@ -1857,8 +1835,7 @@ public class ExpressionAnalyzer {
 		else
 			throw error(
 					"First argument to subscript operator not pointer to complete object type:\n"
-							+ type0,
-					arg0);
+							+ type0, arg0);
 	}
 
 	private void processBitwise(OperatorNode node) throws SyntaxException {
@@ -1877,8 +1854,7 @@ public class ExpressionAnalyzer {
 		node.setInitialType(doUsualArithmetic(arg0, arg1));
 	}
 
-	private void processBitwiseAssign(OperatorNode node)
-			throws SyntaxException {
+	private void processBitwiseAssign(OperatorNode node) throws SyntaxException {
 		Operator operator = node.getOperator();
 		Type type = assignmentType(node);
 		ExpressionNode lhs = node.getArgument(0);
@@ -1909,10 +1885,8 @@ public class ExpressionAnalyzer {
 		Type type0 = addStandardConversions(arg0);
 
 		if (!isScalar(type0))
-			throw error(
-					"Argument to logical operator " + operator
-							+ " does not have scalar type; type is " + type0,
-					arg0);
+			throw error("Argument to logical operator " + operator
+					+ " does not have scalar type; type is " + type0, arg0);
 		if (node.getNumberOfArguments() > 1) {
 			ExpressionNode arg1 = node.getArgument(1);
 			Type type1 = addStandardConversions(arg1);
@@ -1935,8 +1909,7 @@ public class ExpressionAnalyzer {
 	 * compatible types;</li>
 	 * <li>one operand is a pointer to an object type and the other is a pointer
 	 * to a qualified or unqualified version of void; or</li>
-	 * <li>one operand is a pointer and the other is a null pointer constant.
-	 * </li>
+	 * <li>one operand is a pointer and the other is a null pointer constant.</li>
 	 * </ul>
 	 * 
 	 * <p>
@@ -2012,19 +1985,18 @@ public class ExpressionAnalyzer {
 				&& conversionFactory.isNullPointerConstant(arg0)) {
 			arg0.addConversion(conversionFactory.nullPointerConversion(
 					(ObjectType) type0, (PointerType) type1));
-		} else if (type0 instanceof PointerType
-				&& type1 instanceof PointerType) {
+		} else if (type0 instanceof PointerType && type1 instanceof PointerType) {
 			PointerType p0 = (PointerType) type0;
 			PointerType p1 = (PointerType) type1;
 
 			if (conversionFactory.isPointerToObject(p0)
 					&& conversionFactory.isPointerToVoid(p1)) {
-				arg0.addConversion(
-						conversionFactory.voidPointerConversion(p0, p1));
+				arg0.addConversion(conversionFactory.voidPointerConversion(p0,
+						p1));
 			} else if (conversionFactory.isPointerToObject(p1)
 					&& conversionFactory.isPointerToVoid(p0)) {
-				arg0.addConversion(
-						conversionFactory.voidPointerConversion(p0, p1));
+				arg0.addConversion(conversionFactory.voidPointerConversion(p0,
+						p1));
 			} else
 				throw error("Incompatible pointer types for operator "
 						+ operator + ":\n" + type0 + "\n" + type1, node);
@@ -2111,9 +2083,9 @@ public class ExpressionAnalyzer {
 				throw error("Argument to * has non-pointer set type: " + type,
 						node);
 			else
-				node.setInitialType(this.typeFactory.incompleteArrayType(
-						(ObjectType) ((PointerType) arrayType.getElementType())
-								.referencedType()));
+				node.setInitialType(this.typeFactory
+						.incompleteArrayType((ObjectType) ((PointerType) arrayType
+								.getElementType()).referencedType()));
 		} else {
 			throw error("Argument to * has non-pointer type: " + type, node);
 		}
@@ -2257,8 +2229,7 @@ public class ExpressionAnalyzer {
 		return type instanceof ArithmeticType || type instanceof PointerType;
 	}
 
-	private void addArrayConversion(ExpressionNode node)
-			throws SyntaxException {
+	private void addArrayConversion(ExpressionNode node) throws SyntaxException {
 		Type oldType = node.getConvertedType();
 
 		if (oldType instanceof ArrayType) {
@@ -2353,10 +2324,8 @@ public class ExpressionAnalyzer {
 	 */
 	private boolean pointerToCompatibleTypes(Type type0, Type type1) {
 		if (type0 instanceof PointerType && type1 instanceof PointerType) {
-			Type base0 = stripQualifiers(
-					((PointerType) type0).referencedType());
-			Type base1 = stripQualifiers(
-					((PointerType) type1).referencedType());
+			Type base0 = stripQualifiers(((PointerType) type0).referencedType());
+			Type base1 = stripQualifiers(((PointerType) type1).referencedType());
 
 			return base0.compatibleWith(base1);
 		}
@@ -2375,10 +2344,8 @@ public class ExpressionAnalyzer {
 	 */
 	private boolean pointerToCompatibleObject(Type type0, Type type1) {
 		if (type0 instanceof PointerType && type1 instanceof PointerType) {
-			Type base0 = stripQualifiers(
-					((PointerType) type0).referencedType());
-			Type base1 = stripQualifiers(
-					((PointerType) type1).referencedType());
+			Type base0 = stripQualifiers(((PointerType) type0).referencedType());
+			Type base1 = stripQualifiers(((PointerType) type1).referencedType());
 
 			return base0 instanceof ObjectType && base1 instanceof ObjectType
 					&& base0.compatibleWith(base1);
@@ -2399,10 +2366,8 @@ public class ExpressionAnalyzer {
 	 */
 	private boolean pointerToCompatibleComplete(Type type0, Type type1) {
 		if (type0 instanceof PointerType && type1 instanceof PointerType) {
-			Type base0 = stripQualifiers(
-					((PointerType) type0).referencedType());
-			Type base1 = stripQualifiers(
-					((PointerType) type1).referencedType());
+			Type base0 = stripQualifiers(((PointerType) type0).referencedType());
+			Type base1 = stripQualifiers(((PointerType) type1).referencedType());
 
 			return base0 instanceof ObjectType && base1 instanceof ObjectType
 					&& ((ObjectType) base0).isComplete()
@@ -2433,11 +2398,9 @@ public class ExpressionAnalyzer {
 		ArithmeticType type = typeFactory.usualArithmeticConversion(a0, a1);
 
 		if (!type.equals(a0))
-			arg0.addConversion(
-					conversionFactory.arithmeticConversion(a0, type));
+			arg0.addConversion(conversionFactory.arithmeticConversion(a0, type));
 		if (!type.equals(a1))
-			arg1.addConversion(
-					conversionFactory.arithmeticConversion(a1, type));
+			arg1.addConversion(conversionFactory.arithmeticConversion(a1, type));
 		return type;
 	}
 
@@ -2473,7 +2436,8 @@ public class ExpressionAnalyzer {
 			throw error("Left argument of assignment can't have void type",
 					leftNode);
 		if (!(leftType instanceof ObjectType))
-			throw error("Left argument of assignment does not have object type",
+			throw error(
+					"Left argument of assignment does not have object type",
 					leftNode);
 		if (leftType instanceof ArrayType)
 			throw error("Left argument of assignment can't have array type",
@@ -2514,18 +2478,18 @@ public class ExpressionAnalyzer {
 	private void doArithmeticCompoundAssign(ArithmeticType assignmentType,
 			ExpressionNode rightNode) {
 		ArithmeticType a1 = (ArithmeticType) rightNode.getConvertedType();
-		ArithmeticType commonType = typeFactory
-				.usualArithmeticConversion(assignmentType, a1);
+		ArithmeticType commonType = typeFactory.usualArithmeticConversion(
+				assignmentType, a1);
 
 		if (!commonType.equals(a1))
-			rightNode.addConversion(
-					conversionFactory.arithmeticConversion(a1, commonType));
+			rightNode.addConversion(conversionFactory.arithmeticConversion(a1,
+					commonType));
 	}
 
 	private void convertRHS(ExpressionNode rightNode, Type type)
 			throws UnsourcedException {
-		Conversion rightConversion = conversionFactory
-				.assignmentConversion(config, rightNode, type);
+		Conversion rightConversion = conversionFactory.assignmentConversion(
+				config, rightNode, type);
 
 		if (rightConversion != null)
 			rightNode.addConversion(rightConversion);
