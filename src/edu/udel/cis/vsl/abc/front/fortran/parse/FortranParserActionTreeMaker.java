@@ -4760,7 +4760,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		subroutine_subprogram_Node.addChild(0, temp);
 		// ROOT: Subprogram_Subroutine
 		root.addChild(subroutine_subprogram_Node);
-	} // Test
+	}
 
 	public void entry_stmt(Token label, Token keyword, Token id, Token eos,
 			boolean hasDummyArgList, boolean hasSuffix) {
@@ -4781,7 +4781,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			assert false; // TODO:
 		}
 		stack.push(return_stmt_Node);
-	} // Test
+	}
 
 	public void contains_stmt(Token label, Token keyword, Token eos) {
 
@@ -4837,8 +4837,8 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		if (!formations.empty()) {
 			inclusion = formations.peek();
 		} else {
-			//System.out.println("ParsingTree:");
-			//System.out.println(root.toString());
+			// System.out.println("ParsingTree:");
+			// System.out.println(root.toString());
 			if (isAST) {
 				TypeFactory typeFactory = Types.newTypeFactory();
 				ValueFactory valueFactory = Values.newValueFactory(null,
@@ -4865,8 +4865,8 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	}
 
 	public void cleanUp() {
-
-	} // TODO: Implement
+		// Do nothing
+	}
 
 	public void rice_image_selector(Token idTeam) {
 
@@ -4960,7 +4960,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 				cTokens.add(cToken);
 			}
 		}
-	} // TODO: Implement
+	}
 
 	/**
 	 * R838 2 Do Termination Action Statement
@@ -4987,7 +4987,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		assert temp.rule() == 214;
 		do_term_action_stmt_Node.addChild(temp);
 		stack.push(do_term_action_stmt_Node);
-	} // Test
+	}
 
 	@Override
 	public void inclusion(String included, String source) {
