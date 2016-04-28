@@ -20,7 +20,7 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 
 public class CParserTest {
 
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	private static Preprocessor preprocessor = Front.newPreprocessor(
 			Language.C, null, null);
