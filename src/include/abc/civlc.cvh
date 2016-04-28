@@ -133,18 +133,6 @@ $system void $havoc(void *ptr);
   @*/
 $system double $pow(double base, double exp);
 
-/* *********************** Division And Modulo Function ********************* */
-
-/* This is a replacement function for division which does the same thing as division.
- * The purpose of this function is to simplify the cvc translation.
-*/
-int $int_div(int numerator, int denominator);
-
-/* This is a replacement function for modulo which does the same thing as modulo.
- * The purpose of this function is to simplify the cvc translation.
-*/
-int $int_mod(int numerator, int denominator);
-
 /* *************************** Iterator Functions ************************** */
 
 /* Tells whether the integer iterator has any more elements */

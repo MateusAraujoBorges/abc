@@ -1,0 +1,9 @@
+#ifndef _INT_DIV_
+#define _INT_DIV_
+
+
+int $int_div(int numerator, int denominator);
+
+int $int_mod(int numerator, int denominator);
+
+#endif
