@@ -16,8 +16,8 @@ typedef struct cnd_t cnd_t;
 typedef struct thrd_t thrd_t;
 typedef struct tss_t tss_t;
 typedef struct mtx_t mtx_t;
-typedef void (*tss_dtor_t)(void*); //need to be check
-typedef int (*thrd_start_t)(int); //need to be check
+typedef void (*tss_dtor_t)(void*);
+typedef int (*thrd_start_t)(int);
 typedef struct once_flag once_flag;
 
 
