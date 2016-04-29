@@ -8,11 +8,9 @@
 #define _STDATOMIC_
 
 #include <stddef.h>
-//#include <uchar.h>
 #include <stdint.h>
 
 /* Types */
-
 typedef enum memory_order{ //defines memory ordering constraints 
   memory_order_relaxed,
   memory_order_consume,
