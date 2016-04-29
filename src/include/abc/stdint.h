@@ -47,6 +47,9 @@ typedef unsigned long long int    uint_fast64_t;
 typedef long long int             intmax_t;
 typedef unsigned long long int    uintmax_t;
 
+typedef long  int             intptr_t;
+typedef unsigned  long int    uintptr_t;
+
 #if (! defined(__cplusplus)) || defined(__STDC_LIMIT_MACROS)
 
 #define INT8_MIN         (-127-1)
