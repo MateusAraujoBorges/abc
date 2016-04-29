@@ -1,9 +1,14 @@
 #ifndef _INT_DIV_
 #define _INT_DIV_
 
-
+/*
+This function is used to replace division operator in the program
+*/
 int $int_div(int numerator, int denominator);
 
+/*
+This method is used to replace modulo operator in the program
+*/
 int $int_mod(int numerator, int denominator);
 
 #endif
