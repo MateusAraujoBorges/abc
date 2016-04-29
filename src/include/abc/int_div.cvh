@@ -11,4 +11,6 @@ This method is used to replace modulo operator in the program
 */
 int $int_mod(int numerator, int denominator);
 
+$system void $assert(_Bool expr, ...);
+
 #endif
