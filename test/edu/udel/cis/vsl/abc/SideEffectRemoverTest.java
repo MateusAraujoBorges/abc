@@ -138,4 +138,9 @@ public class SideEffectRemoverTest {
 		check("nestedLoop.c");
 	}
 
+	@Test
+	public void funcalls() throws ABCException, IOException {
+		check("funcalls.c");
+	}
+
 }

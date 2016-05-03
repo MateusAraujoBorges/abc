@@ -2587,22 +2587,18 @@ public class SideEffectRemover extends BaseTransformer {
 			return translateLabeledStatement((LabeledStatementNode) statement);
 		case LOOP:
 			return translateLoop((LoopNode) statement);
-			// code review stops here on 04/06/2016
 		case NULL:
 			return Arrays.asList((BlockItemNode) statement);
 		case OMP:
 			return translateOmpExecutable((OmpExecutableNode) statement);
-		case PRAGMA:
-			throw new ABCUnsupportedException(
-					"removing side-effects for pragmas");
+		case PRAGMA:// ignore side effects in pragma nodes
+			return Arrays.asList((BlockItemNode) statement);
 		case SWITCH:
 			return translateSwitch((SwitchNode) statement);
 		case WHEN:
 			return translateWhen((WhenNode) statement);
 		default:
-			throw new ABCUnsupportedException("removing side-effects for "
-					+ statement.statementKind() + " statement");
-
+			throw new ABCRuntimeException("unreachable");
 		}
 	}
 
@@ -2647,6 +2643,8 @@ public class SideEffectRemover extends BaseTransformer {
 	 * are equivalent to it. Note: the guard is not allowed to contain side
 	 * effects and if so, an error should have been reported by the standard
 	 * analyzer.
+	 * 
+	 * Precondition: no side effects in the guard.
 	 * 
 	 * @param when
 	 *            the guarded statement whose body may contain some side effects
@@ -2708,6 +2706,7 @@ public class SideEffectRemover extends BaseTransformer {
 	private List<BlockItemNode> translateOmpExecutable(OmpExecutableNode ompExec) {
 		StatementNode body = ompExec.statementNode();
 		List<BlockItemNode> result = new LinkedList<>();
+
 		if (body != null) {
 			int bodyIndex = body.childIndex();
 			List<BlockItemNode> bodyItems = translateStatement(body);

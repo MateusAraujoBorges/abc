@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ABSENT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ABSTRACT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ALIGNAS;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ATOMIC;
@@ -160,6 +161,7 @@ public class SpecifierAnalysis {
 	boolean fatomicSpecifier = false;
 	boolean pureSpecifier = false;
 	boolean systemSpecifier = false;
+	String systemLibrary = null;
 	/**
 	 * CUDA specifier __global__
 	 */
@@ -363,9 +365,16 @@ public class SpecifierAnalysis {
 				case PURE:
 					this.pureSpecifier = true;
 					break;
-				case SYSTEM:
+				case SYSTEM: {
+					CommonTree lib = (CommonTree) node.getChild(0);
+
 					this.systemSpecifier = true;
+					if (lib.getType() != ABSENT) {
+						this.systemLibrary = lib.getText().substring(1,
+								lib.getText().length() - 1);
+					}
 					break;
+				}
 				default:
 					throw error("Unknown declaration specifier", node);
 				}

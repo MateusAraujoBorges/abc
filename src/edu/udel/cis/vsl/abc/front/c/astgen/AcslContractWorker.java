@@ -11,6 +11,8 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CAST;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHARACTER_CONSTANT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CIVLFALSE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CIVLTRUE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMMA;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMP;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.C_TYPE;
@@ -154,7 +156,8 @@ public class AcslContractWorker {
 	private final String MPI_COMM_RANK = "\\mpi_comm_rank";
 	private final String MPI_COMM_SIZE = "\\mpi_comm_size";
 
-	public AcslContractWorker(NodeFactory factory, TokenFactory tokenFactory, CParseTree parseTree) {
+	public AcslContractWorker(NodeFactory factory, TokenFactory tokenFactory,
+			CParseTree parseTree) {
 		this.nodeFactory = factory;
 		this.tokenFactory = tokenFactory;
 		this.parseTree = parseTree;
@@ -162,27 +165,31 @@ public class AcslContractWorker {
 		formation = tokenFactory.newTransformFormation("ACSL", "contract");
 	}
 
-	public List<ContractNode> generateASTNodes(SimpleScope scope) throws SyntaxException {
+	public List<ContractNode> generateASTNodes(SimpleScope scope)
+			throws SyntaxException {
 		CommonTree contractTree = parseTree.getRoot();
 
 		switch (contractTree.getType()) {
 		case AcslParser.FUNC_CONTRACT: {
 			CommonTree pure = (CommonTree) contractTree.getChild(1);
-			List<ContractNode> result = translateFunctionContractBlock((CommonTree) contractTree.getChild(0), scope);
+			List<ContractNode> result = translateFunctionContractBlock(
+					(CommonTree) contractTree.getChild(0), scope);
 
 			if (pure != null) {
-				result.add(this.nodeFactory.newPureNode(this.newSource(pure)));
+				result.add(0,this.nodeFactory.newPureNode(this.newSource(pure)));
 			}
 			return result;
 		}
 		case AcslParser.LOOP_CONTRACT:
-			return translateLoopContractBlock((CommonTree) contractTree.getChild(0), scope);
+			return translateLoopContractBlock(
+					(CommonTree) contractTree.getChild(0), scope);
 		default:
 			throw this.error("unknown kind of contract", contractTree);
 		}
 	}
 
-	private List<ContractNode> translateLoopContractBlock(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private List<ContractNode> translateLoopContractBlock(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
 		List<ContractNode> result = new ArrayList<>();
 
@@ -193,7 +200,8 @@ public class AcslContractWorker {
 
 			switch (loopItemKind) {
 			case AcslParser.LOOP_CLAUSE:
-				result.add(this.translateLoopClause((CommonTree) loopIterm.getChild(0), scope));
+				result.add(this.translateLoopClause(
+						(CommonTree) loopIterm.getChild(0), scope));
 				break;
 			case AcslParser.LOOP_BEHAVIOR:
 			case AcslParser.LOOP_VARIANT:
@@ -204,14 +212,16 @@ public class AcslContractWorker {
 		return result;
 	}
 
-	private ContractNode translateLoopClause(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private ContractNode translateLoopClause(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		int loopClauseKind = tree.getType();
 		Source source = this.newSource(tree);
 
 		switch (loopClauseKind) {
 		case AcslParser.LOOP_INVARIANT: {
 			CommonTree exprTree = (CommonTree) tree.getChild(0);
-			ExpressionNode expression = this.translateExpression(exprTree, scope);
+			ExpressionNode expression = this.translateExpression(exprTree,
+					scope);
 
 			return this.nodeFactory.newInvariantNode(source, true, expression);
 		}
@@ -223,8 +233,8 @@ public class AcslContractWorker {
 		}
 	}
 
-	private List<ContractNode> translateFunctionContractBlock(CommonTree tree, SimpleScope scope)
-			throws SyntaxException {
+	private List<ContractNode> translateFunctionContractBlock(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
 		List<ContractNode> result = new ArrayList<>();
 
@@ -235,16 +245,20 @@ public class AcslContractWorker {
 
 			switch (childKind) {
 			case AcslParser.CLAUSE_NORMAL:
-				result.add(this.translateContractClause((CommonTree) child.getChild(0), scope));
+				result.add(this.translateContractClause(
+						(CommonTree) child.getChild(0), scope));
 				break;
 			case AcslParser.CLAUSE_BEHAVIOR:
-				result.add(this.translateBehavior((CommonTree) child.getChild(0), scope));
+				result.add(this.translateBehavior(
+						(CommonTree) child.getChild(0), scope));
 				break;
 			case AcslParser.CLAUSE_COMPLETE:
-				result.add(this.translateCompleteness((CommonTree) child.getChild(0), scope));
+				result.add(this.translateCompleteness(
+						(CommonTree) child.getChild(0), scope));
 				break;
 			case AcslParser.MPI_COLLECTIVE:
-				result.add(this.translateMPICollectiveBlock(this.parseTree.source(child), child, scope));
+				result.add(this.translateMPICollectiveBlock(
+						this.parseTree.source(child), child, scope));
 				break;
 			default:
 				throw this.error("Unknown contract kind", tree);
@@ -253,10 +267,12 @@ public class AcslContractWorker {
 		return result;
 	}
 
-	private CompletenessNode translateCompleteness(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private CompletenessNode translateCompleteness(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
 		boolean isComplete = false;
-		SequenceNode<IdentifierNode> idList = this.translateIdList((CommonTree) tree.getChild(0), scope);
+		SequenceNode<IdentifierNode> idList = this.translateIdList(
+				(CommonTree) tree.getChild(0), scope);
 		Source source = this.parseTree.source(tree);
 
 		switch (kind) {
@@ -271,7 +287,8 @@ public class AcslContractWorker {
 		return this.nodeFactory.newCompletenessNode(source, isComplete, idList);
 	}
 
-	private SequenceNode<IdentifierNode> translateIdList(CommonTree tree, SimpleScope scope) {
+	private SequenceNode<IdentifierNode> translateIdList(CommonTree tree,
+			SimpleScope scope) {
 		int numChildren = tree.getChildCount();
 		List<IdentifierNode> list = new ArrayList<>();
 		Source source = this.parseTree.source(tree);
@@ -284,17 +301,20 @@ public class AcslContractWorker {
 		return this.nodeFactory.newSequenceNode(source, "ID list", list);
 	}
 
-	private BehaviorNode translateBehavior(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private BehaviorNode translateBehavior(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree idTree = (CommonTree) tree.getChild(0);
 		CommonTree bodyTree = (CommonTree) tree.getChild(1);
 		IdentifierNode id = this.translateIdentifier(idTree);
-		SequenceNode<ContractNode> body = this.translateBehaviorBody(bodyTree, scope);
+		SequenceNode<ContractNode> body = this.translateBehaviorBody(bodyTree,
+				scope);
 
-		return this.nodeFactory.newBehaviorNode(this.parseTree.source(tree), id, body);
+		return this.nodeFactory.newBehaviorNode(this.parseTree.source(tree),
+				id, body);
 	}
 
-	private SequenceNode<ContractNode> translateBehaviorBody(CommonTree tree, SimpleScope scope)
-			throws SyntaxException {
+	private SequenceNode<ContractNode> translateBehaviorBody(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		Source source = this.parseTree.source(tree);
 		int numChildren = tree.getChildCount();
 		List<ContractNode> clauses = new ArrayList<>();
@@ -304,10 +324,12 @@ public class AcslContractWorker {
 
 			clauses.add(this.translateContractClause(clause, scope));
 		}
-		return this.nodeFactory.newSequenceNode(source, "behavior body", clauses);
+		return this.nodeFactory.newSequenceNode(source, "behavior body",
+				clauses);
 	}
 
-	private ContractNode translateContractClause(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private ContractNode translateContractClause(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
 
 		switch (kind) {
@@ -332,20 +354,25 @@ public class AcslContractWorker {
 		}
 	}
 
-	private GuardsNode translateGuards(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private GuardsNode translateGuards(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree expressionTree = (CommonTree) tree.getChild(0);
 
-		return this.nodeFactory.newGuardNode(this.newSource(tree), this.translateExpression(expressionTree, scope));
+		return this.nodeFactory.newGuardNode(this.newSource(tree),
+				this.translateExpression(expressionTree, scope));
 	}
 
-	private WaitsforNode translateWaitsfor(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private WaitsforNode translateWaitsfor(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree expressionTree = (CommonTree) tree.getChild(0);
-		SequenceNode<ExpressionNode> arguments = translateArgumentList(expressionTree, scope);
+		SequenceNode<ExpressionNode> arguments = translateArgumentList(
+				expressionTree, scope);
 
 		return nodeFactory.newWaitsforNode(newSource(tree), arguments);
 	}
 
-	private AssumesNode translateAssumes(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private AssumesNode translateAssumes(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree exprTree = (CommonTree) tree.getChild(0);
 		ExpressionNode predicate = this.translateExpression(exprTree, scope);
 		Source source = this.parseTree.source(tree);
@@ -353,10 +380,11 @@ public class AcslContractWorker {
 		return this.nodeFactory.newAssumesNode(source, predicate);
 	}
 
-	private AssignsOrReadsNode translateReadsOrAssigns(CommonTree tree, SimpleScope scope, boolean isRead)
-			throws SyntaxException {
+	private AssignsOrReadsNode translateReadsOrAssigns(CommonTree tree,
+			SimpleScope scope, boolean isRead) throws SyntaxException {
 		Source source = this.parseTree.source(tree);
-		SequenceNode<ExpressionNode> memoryList = translateArgumentList((CommonTree) tree.getChild(0), scope);
+		SequenceNode<ExpressionNode> memoryList = translateArgumentList(
+				(CommonTree) tree.getChild(0), scope);
 
 		if (isRead)
 			return this.nodeFactory.newReadsNode(source, memoryList);
@@ -364,16 +392,18 @@ public class AcslContractWorker {
 			return this.nodeFactory.newAssignsNode(source, memoryList);
 	}
 
-	private DependsNode translateDepends(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private DependsNode translateDepends(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		Source source = this.parseTree.source(tree);
 		CommonTree argumentTree = (CommonTree) tree.getChild(0);
-		SequenceNode<DependsEventNode> argumentList = this.translateDependsEventList(argumentTree, scope);
+		SequenceNode<DependsEventNode> argumentList = this
+				.translateDependsEventList(argumentTree, scope);
 
 		return this.nodeFactory.newDependsNode(source, null, argumentList);
 	}
 
-	private SequenceNode<ExpressionNode> translateArgumentList(CommonTree tree, SimpleScope scope)
-			throws SyntaxException {
+	private SequenceNode<ExpressionNode> translateArgumentList(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
 		List<ExpressionNode> list = new ArrayList<>();
 
@@ -382,11 +412,12 @@ public class AcslContractWorker {
 
 			list.add(this.translateExpression(arg, scope));
 		}
-		return this.nodeFactory.newSequenceNode(this.parseTree.source(tree), "argument list", list);
+		return this.nodeFactory.newSequenceNode(this.parseTree.source(tree),
+				"argument list", list);
 	}
 
-	private SequenceNode<DependsEventNode> translateDependsEventList(CommonTree tree, SimpleScope scope)
-			throws SyntaxException {
+	private SequenceNode<DependsEventNode> translateDependsEventList(
+			CommonTree tree, SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
 		List<DependsEventNode> events = new ArrayList<>();
 		Source source = this.parseTree.source(tree);
@@ -396,10 +427,12 @@ public class AcslContractWorker {
 
 			events.add(this.translateDependsEvent(event, scope));
 		}
-		return this.nodeFactory.newSequenceNode(source, "depends event list", events);
+		return this.nodeFactory.newSequenceNode(source, "depends event list",
+				events);
 	}
 
-	private DependsEventNode translateDependsEvent(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private DependsEventNode translateDependsEvent(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
 
 		switch (kind) {
@@ -413,49 +446,63 @@ public class AcslContractWorker {
 			operator = EventOperator.INTERSECT;
 			return translateOperatorEvent(tree, operator, scope);
 		case EVENT_BASE:
-			return translateDependsEventBase((CommonTree) tree.getChild(0), scope);
+			return translateDependsEventBase((CommonTree) tree.getChild(0),
+					scope);
 		default:
-			throw this.error("unknown kind of operator for depends events", tree);
+			throw this.error("unknown kind of operator for depends events",
+					tree);
 		}
 	}
 
-	private CompositeEventNode translateOperatorEvent(CommonTree tree, EventOperator op, SimpleScope scope)
-			throws SyntaxException {
+	private CompositeEventNode translateOperatorEvent(CommonTree tree,
+			EventOperator op, SimpleScope scope) throws SyntaxException {
 		Source source = this.parseTree.source(tree);
-		CommonTree leftTree = (CommonTree) tree.getChild(0), rightTree = (CommonTree) tree.getChild(1);
-		DependsEventNode left = this.translateDependsEventBase(leftTree, scope),
-				right = this.translateDependsEventBase(rightTree, scope);
+		CommonTree leftTree = (CommonTree) tree.getChild(0), rightTree = (CommonTree) tree
+				.getChild(1);
+		DependsEventNode left = this.translateDependsEventBase(leftTree, scope), right = this
+				.translateDependsEventBase(rightTree, scope);
 
 		return this.nodeFactory.newOperatorEventNode(source, op, left, right);
 	}
 
-	private DependsEventNode translateDependsEventBase(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private DependsEventNode translateDependsEventBase(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
 		Source source = this.parseTree.source(tree);
 
 		switch (kind) {
 		case READ: {
-			SequenceNode<ExpressionNode> memList = this.translateArgumentList((CommonTree) tree.getChild(0), scope);
+			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
+					(CommonTree) tree.getChild(0), scope);
 
-			return nodeFactory.newMemoryEventNode(source, MemoryEventNodeKind.READ, memList);
+			return nodeFactory.newMemoryEventNode(source,
+					MemoryEventNodeKind.READ, memList);
 		}
 		case WRITE: {
-			SequenceNode<ExpressionNode> memList = this.translateArgumentList((CommonTree) tree.getChild(0), scope);
+			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
+					(CommonTree) tree.getChild(0), scope);
 
-			return nodeFactory.newMemoryEventNode(source, MemoryEventNodeKind.WRITE, memList);
+			return nodeFactory.newMemoryEventNode(source,
+					MemoryEventNodeKind.WRITE, memList);
 		}
 		case REACH: {
-			SequenceNode<ExpressionNode> memList = this.translateArgumentList((CommonTree) tree.getChild(0), scope);
+			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
+					(CommonTree) tree.getChild(0), scope);
 
-			return nodeFactory.newMemoryEventNode(source, MemoryEventNodeKind.REACH, memList);
+			return nodeFactory.newMemoryEventNode(source,
+					MemoryEventNodeKind.REACH, memList);
 
 		}
 		case CALL: {
-			IdentifierNode function = this.translateIdentifier((CommonTree) tree.getChild(0));
-			SequenceNode<ExpressionNode> args = this.translateArgumentList((CommonTree) tree.getChild(1), scope);
+			IdentifierNode function = this
+					.translateIdentifier((CommonTree) tree.getChild(0));
+			SequenceNode<ExpressionNode> args = this.translateArgumentList(
+					(CommonTree) tree.getChild(1), scope);
 
-			return nodeFactory.newCallEventNode(source,
-					this.nodeFactory.newIdentifierExpressionNode(function.getSource(), function), args);
+			return nodeFactory.newCallEventNode(
+					source,
+					this.nodeFactory.newIdentifierExpressionNode(
+							function.getSource(), function), args);
 		}
 		case NOTHING:
 			return nodeFactory.newNoactNode(source);
@@ -468,18 +515,22 @@ public class AcslContractWorker {
 		}
 	}
 
-	private RequiresNode translateRequires(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private RequiresNode translateRequires(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree expressionTree = (CommonTree) tree.getChild(0);
 		Source source = this.newSource(tree);
-		ExpressionNode expression = this.translateExpression(expressionTree, scope);
+		ExpressionNode expression = this.translateExpression(expressionTree,
+				scope);
 
 		return nodeFactory.newRequiresNode(source, expression);
 	}
 
-	private EnsuresNode translateEnsures(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private EnsuresNode translateEnsures(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		Source source = this.newSource(tree);
 		CommonTree expressionTree = (CommonTree) tree.getChild(0);
-		ExpressionNode expression = this.translateExpression(expressionTree, scope);
+		ExpressionNode expression = this.translateExpression(expressionTree,
+				scope);
 
 		return nodeFactory.newEnsuresNode(source, expression);
 	}
@@ -492,7 +543,8 @@ public class AcslContractWorker {
 	 * @return an ExpressionNode
 	 * @throws SyntaxException
 	 */
-	private ExpressionNode translateExpression(CommonTree expressionTree, SimpleScope scope) throws SyntaxException {
+	private ExpressionNode translateExpression(CommonTree expressionTree,
+			SimpleScope scope) throws SyntaxException {
 		Source source = this.newSource(expressionTree);
 		int kind = expressionTree.getType();
 
@@ -506,9 +558,11 @@ public class AcslContractWorker {
 		case STRING_LITERAL:
 			return translateStringLiteral(source, expressionTree);
 		case ID:
-			return nodeFactory.newIdentifierExpressionNode(source, translateIdentifier(expressionTree));
+			return nodeFactory.newIdentifierExpressionNode(source,
+					translateIdentifier(expressionTree));
 		case TERM_PARENTHESIZED:
-			return translateExpression((CommonTree) expressionTree.getChild(0), scope);
+			return translateExpression((CommonTree) expressionTree.getChild(0),
+					scope);
 		case CALL:
 			return translateCall(source, expressionTree, scope);
 		case DOT:
@@ -517,8 +571,10 @@ public class AcslContractWorker {
 		case OPERATOR:
 			return translateOperatorExpression(source, expressionTree, scope);
 		case TRUE:
+		case CIVLTRUE:
 			return translateTrue(source);
 		case FALSE:
+		case CIVLFALSE:
 			return translateFalse(source);
 		case RESULT:
 			return nodeFactory.newResultNode(source);
@@ -568,7 +624,8 @@ public class AcslContractWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private ExpressionNode translateQuantifiedExpression(CommonTree expressionTree, Source source, SimpleScope scope)
+	private ExpressionNode translateQuantifiedExpression(
+			CommonTree expressionTree, Source source, SimpleScope scope)
 			throws SyntaxException {
 		CommonTree quantifierTree = (CommonTree) expressionTree.getChild(0);
 		CommonTree bindersTree = (CommonTree) expressionTree.getChild(1);
@@ -588,19 +645,22 @@ public class AcslContractWorker {
 		else if (quantifierTree.getType() == AcslParser.EXISTS)
 			quantifier = Quantifier.EXISTS;
 		else
-			throw error("Unexpexted quantifier " + quantifierTree.getType(), quantifierTree);
+			throw error("Unexpexted quantifier " + quantifierTree.getType(),
+					quantifierTree);
 		binders = translateBinders(bindersTree, source, scope);
 		restrict = translateExpression(restrictTree, scope);
 		pred = translateExpression(predTree, scope);
 		for (VariableDeclarationNode binder : binders) {
-			QuantifiedExpressionNode quantifiedExprNode = nodeFactory.newQuantifiedExpressionNode(source, quantifier,
-					binder.copy(), restrict, pred);
+			QuantifiedExpressionNode quantifiedExprNode = nodeFactory
+					.newQuantifiedExpressionNode(source, quantifier,
+							binder.copy(), restrict, pred);
 
 			if (firstQuantifiedExpr) {
 				result = quantifiedExprNode;
 				firstQuantifiedExpr = false;
 			} else
-				result = nodeFactory.newOperatorNode(source, Operator.LAND, result, quantifiedExprNode);
+				result = nodeFactory.newOperatorNode(source, Operator.LAND,
+						result, quantifiedExprNode);
 		}
 		if (result == null) {
 			// no binder, just return the predicate:
@@ -621,22 +681,25 @@ public class AcslContractWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private ExpressionNode translateSetBinders(CommonTree tree, Source source, SimpleScope scope)
-			throws SyntaxException {
+	private ExpressionNode translateSetBinders(CommonTree tree, Source source,
+			SimpleScope scope) throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree termTree = (CommonTree) tree.getChild(0);
 		CommonTree bindersTree = (CommonTree) tree.getChild(1);
-		CommonTree predicateTree = tree.getChildCount() > 2 ? (CommonTree) tree.getChild(2) : null;
+		CommonTree predicateTree = tree.getChildCount() > 2 ? (CommonTree) tree
+				.getChild(2) : null;
 		ExpressionNode term = this.translateExpression(termTree, newScope), predicate = null;
-		SequenceNode<VariableDeclarationNode> binders = this.translateBinders(bindersTree, source, newScope);
+		SequenceNode<VariableDeclarationNode> binders = this.translateBinders(
+				bindersTree, source, newScope);
 
 		if (predicateTree != null)
 			predicate = this.translateExpression(predicateTree, newScope);
-		return this.nodeFactory.newMemorySetNode(source, term, binders, predicate);
+		return this.nodeFactory.newMemorySetNode(source, term, binders,
+				predicate);
 	}
 
-	private ExpressionNode translateRemoteExpression(CommonTree tree, Source source, SimpleScope scope)
-			throws SyntaxException {
+	private ExpressionNode translateRemoteExpression(CommonTree tree,
+			Source source, SimpleScope scope) throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree idTree = (CommonTree) tree.getChild(0);
 		CommonTree procTree = (CommonTree) tree.getChild(1);
@@ -644,12 +707,17 @@ public class AcslContractWorker {
 
 		idArg = translateExpression(idTree, newScope);
 		procArg = translateExpression(procTree, newScope);
-		if (!idArg.expressionKind().equals(ExpressionKind.IDENTIFIER_EXPRESSION))
-			this.error("The first operand of a remote access operator must be an identifier: " + idArg, idTree);
-		return nodeFactory.newRemoteExpressionNode(source, procArg, (IdentifierExpressionNode) idArg);
+		if (!idArg.expressionKind()
+				.equals(ExpressionKind.IDENTIFIER_EXPRESSION))
+			this.error(
+					"The first operand of a remote access operator must be an identifier: "
+							+ idArg, idTree);
+		return nodeFactory.newRemoteExpressionNode(source, procArg,
+				(IdentifierExpressionNode) idArg);
 	}
 
-	private SequenceNode<VariableDeclarationNode> translateBinders(CommonTree tree, Source source, SimpleScope scope)
+	private SequenceNode<VariableDeclarationNode> translateBinders(
+			CommonTree tree, Source source, SimpleScope scope)
 			throws SyntaxException {
 		int count = tree.getChildCount();
 		List<VariableDeclarationNode> vars = new LinkedList<>();
@@ -662,7 +730,8 @@ public class AcslContractWorker {
 		return this.nodeFactory.newSequenceNode(source, "Binder List", vars);
 	}
 
-	private List<VariableDeclarationNode> translateBinder(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private List<VariableDeclarationNode> translateBinder(CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
 		CommonTree typeTree = (CommonTree) tree.getChild(0);
 		int numChild = tree.getChildCount();
 		TypeNode type = this.translateTypeExpr(typeTree, scope);
@@ -676,12 +745,14 @@ public class AcslContractWorker {
 		return result;
 	}
 
-	private TypeNode translateTypeExpr(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private TypeNode translateTypeExpr(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		int kind = tree.getType();
 
 		switch (kind) {
 		case LOGIC_TYPE:
-			return this.translateLogicType((CommonTree) tree.getChild(0), scope);
+			return this
+					.translateLogicType((CommonTree) tree.getChild(0), scope);
 		case C_TYPE:
 			return this.translateCType((CommonTree) tree.getChild(0), scope);
 		default:
@@ -689,23 +760,29 @@ public class AcslContractWorker {
 		}
 	}
 
-	private TypeNode translateCType(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private TypeNode translateCType(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		int kind = tree.getType();
 		Source source = this.newSource(tree);
 
 		switch (kind) {
 		case CHAR:
-			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.CHAR);
+			return this.nodeFactory
+					.newBasicTypeNode(source, BasicTypeKind.CHAR);
 		case DOUBLE:
-			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.DOUBLE);
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.DOUBLE);
 		case FLOAT:
-			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.FLOAT);
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.FLOAT);
 		case INT:
 			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
 		case LONG:
-			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.LONG);
+			return this.nodeFactory
+					.newBasicTypeNode(source, BasicTypeKind.LONG);
 		case SHORT:
-			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.SHORT);
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.SHORT);
 		case VOID:
 			return this.nodeFactory.newVoidTypeNode(source);
 		default:
@@ -713,7 +790,8 @@ public class AcslContractWorker {
 		}
 	}
 
-	private TypeNode translateLogicType(CommonTree tree, SimpleScope scope) throws SyntaxException {
+	private TypeNode translateLogicType(CommonTree tree, SimpleScope scope)
+			throws SyntaxException {
 		int kind = tree.getType();
 		Source source = this.newSource(tree);
 
@@ -723,31 +801,36 @@ public class AcslContractWorker {
 
 			switch (typeKind) {
 			case BOOLEAN:
-				return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.BOOL);
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.BOOL);
 			case INTEGER:
-				return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.INT);
 			case REAL:
-				return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.REAL);
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.REAL);
 			default:
 				throw this.error("unknown built-in logic type", tree);
 			}
 		}
 		case TYPE_ID:
-			return this.nodeFactory.newTypedefNameNode(this.translateIdentifier((CommonTree) tree.getChild(0)), null);
+			return this.nodeFactory.newTypedefNameNode(
+					this.translateIdentifier((CommonTree) tree.getChild(0)),
+					null);
 		default:
 			throw this.error("unknown kind of logic type", tree);
 		}
 	}
 
-	private VariableDeclarationNode translateVariableIdent(CommonTree tree, SimpleScope scope, TypeNode baseType)
-			throws SyntaxException {
+	private VariableDeclarationNode translateVariableIdent(CommonTree tree,
+			SimpleScope scope, TypeNode baseType) throws SyntaxException {
 		int kind = tree.getType();
 		Source source = this.newSource(tree);
 
 		switch (kind) {
 		case VAR_ID_STAR: {
-			VariableDeclarationNode baseVar = this.translateVariableIdentBase((CommonTree) tree.getChild(0), source,
-					scope, baseType);
+			VariableDeclarationNode baseVar = this.translateVariableIdentBase(
+					(CommonTree) tree.getChild(0), source, scope, baseType);
 			TypeNode baseVarType, type;
 
 			baseVarType = baseVar.getTypeNode();
@@ -757,8 +840,8 @@ public class AcslContractWorker {
 			return baseVar;
 		}
 		case VAR_ID_SQUARE: {
-			VariableDeclarationNode baseVar = this.translateVariableIdentBase((CommonTree) tree.getChild(0), source,
-					scope, baseType);
+			VariableDeclarationNode baseVar = this.translateVariableIdentBase(
+					(CommonTree) tree.getChild(0), source, scope, baseType);
 			TypeNode baseVarType, type;
 
 			baseVarType = baseVar.getTypeNode();
@@ -768,32 +851,36 @@ public class AcslContractWorker {
 			return baseVar;
 		}
 		case VAR_ID:
-			return this.translateVariableIdentBase((CommonTree) tree.getChild(0), source, scope, baseType);
+			return this.translateVariableIdentBase(
+					(CommonTree) tree.getChild(0), source, scope, baseType);
 		default:
 			throw this.error("unknown kind of variable identity", tree);
 		}
 	}
 
-	private VariableDeclarationNode translateVariableIdentBase(CommonTree tree, Source source, SimpleScope scope,
-			TypeNode baseType) throws SyntaxException {
+	private VariableDeclarationNode translateVariableIdentBase(CommonTree tree,
+			Source source, SimpleScope scope, TypeNode baseType)
+			throws SyntaxException {
 		int kind = tree.getType();
 
 		switch (kind) {
 		case ID: {
 			IdentifierNode identifier = this.translateIdentifier(tree);
 
-			return this.nodeFactory.newVariableDeclarationNode(identifier.getSource(), identifier, baseType);
+			return this.nodeFactory.newVariableDeclarationNode(
+					identifier.getSource(), identifier, baseType);
 		}
 		case VAR_ID_BASE:
-			return this.translateVariableIdent((CommonTree) tree.getChild(0), scope, baseType);
+			return this.translateVariableIdent((CommonTree) tree.getChild(0),
+					scope, baseType);
 		default:
 			throw this.error("unknown kind of variable identity base", tree);
 		}
 	}
 
 	// ////////////////////////////////////
-	private ExpressionNode translateValidNode(CommonTree tree, Source source, SimpleScope scope)
-			throws SyntaxException {
+	private ExpressionNode translateValidNode(CommonTree tree, Source source,
+			SimpleScope scope) throws SyntaxException {
 		CommonTree pointer = (CommonTree) tree.getChild(0);
 		ExpressionNode ptrNode;
 		ExpressionNode rangeNode;
@@ -804,31 +891,36 @@ public class AcslContractWorker {
 
 			range = (CommonTree) tree.getChild(1);
 			rangeNode = translateExpression(range, scope);
-			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode, rangeNode);
+			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode,
+					rangeNode);
 		} else
 			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode);
 	}
 
-	private ExpressionNode translateWriteEvent(Source source, CommonTree expressionTree, SimpleScope scope) {
+	private ExpressionNode translateWriteEvent(Source source,
+			CommonTree expressionTree, SimpleScope scope) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private IntegerConstantNode translateIntegerConstant(Source source, CommonTree integerConstant)
-			throws SyntaxException {
-		return nodeFactory.newIntegerConstantNode(source, integerConstant.getText());
+	private IntegerConstantNode translateIntegerConstant(Source source,
+			CommonTree integerConstant) throws SyntaxException {
+		return nodeFactory.newIntegerConstantNode(source,
+				integerConstant.getText());
 	}
 
-	private FloatingConstantNode translateFloatingConstant(Source source, CommonTree floatingConstant)
-			throws SyntaxException {
-		return nodeFactory.newFloatingConstantNode(source, floatingConstant.getText());
+	private FloatingConstantNode translateFloatingConstant(Source source,
+			CommonTree floatingConstant) throws SyntaxException {
+		return nodeFactory.newFloatingConstantNode(source,
+				floatingConstant.getText());
 	}
 
-	private CharacterConstantNode translateCharacterConstant(Source source, CommonTree characterConstant)
-			throws SyntaxException {
+	private CharacterConstantNode translateCharacterConstant(Source source,
+			CommonTree characterConstant) throws SyntaxException {
 		CharacterToken token = (CharacterToken) characterConstant.getToken();
 
-		return nodeFactory.newCharacterConstantNode(source, characterConstant.getText(), token.getExecutionCharacter());
+		return nodeFactory.newCharacterConstantNode(source,
+				characterConstant.getText(), token.getExecutionCharacter());
 	}
 
 	private ConstantNode translateTrue(Source source) {
@@ -839,24 +931,31 @@ public class AcslContractWorker {
 		return nodeFactory.newBooleanConstantNode(source, false);
 	}
 
-	private StringLiteralNode translateStringLiteral(Source source, CommonTree stringLiteral) throws SyntaxException {
+	private StringLiteralNode translateStringLiteral(Source source,
+			CommonTree stringLiteral) throws SyntaxException {
 		StringToken token = (StringToken) stringLiteral.getToken();
 
-		return nodeFactory.newStringLiteralNode(source, stringLiteral.getText(), token.getStringLiteral());
+		return nodeFactory.newStringLiteralNode(source,
+				stringLiteral.getText(), token.getStringLiteral());
 	}
 
-	private ExpressionNode translateRegularRange(Source source, CommonTree expressionTree, SimpleScope scope)
+	private ExpressionNode translateRegularRange(Source source,
+			CommonTree expressionTree, SimpleScope scope)
 			throws SyntaxException {
 		{// regular range expression lo..hi or lo..hi#step
-			ExpressionNode loNode = translateExpression((CommonTree) expressionTree.getChild(0), scope);
-			ExpressionNode hiNode = translateExpression((CommonTree) expressionTree.getChild(1), scope);
+			ExpressionNode loNode = translateExpression(
+					(CommonTree) expressionTree.getChild(0), scope);
+			ExpressionNode hiNode = translateExpression(
+					(CommonTree) expressionTree.getChild(1), scope);
 			if (expressionTree.getChildCount() > 2) {
 				CommonTree stepTree = (CommonTree) expressionTree.getChild(2);
 
 				if (stepTree != null /* && stepTree.getType() != ABSENT */) {
-					ExpressionNode stepNode = translateExpression(stepTree, scope);
+					ExpressionNode stepNode = translateExpression(stepTree,
+							scope);
 
-					return nodeFactory.newRegularRangeNode(source, loNode, hiNode, stepNode);
+					return nodeFactory.newRegularRangeNode(source, loNode,
+							hiNode, stepNode);
 				}
 			}
 			return nodeFactory.newRegularRangeNode(source, loNode, hiNode);
@@ -871,8 +970,8 @@ public class AcslContractWorker {
 	 * @return a FunctionCallNode corresponding to the ANTLR tree
 	 * @throws SyntaxException
 	 */
-	private FunctionCallNode translateCall(Source source, CommonTree callTree, SimpleScope scope)
-			throws SyntaxException {
+	private FunctionCallNode translateCall(Source source, CommonTree callTree,
+			SimpleScope scope) throws SyntaxException {
 		CommonTree functionTree = (CommonTree) callTree.getChild(1);
 		CommonTree contextArgumentListTree = (CommonTree) callTree.getChild(2);
 		CommonTree argumentListTree = (CommonTree) callTree.getChild(3);
@@ -886,19 +985,23 @@ public class AcslContractWorker {
 		// .getChild(4));
 
 		for (int i = 0; i < numContextArgs; i++) {
-			CommonTree argumentTree = (CommonTree) contextArgumentListTree.getChild(i);
-			ExpressionNode contextArgumentNode = translateExpression(argumentTree, scope);
+			CommonTree argumentTree = (CommonTree) contextArgumentListTree
+					.getChild(i);
+			ExpressionNode contextArgumentNode = translateExpression(
+					argumentTree, scope);
 
 			contextArgumentList.add(contextArgumentNode);
 		}
 
 		for (int i = 0; i < numArgs; i++) {
 			CommonTree argumentTree = (CommonTree) argumentListTree.getChild(i);
-			ExpressionNode argumentNode = translateExpression(argumentTree, scope);
+			ExpressionNode argumentNode = translateExpression(argumentTree,
+					scope);
 
 			argumentList.add(argumentNode);
 		}
-		return nodeFactory.newFunctionCallNode(source, functionNode, contextArgumentList, argumentList, null);
+		return nodeFactory.newFunctionCallNode(source, functionNode,
+				contextArgumentList, argumentList, null);
 	}
 
 	/**
@@ -907,7 +1010,8 @@ public class AcslContractWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private ExpressionNode translateDotOrArrow(Source source, CommonTree expressionTree, SimpleScope scope)
+	private ExpressionNode translateDotOrArrow(Source source,
+			CommonTree expressionTree, SimpleScope scope)
 			throws SyntaxException {
 		int kind = expressionTree.getType();
 		CommonTree argumentNode = (CommonTree) expressionTree.getChild(0);
@@ -927,7 +1031,8 @@ public class AcslContractWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private OperatorNode translateOperatorExpression(Source source, CommonTree expressionTree, SimpleScope scope)
+	private OperatorNode translateOperatorExpression(Source source,
+			CommonTree expressionTree, SimpleScope scope)
 			throws SyntaxException {
 		CommonTree operatorTree = (CommonTree) expressionTree.getChild(0);
 		int operatorKind = operatorTree.getType();
@@ -937,7 +1042,8 @@ public class AcslContractWorker {
 		Operator operator;
 
 		for (int i = 0; i < numArgs; i++) {
-			ExpressionNode argument = translateExpression((CommonTree) argumentList.getChild(i), scope);
+			ExpressionNode argument = translateExpression(
+					(CommonTree) argumentList.getChild(i), scope);
 
 			arguments.add(argument);
 		}
@@ -1042,8 +1148,8 @@ public class AcslContractWorker {
 
 	// ////////////////////////////////////
 
-	private MPICollectiveBlockNode translateMPICollectiveBlock(Source source, CommonTree colBlock, SimpleScope scope)
-			throws SyntaxException {
+	private MPICollectiveBlockNode translateMPICollectiveBlock(Source source,
+			CommonTree colBlock, SimpleScope scope) throws SyntaxException {
 		CommonTree mpiComm = (CommonTree) colBlock.getChild(0);
 		CommonTree kind = (CommonTree) colBlock.getChild(1);
 		CommonTree body = (CommonTree) colBlock.getChild(2);
@@ -1068,28 +1174,32 @@ public class AcslContractWorker {
 			throw error("Unknown MPI collective kind", kind);
 		}
 		bodyComponents.addAll(translateFunctionContractBlock(body, scope));
-		bodyNode = nodeFactory.newSequenceNode(source, "mpi_collective body", bodyComponents);
-		return nodeFactory.newMPICollectiveBlockNode(source, mpiCommNode, colKind, bodyNode);
+		bodyNode = nodeFactory.newSequenceNode(source, "mpi_collective body",
+				bodyComponents);
+		return nodeFactory.newMPICollectiveBlockNode(source, mpiCommNode,
+				colKind, bodyNode);
 	}
 
-	private MPIContractConstantNode translateMPIConstantNode(CommonTree tree, Source source) throws SyntaxException {
+	private MPIContractConstantNode translateMPIConstantNode(CommonTree tree,
+			Source source) throws SyntaxException {
 		String text = tree.getChild(0).getText();
 		MPIContractConstantNode result;
 
 		if (text.equals(MPI_COMM_RANK)) {
-			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK, MPIConstantKind.MPI_COMM_RANK,
-					ConstantKind.INT);
+			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK,
+					MPIConstantKind.MPI_COMM_RANK, ConstantKind.INT);
 		} else if (text.equals(MPI_COMM_SIZE)) {
-			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE, MPIConstantKind.MPI_COMM_SIZE,
-					ConstantKind.INT);
+			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE,
+					MPIConstantKind.MPI_COMM_SIZE, ConstantKind.INT);
 		} else
 			throw error("Unknown MPI Constant " + text, tree);
 		result.setInitialType(typeFactory.signedIntegerType(SignedIntKind.INT));
 		return result;
 	}
 
-	private MPIContractExpressionNode translateMPIExpressionNode(CommonTree expressionTree, Source source,
-			SimpleScope scope) throws SyntaxException {
+	private MPIContractExpressionNode translateMPIExpressionNode(
+			CommonTree expressionTree, Source source, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree expression = (CommonTree) expressionTree.getChild(0);
 		int kind = expression.getType();
 		int numArgs;
@@ -1130,25 +1240,33 @@ public class AcslContractWorker {
 		}
 		for (int i = 0; i < numArgs; i++) {
 			if (i == 2 && kind == AcslParser.MPI_EQUALS) {
-				args.add(this.translateEnumerationConstantNode((CommonTree) expression.getChild(i), source, scope));
+				args.add(this.translateEnumerationConstantNode(
+						(CommonTree) expression.getChild(i), source, scope));
 			} else
-				args.add(this.translateExpression((CommonTree) expression.getChild(i), scope));
+				args.add(this.translateExpression(
+						(CommonTree) expression.getChild(i), scope));
 		}
-		result = nodeFactory.newMPIExpressionNode(source, args, mpiExprKind, exprName);
+		result = nodeFactory.newMPIExpressionNode(source, args, mpiExprKind,
+				exprName);
 		result.setInitialType(initialType);
 		return result;
 	}
 
-	private EnumerationConstantNode translateEnumerationConstantNode(CommonTree expressionTree, Source source,
-			SimpleScope scope) throws SyntaxException {
-		ExpressionNode identifierExpr = this.translateExpression(expressionTree, scope);
+	private EnumerationConstantNode translateEnumerationConstantNode(
+			CommonTree expressionTree, Source source, SimpleScope scope)
+			throws SyntaxException {
+		ExpressionNode identifierExpr = this.translateExpression(
+				expressionTree, scope);
 
-		if (identifierExpr.expressionKind().equals(ExpressionKind.IDENTIFIER_EXPRESSION)) {
-			IdentifierNode ident = ((IdentifierExpressionNode) identifierExpr).getIdentifier();
+		if (identifierExpr.expressionKind().equals(
+				ExpressionKind.IDENTIFIER_EXPRESSION)) {
+			IdentifierNode ident = ((IdentifierExpressionNode) identifierExpr)
+					.getIdentifier();
 
 			return nodeFactory.newEnumerationConstantNode(ident.copy());
 		}
-		throw error("Expecting an identifer for an enumeration constant.", expressionTree);
+		throw error("Expecting an identifer for an enumeration constant.",
+				expressionTree);
 	}
 
 	private SyntaxException error(String message, CommonTree tree) {

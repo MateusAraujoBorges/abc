@@ -25,6 +25,7 @@ public class CommonFunctionDeclarationNode extends
 	private boolean atomicFunctionSpecifier = false;// $atomic_f
 	private boolean pureFunctionSpecifier = false;
 	private boolean systemFunctionSpecifier = false;
+	private String systemLibrary = null;
 
 	public CommonFunctionDeclarationNode(Source source,
 			IdentifierNode identifier, FunctionTypeNode type,
@@ -186,5 +187,15 @@ public class CommonFunctionDeclarationNode extends
 	@Override
 	public boolean hasSystemFunctionSpecifier() {
 		return this.systemFunctionSpecifier;
+	}
+
+	@Override
+	public String getSystemLibrary() {
+		return this.systemLibrary;
+	}
+
+	@Override
+	public void setSystemLibrary(String library) {
+		this.systemLibrary = library;
 	}
 }

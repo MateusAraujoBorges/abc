@@ -540,8 +540,18 @@ public class ASTPrettyPrinter {
 			out.print("__global__ ");
 		if (function.hasAtomicFunctionSpecifier())
 			out.print("$atomic_f ");
-		if (function.hasSystemFunctionSpecifier())
-			out.print("$system ");
+		if (function.hasSystemFunctionSpecifier()) {
+			String fileName = function.getSource().getFirstToken()
+					.getSourceFile().getName();
+			int dotIndex = fileName.lastIndexOf(".");
+
+			out.print("$system");
+			if (dotIndex >= 0) {
+				out.print("\"");
+				out.print(fileName.substring(0, fileName.lastIndexOf(".")));
+				out.print("\" ");
+			}
+		}
 		if (function.hasInlineFunctionSpecifier())
 			out.print("inline ");
 		if (function.hasNoreturnFunctionSpecifier())
@@ -626,7 +636,7 @@ public class ASTPrettyPrinter {
 		case DEPENDS: {
 			DependsNode depends = (DependsNode) contract;
 
-			out.print("depends ");
+			out.print("depends_on ");
 			out.print(sequenceDependsEvent2Pretty(depends.getEventList()));
 			out.print(";");
 			break;
@@ -642,7 +652,7 @@ public class ASTPrettyPrinter {
 		case GUARDS: {
 			GuardsNode guard = (GuardsNode) contract;
 
-			out.print("guards ");
+			out.print("executes_when ");
 			out.print(expression2Pretty(guard.getExpression()));
 			out.print(";");
 			break;
@@ -782,7 +792,7 @@ public class ASTPrettyPrinter {
 			break;
 		}
 		case NOACT:
-			result.append("\\noact");
+			result.append("\\nothing");
 			break;
 		case ANYACT:
 			result.append("\\anyact");
@@ -1606,8 +1616,6 @@ public class ASTPrettyPrinter {
 			result.append("_Atomic ");
 		if (typeNode.isConstQualified())
 			result.append("const ");
-		if (typeNode.isRestrictQualified())
-			result.append("restrict ");
 		if (typeNode.isVolatileQualified())
 			result.append("volatile ");
 		if (variable.hasExternStorage())
@@ -1628,6 +1636,8 @@ public class ASTPrettyPrinter {
 
 			result.append(typeResult.left);
 			result.append(" ");
+			if (typeNode.isRestrictQualified())
+				result.append("restrict ");
 			if (varName != null) {
 				result.append(" ");
 				result.append(varName);
@@ -1635,6 +1645,8 @@ public class ASTPrettyPrinter {
 			result.append(typeResult.right);
 		} else {
 			result.append(type);
+			if (typeNode.isRestrictQualified())
+				result.append(" restrict");
 			if (varName != null) {
 				result.append(" ");
 				result.append(varName);

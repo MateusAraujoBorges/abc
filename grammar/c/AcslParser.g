@@ -739,7 +739,7 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| TRUE | FALSE | RESULT | NOTHING | ELLIPSIS
-    | SELF | NULL
+    | SELF | NULL | CIVLTRUE | CIVLTRUE
     | mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
 

@@ -23,6 +23,7 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	private Set<Function> callers = new HashSet<>();
 	private Set<Function> callees = new HashSet<>();
 	static Function mainFunction;
+	private String library = null;
 
 	private List<ContractNode> contracts = new LinkedList<>();
 
@@ -124,5 +125,15 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	@Override
 	public void setAbstract(boolean value) {
 		this.isAbstract = value;
+	}
+
+	@Override
+	public String systemLibrary() {
+		return this.library;
+	}
+
+	@Override
+	public void setSystemLibrary(String library) {
+		this.library = library;
 	}
 }

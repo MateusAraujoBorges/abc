@@ -923,8 +923,10 @@ public class ExpressionAnalyzer {
 		EntityKind kind;
 
 		if (entity == null) {
-			if (isFirstRound && (config.svcomp() || isContract)
-					&& (node.parent() instanceof FunctionCallNode)) {
+			if (isFirstRound
+					&& (config.svcomp() || isContract)
+					&& ((node.parent() instanceof FunctionCallNode) || node
+							.parent() instanceof CallEventNode)) {
 				node.setAttribute(unknownIdentifier, true);
 				return;
 			} else {

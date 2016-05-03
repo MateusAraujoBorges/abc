@@ -153,6 +153,20 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	void setSystemFunctionSpecifier(boolean value);
 
 	/**
+	 * gets the library name of this system function
+	 * 
+	 * @return
+	 */
+	String getSystemLibrary();
+
+	/**
+	 * sets the library name of this system function
+	 * 
+	 * @param library
+	 */
+	void setSystemLibrary(String library);
+
+	/**
 	 * Returns the contract node for this function declaration. May be
 	 * <code>null</code>. It is a child node of this node.
 	 * 

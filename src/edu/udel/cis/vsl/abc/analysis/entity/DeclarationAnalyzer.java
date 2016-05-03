@@ -682,8 +682,11 @@ public class DeclarationAnalyzer {
 				function.setDoesNotReturn(true);
 			if (declaration.hasAtomicFunctionSpecifier())
 				function.setAtomic(true);
-			if (declaration.hasSystemFunctionSpecifier())
+			if (declaration.hasSystemFunctionSpecifier()) {
 				function.setSystemFunction(true);
+				if (declaration.getSystemLibrary() != null)
+					function.setSystemLibrary(declaration.getSystemLibrary());
+			}
 			if (declaration instanceof AbstractFunctionDefinitionNode)
 				function.setAbstract(true);
 		} else if (declaration.hasNoreturnFunctionSpecifier() != function

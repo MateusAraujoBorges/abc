@@ -93,6 +93,9 @@ FORALL  :   '\\forall';
 EXISTS  :   '\\exists';
 VALID   :   '\\valid';
 NULL    :   '\\null';
+/* CIVL keywords of terms */
+CIVLTRUE:   '$true';
+CIVLFALSE:  '$false';
 
 /* operators */
 PLUS    :   '+';

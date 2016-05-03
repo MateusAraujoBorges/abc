@@ -4,12 +4,13 @@ import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpNode;
 
 public interface StatementNode extends BlockItemNode {
 
+	//TODO add javadocs
 	public enum StatementKind {
-		ASSUME, ASSERT, ATOMIC, CHOOSE, CIVL_FOR, COMPOUND, EXPRESSION, IF, JUMP, LABELED, LOOP, NULL,
+		ATOMIC, CHOOSE, CIVL_FOR, COMPOUND, EXPRESSION, IF, JUMP, LABELED, LOOP, NULL,
 		/**
 		 * indicates a OmpNode instance {@link OmpNode}
 		 */
-		OMP, PRAGMA, SWITCH, WHEN,
+		OMP, PRAGMA, SWITCH, WHEN
 	}
 
 	@Override

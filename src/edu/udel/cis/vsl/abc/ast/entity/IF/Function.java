@@ -85,6 +85,21 @@ public interface Function extends OrdinaryEntity {
 	void setSystemFunction(boolean value);
 
 	/**
+	 * gets the library of this system function; null if this is not a system
+	 * function.
+	 * 
+	 * @return
+	 */
+	String systemLibrary();
+
+	/**
+	 * sets the library of this system function;
+	 * 
+	 * @param library
+	 */
+	void setSystemLibrary(String library);
+
+	/**
 	 * Is the function declared with the <code>_Noreturn</code> specifier,
 	 * indicating that the function does not return.
 	 * 
