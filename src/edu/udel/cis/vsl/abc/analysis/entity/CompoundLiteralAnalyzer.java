@@ -263,7 +263,7 @@ public class CompoundLiteralAnalyzer {
 				}
 				subLiteral = new CommonScalarLiteralObject(subType, expr);
 			}
-			result.set(position, subLiteral);
+			result.set(compoundInitNode.getSource(), position, subLiteral);
 		}
 		return result;
 	}
@@ -307,7 +307,7 @@ public class CompoundLiteralAnalyzer {
 				} else {
 					member = new CommonCompoundLiteralObject(child, sourceNode);
 				}
-				object.setElement(i, member);
+				object.setElement(source, i, member);
 			}
 			if (member instanceof CommonCompoundLiteralObject) {
 				fill((CommonCompoundLiteralObject) member);

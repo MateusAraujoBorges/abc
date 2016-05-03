@@ -7,6 +7,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundLiteralObject;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.LiteralObject;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
+import edu.udel.cis.vsl.abc.token.IF.Source;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Implementation of CompoundLiteral that provides additional functionality for
@@ -83,13 +85,14 @@ public class CommonCompoundLiteralObject extends CommonLiteralObject implements
 		return result;
 	}
 
-	public void setElement(int index, LiteralObject value) {
+	public void setElement(Source source, int index, LiteralObject value)
+			throws SyntaxException {
 		LiteralTypeNode typeNode = getTypeNode();
 		int length = typeNode.length();
 
 		if (typeNode.hasFixedLength() && index >= length)
-			throw new ABCRuntimeException("Exceeded object bound: index="
-					+ index + ", length=" + length);
+			throw new SyntaxException("Exceeded object bound: index=" + index
+					+ ", length=" + length, source);
 		while (index >= elements.size())
 			elements.add(null);
 		elements.set(index, value);
@@ -100,22 +103,23 @@ public class CommonCompoundLiteralObject extends CommonLiteralObject implements
 			((LiteralArrayTypeNode) typeNode).setLength(elements.size());
 	}
 
-	private void set(Designation designation, int desStart, LiteralObject value) {
+	private void set(Source source, Designation designation, int desStart,
+			LiteralObject value) throws SyntaxException {
 		int deslen = designation.length() - desStart;
 		int index0 = designation.get(desStart).getIndex();
 
 		assert deslen > 0;
 		if (deslen == 1) {
-			setElement(index0, value);
+			setElement(source, index0, value);
 		} else {
 			CommonCompoundLiteralObject r = (CommonCompoundLiteralObject) get(index0);
 
 			if (r == null) {
 				r = new CommonCompoundLiteralObject(getTypeNode().getChild(
 						index0), getSourceNode());
-				setElement(index0, r);
+				setElement(source, index0, r);
 			}
-			r.set(designation, desStart + 1, value);
+			r.set(source, designation, desStart + 1, value);
 		}
 	}
 
@@ -125,11 +129,13 @@ public class CommonCompoundLiteralObject extends CommonLiteralObject implements
 	 * 
 	 * @param designation
 	 * @param value
+	 * @throws SyntaxException
 	 */
-	public void set(Designation designation, LiteralObject value) {
+	public void set(Source source, Designation designation, LiteralObject value)
+			throws SyntaxException {
 		if (designation.length() == 0)
 			throw new ABCRuntimeException("saw empty designation in set");
-		set(designation, 0, value);
+		set(source, designation, 0, value);
 	}
 
 }
