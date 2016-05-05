@@ -1626,13 +1626,13 @@ public interface NodeFactory {
 	 *            variables
 	 * @param body
 	 *            the body of the loop statement
-	 * @param invariant
-	 *            optional loop invariant expression
+	 * @param loopContract
+	 *            optional loop contracts node
 	 * @return the new node
 	 */
 	CivlForNode newCivlForNode(Source source, boolean isParallel,
 			DeclarationListNode variables, ExpressionNode domain,
-			StatementNode body, ExpressionNode invariant);
+			StatementNode body, SequenceNode<ContractNode> loopContract);
 
 	/**
 	 * Creates a new node representing a CIVL-C <code>$assume</code> statement.

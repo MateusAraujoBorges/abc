@@ -5,6 +5,8 @@ import java.io.PrintStream;
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject.DiffKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CivlForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.DeclarationListNode;
@@ -18,7 +20,7 @@ public class CommonCivlForNode extends CommonStatementNode implements
 
 	public CommonCivlForNode(Source source, boolean isParallel,
 			DeclarationListNode variables, ExpressionNode domain,
-			StatementNode body, ExpressionNode invariant) {
+			StatementNode body, SequenceNode<ContractNode> invariant) {
 		super(source, variables, domain, body);
 		addChild(invariant);
 		this.isParallel = isParallel;
@@ -44,9 +46,10 @@ public class CommonCivlForNode extends CommonStatementNode implements
 		return (StatementNode) child(2);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public ExpressionNode getInvariant() {
-		return (ExpressionNode) child(3);
+	public SequenceNode<ContractNode> loopContracts() {
+		return (SequenceNode<ContractNode>) child(3);
 	}
 
 	@Override
@@ -58,7 +61,7 @@ public class CommonCivlForNode extends CommonStatementNode implements
 	public CivlForNode copy() {
 		return new CommonCivlForNode(getSource(), isParallel,
 				duplicate(getVariables()), duplicate(getDomain()),
-				duplicate(getBody()), duplicate(getInvariant()));
+				duplicate(getBody()), duplicate(loopContracts()));
 	}
 
 	@Override

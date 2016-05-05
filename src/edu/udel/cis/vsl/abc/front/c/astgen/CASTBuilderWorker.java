@@ -2045,8 +2045,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		DeclarationListNode declListNode;
 		ExpressionNode domainNode = translateExpression(domainTree, loopScope);
 		StatementNode bodyNode = translateStatement(bodyTree, loopScope);
-		ExpressionNode invariantNode = translateExpression(invariantTree,
-				loopScope);
+		SequenceNode<ContractNode> loopContractNode = translateAcslContract(
+				AcslContractKind.LOOP_CONTRACT, invariantTree, loopScope);
 		CivlForNode result;
 
 		if (typeNameTree.getType() != ABSENT) {
@@ -2072,7 +2072,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 							+ "$for (int i1, i2, ... : domain) ...", tree);
 		result = nodeFactory.newCivlForNode(statementSource,
 				tree.getType() == PARFOR, declListNode, domainNode, bodyNode,
-				invariantNode);
+				loopContractNode);
 		return result;
 	}
 

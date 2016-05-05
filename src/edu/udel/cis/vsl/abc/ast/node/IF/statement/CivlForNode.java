@@ -1,5 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.statement;
 
+import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
 /**
@@ -51,11 +53,11 @@ public interface CivlForNode extends StatementNode {
 	StatementNode getBody();
 
 	/**
-	 * Optional loop invariant expression.
+	 * Optional loop contracts node.
 	 * 
-	 * @return loop invariant or null
+	 * @return loop contracts or null
 	 */
-	ExpressionNode getInvariant();
+	SequenceNode<ContractNode> loopContracts();
 
 	/**
 	 * Returns the sequence of loop variable declarations. Each element in the

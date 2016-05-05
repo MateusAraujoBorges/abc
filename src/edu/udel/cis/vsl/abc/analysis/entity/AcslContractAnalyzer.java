@@ -27,7 +27,8 @@ public class AcslContractAnalyzer {
 		worker.processContractNodes(contract, result);
 	}
 
-	void processLoopContractNodes(SequenceNode<ContractNode> loopContracts) {
+	void processLoopContractNodes(SequenceNode<ContractNode> loopContracts)
+			throws SyntaxException {
 		AcslContractAnalyzerWorker worker = new AcslContractAnalyzerWorker(
 				this.entityAnalyzer, conversionFactory);
 

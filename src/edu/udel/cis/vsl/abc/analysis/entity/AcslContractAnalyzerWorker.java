@@ -22,11 +22,14 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventNodeKi
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType;
+import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
@@ -260,8 +263,40 @@ public class AcslContractAnalyzerWorker {
 		return entityAnalyzer.error(e, node);
 	}
 
-	void processLoopContractNodes(SequenceNode<ContractNode> loopContracts) {
-		// TODO Auto-generated method stub
+	void processLoopContractNodes(SequenceNode<ContractNode> loopContracts)
+			throws SyntaxException {
+		Type expressionType;
 
+		for (ContractNode clause : loopContracts) {
+			switch (clause.contractKind()) {
+			case INVARIANT:
+				InvariantNode loopInvari = ((InvariantNode) clause);
+
+				expressionAnalyzer
+						.processExpression(loopInvari.getExpression());
+				if ((expressionType = loopInvari.getExpression()
+						.getConvertedType()).kind() == Type.TypeKind.BASIC)
+					if (((StandardBasicType) expressionType).getBasicTypeKind() == StandardBasicType.BasicTypeKind.BOOL)
+						break;
+				throw error(
+						"Unexpected type of the loop invariant expression type: "
+								+ expressionType
+								+ ". Loop invariant expression can only be bool type.",
+						clause);
+			case ASSIGNS_READS:
+				AssignsOrReadsNode assignsNode = (AssignsOrReadsNode) clause;
+
+				if (assignsNode.isReads())
+					throw error("Unexpected loop contract clause: " + clause,
+							clause);
+				for (ExpressionNode mem : assignsNode.getMemoryList())
+					expressionAnalyzer.processExpression(mem);
+			default:
+				throw error(
+						"Unknown kind of loop contracts: "
+								+ clause.contractKind(), clause);
+				// Check expression types
+			}
+		}
 	}
 }

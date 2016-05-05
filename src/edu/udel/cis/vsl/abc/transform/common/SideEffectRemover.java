@@ -2812,7 +2812,6 @@ public class SideEffectRemover extends BaseTransformer {
 	private List<BlockItemNode> translateCivlFor(CivlForNode civlFor) {
 		List<BlockItemNode> result = new LinkedList<>();
 		ExpressionNode domain = civlFor.getDomain();
-		ExpressionNode invariant = civlFor.getInvariant();
 		StatementNode body = civlFor.getBody();
 		int domIndex = domain.childIndex(), bodyIndex = body.childIndex();
 		ExprTriple domTriple = translate(domain, false);
@@ -2821,14 +2820,6 @@ public class SideEffectRemover extends BaseTransformer {
 		purify(domTriple);
 		result.addAll(domTriple.getBefore());
 		civlFor.setChild(domIndex, domTriple.getNode());
-		if (invariant != null) {
-			int invIndex = invariant.childIndex();
-			ExprTriple invTriple = translate(invariant, false);
-
-			purify(invTriple);
-			result.addAll(invTriple.getBefore());
-			civlFor.setChild(invIndex, invTriple.getNode());
-		}
 		removeNodes(normalBodyItems);
 		if (normalBodyItems.size() == 1)
 			civlFor.setChild(bodyIndex, normalBodyItems.get(0));

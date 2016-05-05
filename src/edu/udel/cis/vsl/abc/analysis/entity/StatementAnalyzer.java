@@ -357,7 +357,8 @@ public class StatementAnalyzer {
 					+ "does not equal number of loop variables (" + numVars
 					+ ")", domainNode);
 		processStatement(node.getBody());
-		processExpression(node.getInvariant());
+		if (node.loopContracts() != null)
+			acslAnalyzer.processLoopContractNodes(node.loopContracts());
 	}
 
 	// ************************* Exported Methods **************************

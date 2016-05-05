@@ -686,9 +686,9 @@ public class CommonNodeFactory implements NodeFactory {
 	@Override
 	public CivlForNode newCivlForNode(Source source, boolean isParallel,
 			DeclarationListNode variables, ExpressionNode domain,
-			StatementNode body, ExpressionNode invariant) {
+			StatementNode body, SequenceNode<ContractNode> loopContracts) {
 		return new CommonCivlForNode(source, isParallel, variables, domain,
-				body, invariant);
+				body, loopContracts);
 	}
 
 	@Override
