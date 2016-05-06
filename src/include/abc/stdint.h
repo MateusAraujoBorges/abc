@@ -1,5 +1,6 @@
 /*
- *	7.20 Integer types <stdint.h>
+ * The header stdint.h declares sets of integer types having specified widths, and
+ * defines corresponding sets of macros
  */
 
 #ifndef _STDINT_
