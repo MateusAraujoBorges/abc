@@ -1,5 +1,5 @@
-/* uchar.h: The ABC representation of standard C library.
- * Based on C11 Standard.
+/* The header uchar.h declares types and functions for manipulating 
+ * Unicode characters. 
  */
  
 #ifndef _UCHAR_
