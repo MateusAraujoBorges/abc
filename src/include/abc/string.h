@@ -1,4 +1,6 @@
-/* ABC model of string.h */
+/* The header string.h defines one macro for manipulating arrays 
+ * of character type and other objects treated as arrays of character type.
+ */
 
 #ifndef _STRING_
 #define _STRING_
