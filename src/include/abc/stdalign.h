@@ -1,5 +1,5 @@
 /* stdalign.h: The ABC representation of standard C library.
- * Based on C11 Standard.
+ * Based on C11 Standard 7.15.
  */
 #ifndef _STDALIGN_
 #define _STDALIGN_
