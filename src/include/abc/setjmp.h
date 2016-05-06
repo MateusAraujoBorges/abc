@@ -1,6 +1,5 @@
-/* setjmp.h: The ABC representation of standard C library setjmp.
- * Nonlocal jumps <setjmp.h> 7.13.
- * Based on C11 Standard.
+/* setjmp.h: declares one function and one type, for 
+ * bypassing the normal function call and return discipline
  */
 #ifndef _SETJMP_
 #define _SETJMP_
