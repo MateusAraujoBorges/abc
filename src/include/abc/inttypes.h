@@ -6,7 +6,6 @@
 #ifndef _INTTYPES_
 #define _INTTYPES_
 
-
 /* Needed from stdint.h, stddef.h: */
 #include <stdint.h>
 #include <stddef.h>
