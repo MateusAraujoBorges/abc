@@ -1,6 +1,4 @@
-/* locale.h: The ABC representation of standard C library locale.h.
- * Localization <locale.h>.
- * Based on C11 Standard 7.11.
+/* locale.h: to alter or access properties of the current locale.
  */
 #ifndef _LOCALE_
 #define _LOCALE_
@@ -14,7 +12,7 @@
 #define LC_TIME          5     
 
 #ifndef NULL
-#define	NULL	0
+ #define	NULL	0
 #endif
 
 struct lconv {
