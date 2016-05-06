@@ -1,5 +1,5 @@
-/* ABC Model of float.h
- * Based on C11 standard.
+/* The header float.h defines several macros that expand to various 
+ * limits and parameters of the standard floating-point types.
  */
 
 #ifndef _FLOAT_
