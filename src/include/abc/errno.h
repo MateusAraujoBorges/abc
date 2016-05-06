@@ -1,6 +1,7 @@
-/* errno.h: The ABC representation of standard C library.
- * Based on C11 Standard.
+/* The errno.h header defines several macros, all relating to the 
+ * reporting of error conditions.
  */
+ 
 #ifndef _ERRNO_
 #define _ERRNO_
 
