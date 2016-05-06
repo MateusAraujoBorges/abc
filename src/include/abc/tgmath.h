@@ -1,10 +1,11 @@
-/* tgmath.h: The ABC representation of standard C library type generic math.
- * Based on C11 Standard.
+/* The header tgmath.h defines several families of generic functions. 
  */
 #ifndef _TGMATH_
 #define _TGMATH_
 
 #include <math.h>
 #include <complex.h>
+
+// TODO: need to define type-generic macros.
 
 #endif
