@@ -1,11 +1,10 @@
-/* fenv.h: The ABC representation of standard C library fenv.h.
- * Floating-point environment <fenv.h>.
- * Based on C11 Standard.
+/* The fenv.h header declares types and functions that provide 
+ * access to the floating-point environment.
  */
 #ifndef _FENV_
 #define _FENV_
 
-/* MACROS */
+/* Macros */
 #define FE_DIVBYZERO 0
 #define FE_INEXACT 1
 #define FE_INVALID 2
@@ -20,7 +19,7 @@
 
 #define FE_DFL_ENV 10
 
-/* TYPES */
+/* Types */
 typedef struct fenv_t fenv_t;
 typedef long int fexcept_t;
 
