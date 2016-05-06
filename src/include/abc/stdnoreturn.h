@@ -1,5 +1,4 @@
-/* stdnoreturn.h: The ABC representation of standard C library.
- * Based on C11 Standard.
+/* stdnoreturn.h:  provides a single convenient macro for non-returning functions. 
  */
  
 #ifndef _STDNORETURN_
