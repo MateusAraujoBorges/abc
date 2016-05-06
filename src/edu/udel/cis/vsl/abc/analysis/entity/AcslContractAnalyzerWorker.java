@@ -28,8 +28,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType;
-import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
@@ -265,8 +263,6 @@ public class AcslContractAnalyzerWorker {
 
 	void processLoopContractNodes(SequenceNode<ContractNode> loopContracts)
 			throws SyntaxException {
-		Type expressionType;
-
 		for (ContractNode clause : loopContracts) {
 			switch (clause.contractKind()) {
 			case INVARIANT:
@@ -274,15 +270,7 @@ public class AcslContractAnalyzerWorker {
 
 				expressionAnalyzer
 						.processExpression(loopInvari.getExpression());
-				if ((expressionType = loopInvari.getExpression()
-						.getConvertedType()).kind() == Type.TypeKind.BASIC)
-					if (((StandardBasicType) expressionType).getBasicTypeKind() == StandardBasicType.BasicTypeKind.BOOL)
-						break;
-				throw error(
-						"Unexpected type of the loop invariant expression type: "
-								+ expressionType
-								+ ". Loop invariant expression can only be bool type.",
-						clause);
+				break;
 			case ASSIGNS_READS:
 				AssignsOrReadsNode assignsNode = (AssignsOrReadsNode) clause;
 
@@ -291,6 +279,7 @@ public class AcslContractAnalyzerWorker {
 							clause);
 				for (ExpressionNode mem : assignsNode.getMemoryList())
 					expressionAnalyzer.processExpression(mem);
+				break;
 			default:
 				throw error(
 						"Unknown kind of loop contracts: "
