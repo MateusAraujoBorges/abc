@@ -1,6 +1,5 @@
-/* signal.h: The ABC representation of standard C library .
- * Signal handling.
- * Based on C11 Standard 7.14.
+/* The header signal.h declares a type and two functions and defines several macros,
+ * for handling various signals (conditions that may be reported during program execution). 
  */
 #ifndef _SIGNAL_
 #define _SIGNAL_
