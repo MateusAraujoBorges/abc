@@ -1,3 +1,7 @@
+/* The header stdarg.h declares a type and defines four macros, for advancing
+ * through a list of arguments whose number and types are not known to the 
+ * called function when it is translated.
+ */
 #ifndef _STDARG_
 #define _STDARG_
 
