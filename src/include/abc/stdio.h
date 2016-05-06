@@ -1,5 +1,5 @@
-/* stdio.h: The ABC representation of standard C library stdio.
- * Based on C11 Standard.
+/* The header stdio.h defines several macros, and declares three types and many
+ * functions for performing input and output.
  */
 #ifndef _STDIO_
 #define _STDIO_
