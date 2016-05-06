@@ -1,6 +1,5 @@
-/* wchar.h: The ABC representation of standard C library wchar.
- * Extended multibyte and wide character utilities <wchar.h>
- * Based on C11 Standard.
+/* The header wchar.h declares input and output operations on 
+ * wide streams or manipulate wide strings.
  */
 #ifndef _WCHAR_
 #define _WCHAR_
