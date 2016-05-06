@@ -1,13 +1,18 @@
+/* The header math.h declares two types and many common mathematical operations 
+ * and defines several macros.
+ */
+
 #ifndef _MATH_
 #define _MATH_
-//two types
+
+/* Types */
 #define float_t float      // floating-point type at least 
                            //as wide as 'float' used to evaluate 
                            //'float' expression. 
 #define double_t double    // floating-point type at least 
                            //as wide as 'double' used to evaluate 
                            //'double' expression. 
-//macros
+/* Macros */
 //In CIVL implementation, they better be abstract functions.
 #define HUGE_VAL       3.40282347e+38F
 #define INFINITY       (1/0)
@@ -591,5 +596,7 @@ long double fmal(long double x, long double y, long double z);
 #define isless(X,Y) ((X)<(Y))
 #define islessequal(X,Y) ((X)<=(Y))
 #define islessgreater(X,Y) ((X)<(Y))||((X)>(Y))
+// TODO: isunordered macro: int isunordered(real-floating x, real-floating y);
+//       The isunordered macro returns 1 if its arguments are unordered and 0 otherwise
 
 #endif
