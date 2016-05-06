@@ -1,9 +1,11 @@
-/* ABC model of stdlib.c */
+/* The header stdlib.h declare an assortment of useful functions 
+ * and to define the macros and types that help you use them.
+ */
 
 #ifndef _STDLIB_
 #define _STDLIB_
 
-/* Types defined */
+/* Types */
 
 typedef unsigned long int size_t;
 
