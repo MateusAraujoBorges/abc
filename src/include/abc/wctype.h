@@ -1,10 +1,12 @@
-/* wctype.h: The ABC representation of standard C library wctype.
- * Based on C11 Standard.
+/* wctype.h: declare several functions that are useful for classifying 
+ * and mapping codes from the target wide-character set.
  */
 #ifndef _WCTYPE_
 #define _WCTYPE_
 
 #include <wchar.h>
+
+/* Types */
 typedef struct wctrans_t wctrans_t;
 
 /* Functions */
