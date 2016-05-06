@@ -1,6 +1,11 @@
+/* The header <ctype.h> declares several functions for classifying 
+ * and mapping characters.
+ */
+
 #ifndef _CTYPE_
 #define _CTYPE_
 
+/* Functions */
 int   isalnum(int);
 int   isalpha(int);
 int   isascii(int);
