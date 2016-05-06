@@ -1,4 +1,5 @@
-/* This header file defines the C library time.h */
+/* The time.h header declare several functions that help you manipulate times.
+ */
 
 #ifndef _TIME_
 #define _TIME_
