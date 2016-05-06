@@ -12,8 +12,8 @@
   This instance chooses to make char a signed integer type.
 */
 
-#ifndef _LIMITS
-#define _LIMITS
+#ifndef _LIMITS_
+#define _LIMITS_
 
 // number of bits for smallest object that is not a bit-field (byte)
 #define CHAR_BIT 8
