@@ -5,9 +5,10 @@
 #ifndef _SETJMP_
 #define _SETJMP_
 
-typedef int jmp_buf[2];
+typedef int jmp_buf[];
 
 /* Functions */
+
 int setjmp(jmp_buf);
 void longjmp(jmp_buf, int);
 
