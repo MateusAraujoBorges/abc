@@ -1,13 +1,20 @@
 #ifndef _COMPLEX_
 #define _COMPLEX_  
 
-#define _Complex _COMPLEX_
+/* Macros */
+#define _Complex   
+#define _Imaginary  
 #define complex _Complex
-#define _Complex_I (const float _Complex)
+#define _Complex_I ((const float _Complex)0)
 #define imaginary _Imaginary
-#define _Imaginary_I (const float _Imaginary)
-#define I _Imaginary_I
+#define _Imaginary_I ((const float _Imaginary)0)
+#ifdef _Imaginary_I
+ #define I _Imaginary_I
+#else
+ #define I _Complex_I 
+#endif
 
+/* Funciton */
 double               cabs(double complex);
 float                cabsf(float complex);
 long double          cabsl(long double complex);
