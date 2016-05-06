@@ -1,3 +1,7 @@
+/* The header complex.h defines macros and declares functions that support complex
+ * arithmetic.
+ */
+
 #ifndef _COMPLEX_
 #define _COMPLEX_  
 
