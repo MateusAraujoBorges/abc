@@ -1,9 +1,9 @@
-#ifndef _STDINT_H_
-#define _STDINT_H_
-
 /*
- *	ISO C99: 7.18 Integer types <stdint.h>
+ *	7.20 Integer types <stdint.h>
  */
+
+#ifndef _STDINT_
+#define _STDINT_
 
 typedef signed char                             int8_t;
 typedef int                                     int16_t;
