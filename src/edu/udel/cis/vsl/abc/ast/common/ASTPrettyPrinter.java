@@ -547,9 +547,14 @@ public class ASTPrettyPrinter {
 
 			out.print("$system");
 			if (dotIndex >= 0) {
-				out.print("\"");
-				out.print(fileName.substring(0, fileName.lastIndexOf(".")));
-				out.print("\" ");
+				String systemLib = function.getSystemLibrary();
+
+				out.print("[");
+				if (systemLib != null)
+					out.print(systemLib);
+				else
+					out.print(fileName.substring(0, fileName.lastIndexOf(".")));
+				out.print("] ");
 			}
 		}
 		if (function.hasInlineFunctionSpecifier())

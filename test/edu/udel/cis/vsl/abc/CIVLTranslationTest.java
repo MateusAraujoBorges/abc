@@ -90,8 +90,6 @@ public class CIVLTranslationTest {
 		check("potentialBug");
 	}
 
-	// ignoring because for now CIVL follows the C11 Standard
-	// in that all functions have internal or external linkage
 	@Test
 	public void nestedFunctions() throws ABCException, IOException {
 		check("nestedFunctions");
@@ -135,5 +133,15 @@ public class CIVLTranslationTest {
 	@Test
 	public void externalDefs() throws ABCException, IOException {
 		check("externaldefs");
+	}
+
+	@Test
+	public void systemFunction() throws ABCException, IOException {
+		check("systemFunction");
+	}
+
+	@Test(expected = SyntaxException.class)
+	public void sysLibraryBad() throws ABCException, IOException {
+		check("sysLibraryBad");
 	}
 }

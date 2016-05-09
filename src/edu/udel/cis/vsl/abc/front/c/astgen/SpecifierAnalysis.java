@@ -1,6 +1,5 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ABSENT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ABSTRACT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ALIGNAS;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ATOMIC;
@@ -21,10 +20,10 @@ import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.GLOBAL;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.INLINE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.INPUT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.INT;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.LIB_NAME;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.LONG;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.NORETURN;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.OUTPUT;
-import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.PURE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.RANGE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.REAL;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.REGISTER;
@@ -362,16 +361,16 @@ public class SpecifierAnalysis {
 				case DEVICE:
 					this.deviceSpecifier = true;
 					break;
-				case PURE:
-					this.pureSpecifier = true;
-					break;
 				case SYSTEM: {
 					CommonTree lib = (CommonTree) node.getChild(0);
 
 					this.systemSpecifier = true;
-					if (lib.getType() != ABSENT) {
-						this.systemLibrary = lib.getText().substring(1,
-								lib.getText().length() - 1);
+					if (lib.getType() == LIB_NAME) {
+						this.systemLibrary = "";
+						for (Object child : lib.getChildren()) {
+							this.systemLibrary += ((CommonTree) child)
+									.getText();
+						}
 					}
 					break;
 				}

@@ -12,6 +12,7 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration.Architecture;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.transform.common.Pruner;
 import edu.udel.cis.vsl.abc.transform.common.SideEffectRemover;
 
@@ -167,5 +168,15 @@ public class SvcompTest {
 	@Test
 	public void typeof() throws ABCException, IOException {
 		check(this.file("typeof.c"));
+	}
+
+	@Test
+	public void externVar() throws ABCException, IOException {
+		check(this.file("externVar.c"));
+	}
+
+	@Test(expected = SyntaxException.class)
+	public void svcompbug() throws ABCException, IOException {
+		check(this.file("svcomp_frontend_bug.c"));
 	}
 }

@@ -217,8 +217,8 @@ public class AcslContractAnalyzerWorker {
 
 			for (ExpressionNode memory : memoryList) {
 				this.expressionAnalyzer.processExpression(memory);
-				memory.addConversion(this.conversionFactory
-						.memoryConversion(memory.getConvertedType()));
+				// memory.addConversion(this.conversionFactory
+				// .memoryConversion(memory.getConvertedType()));
 			}
 			break;
 		}

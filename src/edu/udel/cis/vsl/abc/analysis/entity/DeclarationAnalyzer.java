@@ -515,9 +515,29 @@ public class DeclarationAnalyzer {
 				ast.setMain((Function) entity);
 			}
 		}
-		if (!isNew)
+		if (!isNew) {
 			addTypeToVariableOrFunction(typeNode, entity);
+			if (isFunction) {
+				checkSystemLibraryForFunction((FunctionDeclarationNode) node,
+						(Function) entity);
+			}
+		}
 		return entity;
+	}
+
+	private void checkSystemLibraryForFunction(
+			FunctionDeclarationNode functionNode, Function entity) throws SyntaxException {
+		String entityLib = entity.systemLibrary();
+
+		if (entityLib != null) {
+			String funcLib = functionNode.getSystemLibrary();
+
+			if (funcLib != null)
+				if (!entityLib.equals(funcLib))
+					throw error(
+							"Disagreement on system library between two declarations of a system function",
+							functionNode);
+		}
 	}
 
 	/**

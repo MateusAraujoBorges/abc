@@ -35,7 +35,6 @@ import edu.udel.cis.vsl.abc.front.c.parse.CivlCParser;
 public interface CivlcTokenConstant {
 
 	// constants defined in the ANTLR-generated parser
-
 	public static final int EOF = CivlCParser.EOF;
 	public static final int ABSTRACT = CivlCParser.ABSTRACT;
 	public static final int ALIGNAS = CivlCParser.ALIGNAS;
@@ -136,6 +135,7 @@ public interface CivlcTokenConstant {
 	public static final int IntegerSuffix = CivlCParser.IntegerSuffix;
 	public static final int LCURLY = CivlCParser.LCURLY;
 	public static final int LEXCON = CivlCParser.LEXCON;
+	public static final int LIB_NAME = CivlCParser.LIB_NAME;
 	public static final int LONG = CivlCParser.LONG;
 	public static final int LPAREN = CivlCParser.LPAREN;
 	public static final int LSLIST = CivlCParser.LSLIST;
@@ -180,7 +180,6 @@ public interface CivlcTokenConstant {
 	public static final int PROCNULL = CivlCParser.PROCNULL;
 	public static final int PROGRAM = CivlCParser.PROGRAM;
 	public static final int PUNDEF = CivlCParser.PUNDEF;
-	public static final int PURE = CivlCParser.PURE;
 	public static final int QMARK = CivlCParser.QMARK;
 	public static final int RCURLY = CivlCParser.RCURLY;
 	public static final int READS = CivlCParser.READS;

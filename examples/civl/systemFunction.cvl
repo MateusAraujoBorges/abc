@@ -1,0 +1,7 @@
+$system[mylib] int k(int);
+
+int main(){
+  int a;
+
+  a=k(0);
+}

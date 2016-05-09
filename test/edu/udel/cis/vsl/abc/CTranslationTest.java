@@ -204,6 +204,11 @@ public class CTranslationTest {
 		check("c/ident2");
 	}
 
+	@Test
+	public void funcDecls() throws ABCException, IOException {
+		check("c/funcs");
+	}
+
 	@Test(expected = SyntaxException.class)
 	public void incompatibleFunctions() throws ABCException, IOException {
 		check("c/incompatibleFunctions");

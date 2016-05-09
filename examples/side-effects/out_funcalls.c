@@ -5,7 +5,7 @@ int f(int a)
 }
 /*@ pure;
   @*/
-$system"funcalls" int g(int a);
+$system[funcalls] int g(int a);
 $abstract int k(int t);
 int main()
 {
