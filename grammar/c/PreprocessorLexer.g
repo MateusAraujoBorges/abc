@@ -157,7 +157,6 @@ LSLIST		:	'<|';  // LSLIST and RSLIST enclose a scope list
 OUTPUT		:	'$output';
 PARFOR		:	'$parfor';
 PROCNULL	:	'$proc_null';
-PURE        :   '$pure';
 RANGE		:	'$range';
 REAL		:	'$real';
 REQUIRES	:	'$requires';
@@ -348,7 +347,6 @@ STRING_LITERAL  :	('u8' | 'u' | 'U' | 'L')? '"' SChar* '"'
 fragment
 SChar		:	~('"' | '\\' | '\n') | EscapeSequence ;
 
-
 /****** Punctuators: C11 Sec. 6.4.6 ******/
 
 ELLIPSIS	: '...' NotLineStart;
@@ -422,3 +420,4 @@ COMMENT		:	'//' ( options {greedy=true;} : ~('\n'|'\r') )*
 /****** Other characters: C11 Sec. 6.4 ******/
 
 OTHER		:	. NotLineStart;
+

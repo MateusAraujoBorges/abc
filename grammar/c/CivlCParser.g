@@ -61,6 +61,7 @@ tokens
 	INITIALIZER_LIST;         // initializer list in compound initializer
 	INIT_DECLARATOR;          // initializer-declaration pair
 	INIT_DECLARATOR_LIST;     // list of initializer-declarator pairs
+	LIB_NAME;
 	OPERATOR;                 // symbol indicating an operator
 	PARAMETER_DECLARATION;    // parameter declaration in function decl
 	PARAMETER_LIST;           // list of parameter decls in function decl
@@ -860,22 +861,29 @@ typeQualifier
     : CONST | RESTRICT | VOLATILE | ATOMIC | INPUT | OUTPUT
     ;
 
-/* 6.7.4.  Added CIVL $atomic and $atom as specifiers, indicating
- * a function should be executed atomically or atom-ly.  CIVL's
+/* 6.7.4.  Added CIVL $atomic_f, indicating
+ * a function should be executed atomically.  CIVL's
  * $abstract specifier also included for abstract functions.
+ * CIVL's $system specifier indicates a system function, with 
+ * additional field to denote the corresponding library.
  */
 functionSpecifier
     : INLINE | NORETURN
     | ABSTRACT CONTIN LPAREN INTEGER_CONSTANT RPAREN 
       -> ^(ABSTRACT INTEGER_CONSTANT)
     | ABSTRACT -> ^(ABSTRACT)
-    | SYSTEM STRING_LITERAL -> ^(SYSTEM STRING_LITERAL)
+    | ((SYSTEM libraryName) => SYSTEM libraryName) -> ^(SYSTEM libraryName)
     | SYSTEM  -> ^(SYSTEM ABSENT)
     | FATOMIC -> ^(FATOMIC)
-    | PURE -> ^(PURE)
     | DEVICE
     | GLOBAL
     ;
+
+libraryName
+	: LSQUARE i0=IDENTIFIER i1+=(SUB | IDENTIFIER)* RSQUARE
+	->^(LIB_NAME $i0 $i1*)
+	;
+	
 
 /* 6.7.5
  * Root: ALIGNAS
