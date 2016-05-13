@@ -1,5 +1,7 @@
 
-/*@ requires a>0;
+enum t{RED, BLUE};
+
+/*@ requires a==BLUE;
   @ ensures \result==a*2;
   @ depends_on \write(a), \read(a);
   @ behavior aaa:

@@ -87,7 +87,7 @@ public class SimpleScope {
 	public Set<String> getTypes() {
 		return typedefMap.keySet();
 	}
-	
+
 	public Set<String> getEnumConstants() {
 		return this.enumerationConstants;
 	}
@@ -111,7 +111,7 @@ public class SimpleScope {
 	public boolean isFunctionScope() {
 		return isFunctionScope;
 	}
-	
+
 	public Stack<ScopeSymbols> getScopeSymbolStack() {
 		Stack<ScopeSymbols> stack = new Stack<>();
 		SimpleScope current = this;
@@ -124,5 +124,22 @@ public class SimpleScope {
 			current = current.getParent();
 		}
 		return stack;
+	}
+
+	/**
+	 * is the given name declared as an enumeration constant in a visible scope
+	 * ?
+	 * 
+	 * @param name
+	 *            the name that is to be checked
+	 * @return true iff the given name is declared as an enumeration constant in
+	 *         some reachable scope.
+	 */
+	public boolean isEnumerationConstant(String name) {
+		if (this.enumerationConstants.contains(name))
+			return true;
+		if (parent != null)
+			return parent.isEnumerationConstant(name);
+		return false;
 	}
 }

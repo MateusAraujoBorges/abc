@@ -170,7 +170,7 @@ public class SvcompTest {
 		check(this.file("typeof.c"));
 	}
 
-	@Test
+	@Test(expected = SyntaxException.class)
 	public void externVar() throws ABCException, IOException {
 		check(this.file("externVar.c"));
 	}

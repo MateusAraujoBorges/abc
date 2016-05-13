@@ -176,7 +176,8 @@ public class AcslContractWorker {
 					(CommonTree) contractTree.getChild(0), scope);
 
 			if (pure != null) {
-				result.add(0,this.nodeFactory.newPureNode(this.newSource(pure)));
+				result.add(0,
+						this.nodeFactory.newPureNode(this.newSource(pure)));
 			}
 			return result;
 		}
@@ -557,9 +558,15 @@ public class AcslContractWorker {
 			return translateCharacterConstant(source, expressionTree);
 		case STRING_LITERAL:
 			return translateStringLiteral(source, expressionTree);
-		case ID:
-			return nodeFactory.newIdentifierExpressionNode(source,
-					translateIdentifier(expressionTree));
+		case ID: {
+			IdentifierNode identifier = translateIdentifier(expressionTree);
+			ExpressionNode enumerationConsant = translateEnumerationConstant(
+					identifier, scope);
+
+			return enumerationConsant != null ? enumerationConsant
+					: nodeFactory.newIdentifierExpressionNode(source,
+							identifier);
+		}
 		case TERM_PARENTHESIZED:
 			return translateExpression((CommonTree) expressionTree.getChild(0),
 					scope);
@@ -1130,6 +1137,27 @@ public class AcslContractWorker {
 			throw error("Unknown operator :", operatorTree);
 		}
 		return nodeFactory.newOperatorNode(source, operator, arguments);
+	}
+
+	/**
+	 * tries to translate the given identifier node into an enumeration node
+	 * according to the scope. If the identifer's name has NOT been declared as
+	 * an enumeration constant in the scope, then return null.
+	 * 
+	 * @param identifier
+	 *            the identifier node to be translated
+	 * @param scope
+	 *            the current scope
+	 * @return an enumeration constant node if the identifer's name has been
+	 *         declared as an enumeration in the scope otherwise return null.
+	 */
+	private EnumerationConstantNode translateEnumerationConstant(
+			IdentifierNode identifier, SimpleScope scope) {
+		String name = identifier.name();
+
+		if (scope.isEnumerationConstant(name))
+			return this.nodeFactory.newEnumerationConstantNode(identifier);
+		return null;
 	}
 
 	private IdentifierNode translateIdentifier(CommonTree identifier) {
