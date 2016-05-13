@@ -9,7 +9,7 @@
   @ depends_on \nothing;
   @ executes_when \true;
   @ */
-$system void assert(_Bool expr);
+$system[asserts] void assert(_Bool expr);
 
 #define static_assert _Static_assert
 
