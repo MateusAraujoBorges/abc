@@ -540,7 +540,7 @@ public class ASTPrettyPrinter {
 			out.print("__global__ ");
 		if (function.hasAtomicFunctionSpecifier())
 			out.print("$atomic_f ");
-		if (function.hasSystemFunctionSpecifier()) {
+		if (function.hasSystemFunctionSpecifier()) {			
 			String fileName = function.getSource().getFirstToken()
 					.getSourceFile().getName();
 			int dotIndex = fileName.lastIndexOf(".");
