@@ -1382,7 +1382,7 @@ public class SideEffectRemover extends BaseTransformer {
 	private SETriple translateInitializer(InitializerNode node, boolean emptyAfter) {
 		if (node instanceof ExpressionNode) {
 			ExprTriple triple = translate((ExpressionNode) node, false);
-
+			
 			purify(triple);
 			emptyAfter(triple);
 			return triple;
@@ -1406,7 +1406,7 @@ public class SideEffectRemover extends BaseTransformer {
 
 		for (PairNode<DesignationNode, InitializerNode> pair : node) {
 			DesignationNode designationNode = pair.getLeft();
-
+			
 			if (designationNode != null)
 				for (DesignatorNode designator : designationNode) {
 					if (designator instanceof FieldDesignatorNode) {
@@ -1800,7 +1800,7 @@ public class SideEffectRemover extends BaseTransformer {
 	 */
 	private List<BlockItemNode> translateOrdinaryDeclaration(OrdinaryDeclarationNode ordinaryDecl) {
 		OrdinaryDeclarationKind kind = ordinaryDecl.ordinaryDeclarationKind();
-
+		
 		switch (kind) {
 		case VARIABLE_DECLARATION:
 			return this.translateVariableDeclaration((VariableDeclarationNode) ordinaryDecl);
@@ -1834,7 +1834,7 @@ public class SideEffectRemover extends BaseTransformer {
 		decl.setTypeNode((TypeNode) typeTriple.getNode());
 		if (initNode != null) {
 			SETriple initTriple;
-
+			
 			if (initNode instanceof ExpressionNode) {
 				initTriple = translate((ExpressionNode) initNode, false);
 				emptyAfter((ExprTriple) initTriple);
@@ -2403,7 +2403,7 @@ public class SideEffectRemover extends BaseTransformer {
 
 		for (BlockItemNode item : compound) {
 			List<BlockItemNode> tmp = translateBlockItem(item);
-
+			
 			blockItems.addAll(tmp);
 		}
 		removeNodes(blockItems);
