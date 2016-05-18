@@ -987,9 +987,6 @@ public class AcslContractWorker {
 		int numArgs = argumentListTree.getChildCount();
 		List<ExpressionNode> contextArgumentList = new LinkedList<ExpressionNode>();
 		List<ExpressionNode> argumentList = new LinkedList<ExpressionNode>();
-		// SequenceNode<ExpressionNode> scopeList =
-		// translateScopeListUse((CommonTree) callTree
-		// .getChild(4));
 
 		for (int i = 0; i < numContextArgs; i++) {
 			CommonTree argumentTree = (CommonTree) contextArgumentListTree
@@ -1267,34 +1264,13 @@ public class AcslContractWorker {
 			throw error("Unknown MPI expression " + exprName, expressionTree);
 		}
 		for (int i = 0; i < numArgs; i++) {
-			if (i == 2 && kind == AcslParser.MPI_EQUALS) {
-				args.add(this.translateEnumerationConstantNode(
-						(CommonTree) expression.getChild(i), source, scope));
-			} else
-				args.add(this.translateExpression(
-						(CommonTree) expression.getChild(i), scope));
+			args.add(this.translateExpression(
+					(CommonTree) expression.getChild(i), scope));
 		}
 		result = nodeFactory.newMPIExpressionNode(source, args, mpiExprKind,
 				exprName);
 		result.setInitialType(initialType);
 		return result;
-	}
-
-	private EnumerationConstantNode translateEnumerationConstantNode(
-			CommonTree expressionTree, Source source, SimpleScope scope)
-			throws SyntaxException {
-		ExpressionNode identifierExpr = this.translateExpression(
-				expressionTree, scope);
-
-		if (identifierExpr.expressionKind().equals(
-				ExpressionKind.IDENTIFIER_EXPRESSION)) {
-			IdentifierNode ident = ((IdentifierExpressionNode) identifierExpr)
-					.getIdentifier();
-
-			return nodeFactory.newEnumerationConstantNode(ident.copy());
-		}
-		throw error("Expecting an identifer for an enumeration constant.",
-				expressionTree);
 	}
 
 	private SyntaxException error(String message, CommonTree tree) {
