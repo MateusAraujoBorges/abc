@@ -1149,12 +1149,7 @@ public class ExpressionAnalyzer {
 			throws SyntaxException {
 		entityAnalyzer.declarationAnalyzer.processVariableDeclaration(node
 				.variable());
-		if (node.isRange()) {
-			processExpression(node.lower());
-			processExpression(node.upper());
-		} else {
-			processExpression(node.restriction());
-		}
+		processExpression(node.restrictionOrRange());
 		processExpression(node.expression());
 		node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
 		if (!node.isSideEffectFree(false))

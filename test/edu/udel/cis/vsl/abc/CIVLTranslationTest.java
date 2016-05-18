@@ -144,4 +144,9 @@ public class CIVLTranslationTest {
 	public void sysLibraryBad() throws ABCException, IOException {
 		check("sysLibraryBad");
 	}
+
+	@Test
+	public void quantifiers() throws ABCException, IOException {
+		check("quantifiers");
+	}
 }

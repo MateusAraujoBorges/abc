@@ -660,7 +660,7 @@ public class AcslContractWorker {
 		for (VariableDeclarationNode binder : binders) {
 			QuantifiedExpressionNode quantifiedExprNode = nodeFactory
 					.newQuantifiedExpressionNode(source, quantifier,
-							binder.copy(), restrict, pred);
+							binder.copy(), false, restrict, pred);
 
 			if (firstQuantifiedExpr) {
 				result = quantifiedExprNode;

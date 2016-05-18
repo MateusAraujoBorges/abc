@@ -181,6 +181,9 @@ public interface CivlcTokenConstant {
 	public static final int PROGRAM = CivlCParser.PROGRAM;
 	public static final int PUNDEF = CivlCParser.PUNDEF;
 	public static final int QMARK = CivlCParser.QMARK;
+	public static final int QUANTIFIER_FREE = CivlCParser.QUANTIFIER_FREE;
+	public static final int QUANTIFIER_RANGE = CivlCParser.QUANTIFIER_RANGE;
+	public static final int QUANTIFIER_RESTRICT = CivlCParser.QUANTIFIER_RESTRICT;
 	public static final int RCURLY = CivlCParser.RCURLY;
 	public static final int READS = CivlCParser.READS;
 	public static final int REXCON = CivlCParser.REXCON;
@@ -191,7 +194,6 @@ public interface CivlcTokenConstant {
 	public static final int RESTRICT = CivlCParser.RESTRICT;
 	public static final int RESULT = CivlCParser.RESULT;
 	public static final int RETURN = CivlCParser.RETURN;
-	public static final int ROOT = CivlCParser.ROOT;
 	public static final int RPAREN = CivlCParser.RPAREN;
 	public static final int RSLIST = CivlCParser.RSLIST;
 	public static final int RSQUARE = CivlCParser.RSQUARE;

@@ -75,6 +75,9 @@ tokens
 	PRE_DECREMENT;            // --expr
 	PRE_INCREMENT;            // ++expr
 	PROGRAM;                  // whole program (linking translation units)
+	QUANTIFIER_RESTRICT;
+	QUANTIFIER_RANGE;
+	QUANTIFIER_FREE;
 	SCALAR_INITIALIZER;       // initializer for scalar variable
 	SPECIFIER_QUALIFIER_LIST; // list of type specifiers and qualifiers
     STATEMENT;                // a statement
@@ -171,7 +174,7 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| SELF | PROCNULL | TRUE | FALSE | RESULT
-	| HERE | ROOT | ELLIPSIS
+	| HERE | ELLIPSIS
 	;
 
 enumerationConstant
@@ -503,18 +506,25 @@ conditionalExpression
 /* A CIVL-C quantified expression using $exists or $forall.
  */
 quantifierExpression
-	: quantifier LCURLY type=typeName id=IDENTIFIER
-	  BITOR restrict=conditionalExpression RCURLY 
-	  cond=assignmentExpression
-	  -> ^(quantifier $type $id $restrict $cond)
-	| quantifier LCURLY id=IDENTIFIER ASSIGN
-	  lower=additiveExpression DOTDOT upper=additiveExpression
-	  RCURLY cond=assignmentExpression
-	  -> ^(quantifier $id $lower $upper $cond)
+	: ((quantifier LPAREN typeName IDENTIFIER SEMI 
+      	  conditionalExpression RPAREN) => 
+     	  quantifier LPAREN type1=typeName id1=IDENTIFIER SEMI 
+     	  restrict=conditionalExpression RPAREN cond1=assignmentExpression )
+	  -> ^(QUANTIFIER_RESTRICT quantifier $type1 $id1 $restrict $cond1)
+   	| ((quantifier LPAREN typeName IDENTIFIER COLON) =>
+	  quantifier LPAREN type2=typeName id2=IDENTIFIER COLON
+	  lower=rangeExpression /*DOTDOT upper=additiveExpression*/
+	  RPAREN cond2=assignmentExpression)
+	  -> ^(QUANTIFIER_RANGE quantifier $type2 $id2 $lower $cond2)
 // eventually change to the following:
-//	| quantifier LCURLY id=IDENTIFIER ASSIGN rangeExpression
-//	  RCURLY cond=assignmentExpression
-//	  -> ^(quantifier $id rangeExpression $cond)
+	//| quantifier LCURLY type=typeName id=IDENTIFIER ASSIGN
+      //range=rangeExpression SEMI cond=assignmentExpression RCURLY
+	//  -> ^(quantifier $type $id $range $cond)
+	| (/*(quantifier LPAREN typeName IDENTIFIER RPAREN 
+	  assignmentExpression) =>*/
+	  quantifier LPAREN type=typeName id=IDENTIFIER RPAREN
+	  cond=assignmentExpression)
+	  -> ^(QUANTIFIER_FREE quantifier $type $id $cond)
 	;
 
 /* One of the CIVL-C first-order quantifiers.
@@ -533,7 +543,8 @@ quantifier
  * Child 1.1: assignmentExpression
  */
 assignmentExpression
-	: (unaryExpression assignmentOperator)=>
+	: 
+	(unaryExpression assignmentOperator)=>
 	  unaryExpression assignmentOperator assignmentExpression
 	  -> ^(OPERATOR assignmentOperator
 	       ^(ARGUMENT_LIST unaryExpression assignmentExpression))

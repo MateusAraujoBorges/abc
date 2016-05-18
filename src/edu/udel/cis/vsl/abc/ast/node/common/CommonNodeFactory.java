@@ -852,18 +852,10 @@ public class CommonNodeFactory implements NodeFactory {
 	@Override
 	public QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
 			Quantifier quantifier, VariableDeclarationNode variable,
-			ExpressionNode restriction, ExpressionNode expression) {
-		return new CommonQuantifiedExpressionNode(source, quantifier, variable,
-				restriction, expression);
-	}
-
-	@Override
-	public QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
-			Quantifier quantifier, VariableDeclarationNode variable,
-			ExpressionNode lower, ExpressionNode upper,
+			boolean isRange, ExpressionNode restrictionOrRange,
 			ExpressionNode expression) {
 		return new CommonQuantifiedExpressionNode(source, quantifier, variable,
-				lower, upper, expression);
+				isRange, restrictionOrRange, expression);
 	}
 
 	@Override

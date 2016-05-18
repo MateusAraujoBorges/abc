@@ -78,7 +78,7 @@ public interface QuantifiedExpressionNode extends ExpressionNode {
 	 *         restricts the domain of that variable, or <code>null</code> if
 	 *         {@link #isRange()} is <code>true</code>
 	 */
-	ExpressionNode restriction();
+	ExpressionNode restrictionOrRange();
 
 	/**
 	 * If this expression has an integer range restriction, returns the lower
@@ -88,7 +88,7 @@ public interface QuantifiedExpressionNode extends ExpressionNode {
 	 *         range, the lower end of the range (e.g., 0 in i=0..n). Returns
 	 *         <code>null</code> iff {@link #isRange()} is <code>false</code>
 	 */
-	ExpressionNode lower();
+	//ExpressionNode lower();
 
 	/**
 	 * If this expression has an integer range restriction, returns the upper
@@ -98,7 +98,7 @@ public interface QuantifiedExpressionNode extends ExpressionNode {
 	 *         range, the upper bound of the range (e.g., n in i=0..n). Returns
 	 *         <code>null</code> iff {@link #isRange()} is <code>false</code>
 	 */
-	ExpressionNode upper();
+	//ExpressionNode upper();
 
 	/**
 	 * The quantified expression.

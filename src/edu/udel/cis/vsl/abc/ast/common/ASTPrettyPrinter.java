@@ -540,7 +540,7 @@ public class ASTPrettyPrinter {
 			out.print("__global__ ");
 		if (function.hasAtomicFunctionSpecifier())
 			out.print("$atomic_f ");
-		if (function.hasSystemFunctionSpecifier()) {			
+		if (function.hasSystemFunctionSpecifier()) {
 			String fileName = function.getSource().getFirstToken()
 					.getSourceFile().getName();
 			int dotIndex = fileName.lastIndexOf(".");
@@ -1956,20 +1956,14 @@ public class ASTPrettyPrinter {
 			quantifier = "$uniform";
 		}
 		result.append(quantifier);
-		result.append(" {");
-		if (quantified.isRange()) {
-			result.append(quantified.variable().getName());
-			result.append(" = ");
-			result.append(expression2Pretty(quantified.lower()));
-			result.append(" .. ");
-			result.append(expression2Pretty(quantified.upper()));
-		} else {
-			result.append(variableDeclaration2Pretty("", quantified.variable()));
-			result.append(" | ");
-			result.append(expression2Pretty(quantified.restriction()));
-		}
-		result.append("} ");
-		result.append("(");
+		result.append(" (");
+		result.append(variableDeclaration2Pretty("", quantified.variable()));
+		if (quantified.isRange())
+			result.append(": ");
+		else
+			result.append("; ");
+		result.append(expression2Pretty(quantified.restrictionOrRange()));
+		result.append("; ");
 		result.append(expression2Pretty(quantified.expression()));
 		result.append(")");
 		return result;

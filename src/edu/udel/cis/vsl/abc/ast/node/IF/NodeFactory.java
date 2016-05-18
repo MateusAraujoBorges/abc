@@ -970,16 +970,18 @@ public interface NodeFactory {
 	 *            a uniform universal condition
 	 * @param variable
 	 *            The quantified variable.
-	 * @param restriction
+	 * @param restrictionOrRange
 	 *            A boolean-valued expression that holds true when the
-	 *            quantified variable is in the domain.
+	 *            quantified variable is in the domain or a range to bound the
+	 *            variable
 	 * @param expression
 	 *            The quantified expression.
 	 * @return The new quantified expression with the given children.
 	 */
 	QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
 			Quantifier quantifier, VariableDeclarationNode variable,
-			ExpressionNode restriction, ExpressionNode expression);
+			boolean isRange, ExpressionNode restrictionOrRange,
+			ExpressionNode expression);
 
 	/**
 	 * 
@@ -999,10 +1001,10 @@ public interface NodeFactory {
 	 *            The quantified expression.
 	 * @return The new quantified expression with the given children.
 	 */
-	QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
-			Quantifier quantifier, VariableDeclarationNode variable,
-			ExpressionNode lower, ExpressionNode upper,
-			ExpressionNode expression);
+	// QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
+	// Quantifier quantifier, VariableDeclarationNode variable,
+	// ExpressionNode lower, ExpressionNode upper,
+	// ExpressionNode expression);
 
 	/**
 	 * Constructs a new CIVL-C derivative expression, used to represent the
