@@ -23,11 +23,11 @@
 #define COMMFREE_TAG     9985
 
 /* Definition of CIVL-MPI */
-typedef enum _mpi_sys_status_{
-  __UNINIT,
-  __INIT,
-  __FINALIZED
-}$mpi_sys_status;
+typedef enum _mpi_state_{
+  _MPI_UNINIT,
+  _MPI_INIT,
+  _MPI_FINALIZED
+}$mpi_state;
 
 /**************************** Redundent Definitions *******************************/
 /* The independence between civlmpi.cvh and mpi.h causes redundent definition */
@@ -111,9 +111,9 @@ typedef struct $mpi_gcomm $mpi_gcomm;
 /****************************** Helper Functions **********************************/
 int sizeofDatatype(MPI_Datatype);
 
-$system[mpi] void $mpi_set_status($mpi_sys_status newStatus);
+//$system[mpi] void $mpi_set_status($mpi_sys_status newStatus);
 
-$system[mpi] $mpi_sys_status $mpi_get_status(void);
+//$system[mpi] $mpi_sys_status $mpi_get_status(void);
 
 /************************** MPI LIB Implementations *******************************/
 $abstract double $mpi_time(int i);
@@ -124,11 +124,7 @@ void $mpi_gcomm_destroy($mpi_gcomm);
 
 MPI_Comm $mpi_comm_create($scope, $mpi_gcomm, int);
 
-void $mpi_comm_destroy(MPI_Comm);
-
-int $mpi_init(void);
-
-int $mpi_finalize(void);
+void $mpi_comm_destroy(MPI_Comm, $mpi_state);
 
 int $mpi_send(const void *, int, MPI_Datatype, int, int, MPI_Comm);
 
@@ -175,7 +171,7 @@ $system[mpi] $mpi_gcomm $mpi_getGcomm($scope, int);
 
 int $mpi_comm_dup($scope, MPI_Comm, MPI_Comm *, char *);
 
-int $mpi_comm_free(MPI_Comm *);
+int $mpi_comm_free(MPI_Comm *, $mpi_state);
 
 $system[mpi] $scope $mpi_root_scope($comm);
 
