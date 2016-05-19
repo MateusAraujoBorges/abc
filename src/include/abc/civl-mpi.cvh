@@ -163,11 +163,11 @@ int $mpi_scatterv(const void*, const int[], const
 		 int, MPI_Datatype, int, int,
 		  MPI_Comm, char *);
 
-void* $mpi_pointerAdd(void*, int, MPI_Datatype);
+void* $mpi_pointer_add(void*, int, MPI_Datatype);
 
-$system[mpi] int $mpi_newGcomm($scope, $mpi_gcomm);
+$system[mpi] int $mpi_new_gcomm($scope, $mpi_gcomm);
 
-$system[mpi] $mpi_gcomm $mpi_getGcomm($scope, int);
+$system[mpi] $mpi_gcomm $mpi_get_gcomm($scope, int);
 
 int $mpi_comm_dup($scope, MPI_Comm, MPI_Comm *, char *);
 
@@ -179,7 +179,7 @@ $system[mpi] $scope $mpi_proc_scope($comm);
 
 /* Assert that the size of the primitive type of the object pointed
    'buf' is consistent with the size of the given MPI_Datatype */
-$system[mpi] void $mpi_assertConsistentType(void * buf, MPI_Datatype datatype);
+$system[mpi] void $mpi_assert_consistent_type(void * buf, MPI_Datatype datatype);
 
 /* Create a $bundle type object which contains a sequence of entries
    that identify a group of consistent MPI collective routines. MPI
@@ -196,12 +196,12 @@ $system[mpi] void $mpi_assertConsistentType(void * buf, MPI_Datatype datatype);
    datatypes: the datatype array stores datatypes enumerators involved in 
               the message.
 */
-$bundle $mpi_createCoroutineEntry(int routineTag, int root, 
+$bundle $mpi_create_coroutine_entry(int routineTag, int root, 
 				    int op, int numDatatypes, int * datatypes);
 
 /* Compare two collective routine entries, report errors if there is
 *  unmatched informations in these entries. */
-void $mpi_diffCoroutineEntries($bundle specEntry, $bundle mineEntry, int rank);
+void $mpi_diff_coroutine_entries($bundle specEntry, $bundle mineEntry, int rank);
 
 
 /* Checking a boolean expression in a collective way. Participating
