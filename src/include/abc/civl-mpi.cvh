@@ -177,9 +177,11 @@ $system[mpi] $scope $mpi_root_scope($comm);
 
 $system[mpi] $scope $mpi_proc_scope($comm);
 
-/* Assert that the size of the primitive type of the object pointed
-   'buf' is consistent with the size of the given MPI_Datatype */
-$system[mpi] void $mpi_assert_consistent_type(void * buf, MPI_Datatype datatype);
+/* Assert that the basetype of the object pointed by 'buf' is sames as
+   the basetype of the 'datatype'. Here a basetype of an MPI_Datatype
+   means a indivisiable MPI_datatype, e.g. the basetype of MPI_2INT is
+   MPI_INT.*/
+$system[mpi] void $mpi_assert_consistent_basetype(void * buf, MPI_Datatype datatype);
 
 /* Create a $bundle type object which contains a sequence of entries
    that identify a group of consistent MPI collective routines. MPI
