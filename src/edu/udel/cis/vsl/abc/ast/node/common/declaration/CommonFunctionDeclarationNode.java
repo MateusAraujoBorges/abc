@@ -130,6 +130,7 @@ public class CommonFunctionDeclarationNode extends
 		result.setAtomicFunctionSpecifier(this.hasAtomicFunctionSpecifier());
 		result.setSystemFunctionSpecifier(this.hasSystemFunctionSpecifier());
 		copyStorage(result);
+		result.setSystemLibrary(this.systemLibrary);
 		return result;
 	}
 

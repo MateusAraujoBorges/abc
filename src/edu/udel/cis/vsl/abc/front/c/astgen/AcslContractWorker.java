@@ -949,24 +949,23 @@ public class AcslContractWorker {
 	private ExpressionNode translateRegularRange(Source source,
 			CommonTree expressionTree, SimpleScope scope)
 			throws SyntaxException {
-		{// regular range expression lo..hi or lo..hi#step
-			ExpressionNode loNode = translateExpression(
-					(CommonTree) expressionTree.getChild(0), scope);
-			ExpressionNode hiNode = translateExpression(
-					(CommonTree) expressionTree.getChild(1), scope);
-			if (expressionTree.getChildCount() > 2) {
-				CommonTree stepTree = (CommonTree) expressionTree.getChild(2);
+		// regular range expression lo..hi or lo..hi#step
+		ExpressionNode loNode = translateExpression(
+				(CommonTree) expressionTree.getChild(0), scope);
+		ExpressionNode hiNode = translateExpression(
+				(CommonTree) expressionTree.getChild(1), scope);
+		if (expressionTree.getChildCount() > 2) {
+			CommonTree stepTree = (CommonTree) expressionTree.getChild(2);
 
-				if (stepTree != null /* && stepTree.getType() != ABSENT */) {
-					ExpressionNode stepNode = translateExpression(stepTree,
-							scope);
+			if (stepTree != null /* && stepTree.getType() != ABSENT */) {
+				ExpressionNode stepNode = translateExpression(stepTree, scope);
 
-					return nodeFactory.newRegularRangeNode(source, loNode,
-							hiNode, stepNode);
-				}
+				return nodeFactory.newRegularRangeNode(source, loNode, hiNode,
+						stepNode);
 			}
-			return nodeFactory.newRegularRangeNode(source, loNode, hiNode);
 		}
+		return nodeFactory.newRegularRangeNode(source, loNode, hiNode);
+
 	}
 
 	/**
