@@ -42,6 +42,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
@@ -781,14 +782,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			// return translateUniform(source, expressionTree, scope);
 			// case EXISTS:
 			// return translateExists(source, expressionTree, scope);
-		case QUANTIFIER_FREE:
-			return translateQuantifiedExpressionFree(source, expressionTree,
-					scope);
-		case QUANTIFIER_RANGE:
-			return translateQuantifiedExpression(source, expressionTree, true,
-					scope);
-		case QUANTIFIER_RESTRICT:
-			return translateQuantifiedExpression(source, expressionTree, false,
+		case QUANTIFIED:
+			return translateQuantifiedExpressionNew(source, expressionTree,
 					scope);
 		case DERIVATIVE_EXPRESSION:
 			return translateDeriv(source, expressionTree, scope);
@@ -808,6 +803,61 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	// Translation of Declarations and Types...
 
+	private QuantifiedExpressionNode translateQuantifiedExpressionNew(
+			Source source, CommonTree quantifiedTree, SimpleScope scope)
+			throws SyntaxException {
+		SimpleScope newScope = new SimpleScope(scope);
+		CommonTree quantifierTree = (CommonTree) quantifiedTree.getChild(0);
+		CommonTree boundVariableDeclListTree = (CommonTree) quantifiedTree
+				.getChild(1);
+		CommonTree restrictionTree = (CommonTree) quantifiedTree.getChild(3);
+		CommonTree bodyTree = (CommonTree) quantifiedTree.getChild(2);
+		Quantifier quantifier = translateQuantifier(quantifierTree);
+		ExpressionNode restrict = null, body;
+		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationLists = new LinkedList<>();
+		SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclListNode;
+
+		for (Object varObj : boundVariableDeclListTree.getChildren()) {
+			boundVariableDeclarationLists.add(this
+					.translateBoundVariableDeclarationSubList(source,
+							(CommonTree) varObj, newScope));
+		}
+		boundVariableDeclListNode = nodeFactory.newSequenceNode(source,
+				"bound variable declaration list",
+				boundVariableDeclarationLists);
+		if (restrictionTree != null)
+			restrict = this.translateExpression(source, restrictionTree,
+					newScope);
+		body = this.translateExpression(bodyTree, newScope);
+		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
+				boundVariableDeclListNode, restrict, body);
+	}
+
+	private PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> translateBoundVariableDeclarationSubList(
+			Source source, CommonTree boundVariableListTree, SimpleScope scope)
+			throws SyntaxException {
+		CommonTree typeTree = (CommonTree) boundVariableListTree.getChild(0);
+		CommonTree namesTree = (CommonTree) boundVariableListTree.getChild(1);
+		CommonTree domainTree = (CommonTree) boundVariableListTree.getChild(2);
+		List<VariableDeclarationNode> variableList = new LinkedList<>();
+		SequenceNode<VariableDeclarationNode> variablesNode;
+		ExpressionNode domainNode = null;
+		TypeNode type = translateTypeName(typeTree, scope);
+
+		for (Object varObj : namesTree.getChildren()) {
+			IdentifierNode variableName = this
+					.translateIdentifier((CommonTree) varObj);
+
+			variableList.add(this.nodeFactory.newVariableDeclarationNode(
+					source, variableName, type.copy()));
+		}
+		variablesNode = this.nodeFactory.newSequenceNode(source,
+				"bound variable declarations", variableList);
+		if (domainTree != null)
+			domainNode = this.translateExpression(domainTree, scope);
+		return this.nodeFactory.newPairNode(source, variablesNode, domainNode);
+	}
+
 	private Quantifier translateQuantifier(CommonTree quantifierTree)
 			throws SyntaxException {
 		switch (quantifierTree.getType()) {
@@ -820,52 +870,6 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		default:
 			throw this.error("unknown quantifier", quantifierTree);
 		}
-	}
-
-	private ExpressionNode translateQuantifiedExpression(Source source,
-			CommonTree quantifiedExpression, boolean isRange, SimpleScope scope)
-			throws SyntaxException {
-		SimpleScope newScope = new SimpleScope(scope);
-		VariableDeclarationNode variable;
-		CommonTree quantifierTree = (CommonTree) quantifiedExpression
-				.getChild(0);
-		CommonTree type = (CommonTree) quantifiedExpression.getChild(1);
-		CommonTree variableName = (CommonTree) quantifiedExpression.getChild(2);
-		CommonTree restrictionTree = (CommonTree) quantifiedExpression
-				.getChild(3);
-		CommonTree body = (CommonTree) quantifiedExpression.getChild(4);
-		Quantifier quantifier = translateQuantifier(quantifierTree);
-		ExpressionNode restrictionOrRange;
-
-		variable = nodeFactory.newVariableDeclarationNode(source,
-				translateIdentifier(variableName),
-				translateTypeName(type, newScope));
-		restrictionOrRange = this.translateExpression(source, restrictionTree,
-				newScope);
-		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
-				variable, isRange, restrictionOrRange,
-				translateExpression(body, newScope));
-	}
-
-	private ExpressionNode translateQuantifiedExpressionFree(Source source,
-			CommonTree quantifiedExpression, SimpleScope scope)
-			throws SyntaxException {
-		SimpleScope newScope = new SimpleScope(scope);
-		VariableDeclarationNode variable;
-		CommonTree quantifierTree = (CommonTree) quantifiedExpression
-				.getChild(0);
-		CommonTree type = (CommonTree) quantifiedExpression.getChild(1);
-		CommonTree variableName = (CommonTree) quantifiedExpression.getChild(2);
-		CommonTree body = (CommonTree) quantifiedExpression.getChild(3);
-		Quantifier quantifier = translateQuantifier(quantifierTree);
-
-		variable = nodeFactory.newVariableDeclarationNode(source,
-				translateIdentifier(variableName),
-				translateTypeName(type, newScope));
-		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
-				variable, false,
-				nodeFactory.newBooleanConstantNode(source, true),
-				translateExpression(body, newScope));
 	}
 
 	private ExpressionNode translateWildcard(Source source,

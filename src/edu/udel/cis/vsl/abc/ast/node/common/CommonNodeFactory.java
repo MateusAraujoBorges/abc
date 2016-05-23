@@ -850,15 +850,6 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
-			Quantifier quantifier, VariableDeclarationNode variable,
-			boolean isRange, ExpressionNode restrictionOrRange,
-			ExpressionNode expression) {
-		return new CommonQuantifiedExpressionNode(source, quantifier, variable,
-				isRange, restrictionOrRange, expression);
-	}
-
-	@Override
 	public DerivativeExpressionNode newDerivativeExpressionNode(
 			Source source,
 			ExpressionNode function,
@@ -1180,5 +1171,15 @@ public class CommonNodeFactory implements NodeFactory {
 	public WaitsforNode newWaitsforNode(Source source,
 			SequenceNode<ExpressionNode> arguments) {
 		return new CommonWaitsforNode(source, arguments);
+	}
+
+	@Override
+	public QuantifiedExpressionNode newQuantifiedExpressionNode(
+			Source source,
+			Quantifier quantifier,
+			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
+			ExpressionNode restriction, ExpressionNode expression) {
+		return new CommonQuantifiedExpressionNode(source, quantifier,
+				boundVariableDeclarationList, restriction, expression);
 	}
 }

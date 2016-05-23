@@ -968,20 +968,20 @@ public interface NodeFactory {
 	 *            , the standard universal quantifier, or (3)
 	 *            {@link Quantifier#UNIFORM}, the CIVL-C quantifier representing
 	 *            a uniform universal condition
-	 * @param variable
-	 *            The quantified variable.
-	 * @param restrictionOrRange
+	 * @param boundVariableDeclarationList
+	 *            The list of bound variable declarations.
+	 * @param restriction
 	 *            A boolean-valued expression that holds true when the
-	 *            quantified variable is in the domain or a range to bound the
-	 *            variable
+	 *            quantified variables is in the domain
 	 * @param expression
 	 *            The quantified expression.
 	 * @return The new quantified expression with the given children.
 	 */
-	QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
-			Quantifier quantifier, VariableDeclarationNode variable,
-			boolean isRange, ExpressionNode restrictionOrRange,
-			ExpressionNode expression);
+	QuantifiedExpressionNode newQuantifiedExpressionNode(
+			Source source,
+			Quantifier quantifier,
+			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
+			ExpressionNode restriction, ExpressionNode expression);
 
 	/**
 	 * 

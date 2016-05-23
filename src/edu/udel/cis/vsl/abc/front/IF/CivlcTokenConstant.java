@@ -181,9 +181,7 @@ public interface CivlcTokenConstant {
 	public static final int PROGRAM = CivlCParser.PROGRAM;
 	public static final int PUNDEF = CivlCParser.PUNDEF;
 	public static final int QMARK = CivlCParser.QMARK;
-	public static final int QUANTIFIER_FREE = CivlCParser.QUANTIFIER_FREE;
-	public static final int QUANTIFIER_RANGE = CivlCParser.QUANTIFIER_RANGE;
-	public static final int QUANTIFIER_RESTRICT = CivlCParser.QUANTIFIER_RESTRICT;
+	public static final int QUANTIFIED = CivlCParser.QUANTIFIED;
 	public static final int RCURLY = CivlCParser.RCURLY;
 	public static final int READS = CivlCParser.READS;
 	public static final int REXCON = CivlCParser.REXCON;

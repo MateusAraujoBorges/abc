@@ -90,6 +90,7 @@ import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
+import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
@@ -124,7 +125,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
@@ -644,8 +644,9 @@ public class AcslContractWorker {
 		// If the quantified expression has more than one binder, it will be
 		// translated into several quantifiedExpressions each of which has exact
 		// one binder:
-		boolean firstQuantifiedExpr = true;
-		ExpressionNode result = null;
+		// boolean firstQuantifiedExpr = true;
+		// ExpressionNode result = null;
+		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableList = new LinkedList<>();
 
 		if (quantifierTree.getType() == AcslParser.FORALL)
 			quantifier = Quantifier.FORALL;
@@ -655,25 +656,29 @@ public class AcslContractWorker {
 			throw error("Unexpexted quantifier " + quantifierTree.getType(),
 					quantifierTree);
 		binders = translateBinders(bindersTree, source, scope);
+		boundVariableList.add(nodeFactory.newPairNode(source, binders, null));
 		restrict = translateExpression(restrictTree, scope);
 		pred = translateExpression(predTree, scope);
-		for (VariableDeclarationNode binder : binders) {
-			QuantifiedExpressionNode quantifiedExprNode = nodeFactory
-					.newQuantifiedExpressionNode(source, quantifier,
-							binder.copy(), false, restrict, pred);
-
-			if (firstQuantifiedExpr) {
-				result = quantifiedExprNode;
-				firstQuantifiedExpr = false;
-			} else
-				result = nodeFactory.newOperatorNode(source, Operator.LAND,
-						result, quantifiedExprNode);
-		}
-		if (result == null) {
-			// no binder, just return the predicate:
-			return pred;
-		}
-		return result;
+		// for (VariableDeclarationNode binder : binders) {
+		// QuantifiedExpressionNode quantifiedExprNode = nodeFactory
+		// .newQuantifiedExpressionNode(source, quantifier,
+		// binder.copy(), restrict, pred);
+		//
+		// if (firstQuantifiedExpr) {
+		// result = quantifiedExprNode;
+		// firstQuantifiedExpr = false;
+		// } else
+		// result = nodeFactory.newOperatorNode(source, Operator.LAND,
+		// result, quantifiedExprNode);
+		// }
+		// if (result == null) {
+		// // no binder, just return the predicate:
+		// return pred;
+		// }
+		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
+				nodeFactory.newSequenceNode(source,
+						"bound variable declaration list", boundVariableList),
+				restrict, pred);
 	}
 
 	/**

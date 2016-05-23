@@ -351,7 +351,7 @@ SChar		:	~('"' | '\\' | '\n') | EscapeSequence ;
 
 ELLIPSIS	: '...' NotLineStart;
 DOTDOT		: '..' NotLineStart;
-DOT			:	'.' NotLineStart;
+DOT		:	'.' NotLineStart;
 AMPERSAND	:	'&'		NotLineStart;
 AND		:	'&&'		NotLineStart;
 ARROW		:	'->'		NotLineStart;

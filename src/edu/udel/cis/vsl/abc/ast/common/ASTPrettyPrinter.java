@@ -1944,6 +1944,7 @@ public class ASTPrettyPrinter {
 			QuantifiedExpressionNode quantified) {
 		StringBuffer result = new StringBuffer();
 		String quantifier;
+		boolean isFirstBoundVarSubList = true;
 
 		switch (quantified.quantifier()) {
 		case FORALL:
@@ -1957,15 +1958,33 @@ public class ASTPrettyPrinter {
 		}
 		result.append(quantifier);
 		result.append(" (");
-		result.append(variableDeclaration2Pretty("", quantified.variable()));
-		if (quantified.isRange())
-			result.append(": ");
-		else
-			result.append("; ");
-		result.append(expression2Pretty(quantified.restrictionOrRange()));
-		result.append("; ");
+		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> boundVariableSubList : quantified
+				.boundVariableList()) {
+			boolean isFirstVariable = true;
+
+			if (isFirstBoundVarSubList)
+				isFirstBoundVarSubList = false;
+			else
+				result.append("; ");
+			for (VariableDeclarationNode variable : boundVariableSubList
+					.getLeft()) {
+				if (isFirstVariable) {
+					result.append(variableDeclaration2Pretty("", variable));
+					isFirstVariable = false;
+				} else
+					result.append(", " + variable.getName());
+			}
+			if (boundVariableSubList.getRight() != null) {
+				result.append(": ");
+				result.append(expression2Pretty(boundVariableSubList.getRight()));
+			}
+		}
+		if (quantified.restriction() != null) {
+			result.append(" | ");
+			result.append(expression2Pretty(quantified.restriction()));
+		}
+		result.append(") ");
 		result.append(expression2Pretty(quantified.expression()));
-		result.append(")");
 		return result;
 	}
 

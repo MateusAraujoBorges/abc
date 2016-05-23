@@ -1147,9 +1147,18 @@ public class ExpressionAnalyzer {
 
 	private void processQuantifiedExpression(QuantifiedExpressionNode node)
 			throws SyntaxException {
-		entityAnalyzer.declarationAnalyzer.processVariableDeclaration(node
-				.variable());
-		processExpression(node.restrictionOrRange());
+		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> variableSubList : node
+				.boundVariableList()) {
+			for (VariableDeclarationNode variable : variableSubList.getLeft())
+				entityAnalyzer.declarationAnalyzer
+						.processVariableDeclaration(variable);
+			if (variableSubList.getRight() != null)
+				processExpression(variableSubList.getRight());
+		}
+		// entityAnalyzer.declarationAnalyzer.processVariableDeclaration(node
+		// .variable());
+		if (node.restriction() != null)
+			processExpression(node.restriction());
 		processExpression(node.expression());
 		node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
 		if (!node.isSideEffectFree(false))

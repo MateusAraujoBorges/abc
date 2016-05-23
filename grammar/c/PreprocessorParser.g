@@ -229,9 +229,9 @@ nonPoundPunctuator
 		|	COMMA
 		|	DIV
 		|	DIVEQ
-		|	DOT
-		|	DOTDOT
 		|	ELLIPSIS
+		|	DOTDOT
+		|	DOT
 		|	EQUALS
 		|	GT
 		|	GTE

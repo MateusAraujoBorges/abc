@@ -29,6 +29,11 @@ tokens
 	ARRAY_ELEMENT_DESIGNATOR; // [idx]=expr
 	ARRAY_SUFFIX;             // [..] used in declarator
 	BLOCK_ITEM_LIST;          // list of block items
+	BOUND_VARIABLE_DECLARATION;// bound varialbe declaration
+	BOUND_VARIABLE_DECLARATION_LIST;// bound varialbe declaration list
+	BOUND_VARIABLE_NAME_LIST; // bound varialbe name list
+	BOUND_VARIABLE_RANGE;     // bound varialbe declaration with range
+	BOUND_VARIABLE_RANGE_LIST;// bound varialbe declaration with range list
 	CALL;                     // function call
 	CASE_LABELED_STATEMENT;   // case CONST: stmt
 	CAST;                     // type cast operator
@@ -75,9 +80,7 @@ tokens
 	PRE_DECREMENT;            // --expr
 	PRE_INCREMENT;            // ++expr
 	PROGRAM;                  // whole program (linking translation units)
-	QUANTIFIER_RESTRICT;
-	QUANTIFIER_RANGE;
-	QUANTIFIER_FREE;
+	QUANTIFIED;		  // quantified expression
 	SCALAR_INITIALIZER;       // initializer for scalar variable
 	SPECIFIER_QUALIFIER_LIST; // list of type specifiers and qualifiers
     STATEMENT;                // a statement
@@ -506,26 +509,27 @@ conditionalExpression
 /* A CIVL-C quantified expression using $exists or $forall.
  */
 quantifierExpression
-	: ((quantifier LPAREN typeName IDENTIFIER SEMI 
-      	  conditionalExpression RPAREN) => 
-     	  quantifier LPAREN type1=typeName id1=IDENTIFIER SEMI 
-     	  restrict=conditionalExpression RPAREN cond1=assignmentExpression )
-	  -> ^(QUANTIFIER_RESTRICT quantifier $type1 $id1 $restrict $cond1)
-   	| ((quantifier LPAREN typeName IDENTIFIER COLON) =>
-	  quantifier LPAREN type2=typeName id2=IDENTIFIER COLON
-	  lower=rangeExpression /*DOTDOT upper=additiveExpression*/
-	  RPAREN cond2=assignmentExpression)
-	  -> ^(QUANTIFIER_RANGE quantifier $type2 $id2 $lower $cond2)
-// eventually change to the following:
-	//| quantifier LCURLY type=typeName id=IDENTIFIER ASSIGN
-      //range=rangeExpression SEMI cond=assignmentExpression RCURLY
-	//  -> ^(quantifier $type $id $range $cond)
-	| (/*(quantifier LPAREN typeName IDENTIFIER RPAREN 
-	  assignmentExpression) =>*/
-	  quantifier LPAREN type=typeName id=IDENTIFIER RPAREN
-	  cond=assignmentExpression)
-	  -> ^(QUANTIFIER_FREE quantifier $type $id $cond)
+	: 
+	 ((quantifier LPAREN boundVariableDeclarationList BITOR) =>
+     	  quantifier LPAREN boundVariableDeclarationList BITOR 
+     	  restrict=conditionalExpression RPAREN cond1=assignmentExpression)
+	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond1 $restrict)
+   	| quantifier LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression 
+	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond2)
 	;
+	
+boundVariableDeclarationSubList
+	:	
+	  typeName IDENTIFIER (COMMA IDENTIFIER)* (COLON rangeExpression)?
+	  -> ^(BOUND_VARIABLE_DECLARATION typeName ^(BOUND_VARIABLE_NAME_LIST IDENTIFIER+) rangeExpression?)
+	;
+
+boundVariableDeclarationList
+	:	
+	  boundVariableDeclarationSubList (SEMI boundVariableDeclarationSubList)*
+	  -> ^(BOUND_VARIABLE_DECLARATION_LIST boundVariableDeclarationSubList+)
+	;
+
 
 /* One of the CIVL-C first-order quantifiers.
  * UNIFORM represents uniform continuity.  
