@@ -53,6 +53,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
@@ -158,6 +159,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonFunctionDefinition
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonTypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonVariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonAlignOfNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCallsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCastNode;
@@ -1180,6 +1182,16 @@ public class CommonNodeFactory implements NodeFactory {
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
 			ExpressionNode restriction, ExpressionNode expression) {
 		return new CommonQuantifiedExpressionNode(source, quantifier,
+				boundVariableDeclarationList, restriction, expression);
+	}
+
+	@Override
+	public ArrayLambdaNode newArrayLambdaNode(
+			Source source,
+			TypeNode type,
+			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
+			ExpressionNode restriction, ExpressionNode expression) {
+		return new CommonArrayLambdaNode(source, type,
 				boundVariableDeclarationList, restriction, expression);
 	}
 }

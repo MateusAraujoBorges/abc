@@ -47,6 +47,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
@@ -980,6 +981,28 @@ public interface NodeFactory {
 	QuantifiedExpressionNode newQuantifiedExpressionNode(
 			Source source,
 			Quantifier quantifier,
+			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
+			ExpressionNode restriction, ExpressionNode expression);
+
+	/**
+	 * Constructs a new array lambda expression.
+	 * 
+	 * @param source
+	 *            The source code information for the entire expression
+	 * @param type
+	 *            the type of this array lambda
+	 * @param boundVariableDeclarationList
+	 *            The list of bound variable declarations.
+	 * @param restriction
+	 *            A boolean-valued expression that holds true when the
+	 *            quantified variables is in the domain
+	 * @param expression
+	 *            The body-expression
+	 * @return The new array lambda expression with the given children.
+	 */
+	ArrayLambdaNode newArrayLambdaNode(
+			Source source,
+			TypeNode type,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
 			ExpressionNode restriction, ExpressionNode expression);
 

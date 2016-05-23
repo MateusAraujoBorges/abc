@@ -27,6 +27,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
@@ -193,6 +194,9 @@ public class ExpressionAnalyzer {
 	void processExpression(ExpressionNode node) throws SyntaxException {
 		try {
 			switch (node.expressionKind()) {
+			case ARRAY_LAMBDA:
+				processArrayLambda((ArrayLambdaNode) node);
+				break;
 			case ALIGNOF:
 				processAlignOf((AlignOfNode) node);
 				break;
@@ -1167,6 +1171,54 @@ public class ExpressionAnalyzer {
 							node);
 	}
 
+	void processArrayLambda(ArrayLambdaNode node) throws SyntaxException {
+		TypeNode typeNode = node.type();
+		ExpressionNode expression = node.expression();
+		Type lambdaType, expressionType;
+		ObjectType elementType;
+
+		entityAnalyzer.typeAnalyzer.processTypeNode(typeNode);
+		lambdaType = typeNode.getType();
+		if (!(lambdaType instanceof ArrayType)) {
+			throw error(
+					"array lambda must have array type but current type is "
+							+ lambdaType, node);
+		}
+		elementType = ((ArrayType) lambdaType).getElementType();
+		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> variableSubList : node
+				.boundVariableList()) {
+			for (VariableDeclarationNode variable : variableSubList.getLeft())
+				entityAnalyzer.declarationAnalyzer
+						.processVariableDeclaration(variable);
+			if (variableSubList.getRight() != null)
+				processExpression(variableSubList.getRight());
+		}
+		if (node.restriction() != null)
+			processExpression(node.restriction());
+		processExpression(expression);
+		expressionType = expression.getConvertedType();
+		if (!elementType.equals(expressionType)) {
+			if (expressionType instanceof ArithmeticType
+					&& elementType instanceof ArithmeticType)
+				expression.addConversion(conversionFactory
+						.arithmeticConversion((ArithmeticType) expressionType,
+								(ArithmeticType) elementType));
+			else
+				throw error(
+						"the lambda body has incompatible type with the element "
+								+ "type of the explict array type\n\tlambda body has type "
+								+ expressionType
+								+ "\n\texplicit array type has element type "
+								+ elementType, node);
+
+		}
+		node.setInitialType(typeNode.getType());
+		if (!node.isSideEffectFree(false))
+			throw this
+					.error("array lambdas are not allowed to have side effects.",
+							node);
+	}
+
 	private void processDerivativeExpression(DerivativeExpressionNode node)
 			throws SyntaxException {
 		ExpressionNode functionNode = node.getFunction();
@@ -1305,25 +1357,38 @@ public class ExpressionAnalyzer {
 	 * @throws SyntaxException
 	 *             if there is a type incompatibility between the two sides
 	 */
+
 	private void processASSIGN(OperatorNode node) throws SyntaxException {
 		ExpressionNode lhs = node.getArgument(0);
+		ExpressionNode rhs = node.getArgument(1);
 
 		if (!this.isLvalue(lhs)) {
 			throw error("The expression " + lhs.prettyRepresentation()
 					+ " doesn't designate an object and thus "
 					+ "can't be used as the left argument of assignment", node);
 		}
+		if (lhs.getType() instanceof ArrayType) {
+			ArrayType lhsType = (ArrayType) lhs.getConvertedType();
+			Type rhsType = rhs.getConvertedType();
 
-		ExpressionNode rhs = node.getArgument(1);
-		Type type = assignmentType(node);
+			if (!lhsType.equals(rhsType)) {
+				throw error("The lhs of ASSIGN operator has incompatible type"
+						+ " with the rhs\n\tlhs has type " + lhsType
+						+ "\n\trhs has type " + rhsType, node);
+			}
+			node.setInitialType(lhsType);
+		} else {
 
-		addStandardConversions(rhs);
-		try {
-			convertRHS(rhs, type);
-		} catch (UnsourcedException e) {
-			throw error(e, node);
+			Type type = assignmentType(node);
+
+			addStandardConversions(rhs);
+			try {
+				convertRHS(rhs, type);
+			} catch (UnsourcedException e) {
+				throw error(e, node);
+			}
+			node.setInitialType(type);
 		}
-		node.setInitialType(type);
 	}
 
 	/**
@@ -2445,9 +2510,9 @@ public class ExpressionAnalyzer {
 			throw error(
 					"Left argument of assignment does not have object type",
 					leftNode);
-		if (leftType instanceof ArrayType)
-			throw error("Left argument of assignment can't have array type",
-					leftNode);
+		// if (leftType instanceof ArrayType)
+		// throw error("Left argument of assignment can't have array type",
+		// leftNode);
 
 		ObjectType objectType = (ObjectType) leftType;
 

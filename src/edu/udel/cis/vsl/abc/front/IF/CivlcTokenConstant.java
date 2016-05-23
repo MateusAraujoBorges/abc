@@ -133,6 +133,7 @@ public interface CivlcTokenConstant {
 	public static final int INVARIANT = CivlCParser.INVARIANT;
 	public static final int IdentifierNonDigit = CivlCParser.IdentifierNonDigit;
 	public static final int IntegerSuffix = CivlCParser.IntegerSuffix;
+	public static final int LAMBDA = CivlCParser.LAMBDA;
 	public static final int LCURLY = CivlCParser.LCURLY;
 	public static final int LEXCON = CivlCParser.LEXCON;
 	public static final int LIB_NAME = CivlCParser.LIB_NAME;

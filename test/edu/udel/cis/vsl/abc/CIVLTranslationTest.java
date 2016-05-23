@@ -149,4 +149,9 @@ public class CIVLTranslationTest {
 	public void quantifiers() throws ABCException, IOException {
 		check("quantifiers");
 	}
+
+	@Test
+	public void arrayLambda() throws ABCException, IOException {
+		check("lambda");
+	}
 }

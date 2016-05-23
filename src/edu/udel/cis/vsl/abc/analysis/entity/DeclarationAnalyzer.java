@@ -26,6 +26,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.OrdinaryDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.GotoNode;
@@ -263,7 +264,21 @@ public class DeclarationAnalyzer {
 	public void processInitializer(InitializerNode initializer,
 			ObjectType currentType) throws SyntaxException {
 		assert currentType != null;
-		if (initializer instanceof ExpressionNode) {
+		if (initializer instanceof ArrayLambdaNode) {
+			Type arrayLambdaType;
+
+			entityAnalyzer.expressionAnalyzer
+					.processArrayLambda((ArrayLambdaNode) initializer);
+			arrayLambdaType = ((ArrayLambdaNode) initializer).getType();
+			if (!currentType.equals(arrayLambdaType)) {
+				throw error(
+						"incompatible types between the variable declaration and the initializer"
+								+ "\n\tvariable is declared as type "
+								+ currentType + "\n\tintializer has type "
+								+ arrayLambdaType, initializer);
+
+			}
+		} else if (initializer instanceof ExpressionNode) {
 			ExpressionNode rhs = (ExpressionNode) initializer;
 
 			entityAnalyzer.expressionAnalyzer
@@ -465,9 +480,12 @@ public class DeclarationAnalyzer {
 		if (linkage == LinkageKind.NONE) {
 			if (entity != null) {
 				if (!(civl() && isFunction && scope.getScopeKind() == ScopeKind.BLOCK))
-					throw error("Redeclaration of identifier with no linkage. "
-							+ "Original declaration was at "
-							+ entity.getDeclaration(0).getSource(), identifier);
+					throw error(
+							"Redeclaration of identifier " + identifier.name()
+									+ " with no linkage. "
+									+ "Original declaration was at "
+									+ entity.getDeclaration(0).getSource(),
+							identifier);
 			} else {
 				entity = isFunction ? entityAnalyzer.entityFactory.newFunction(
 						name, linkage, type) : entityAnalyzer.entityFactory
@@ -526,7 +544,8 @@ public class DeclarationAnalyzer {
 	}
 
 	private void checkSystemLibraryForFunction(
-			FunctionDeclarationNode functionNode, Function entity) throws SyntaxException {
+			FunctionDeclarationNode functionNode, Function entity)
+			throws SyntaxException {
 		String entityLib = entity.systemLibrary();
 
 		if (entityLib != null) {

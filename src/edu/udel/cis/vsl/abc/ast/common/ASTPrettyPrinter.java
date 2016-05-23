@@ -44,6 +44,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
@@ -1766,6 +1767,9 @@ public class ASTPrettyPrinter {
 			result.append(type2Pretty("", align.getArgument(), false));
 			break;
 		}
+		case ARRAY_LAMBDA:
+			result.append(arrayLambda2Pretty((ArrayLambdaNode) expression));
+			break;
 		case ARROW: {
 			ArrowNode arrow = (ArrowNode) expression;
 
@@ -1944,7 +1948,6 @@ public class ASTPrettyPrinter {
 			QuantifiedExpressionNode quantified) {
 		StringBuffer result = new StringBuffer();
 		String quantifier;
-		boolean isFirstBoundVarSubList = true;
 
 		switch (quantified.quantifier()) {
 		case FORALL:
@@ -1958,8 +1961,40 @@ public class ASTPrettyPrinter {
 		}
 		result.append(quantifier);
 		result.append(" (");
-		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> boundVariableSubList : quantified
-				.boundVariableList()) {
+		result.append(boundVariableList2Pretty(quantified.boundVariableList()));
+		if (quantified.restriction() != null) {
+			result.append(" | ");
+			result.append(expression2Pretty(quantified.restriction()));
+		}
+		result.append(") ");
+		result.append(expression2Pretty(quantified.expression()));
+		return result;
+	}
+
+	private static StringBuffer arrayLambda2Pretty(ArrayLambdaNode quantified) {
+		StringBuffer result = new StringBuffer();
+
+		result.append("(");
+		result.append(type2Pretty("", quantified.type(), false));
+		result.append(") ");
+		result.append("$lambda");
+		result.append(" (");
+		result.append(boundVariableList2Pretty(quantified.boundVariableList()));
+		if (quantified.restriction() != null) {
+			result.append(" | ");
+			result.append(expression2Pretty(quantified.restriction()));
+		}
+		result.append(") ");
+		result.append(expression2Pretty(quantified.expression()));
+		return result;
+	}
+
+	private static StringBuffer boundVariableList2Pretty(
+			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableList) {
+		StringBuffer result = new StringBuffer();
+		boolean isFirstBoundVarSubList = true;
+
+		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> boundVariableSubList : boundVariableList) {
 			boolean isFirstVariable = true;
 
 			if (isFirstBoundVarSubList)
@@ -1979,12 +2014,6 @@ public class ASTPrettyPrinter {
 				result.append(expression2Pretty(boundVariableSubList.getRight()));
 			}
 		}
-		if (quantified.restriction() != null) {
-			result.append(" | ");
-			result.append(expression2Pretty(quantified.restriction()));
-		}
-		result.append(") ");
-		result.append(expression2Pretty(quantified.expression()));
 		return result;
 	}
 

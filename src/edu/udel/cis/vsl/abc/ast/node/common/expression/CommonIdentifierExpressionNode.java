@@ -54,4 +54,18 @@ public class CommonIdentifierExpressionNode extends CommonExpressionNode
 	public boolean isSideEffectFree(boolean errorsAreSideEffects) {
 		return true;
 	}
+
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof IdentifierExpressionNode) {
+			IdentifierExpressionNode that = (IdentifierExpressionNode) object;
+			Entity thisEntity = this.getIdentifier().getEntity(), thatEntity = that
+					.getIdentifier().getEntity();
+
+			if (thisEntity != null && thatEntity != null)
+				return thisEntity.equals(thatEntity);
+			return super.equals(object);
+		}
+		return false;
+	}
 }

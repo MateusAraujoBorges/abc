@@ -107,6 +107,10 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 */
 		IDENTIFIER_EXPRESSION,
 		/**
+		 * An array lambda expression. Can be cast to {@link ArrayLambdaNode}.
+		 */
+		ARRAY_LAMBDA,
+		/**
 		 * A memory set of ACSL contracts. Can be cast to {@link MemorySetNode}.
 		 */
 		MEMORY_SET,

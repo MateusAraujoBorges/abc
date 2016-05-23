@@ -31,6 +31,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -728,6 +729,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		case IDENTIFIER:
 			return nodeFactory.newIdentifierExpressionNode(source,
 					translateIdentifier(expressionTree));
+		case LAMBDA:
+			return translateArrayLambdaExpression(source, expressionTree, scope);
 		case PARENTHESIZED_EXPRESSION:
 			return translateExpression(source,
 					(CommonTree) expressionTree.getChild(1), scope);
@@ -803,6 +806,43 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	// Translation of Declarations and Types...
 
+	private ArrayLambdaNode translateArrayLambdaExpression(Source source,
+			CommonTree arrayLambdaTree, SimpleScope scope)
+			throws SyntaxException {
+		SimpleScope newScope = new SimpleScope(scope);
+		CommonTree typeTree = (CommonTree) arrayLambdaTree.getChild(0);
+		CommonTree boundVariableDeclListTree = (CommonTree) arrayLambdaTree
+				.getChild(1);
+		CommonTree bodyTree = (CommonTree) arrayLambdaTree.getChild(2);
+		CommonTree restrictionTree = (CommonTree) arrayLambdaTree.getChild(3);
+		TypeNode type = this.translateTypeName(typeTree, scope);
+		SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclListNode = this
+				.translateBoundVariableDeclarationList(source,
+						boundVariableDeclListTree, newScope);
+		ExpressionNode restriction = null, expression;
+
+		if (restrictionTree != null)
+			restriction = this.translateExpression(restrictionTree, newScope);
+		expression = this.translateExpression(bodyTree, newScope);
+		return nodeFactory.newArrayLambdaNode(source, type,
+				boundVariableDeclListNode, restriction, expression);
+	}
+
+	private SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> translateBoundVariableDeclarationList(
+			Source source, CommonTree boundVariableDeclListTree,
+			SimpleScope scope) throws SyntaxException {
+		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationLists = new LinkedList<>();
+
+		for (Object varObj : boundVariableDeclListTree.getChildren()) {
+			boundVariableDeclarationLists.add(this
+					.translateBoundVariableDeclarationSubList(source,
+							(CommonTree) varObj, scope));
+		}
+		return nodeFactory.newSequenceNode(source,
+				"bound variable declaration sub-list",
+				boundVariableDeclarationLists);
+	}
+
 	private QuantifiedExpressionNode translateQuantifiedExpressionNew(
 			Source source, CommonTree quantifiedTree, SimpleScope scope)
 			throws SyntaxException {
@@ -814,17 +854,10 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		CommonTree bodyTree = (CommonTree) quantifiedTree.getChild(2);
 		Quantifier quantifier = translateQuantifier(quantifierTree);
 		ExpressionNode restrict = null, body;
-		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationLists = new LinkedList<>();
-		SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclListNode;
+		SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclListNode = this
+				.translateBoundVariableDeclarationList(source,
+						boundVariableDeclListTree, newScope);
 
-		for (Object varObj : boundVariableDeclListTree.getChildren()) {
-			boundVariableDeclarationLists.add(this
-					.translateBoundVariableDeclarationSubList(source,
-							(CommonTree) varObj, newScope));
-		}
-		boundVariableDeclListNode = nodeFactory.newSequenceNode(source,
-				"bound variable declaration list",
-				boundVariableDeclarationLists);
 		if (restrictionTree != null)
 			restrict = this.translateExpression(source, restrictionTree,
 					newScope);

@@ -329,7 +329,7 @@ scope DeclarationScope;
 	| ALIGNOF LPAREN typeName RPAREN
 	  -> ^(ALIGNOF typeName)
 	| spawnExpression
-    | callsExpression
+    	| callsExpression
 	;
 
 
@@ -508,7 +508,7 @@ conditionalExpression
 
 /* A CIVL-C quantified expression using $exists or $forall.
  */
-quantifierExpression
+quantifiedExpression
 	: 
 	 ((quantifier LPAREN boundVariableDeclarationList BITOR) =>
      	  quantifier LPAREN boundVariableDeclarationList BITOR 
@@ -516,6 +516,17 @@ quantifierExpression
 	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond1 $restrict)
    	| quantifier LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression 
 	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond2)
+	;
+	
+/* A CIVL-C lambda expression */
+arrayLambdaExpression
+	: 
+	 ((LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList BITOR) =>
+     	  LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList BITOR 
+     	  restrict=conditionalExpression RPAREN cond1=assignmentExpression)
+	  -> ^(LAMBDA typeName boundVariableDeclarationList $cond1 $restrict)
+   	| LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression 
+	  -> ^(LAMBDA typeName boundVariableDeclarationList $cond2)
 	;
 	
 boundVariableDeclarationSubList
@@ -529,6 +540,8 @@ boundVariableDeclarationList
 	  boundVariableDeclarationSubList (SEMI boundVariableDeclarationSubList)*
 	  -> ^(BOUND_VARIABLE_DECLARATION_LIST boundVariableDeclarationSubList+)
 	;
+	
+
 
 
 /* One of the CIVL-C first-order quantifiers.
@@ -548,12 +561,15 @@ quantifier
  */
 assignmentExpression
 	: 
-	(unaryExpression assignmentOperator)=>
+	  (arrayLambdaExpression)
+	  =>
+	  arrayLambdaExpression
+	| (unaryExpression assignmentOperator)=>
 	  unaryExpression assignmentOperator assignmentExpression
 	  -> ^(OPERATOR assignmentOperator
 	       ^(ARGUMENT_LIST unaryExpression assignmentExpression))
 	| conditionalExpression
-	| quantifierExpression
+	| quantifiedExpression
 	;
 
 /* 6.5.16 */
