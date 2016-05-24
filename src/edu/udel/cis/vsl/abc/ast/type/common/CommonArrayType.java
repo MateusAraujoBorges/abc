@@ -21,6 +21,8 @@ public class CommonArrayType extends CommonObjectType implements ArrayType {
 
 	private boolean unspecifiedVariableLength;
 
+	private int dimension = 0;
+
 	/**
 	 * Creates a new array type with given element type and value for
 	 * unspecifiedVariableLength.
@@ -242,5 +244,18 @@ public class CommonArrayType extends CommonObjectType implements ArrayType {
 	@Override
 	public boolean isConstantQualified() {
 		return this.elementType.isConstantQualified();
+	}
+
+	@Override
+	public int getDimension() {
+		if (dimension == 0) {
+			ObjectType type = this;
+
+			while (type.kind() == TypeKind.ARRAY) {
+				dimension++;
+				type = ((ArrayType) type).getElementType();
+			}
+		}
+		return dimension;
 	}
 }

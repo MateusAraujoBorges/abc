@@ -1159,8 +1159,6 @@ public class ExpressionAnalyzer {
 			if (variableSubList.getRight() != null)
 				processExpression(variableSubList.getRight());
 		}
-		// entityAnalyzer.declarationAnalyzer.processVariableDeclaration(node
-		// .variable());
 		if (node.restriction() != null)
 			processExpression(node.restriction());
 		processExpression(node.expression());
@@ -1171,11 +1169,21 @@ public class ExpressionAnalyzer {
 							node);
 	}
 
+	private ObjectType getNonArrayElementType(ArrayType arrayType) {
+		ObjectType eleType = arrayType.getElementType();
+
+		while (eleType.kind() == TypeKind.ARRAY) {
+			eleType = ((ArrayType) eleType).getElementType();
+		}
+		return eleType;
+	}
+
 	void processArrayLambda(ArrayLambdaNode node) throws SyntaxException {
 		TypeNode typeNode = node.type();
 		ExpressionNode expression = node.expression();
 		Type lambdaType, expressionType;
 		ObjectType elementType;
+		int dimension, numBoundVars = 0;
 
 		entityAnalyzer.typeAnalyzer.processTypeNode(typeNode);
 		lambdaType = typeNode.getType();
@@ -1184,15 +1192,32 @@ public class ExpressionAnalyzer {
 					"array lambda must have array type but current type is "
 							+ lambdaType, node);
 		}
-		elementType = ((ArrayType) lambdaType).getElementType();
+		elementType = getNonArrayElementType((ArrayType) lambdaType);
+		dimension = ((ArrayType) lambdaType).getDimension();
 		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> variableSubList : node
 				.boundVariableList()) {
-			for (VariableDeclarationNode variable : variableSubList.getLeft())
+			for (VariableDeclarationNode variable : variableSubList.getLeft()) {
+				Type variableType;
+
+				numBoundVars++;
 				entityAnalyzer.declarationAnalyzer
 						.processVariableDeclaration(variable);
+				variableType = variable.getTypeNode().getType();
+				if (!(variableType instanceof IntegerType))
+					throw error(
+							"array lambda only allows integer typed bound variables but the bound variable "
+									+ variable.getName()
+									+ " has type "
+									+ variableType, variable);
+			}
 			if (variableSubList.getRight() != null)
 				processExpression(variableSubList.getRight());
 		}
+		if (dimension != numBoundVars)
+			throw error("number of bound variables disagrees with"
+					+ " the dimension of the array type\n\tarray dimension: "
+					+ dimension + "\n\tnumber of bound variables: "
+					+ numBoundVars, node);
 		if (node.restriction() != null)
 			processExpression(node.restriction());
 		processExpression(expression);

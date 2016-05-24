@@ -94,4 +94,12 @@ public interface ArrayType extends UnqualifiedObjectType {
 	 */
 	boolean hasUnspecifiedVariableLength();
 
+	/**
+	 * Gets the dimension of this array type.
+	 * 
+	 * @return the dimension of this array type, which is greater than or equal
+	 *         to 1.
+	 */
+	int getDimension();
+
 }

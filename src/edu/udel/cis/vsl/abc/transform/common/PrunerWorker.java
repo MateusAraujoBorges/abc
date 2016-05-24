@@ -13,6 +13,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Variable;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
@@ -21,9 +22,11 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.OrdinaryDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode.BlockItemKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CivlForNode;
@@ -94,6 +97,24 @@ public class PrunerWorker {
 
 				for (VariableDeclarationNode decl : forNode.getVariables())
 					markReachable(decl);
+			} else if (node instanceof QuantifiedExpressionNode) {
+				QuantifiedExpressionNode quantified = (QuantifiedExpressionNode) node;
+
+				for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> varaibleSubList : quantified
+						.boundVariableList()) {
+					for (VariableDeclarationNode variable : varaibleSubList
+							.getLeft())
+						markReachable(variable);
+				}
+			} else if (node instanceof ArrayLambdaNode) {
+				ArrayLambdaNode arrayLambda = (ArrayLambdaNode) node;
+
+				for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> varaibleSubList : arrayLambda
+						.boundVariableList()) {
+					for (VariableDeclarationNode variable : varaibleSubList
+							.getLeft())
+						markReachable(variable);
+				}
 			}
 			if (node instanceof TypeNode) {
 				// special case: if this is a type node under a
