@@ -280,6 +280,10 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	public TokenFactory getTokenFactory() {
 		return tokenFactory;
 	}
+	
+	public Map<String, Macro> getMacroMap(){
+		return macroMap;
+	}
 
 	/**
 	 * Returns current file being processed or null if file is not known.

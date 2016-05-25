@@ -31,6 +31,7 @@ import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.program.IF.ProgramFactory;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
+import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
@@ -306,8 +307,10 @@ public class CommonProgramFactory implements ProgramFactory {
 		SequenceNode<BlockItemNode> newRoot;
 		Collection<SourceFile> allSourceFiles = new LinkedHashSet<>();
 		AST result;
+		Map<String, Macro> macroMap = new HashMap<>();
 
 		for (int i = 0; i < n; i++) {
+			macroMap.putAll(translationUnits[i].getMacroMap());
 			roots.add(translationUnits[i].getRootNode());
 			allSourceFiles.addAll(translationUnits[i].getSourceFiles());
 		}
@@ -341,6 +344,7 @@ public class CommonProgramFactory implements ProgramFactory {
 		}
 		newRoot = nodeFactory.newProgramNode(fakeSource, definitions);
 		result = astFactory.newAST(newRoot, allSourceFiles, true);
+		result.addMacroMap(macroMap);
 		if (debug) {
 			out.println("Linked AST (raw):");
 			result.prettyPrint(out, false);

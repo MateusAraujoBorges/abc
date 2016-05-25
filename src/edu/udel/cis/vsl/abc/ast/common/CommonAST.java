@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.ast.common;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,6 +18,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
+import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
@@ -47,6 +49,8 @@ public class CommonAST implements AST {
 	private Function mainFunction = null;
 
 	private boolean isWholeprogram = false;
+	
+	private Map<String, Macro> macroMap = null;
 
 	public CommonAST(ASTFactory astFactory, SequenceNode<BlockItemNode> root,
 			boolean hasOmpPragma, Collection<SourceFile> sourceFiles)
@@ -55,6 +59,7 @@ public class CommonAST implements AST {
 		this.astFactory = astFactory;
 		this.sourceFiles = sourceFiles;
 		this.isWholeprogram = false;
+		this.macroMap = new HashMap<>();
 		clearEntities();
 		initialize();
 	}
@@ -66,6 +71,7 @@ public class CommonAST implements AST {
 		this.astFactory = astFactory;
 		this.sourceFiles = sourceFiles;
 		this.isWholeprogram = isWholeprogram;
+		this.macroMap = new HashMap<>();
 		clearEntities();
 		initialize();
 	}
@@ -269,5 +275,15 @@ public class CommonAST implements AST {
 	@Override
 	public boolean isWholeProgram() {
 		return this.isWholeprogram;
+	}
+
+	@Override
+	public Map<String, Macro> getMacroMap() {
+		return macroMap;
+	}
+
+	@Override
+	public void addMacroMap(Map<String, Macro> map) {
+		macroMap.putAll(map);
 	}
 }
