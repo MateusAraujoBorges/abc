@@ -1221,6 +1221,7 @@ public class ExpressionAnalyzer {
 		if (node.restriction() != null)
 			processExpression(node.restriction());
 		processExpression(expression);
+		addStandardConversions(expression);
 		expressionType = expression.getConvertedType();
 		if (!elementType.equals(expressionType)) {
 			if (expressionType instanceof ArithmeticType
