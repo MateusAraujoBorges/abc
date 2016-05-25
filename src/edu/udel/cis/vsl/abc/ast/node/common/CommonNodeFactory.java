@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.common;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
@@ -1193,5 +1194,19 @@ public class CommonNodeFactory implements NodeFactory {
 			ExpressionNode restriction, ExpressionNode expression) {
 		return new CommonArrayLambdaNode(source, type,
 				boundVariableDeclarationList, restriction, expression);
+	}
+
+	@Override
+	public ArrayLambdaNode newArrayLambdaNode(Source source, TypeNode type,
+			List<VariableDeclarationNode> boundVariableDeclarationList,
+			ExpressionNode restriction, ExpressionNode expression) {
+		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList = new LinkedList<>();
+
+		variableList.add(newPairNode(
+				source,
+				newSequenceNode(source, "bound variable sub-list",
+						boundVariableDeclarationList), null));
+		return new CommonArrayLambdaNode(source, type, newSequenceNode(source,
+				"bound variable list", variableList), restriction, expression);
 	}
 }

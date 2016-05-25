@@ -1007,6 +1007,26 @@ public interface NodeFactory {
 			ExpressionNode restriction, ExpressionNode expression);
 
 	/**
+	 * Constructs a new array lambda expression.
+	 * 
+	 * @param source
+	 *            The source code information for the entire expression
+	 * @param type
+	 *            the type of this array lambda
+	 * @param boundVariableDeclarationList
+	 *            The list of bound variable declarations.
+	 * @param restriction
+	 *            A boolean-valued expression that holds true when the
+	 *            quantified variables is in the domain
+	 * @param expression
+	 *            The body-expression
+	 * @return The new array lambda expression with the given children.
+	 */
+	ArrayLambdaNode newArrayLambdaNode(Source source, TypeNode type,
+			List<VariableDeclarationNode> boundVariableDeclarationList,
+			ExpressionNode restriction, ExpressionNode expression);
+
+	/**
 	 * 
 	 * @param source
 	 *            The source code elements.

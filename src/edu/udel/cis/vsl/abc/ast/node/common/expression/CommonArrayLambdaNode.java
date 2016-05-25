@@ -54,8 +54,9 @@ public class CommonArrayLambdaNode extends CommonExpressionNode implements
 	@Override
 	public ExpressionNode copy() {
 		return new CommonArrayLambdaNode(this.getSource(), type().copy(),
-				boundVariableList().copy(), restriction().copy(), expression()
-						.copy());
+				boundVariableList().copy(),
+				restriction() != null ? restriction().copy() : null,
+				expression().copy());
 	}
 
 	@Override
