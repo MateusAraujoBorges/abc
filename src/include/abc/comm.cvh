@@ -40,14 +40,14 @@ typedef struct $queue $queue;
 /* A global communicator datatype which must be operated by local communicators.
  * This communicator type has the same meaning as the communicator type in MPI
  * standards*/
-typedef struct $gcomm * $gcomm;
+typedef struct _gcomm_ * $gcomm;
 
 /* A datatype representing a local communicator which is used for 
  * operating global communicators. The local communicator type has 
  * a handle of a global communicator. This type represents for 
  * a set of processes which have ranks in common.
  */
-typedef struct $comm * $comm;
+typedef struct _comm_ * $comm;
 
 /* ************************* Functions of Message ************************** */
 
@@ -101,9 +101,10 @@ $atomic_f void $message_unpack($message message, void *buf, int size);
  * message buffers and all other components of the state associated to
  * message-passing.  The new object will be allocated in the given scope. */
 /*@ depends_on \nothing;
-  @ executes_when \true;
+  @ assigns \nothing;
+  @ reads \nothing;
   @*/
-$system $gcomm $gcomm_create($scope scope, int size);
+$atomic_f $gcomm $gcomm_create($scope scope, int size);
 
 /* De-allocation a __gcomm__ object. Returns the number of messages
  * still remaining in the communicator. 
@@ -112,10 +113,10 @@ $system $gcomm $gcomm_create($scope scope, int size);
  * Parameter junkMsgs: Output argument, a pointer to a CIVL-C sequence ($seq) 
  * of $messages.
  */
-/*@ depends_on \nothing;
-  @ executes_when \true;
+/*@ depends_on \access(junkMsgs), \access(gcomm);
+  @ assigns junkMsgs, gcomm;
   @*/
-$system int $gcomm_destroy($gcomm gcomm, void * junkMsgs);
+$atomic_f int $gcomm_destroy($gcomm gcomm, void * junkMsgs);
 
 /* Returns $true iff gcomm points to a valid object. */
 //_Bool $gcomm_defined($gcomm gcomm);
@@ -137,17 +138,14 @@ $system void $gcomm_dup($comm comm, $comm newcomm);
  * processes will be viewed as occupying the same place.
  * Only one call to $comm_create may occur for each gcomm-place pair.
  * The new object will be allocated in the given scope. */
-/*@ depends_on \nothing;
-  @ reads gcomm;
-  @ assigns gcomm;
-  @*/
 $atomic_f $comm $comm_create($scope scope, $gcomm gcomm, int place);
 
 /* De-allocation a __comm__ object */
-/*@ depends_on \nothing;
-  @ executes_when \true;
+/*@ depends_on \access(comm);
+  @ assigns comm;
+  @ reads \nothing;
   @*/
-$system void $comm_destroy($comm comm);
+$atomic_f void $comm_destroy($comm comm);
 
 /* Returns the size (number of places) in the global communicator associated
  * to the given comm. */

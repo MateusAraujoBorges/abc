@@ -21,10 +21,18 @@ typedef struct _pthread_pool_t * $pthread_pool_t;
 
 /* Creates a new global pthread pool and returns a handle to it.
  * The global pthread will have an incomplete array of pthread constructs. */
-$system[pthread] $pthread_gpool_t $pthread_gpool_create($scope scope);
+/*@ depends_on \nothing;
+  @ assigns \nothing;
+  @ reads \nothing;
+  @*/
+$atomic_f $pthread_gpool_t $pthread_gpool_create($scope scope);
 
 /* De-allocation a _pthread_gpool_t object */
-$system[pthread] void $pthread_gpool_destroy($pthread_gpool_t gpool);
+/*@ depends_on \access(gpool);
+  @ assigns gpool;
+  @ reads \nothing;
+  @*/
+$atomic_f void $pthread_gpool_destroy($pthread_gpool_t gpool);
 
 $system[pthread] void $pthread_gpool_add($pthread_gpool_t gpool, pthread_t * thread);
 
@@ -40,7 +48,11 @@ $system[pthread] void $pthread_gpool_join($pthread_gpool_t gpool);
 /* *************************** Functions of $pthread_pool ************************** */
 
 /* Creates a new local pthread pool object and returns a handle to it. */
-$system[pthread] $pthread_pool_t $pthread_pool_create($scope scope, $pthread_gpool_t gpool);
+/*@ depends_on \nothing;
+  @ assigns gpool;
+  @ reads \nothing;
+  @*/
+$atomic_f $pthread_pool_t $pthread_pool_create($scope scope, $pthread_gpool_t gpool);
 
 /* Terminates this thread */
 $system[pthread] void $pthread_pool_terminates($pthread_pool_t pool, void* value);
@@ -50,7 +62,11 @@ $system[pthread] _Bool $pthread_pool_get_terminated($pthread_pool_t pool);
 $system[pthread] _Bool $pthread_pool_is_terminated($pthread_pool_t pool, $proc pid);
 
 /* De-allocation a _pthread_gpool_t object */
-$system[pthread] void $pthread_pool_destroy($pthread_pool_t pool);
+/*@ depends_on \access(pool);
+  @ assigns pool;
+  @ reads \nothing;
+  @*/
+$atomic_f void $pthread_pool_destroy($pthread_pool_t pool);
 
 $system[pthread] pthread_t $pthread_pool_thread($pthread_pool_t pool);
 

@@ -29,16 +29,17 @@ typedef struct $barrier * $barrier;
  * The new object will be allocated in the given scope. */
 /*@ requires size >= 0;
   @ depends_on \nothing;
-  @ executes_when \true;
   @ assigns \nothing;
+  @ reads \nothing;
   @ */
-$system $gbarrier $gbarrier_create($scope scope, int size);
+$atomic_f $gbarrier $gbarrier_create($scope scope, int size);
 
 /* Destroys the gbarrier */
-/*@ depends_on \nothing;
-  @ executes_when \true;
+/*@ depends_on \access(gbarrier);
+  @ reads \nothing;
+  @ assigns gbarrier;
   @ */
-$system void $gbarrier_destroy($gbarrier barrier);
+$atomic_f void $gbarrier_destroy($gbarrier gbarrier);
 
 /* Creates a new local barrier object and returns a handle to it.
  * The new barrier will be affiliated with the specified global
@@ -49,16 +50,17 @@ $system void $gbarrier_destroy($gbarrier barrier);
  * Only one call to $barrier_create may occur for each barrier-place pair.
  * The new object will be allocated in the given scope. */
 /*@ depends_on \nothing;
-  @ assigns \nothing;
-  @ executes_when \true;
+  @ assigns gbarrier;
+  @ reads gbarrier;
   @ */
-$system $barrier $barrier_create($scope scope, $gbarrier gbarrier, int place);
+$atomic_f $barrier $barrier_create($scope scope, $gbarrier gbarrier, int place);
 
 /* Destroys the barrier. */
-/*@ depends_on \nothing;
-  @ executes_when \true;
+/*@ depends_on \access(barrier);
+  @ assigns barrier;
+  @ reads \nothing;
   @ */
-$system void $barrier_destroy($barrier barrier);
+$atomic_f void $barrier_destroy($barrier barrier);
 
 /* Calls the barrier associated with this local barrier object.*/
 /*@ depends_on \nothing;
@@ -78,29 +80,31 @@ typedef struct $collect_checker * $collect_checker;
 
 /* Creates and initializes the global collective operation checker */
 /*@ depends_on \nothing;
-  @ executes_when \true;
+  @ reads \nothing;
+  @ assigns \nothing;
   @ */
-$system $gcollect_checker $gcollect_checker_create($scope scope);
+$atomic_f $gcollect_checker $gcollect_checker_create($scope scope);
 
 /* Destroy a global collective operation checker.  Returns number of
    junk records remaining in the checker. */
-/*@ depends_on \nothing;
-  @ executes_when \true;
+/*@ depends_on \access(checker);
+  @ assigns checker;
+  @ reads \nothing;
   @ */
-$system int $gcollect_checker_destroy($gcollect_checker checker);
+$atomic_f int $gcollect_checker_destroy($gcollect_checker checker);
 
 /* Creates and initializes the local collective operation checker */
 /*@ depends_on \nothing;
   @ executes_when \true;
   @ */
-$system $collect_checker $collect_checker_create($scope scope, 
+$atomic_f $collect_checker $collect_checker_create($scope scope, 
 				       $gcollect_checker gchecker);
 
 /* Destroy a local collective operation checker */
 /*@ depends_on \nothing;
   @ executes_when \true;
   @ */
-$system void $collect_checker_destroy($collect_checker checker);
+$atomic_f void $collect_checker_destroy($collect_checker checker);
 
 /* Do a check for a collecive operation of one process */
 /*@ depends_on \nothing;

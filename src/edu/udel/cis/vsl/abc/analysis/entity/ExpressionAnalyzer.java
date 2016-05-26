@@ -1397,7 +1397,7 @@ public class ExpressionAnalyzer {
 			ArrayType lhsType = (ArrayType) lhs.getConvertedType();
 			Type rhsType = rhs.getConvertedType();
 
-			if (!lhsType.equals(rhsType)) {
+			if (!lhsType.compatibleWith(rhsType)) {
 				throw error("The lhs of ASSIGN operator has incompatible type"
 						+ " with the rhs\n\tlhs has type " + lhsType
 						+ "\n\trhs has type " + rhsType, node);
