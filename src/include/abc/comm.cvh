@@ -138,9 +138,10 @@ $system void $gcomm_dup($comm comm, $comm newcomm);
  * Only one call to $comm_create may occur for each gcomm-place pair.
  * The new object will be allocated in the given scope. */
 /*@ depends_on \nothing;
-  @ executes_when \true;
+  @ reads gcomm;
+  @ assigns gcomm;
   @*/
-$system $comm $comm_create($scope scope, $gcomm gcomm, int place);
+$atomic_f $comm $comm_create($scope scope, $gcomm gcomm, int place);
 
 /* De-allocation a __comm__ object */
 /*@ depends_on \nothing;
