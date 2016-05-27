@@ -28,10 +28,10 @@ License (LGPL).
 
 For most users, this will be the easiest way to install and use CIVL.
 
-1. Install a Java 7 SDK if you have not already.  Go to
+1. Install a Java 8 SDK if you have not already.  Go to
 http://www.oracle.com/technetwork/java/javase/downloads/ for the
 latest from Oracle.  On linux, you can optionally sudo apt-get install
-openjdk-7-jdk.
+openjdk-8-jdk.
 
 2. If you already have the VSL dependencies library, you may
 skip this step.  Otherwise, download the archive of VSL
