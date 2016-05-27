@@ -27,8 +27,7 @@ typedef struct $barrier * $barrier;
 /* Creates a new barrier object and returns a handle to it.
  * The barrier has the specified size.
  * The new object will be allocated in the given scope. */
-/*@ requires size >= 0;
-  @ depends_on \nothing;
+/*@ depends_on \nothing;
   @ assigns \nothing;
   @ reads \nothing;
   @ */
