@@ -30,6 +30,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FALSE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOAT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOATING_CONSTANT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FUNC_CALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GTE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.HASH;
@@ -607,6 +608,8 @@ public class AcslContractWorker {
 			return translateRemoteExpression(expressionTree, source, scope);
 		case QUANTIFIED:
 			return translateQuantifiedExpression(expressionTree, source, scope);
+		case FUNC_CALL:
+			return translateCall(source, expressionTree, scope);
 		case SIZEOF:
 			// return translateSizeOf(source, expressionTree, scope);
 		case CAST:
@@ -983,23 +986,16 @@ public class AcslContractWorker {
 	 */
 	private FunctionCallNode translateCall(Source source, CommonTree callTree,
 			SimpleScope scope) throws SyntaxException {
-		CommonTree functionTree = (CommonTree) callTree.getChild(1);
-		CommonTree contextArgumentListTree = (CommonTree) callTree.getChild(2);
-		CommonTree argumentListTree = (CommonTree) callTree.getChild(3);
+		CommonTree functionTree = (CommonTree) callTree.getChild(0);
+		// CommonTree contextArgumentListTree = (CommonTree)
+		// callTree.getChild(2);
+		CommonTree argumentListTree = (CommonTree) callTree.getChild(1);
 		ExpressionNode functionNode = translateExpression(functionTree, scope);
-		int numContextArgs = contextArgumentListTree.getChildCount();
+		// int numContextArgs = contextArgumentListTree.getChildCount();
 		int numArgs = argumentListTree.getChildCount();
-		List<ExpressionNode> contextArgumentList = new LinkedList<ExpressionNode>();
+		// List<ExpressionNode> contextArgumentList = new
+		// LinkedList<ExpressionNode>();
 		List<ExpressionNode> argumentList = new LinkedList<ExpressionNode>();
-
-		for (int i = 0; i < numContextArgs; i++) {
-			CommonTree argumentTree = (CommonTree) contextArgumentListTree
-					.getChild(i);
-			ExpressionNode contextArgumentNode = translateExpression(
-					argumentTree, scope);
-
-			contextArgumentList.add(contextArgumentNode);
-		}
 
 		for (int i = 0; i < numArgs; i++) {
 			CommonTree argumentTree = (CommonTree) argumentListTree.getChild(i);
@@ -1009,7 +1005,7 @@ public class AcslContractWorker {
 			argumentList.add(argumentNode);
 		}
 		return nodeFactory.newFunctionCallNode(source, functionNode,
-				contextArgumentList, argumentList, null);
+				new LinkedList<ExpressionNode>(), argumentList, null);
 	}
 
 	/**

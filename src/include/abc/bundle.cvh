@@ -11,7 +11,7 @@
 
 /* A system type for bundling any slice of memory into
  * a single value. */
-typedef struct $bundle $bundle;
+typedef struct _bundle $bundle;
 
 /* *********************** Functions *********************** */
 

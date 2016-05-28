@@ -24,7 +24,7 @@
  * the AST.  For the complete version, see the CIVL
  * project.
  */
-typedef struct $message {
+typedef struct _message {
   int source;
   int dest;
   int tag;
@@ -35,19 +35,19 @@ typedef struct $message {
 /* A datatype representing a queue of messages.  All message
  * data is encapsulated inside this value; no external allocation
  * is used. */ 
-typedef struct $queue $queue;
+typedef struct _queue $queue;
  
 /* A global communicator datatype which must be operated by local communicators.
  * This communicator type has the same meaning as the communicator type in MPI
  * standards*/
-typedef struct _gcomm_ * $gcomm;
+typedef struct _gcomm * $gcomm;
 
 /* A datatype representing a local communicator which is used for 
  * operating global communicators. The local communicator type has 
  * a handle of a global communicator. This type represents for 
  * a set of processes which have ranks in common.
  */
-typedef struct _comm_ * $comm;
+typedef struct _comm * $comm;
 
 /* ************************* Functions of Message ************************** */
 
@@ -151,9 +151,8 @@ $atomic_f void $comm_destroy($comm comm);
  * to the given comm. */
 /*@ pure;
   @ depends_on \nothing;
-  @ executes_when \true;
   @*/
-$system int $comm_size($comm comm);
+$atomic_f int $comm_size($comm comm);
 
 /* Returns the place of the local communicator.  This is the same as the
  * place argument used to create the local communicator. */
@@ -192,6 +191,7 @@ $system $message $comm_seek($comm comm, int source, int tag);
 /* Finds the first matching message, removes it from the communicator,
  * and returns the message */
 /*@ depends_on \access(comm);
+  @ executes_when $comm_probe(comm, source, tag);
   @*/
 $system $message $comm_dequeue($comm comm, int source, int tag);
 

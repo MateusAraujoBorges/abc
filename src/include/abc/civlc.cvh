@@ -7,9 +7,6 @@
 
 #include<op.h>
 
-// Ignore GNU C extensions, for now...  done elsewhere                                        
-// #define __attribute__(X)
-
 /* *********************  Standard Constants and Types ********************* */
 #define $true 1
 
@@ -37,10 +34,6 @@ typedef struct $dynamic $dynamic;
 
 typedef enum Operation $operation;
 
-
-/* The integer iterator */
-//typedef struct $int_iter * $int_iter;
-
 /* **************************** Misc. Functions **************************** */
 
 /* Wait for another process p to terminate. */
@@ -60,19 +53,6 @@ $system void $exit(void);
   @*/
 $system int $choose_int(int n);
 
-/* Returns $true iff p is a defined procecess value (i.e., 
-the value of the process id is greater than 0) */
-//_Bool $proc_defined($proc p);
-
-/* Returns $true iff s is a defined scope value (i.e., 
-the scope s is still valid) */
-//_Bool $scope_defined($scope s);
-
-/*
- * Returns $true iff the given object has a defined value.
-*/
-//_Bool $defined(void* obj);
-
 /*@ depends_on \nothing;
   @*/
 $system void $assert(_Bool expr, ...);
@@ -86,9 +66,6 @@ $system void $assume(_Bool expr);
   @ depends_on \nothing;
   @*/
 $system void $elaborate(int x);
-
-/* Elaborates the given domain */
-//void $elaborate_domain($domain dom);
 
 /* get a unique non-negative integer number for time count */
 /*@ depends_on \nothing;
@@ -132,20 +109,5 @@ $system void $havoc(void *ptr);
   @ depends_on \nothing;
   @*/
 $system double $pow(double base, double exp);
-
-/* *************************** Iterator Functions ************************** */
-
-/* Tells whether the integer iterator has any more elements */
-//_Bool $int_iter_hasNext($int_iter iter);
-
-/* Returns the next element in the iterator (and updates the iterator) */
-//int $int_iter_next($int_iter iter);
-
-/* Creates a new iterator for an array of integers, and returns the
- * handle of the iterator. */
-//$int_iter $int_iter_create($scope scope, int *array, int size);
-
-/* Deletes an $int_iter object from the heap. */
-//void $int_iter_destroy($int_iter iter);
 
 #endif
