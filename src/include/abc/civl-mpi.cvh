@@ -23,7 +23,7 @@
 #define COMMFREE_TAG     9985
 
 /* Definition of CIVL-MPI */
-typedef enum _mpi_state_{
+typedef enum _mpi_state{
   _MPI_UNINIT,
   _MPI_INIT,
   _MPI_FINALIZED
