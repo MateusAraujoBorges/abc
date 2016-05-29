@@ -181,7 +181,7 @@ $system[mpi] $scope $mpi_proc_scope($comm);
    the basetype of the 'datatype'. Here a basetype of an MPI_Datatype
    means a indivisiable MPI_datatype, e.g. the basetype of MPI_2INT is
    MPI_INT.*/
-$system[mpi] void $mpi_assert_consistent_basetype(void * buf, MPI_Datatype datatype);
+$system[mpi] void $mpi_check_buffer(void * buf, int count, MPI_Datatype datatype);
 
 /* Create a $bundle type object which contains a sequence of entries
    that identify a group of consistent MPI collective routines. MPI
