@@ -103,7 +103,7 @@ $atomic_f $collator $collator_create($scope scope,
 $atomic_f void $collator_destroy($collator collator);
 
 /* Do a check for a collecive operation of one process */
-/*@ depends_on \nothing;
+/*@ depends_on \access(collator);
   @ executes_when \true;
   @ */
 $system $bundle $collator_check($collator collator, int place, int nprocs,

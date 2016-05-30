@@ -9,6 +9,9 @@
 
 /* Given a pointer to an object of type "array-of-T", returns the
  * length of the array. */
+/*@ depends_on \access(array);
+  @ executes_when \true;
+  @*/
 $system int $seq_length(void *array);
 
 /* Given a pointer to an object of type "incomplete-array-of-T",
@@ -20,6 +23,9 @@ $system int $seq_length(void *array);
  *   count: any integer type, must be nonnegative
  *   values: pointer-to-T
  */
+/*@ depends_on \access(array, value);
+  @ executes_when \true;
+  @*/
 $system void $seq_init(void *array, int count, void *value);
 
 /* Given a pointer to an object of type "incomplete-array-of-T",
@@ -41,6 +47,9 @@ $system void $seq_init(void *array, int count, void *value);
  *   count: any integer type, count>=0
  *
  */
+/*@ depends_on \access(array, values);
+  @ executes_when \true;
+  @*/
 $system void $seq_insert(void *array, int index, void *values, int count);
 
 /* Removes count elements from the array, starting at position
@@ -52,6 +61,9 @@ $system void $seq_insert(void *array, int index, void *values, int count);
  *   values: pointer-to-T
  *   count: any integer type, 0<=count<=length-index
  */
+/*@ depends_on \access(array, values);
+  @ executes_when \true;
+  @*/
 $system void $seq_remove(void *array, int index, void *values, int count);
 
 /* Given a pointer to an object of type "incomplete-array-of-T",
@@ -67,6 +79,9 @@ $system void $seq_remove(void *array, int index, void *values, int count);
  *   count: any integer type, count>=0
  *
  */
+/*@ depends_on \access(array, values);
+  @ executes_when \true;
+  @*/
 void $seq_append(void *array, void *values, int count);
 
 #endif
