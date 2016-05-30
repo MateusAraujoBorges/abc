@@ -30,5 +30,4 @@ public class CommonAttributeKey implements AttributeKey {
 	public int getId() {
 		return id;
 	}
-
 }

@@ -1,8 +1,11 @@
 package edu.udel.cis.vsl.abc.ast.node.common;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
@@ -262,6 +265,8 @@ public class CommonNodeFactory implements NodeFactory {
 	private ObjectType scopeType;
 
 	private Configuration configuration;
+	
+	private Map<String, HashMap<Class<? extends Object>, AttributeKey>> attributeKeys;
 
 	public CommonNodeFactory(Configuration configuration,
 			TypeFactory typeFactory, ValueFactory valueFactory) {
@@ -274,6 +279,7 @@ public class CommonNodeFactory implements NodeFactory {
 		this.processType = typeFactory.processType();
 		this.scopeType = typeFactory.scopeType();
 		this.configuration = configuration;
+		this.attributeKeys = new ConcurrentHashMap<>();
 	}
 
 	@Override
@@ -284,11 +290,28 @@ public class CommonNodeFactory implements NodeFactory {
 	@Override
 	public AttributeKey newAttribute(String attributeName,
 			Class<? extends Object> attributeClass) {
-		AttributeKey key = new CommonAttributeKey(attributeCount,
-				attributeName, attributeClass);
+		HashMap<Class<? extends Object>, AttributeKey> classMap = attributeKeys.get(attributeName);
+		AttributeKey key;
 
-		attributeCount++;
-		return key;
+		if (classMap != null) {
+			key = classMap.get(attributeClass);
+
+			if (key != null) {
+				return key;
+			} else {
+				key = new CommonAttributeKey(attributeCount, attributeName, attributeClass);
+				classMap.put(attributeClass, key);
+				return key;
+			}
+		} else {
+			key = new CommonAttributeKey(attributeCount, attributeName, attributeClass);
+			HashMap<Class<? extends Object>, AttributeKey> cmap = new HashMap<>();
+
+			cmap.put(attributeClass, key);
+			attributeKeys.put(attributeName, cmap);
+			attributeCount++;
+			return key;
+		}
 	}
 
 	@Override

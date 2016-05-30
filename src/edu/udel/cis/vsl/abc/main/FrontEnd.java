@@ -189,6 +189,10 @@ public class FrontEnd {
 	public ASTFactory getASTFactory() {
 		return astFactory;
 	}
+	
+	public NodeFactory getNodeFactory(){
+		return nodeFactory;
+	}
 
 	/**
 	 * Returns the {@link ASTBuilder} used by this front end. The builder is

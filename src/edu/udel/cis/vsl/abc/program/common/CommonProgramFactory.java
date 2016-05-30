@@ -18,6 +18,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.entity.IF.TaggedEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Typedef;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -31,10 +32,12 @@ import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.program.IF.ProgramFactory;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
+import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.util.IF.MacroConstants;
 
 public class CommonProgramFactory implements ProgramFactory {
 
@@ -128,8 +131,7 @@ public class CommonProgramFactory implements ProgramFactory {
 				throw new ABCRuntimeException("unreachable: " + def);
 		}
 		for (ProgramEntity entity : plan.getEntityRemoveActions()) {
-			boolean isSysTypedef = entity instanceof Typedef
-					&& ((Typedef) entity).isSystem();
+			boolean isSysTypedef = entity instanceof Typedef && ((Typedef) entity).isSystem();
 
 			// system typedefs require special handling because there
 			// is one entity shared by all ASTs. The declarations
@@ -299,13 +301,14 @@ public class CommonProgramFactory implements ProgramFactory {
 		NodeFactory nodeFactory = astFactory.getNodeFactory();
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newSystemFormation("Program");
-		CivlcToken fakeToken = tokenFactory.newCivlcToken(CivlCParser.PROGRAM,
-				"Program", formation);
+		CivlcToken fakeToken = tokenFactory.newCivlcToken(CivlCParser.PROGRAM, "Program", formation);
 		Source fakeSource = tokenFactory.newSource(fakeToken);
 		List<BlockItemNode> definitions = new LinkedList<>();
 		SequenceNode<BlockItemNode> newRoot;
 		Collection<SourceFile> allSourceFiles = new LinkedHashSet<>();
 		AST result;
+		AttributeKey key = astFactory.getNodeFactory().newAttribute(MacroConstants.NO_CHECK_DIVISION_BY_ZERO,
+				Macro.class);
 
 		for (int i = 0; i < n; i++) {
 			roots.add(translationUnits[i].getRootNode());
@@ -318,8 +321,7 @@ public class CommonProgramFactory implements ProgramFactory {
 			for (int i = 0; i < n; i++) {
 				SequenceNode<BlockItemNode> root = roots.get(i);
 				SequenceNode<BlockItemNode> rootClone = root.copy();
-				Collection<SourceFile> sourceFiles = translationUnits[i]
-						.getSourceFiles();
+				Collection<SourceFile> sourceFiles = translationUnits[i].getSourceFiles();
 				AST ast = astFactory.newAST(rootClone, sourceFiles, false);
 
 				out.println(ast + ":");
@@ -340,6 +342,14 @@ public class CommonProgramFactory implements ProgramFactory {
 			}
 		}
 		newRoot = nodeFactory.newProgramNode(fakeSource, definitions);
+		for (ASTNode root : roots) {
+			Object value = root.getAttribute(key);
+
+			if (value != null) {
+				newRoot.setAttribute(key, value);
+				break;
+			}
+		}
 		result = astFactory.newAST(newRoot, allSourceFiles, true);
 		if (debug) {
 			out.println("Linked AST (raw):");
