@@ -66,47 +66,47 @@ void $barrier_call($barrier barrier);
 
 /********* Functions For Collective Arrive Checking Record *********/
 /* Collective checker record entry */
-typedef struct _collect_record  $collect_record;
+typedef struct _collator_entry  $collator_entry;
 
 /* Global collective operation checker */
-typedef struct _gcollect_checker * $gcollect_checker;
+typedef struct _gcollator * $gcollator;
 
 /* Local handle of the collective operation checker */
-typedef struct _collect_checker * $collect_checker;
+typedef struct _collator * $collator;
 
 /* Creates and initializes the global collective operation checker */
 /*@ depends_on \nothing;
   @ reads \nothing;
   @ assigns \nothing;
   @ */
-$atomic_f $gcollect_checker $gcollect_checker_create($scope scope);
+$atomic_f $gcollator $gcollator_create($scope scope);
 
 /* Destroy a global collective operation checker.  Returns number of
    junk records remaining in the checker. */
-/*@ depends_on \access(checker);
-  @ assigns checker;
+/*@ depends_on \access(gcollator);
+  @ assigns gcollator;
   @ reads \nothing;
   @ */
-$atomic_f int $gcollect_checker_destroy($gcollect_checker checker);
+$atomic_f int $gcollator_destroy($gcollator gcollator);
 
 /* Creates and initializes the local collective operation checker */
 /*@ depends_on \nothing;
   @ executes_when \true;
   @ */
-$atomic_f $collect_checker $collect_checker_create($scope scope, 
-				       $gcollect_checker gchecker);
+$atomic_f $collator $collator_create($scope scope, 
+				       $gcollator gcollator);
 
 /* Destroy a local collective operation checker */
-/*@ depends_on \nothing;
+/*@ depends_on \access(collator);
   @ executes_when \true;
   @ */
-$atomic_f void $collect_checker_destroy($collect_checker checker);
+$atomic_f void $collator_destroy($collator collator);
 
 /* Do a check for a collecive operation of one process */
 /*@ depends_on \nothing;
   @ executes_when \true;
   @ */
-$system $bundle $collect_check($collect_checker checker, int place, int nprocs,
+$system $bundle $collator_check($collator collator, int place, int nprocs,
 		    $bundle entries);
 
 #endif
