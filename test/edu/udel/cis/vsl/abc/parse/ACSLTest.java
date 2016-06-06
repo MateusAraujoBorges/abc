@@ -108,4 +108,9 @@ public class ACSLTest {
 	public void memLocation1() throws PreprocessorException, SyntaxException, ParseException {
 		this.parse("memLocation1.c");
 	}
+
+	@Test
+	public void pointers() throws PreprocessorException, SyntaxException, ParseException {
+		this.parse("pointers.c");
+	}
 }
