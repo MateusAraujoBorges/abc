@@ -23,6 +23,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.Nodes;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
@@ -101,6 +102,8 @@ public class FrontEnd {
 	private Map<Language, Preprocessor> preprocessors = new HashMap<>();
 
 	private Map<Language, ASTBuilder> astBuilders = new HashMap<>();
+	
+	private AttributeKey intDivAttributeKey;
 
 	/**
 	 * Constructs a new front end. The front end can be used repeatedly to
@@ -244,6 +247,10 @@ public class FrontEnd {
 	 */
 	public ProgramFactory getProgramFactory(Analyzer analyzer) {
 		return Programs.newProgramFactory(astFactory, analyzer);
+	}
+	
+	public void setIntDivAttributeKey(AttributeKey intDivAttributeKey) {
+		this.intDivAttributeKey = intDivAttributeKey;
 	}
 
 	/**
@@ -390,6 +397,8 @@ public class FrontEnd {
 
 		analyzer = getStandardAnalyzer(language);
 		programFactory = getProgramFactory(analyzer);
+		if(intDivAttributeKey != null)
+			programFactory.setIntDivMacroKey(intDivAttributeKey);
 		result = programFactory.newProgram(translationUnits);
 		return result;
 	}

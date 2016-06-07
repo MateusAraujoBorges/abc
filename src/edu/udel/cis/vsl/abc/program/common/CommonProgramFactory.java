@@ -32,12 +32,10 @@ import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.program.IF.ProgramFactory;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
-import edu.udel.cis.vsl.abc.util.IF.MacroConstants;
 
 public class CommonProgramFactory implements ProgramFactory {
 
@@ -64,6 +62,8 @@ public class CommonProgramFactory implements ProgramFactory {
 	 * into a program.
 	 */
 	private Analyzer standardAnalyzer;
+	
+	private AttributeKey intDivAttributeKey;
 
 	// Constructors...
 
@@ -307,8 +307,6 @@ public class CommonProgramFactory implements ProgramFactory {
 		SequenceNode<BlockItemNode> newRoot;
 		Collection<SourceFile> allSourceFiles = new LinkedHashSet<>();
 		AST result;
-		AttributeKey key = astFactory.getNodeFactory().newAttribute(MacroConstants.NO_CHECK_DIVISION_BY_ZERO,
-				Macro.class);
 
 		for (int i = 0; i < n; i++) {
 			roots.add(translationUnits[i].getRootNode());
@@ -342,12 +340,14 @@ public class CommonProgramFactory implements ProgramFactory {
 			}
 		}
 		newRoot = nodeFactory.newProgramNode(fakeSource, definitions);
-		for (ASTNode root : roots) {
-			Object value = root.getAttribute(key);
-
-			if (value != null) {
-				newRoot.setAttribute(key, value);
-				break;
+		if(intDivAttributeKey != null) {
+			for (ASTNode root : roots) {
+				Object value = root.getAttribute(intDivAttributeKey);
+	
+				if (value != null) {
+					newRoot.setAttribute(intDivAttributeKey, value);
+					break;
+				}
 			}
 		}
 		result = astFactory.newAST(newRoot, allSourceFiles, true);
@@ -357,6 +357,7 @@ public class CommonProgramFactory implements ProgramFactory {
 			out.println();
 			out.flush();
 		}
+		
 		return result;
 	}
 
@@ -375,5 +376,10 @@ public class CommonProgramFactory implements ProgramFactory {
 	@Override
 	public Program newProgram(AST[] asts) throws SyntaxException {
 		return newProgram(link(asts));
+	}
+
+	@Override
+	public void setIntDivMacroKey(AttributeKey key) {
+		this.intDivAttributeKey = key;
 	}
 }
