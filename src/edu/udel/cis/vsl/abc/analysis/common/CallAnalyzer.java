@@ -1,7 +1,9 @@
 package edu.udel.cis.vsl.abc.analysis.common;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -32,12 +34,20 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
  * function type. Second "process" call nodes using the function-type relation
  * to resolve indirect calls.
  * 
+ * In addition to the usual Analyzer interface, this class provides static access to an unordered
+ * list of {@link Function}s computed for each {@link AST}.
+ * 
  * @author dwyer
  * 
  */
 public class CallAnalyzer implements Analyzer {
 	Map<FunctionType, Set<Function>> functionsOfAType = new HashMap<FunctionType, Set<Function>>();
-	AST currentAST;
+	static Map<AST, List<Function>> functionsAnalyzed = new HashMap<AST, List<Function>>();
+				
+	private void addCall(Function caller, Function callee) {
+		caller.getCallees().add(callee);
+		callee.getCallers().add(caller);
+	}
 
 	private void collectProgram(ASTNode node) {
 		if (node instanceof FunctionDefinitionNode) {
@@ -64,7 +74,7 @@ public class CallAnalyzer implements Analyzer {
 					&& ((StandardSignedIntegerType) rType).getIntKind() == SignedIntKind.INT) {
 				// Main has either 0 or 2 parameters
 				if (funType.getNumParameters() == 0) {
-					currentAST.setMain(fEntity);
+					funNode.getOwner().setMain(fEntity);
 				} else if (funType.getNumParameters() == 2) {
 					// If it has parameters they are of type "int" and "char **"
 					Type p0 = funType.getParameterType(0);
@@ -79,7 +89,7 @@ public class CallAnalyzer implements Analyzer {
 								if (deDerefP1 instanceof StandardSignedIntegerType
 										&& ((StandardSignedIntegerType) deDerefP1)
 												.getIntKind() == SignedIntKind.SIGNED_CHAR) {
-									currentAST.setMain(fEntity);
+									funNode.getOwner().setMain(fEntity);
 								}
 							}
 						}
@@ -129,8 +139,7 @@ public class CallAnalyzer implements Analyzer {
 				// Call directly to a function
 				if (calledFunId.getEntity() instanceof Function) {
 					Function callee = (Function) calledFunId.getEntity();
-					caller.getCallees().add(callee);
-					callee.getCallers().add(caller);
+					addCall(caller, callee);
 				} else {
 					// Call through an expression (an identifier)
 					PointerType pFunType = (PointerType) fcn.getFunction()
@@ -142,8 +151,7 @@ public class CallAnalyzer implements Analyzer {
 
 					if (callees != null)
 						for (Function callee : callees) {
-							caller.getCallees().add(callee);
-							callee.getCallers().add(caller);
+							addCall(caller, callee);
 						}
 				}
 			} else {
@@ -163,8 +171,7 @@ public class CallAnalyzer implements Analyzer {
 				Set<Function> callees = functionsOfAType.get(funType);
 				if (callees != null) {
 					for (Function callee : callees) {
-						caller.getCallees().add(callee);
-						callee.getCallers().add(caller);
+						addCall(caller, callee);
 					}
 				}
 			}
@@ -182,6 +189,7 @@ public class CallAnalyzer implements Analyzer {
 
 	private void processProgram(ASTNode node) {
 		if (node instanceof FunctionDefinitionNode) {
+			functionsAnalyzed.get(node.getOwner()).add(((FunctionDefinitionNode)node).getEntity());
 			processFunctionDefinitionNode((FunctionDefinitionNode) node);
 		} else if (node != null) {
 			for (ASTNode child : node.children()) {
@@ -189,10 +197,15 @@ public class CallAnalyzer implements Analyzer {
 			}
 		}
 	}
+	
+	static int count = 0;
 
 	@Override
 	public void clear(AST unit) {
 		functionsOfAType.clear();
+		if (functionsAnalyzed.get(unit) != null) {
+			functionsAnalyzed.get(unit).clear();
+		}
 		clearNode(unit.getRootNode());
 	}
 
@@ -217,37 +230,30 @@ public class CallAnalyzer implements Analyzer {
 
 	@Override
 	public void analyze(AST unit) throws SyntaxException {
-		currentAST = unit;
+		// functions of a type is temporary map used during analysis of an AST
+		functionsOfAType.clear();
+		
+		if (functionsAnalyzed.get(unit) == null) {
+			functionsAnalyzed.put(unit, new ArrayList<Function>());
+		}
 		ASTNode root = unit.getRootNode();
 
 		collectProgram(root);
 		processProgram(root);
+		
+		functionsOfAType.clear();
 	}
-
-	static private Set<Function> seen;
-
+	
+	static public List<Function> functions(AST unit) {
+		return functionsAnalyzed.get(unit);
+	}
+	
 	static public void printCallGraph(AST unit) {
-		System.out.println(unit.getMain().getName());
-		seen = new HashSet<Function>();
-		seen.add(unit.getMain());
-		printCallGraphNodes(unit.getMain(), " ");
-	}
-
-	static private void printCallGraphNodes(Function f, String pre) {
-		for (Function callee : f.getCallees()) {
-			System.out.print(pre + callee.getName() + " [");
-			for (Function caller : callee.getCallers()) {
-				System.out.print(" " + caller.getName());
-			}
-			System.out.println(" ]");
-			if (!seen.contains(callee)) {
-				seen.add(callee);
-				printCallGraphNodes(callee, pre + " ");
-				seen.remove(callee);
-			} else {
-				System.out.println(pre + " <recursion>");
-			}
+		System.out.println("Functions in call graph:");
+		for (Function f : functions(unit)) {
+			System.out.println("   "+f);
 		}
+		System.out.println();
 	}
 
 }
