@@ -1,0 +1,12 @@
+//======================== assert.h ========================
+/*@ pure;
+  @ depends_on \nothing;
+  @ executes_when $true;
+  @*/
+$system[asserts] void assert(_Bool expr);
+//================== abstractFunctions.cvl =================
+$abstract int f(int);
+int main()
+{
+  assert($forall (int i | i > 0) f(i));
+}

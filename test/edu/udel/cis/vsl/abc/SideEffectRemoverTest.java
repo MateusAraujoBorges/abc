@@ -139,6 +139,11 @@ public class SideEffectRemoverTest {
 	}
 
 	@Test
+	public void abstractFunc() throws ABCException, IOException {
+		check("abstractFunctions.cvl");
+	}
+
+	@Test
 	public void funcalls() throws ABCException, IOException {
 		check("funcalls.c");
 	}
