@@ -487,6 +487,10 @@ public class DeclarationAnalyzer {
 									+ entity.getDeclaration(0).getSource(),
 							identifier);
 			} else {
+				if (!isFunction && type.kind() == TypeKind.VOID) {
+					throw error("declaring variable " + name + " as void type",
+							node);
+				}
 				entity = isFunction ? entityAnalyzer.entityFactory.newFunction(
 						name, linkage, type) : entityAnalyzer.entityFactory
 						.newVariable(name, linkage, type);
