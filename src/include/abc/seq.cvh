@@ -80,8 +80,7 @@ $system void $seq_remove(void *array, int index, void *values, int count);
  *
  */
 /*@ depends_on \access(array, values);
-  @ executes_when \true;
   @*/
-void $seq_append(void *array, void *values, int count);
+$atomic_f void $seq_append(void *array, void *values, int count);
 
 #endif

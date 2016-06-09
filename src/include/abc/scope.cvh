@@ -11,6 +11,9 @@
 /* ******************************* Functions ******************************* */
 
 /* Returns the parent scope of the given scope */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
 $system $scope $scope_parent($scope s);
 
 #endif

@@ -17,8 +17,10 @@ public class Pair<S, T> {
 	@Override
 	public boolean equals(final Object o) {
 		if (o instanceof Pair) {
-			final Pair<S,T> other = (Pair<S,T>) o;
-			return this.left.equals(other.left) && this.right.equals(other.right);
+			@SuppressWarnings("unchecked")
+			final Pair<S, T> other = (Pair<S, T>) o;
+			return this.left.equals(other.left)
+					&& this.right.equals(other.right);
 		}
 		return false;
 	}
