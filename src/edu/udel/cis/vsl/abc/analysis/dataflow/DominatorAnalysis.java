@@ -115,16 +115,7 @@ public class DominatorAnalysis extends DataFlowFramework<ASTNode> {
 		return result;
 	}
 	
-	@Override
-	/*
-	 * A statement does not supersede any of its dominators.
-	 * 
-	 * @see edu.udel.cis.vsl.abc.analysis.dataflow.DataFlowFramework#kill(java.util.Set, edu.udel.cis.vsl.abc.ast.node.IF.ASTNode)
-	 */
-	protected Set<ASTNode> kill(final Set<ASTNode> set, final ASTNode s) {
-		Set<ASTNode> result = new HashSet<ASTNode>();
-		return result;
-	}
+	// kill function uses the default implementation
 
 	@Override
 	public String getAnalysisName() {
