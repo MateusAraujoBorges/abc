@@ -222,21 +222,29 @@ _Bool $mpi_isRecvBufEmpty(int x);
 /* Take a snapshot for an MPI send operation. It will modify
    existing point-2-point snapshots as if an MPI send happens on
    them */
+/*@ depends_on \nothing;
+ */
 $system[mpi] void $mpi_p2pSendShot(int commID, $message msg, int place);
 
 /* Take a snapshot for an MPI send operation. It will modify
    existing collective snapshots as if an MPI send happens on
    them */
+/*@ depends_on \nothing;
+ */
 $system[mpi] void $mpi_colSendShot(int commID, $message msg, int place);
 
 /* Take a snapshot for an MPI receive operation. It will modify
    existing point-2-point snapshots as if an MPI receive happens on
    them */
+/*@ depends_on \nothing;
+ */
 $system[mpi] void $mpi_p2pRecvShot(int commID, int source, int dest, int tag);
 
 /* Take a snapshot for an MPI receive operation. It will modify
    existing collective snapshots as if an MPI receive happens on
    them */
+/*@ depends_on \nothing;
+ */
 $system[mpi] void $mpi_colRecvShot(int commID, int source, int dest, int tag);
 
 #endif
