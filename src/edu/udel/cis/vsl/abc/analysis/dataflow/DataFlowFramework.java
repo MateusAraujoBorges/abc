@@ -142,8 +142,17 @@ public abstract class DataFlowFramework<E> {
 	/*
 	 * Function space definition
 	 */
-	protected abstract Set<E> gen(Set<E> set, ASTNode n);
-	protected abstract Set<E> kill(Set<E> set, ASTNode n);
+	
+	/*
+	 * Node gen-kill functions.  These return an empty set by default.
+	 */
+	protected Set<E> gen(Set<E> set, ASTNode n) {
+		return new HashSet<E>();
+	}
+	
+	protected Set<E> kill(Set<E> set, ASTNode n) {
+		return new HashSet<E>();
+	}
 
 	/*
 	 * Override this to define a non-gen-kill function space
