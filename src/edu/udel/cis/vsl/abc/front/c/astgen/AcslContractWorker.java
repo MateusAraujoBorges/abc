@@ -145,18 +145,55 @@ import edu.udel.cis.vsl.abc.token.IF.StringToken;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
+/**
+ * This is responsible for translating a CParseTree that represents an ACSL
+ * contract specification for a function or a loop into an ordered list of
+ * Contract nodes. It serves as a helper for {@link AcslContractHandler}.
+ * 
+ * @author Manchun Zheng (zmanchun)
+ *
+ */
 public class AcslContractWorker {
 
+	/**
+	 * the parse tree to be translated
+	 */
 	private CParseTree parseTree;
+
+	/**
+	 * the node factory to be used for creating AST nodes
+	 */
 	private NodeFactory nodeFactory;
+
+	/**
+	 * the token factory
+	 */
 	private TokenFactory tokenFactory;
+
+	/**
+	 * the type factory
+	 */
 	private TypeFactory typeFactory;
+
+	/**
+	 * the formation to be used for transforming ANTLR tokens into CTokens
+	 */
 	private Formation formation;
 
 	/* ******************** Constants ******************* */
 	private final String MPI_COMM_RANK = "\\mpi_comm_rank";
 	private final String MPI_COMM_SIZE = "\\mpi_comm_size";
 
+	/**
+	 * creates a new instance of AcslContractWorker
+	 * 
+	 * @param factory
+	 *            the node factory to be used
+	 * @param tokenFactory
+	 *            the token factory to be used
+	 * @param parseTree
+	 *            the parse tree to be translated
+	 */
 	public AcslContractWorker(NodeFactory factory, TokenFactory tokenFactory,
 			CParseTree parseTree) {
 		this.nodeFactory = factory;
@@ -166,6 +203,16 @@ public class AcslContractWorker {
 		formation = tokenFactory.newTransformFormation("ACSL", "contract");
 	}
 
+	/**
+	 * translates the parse tree to a list of contract nodes
+	 * 
+	 * @param scope
+	 *            the scope of the contract
+	 * @return the list of contract nodes which is the result of translating the
+	 *         parse tree
+	 * @throws SyntaxException
+	 *             if there are syntax errors during the translation
+	 */
 	public List<ContractNode> generateASTNodes(SimpleScope scope)
 			throws SyntaxException {
 		CommonTree contractTree = parseTree.getRoot();
@@ -190,6 +237,18 @@ public class AcslContractWorker {
 		}
 	}
 
+	/**
+	 * translates the contract for a loop.
+	 * 
+	 * @param tree
+	 *            the tree to be translated, which represented the contracts of
+	 *            the loop
+	 * @param scope
+	 *            the current scope
+	 * @return the list of contracts associated with a loop
+	 * @throws SyntaxException
+	 *             if there are syntax errors
+	 */
 	private List<ContractNode> translateLoopContractBlock(CommonTree tree,
 			SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
@@ -214,6 +273,19 @@ public class AcslContractWorker {
 		return result;
 	}
 
+	/**
+	 * translates a loop clause, which could be a loop invariant, an assigns
+	 * clause, an allocate clause, or a free clause. Currently, only loop
+	 * invariant is supported.
+	 * 
+	 * @param tree
+	 *            the tree represented a loop contract clause
+	 * @param scope
+	 *            the current scope
+	 * @return the contract node represented a loop clause
+	 * @throws SyntaxException
+	 *             if there are some syntax errors
+	 */
 	private ContractNode translateLoopClause(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
 		int loopClauseKind = tree.getType();
@@ -235,6 +307,18 @@ public class AcslContractWorker {
 		}
 	}
 
+	/**
+	 * translates a contract block associated with a function
+	 * 
+	 * @param tree
+	 *            the tree representing the contract block
+	 * @param scope
+	 *            the current scope, which is the scope of the function
+	 *            parameter
+	 * @return the list of contract nodes after translation
+	 * @throws SyntaxException
+	 *             if there are syntax errors
+	 */
 	private List<ContractNode> translateFunctionContractBlock(CommonTree tree,
 			SimpleScope scope) throws SyntaxException {
 		int numChildren = tree.getChildCount();
@@ -269,6 +353,19 @@ public class AcslContractWorker {
 		return result;
 	}
 
+	/**
+	 * translates the ACSL completeness clause for behavior, which could be
+	 * COMPLETE or DISJOINT.
+	 * 
+	 * @param tree
+	 *            the tree representing the completeness clause
+	 * @param scope
+	 *            the current scope
+	 * @return the completeness node which is the result of translating the
+	 *         given tree
+	 * @throws SyntaxException
+	 *             if there are some syntax errors
+	 */
 	private CompletenessNode translateCompleteness(CommonTree tree,
 			SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
@@ -289,6 +386,15 @@ public class AcslContractWorker {
 		return this.nodeFactory.newCompletenessNode(source, isComplete, idList);
 	}
 
+	/**
+	 * translates a list of identifiers
+	 * 
+	 * @param tree
+	 *            a tree that represents a list of identifiers
+	 * @param scope
+	 *            the current scope
+	 * @return a sequence of identifier node
+	 */
 	private SequenceNode<IdentifierNode> translateIdList(CommonTree tree,
 			SimpleScope scope) {
 		int numChildren = tree.getChildCount();
@@ -303,6 +409,18 @@ public class AcslContractWorker {
 		return this.nodeFactory.newSequenceNode(source, "ID list", list);
 	}
 
+	/**
+	 * translates an ACSL behavior block
+	 * 
+	 * @param tree
+	 *            the tree that represents a behavior block
+	 * @param scope
+	 *            the current scope
+	 * @return the behavior node which is the result of translating the given
+	 *         behavior block
+	 * @throws SyntaxException
+	 *             if there are any syntax errors.
+	 */
 	private BehaviorNode translateBehavior(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
 		CommonTree idTree = (CommonTree) tree.getChild(0);
@@ -315,6 +433,18 @@ public class AcslContractWorker {
 				id, body);
 	}
 
+	/**
+	 * translates the body of a behavior block.
+	 * 
+	 * @param tree
+	 *            the tree that represents the body of a behavior block
+	 * @param scope
+	 *            the current scope
+	 * @return a sequence of contract nodes which is the result of the
+	 *         translation
+	 * @throws SyntaxException
+	 *             if there are any syntax errors
+	 */
 	private SequenceNode<ContractNode> translateBehaviorBody(CommonTree tree,
 			SimpleScope scope) throws SyntaxException {
 		Source source = this.parseTree.source(tree);
@@ -330,6 +460,17 @@ public class AcslContractWorker {
 				clauses);
 	}
 
+	/**
+	 * translates a contract clause.
+	 * 
+	 * @param tree
+	 *            the tree that representing a contract clause
+	 * @param scope
+	 *            the current scope
+	 * @return the contract node which is the result of the translation
+	 * @throws SyntaxException
+	 *             if there are any syntax errors
+	 */
 	private ContractNode translateContractClause(CommonTree tree,
 			SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
@@ -356,6 +497,18 @@ public class AcslContractWorker {
 		}
 	}
 
+	/**
+	 * translates a guard clause, which has the syntax
+	 * <code>executes_when expr</code>.
+	 * 
+	 * @param tree
+	 *            the tree that represents the guard clause
+	 * @param scope
+	 *            the current scope
+	 * @return the guard node that is the result of the translation
+	 * @throws SyntaxException
+	 *             if there are some syntax errors.
+	 */
 	private GuardsNode translateGuards(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
 		CommonTree expressionTree = (CommonTree) tree.getChild(0);
@@ -373,6 +526,18 @@ public class AcslContractWorker {
 		return nodeFactory.newWaitsforNode(newSource(tree), arguments);
 	}
 
+	/**
+	 * translates an assume clause, which has the syntax
+	 * <code>assumes expr</code>.
+	 * 
+	 * @param tree
+	 *            the tree that represents an assumes clause
+	 * @param scope
+	 *            the current scope
+	 * @return the Assumes node
+	 * @throws SyntaxException
+	 *             if there are any syntax errors.
+	 */
 	private AssumesNode translateAssumes(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
 		CommonTree exprTree = (CommonTree) tree.getChild(0);
