@@ -115,6 +115,17 @@ public interface TokenFactory {
 
 	CivlcTokenSequence getEmptyTokenSubsequence(CivlcTokenSource originalSource);
 
+	/**
+	 * creates a CivlC Token Source based on a give list of tokens (not
+	 * necessarily CivlC token). All given tokens will be transformed to CivlC
+	 * tokens if they are not CivlC tokens, using the given formation.
+	 * 
+	 * @param tokens
+	 *            the list of tokens
+	 * @param formation
+	 *            the formation to be used when transforming the given tokens
+	 * @return a CivlC token source wrapping the given list of tokens
+	 */
 	CivlcTokenSource getCivlcTokenSourceByTokens(List<? extends Token> tokens,
 			Formation formation);
 }
