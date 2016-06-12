@@ -17,6 +17,7 @@ import edu.udel.cis.vsl.abc.front.c.parse.CParser.RuleKind;
 import edu.udel.cis.vsl.abc.front.c.preproc.AcslLexer;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
+import edu.udel.cis.vsl.abc.front.common.parse.TreeUtils;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
@@ -88,7 +89,7 @@ public class AcslContractHandler {
 	 */
 	public List<ContractNode> translateContracts(int startLine, String text,
 			SimpleScope scope, Formation formation, AcslContractKind kind)
-			throws SyntaxException {
+					throws SyntaxException {
 		CParseTree contractTree = this.parse(startLine, text, formation, kind);
 		AcslContractWorker worker = new AcslContractWorker(nodeFactory,
 				tokenFactory, contractTree);
@@ -118,6 +119,10 @@ public class AcslContractHandler {
 			AcslContractKind kind) throws SyntaxException {
 		ANTLRStringStream input = new ANTLRStringStream(text);
 		AcslLexer lexer = new AcslLexer(input);
+
+		// TODO: need to filter out @s (where is this done?) and
+		// preprocess the sub-expressions occurring in the contracts
+
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		AcslParser parser = new AcslParser(tokens);
 		CommonTree tree;
@@ -132,18 +137,17 @@ public class AcslContractHandler {
 				tree = (CommonTree) parser.loop_contract().getTree();
 				break;
 			default:
-				throw new SyntaxException(
-						"unknown ACSL contract kind: " + kind, null);
+				throw new SyntaxException("unknown ACSL contract kind: " + kind,
+						null);
 			}
 		} catch (RecognitionException e) {
 			throw new ABCRuntimeException(e.getMessage());
 		}
-		// System.out.print(tree);
-		// generateASTNodes(tree);
-
+		TreeUtils.postProcessTree(tree);
 		return new CParseTree(Language.CIVL_C, RuleKind.CONTRACT,
 				this.tokenFactory.getCivlcTokenSourceByTokens(
-						tokens.getTokens(), formation), tree);
+						tokens.getTokens(), formation),
+				tree);
 	}
 
 	/**

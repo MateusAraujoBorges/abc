@@ -81,8 +81,8 @@ public class TokenUtils {
 		}
 	}
 
-	public static String summarizeRangeLocation(CivlcToken first, CivlcToken last,
-			boolean abbreviated) {
+	public static String summarizeRangeLocation(CivlcToken first,
+			CivlcToken last, boolean abbreviated) {
 		String result;
 		String filename1 = getShortFilename(first, abbreviated);
 		String filename2 = getShortFilename(last, abbreviated);
@@ -141,7 +141,8 @@ public class TokenUtils {
 		int tokenCount = 0;
 		CivlcToken token = first;
 
-		while (token != null && token != last && tokenCount < summaryBound - 1) {
+		while (token != null && token != last
+				&& tokenCount < summaryBound - 1) {
 			excerpt += token.getText();
 			token = token.getNext();
 			tokenCount++;
@@ -161,18 +162,18 @@ public class TokenUtils {
 		}
 		return result;
 	}
-	
+
 	public static String contentOfRange(CivlcToken first, CivlcToken last,
 			boolean abbreviated) {
 		String result = summarizeRangeLocation(first, last, abbreviated);
 		String excerpt = "";
-//		int tokenCount = 0;
+		// int tokenCount = 0;
 		CivlcToken token = first;
 
 		while (token != null && token != last) {
 			excerpt += token.getText();
 			token = token.getNext();
-//			tokenCount++;
+			// tokenCount++;
 		}
 		if (token != null) {
 			if (token != last)
