@@ -124,6 +124,8 @@ public class ABC {
 		out.println("  send output to filename");
 		out.println("-E");
 		out.println("  preprocess only");
+		out.println("-ppt");
+		out.println("  show preprocessing output as individual tokens");
 		out.println("-v");
 		out.println("  verbose mode, show all processing steps");
 		out.println("-p");
@@ -140,8 +142,9 @@ public class ABC {
 		out.println("  turn on special setting for svcomp benchmarks");
 		out.println("-gnuc");
 		out.println("  support GNU C features");
-		out.print("-unknownFunc");
-		out.println("  print functions that are used in the program but no definition is given");
+		out.println("-unknownFunc");
+		out.println(
+				"  print functions that are used in the program but no definition is given");
 		out.println("-lang=[c|civlc]");
 		out.println("  set language (default determined by file suffix)");
 		out.println("-arch=[i386|amd64|unknown]");
@@ -175,6 +178,7 @@ public class ABC {
 		// the following are updated by -D
 		Map<String, String> macros = new HashMap<String, String>();
 		boolean preprocOnly = false;
+		boolean ppt = false;
 		boolean verbose = false;
 		boolean pretty = true;
 		boolean tables = false; // show symbol and type tables
@@ -252,6 +256,8 @@ public class ABC {
 				userIncludeList.add(new File(name));
 			} else if (arg.equals("-E")) {
 				preprocOnly = true;
+			} else if (arg.equals("-ppt")) {
+				ppt = true;
 			} else if (arg.equals("-v")) {
 				verbose = true;
 			} else if (arg.equals("-p")) {
@@ -315,13 +321,14 @@ public class ABC {
 			result.setOut(System.out);
 		else
 			result.setOut(new PrintStream(new File(outfileName)));
-		result.setLanguage(language == null ? getLanguageFromName(infileNames
-				.get(0)) : language);
+		result.setLanguage(language == null
+				? getLanguageFromName(infileNames.get(0)) : language);
 		result.setVerbose(verbose);
 		result.setPrettyPrint(pretty);
 		result.setShowTables(tables);
 		result.setShowTime(showTime);
 		result.setPreprocOnly(preprocOnly);
+		result.setPreprocTokens(ppt);
 		result.setShowDiff(showDiff);
 		result.setGnuc(gnuc);
 		result.setSilent(silent);
@@ -366,7 +373,6 @@ public class ABC {
 		}
 		frontEnd = new FrontEnd(task);
 		try {
-
 			if (task.doShowDiff()) {
 				frontEnd.compileAndCompare(task);
 			} else {

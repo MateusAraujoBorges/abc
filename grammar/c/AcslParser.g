@@ -350,7 +350,7 @@ id_list
 
 /* C11 section 6.5 Expressions: Grammar here is organized with a
  * backwards order against the order of sub-sections in C11 standard,
- * because it's amore viewful way to illustrate how expressions will
+ * because it's a more viewful way to illustrate how expressions will
  * be derived
  */
 

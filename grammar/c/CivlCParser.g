@@ -24,6 +24,7 @@ options
 tokens
 {
 	ABSENT;                   // represents missing syntactic element
+	ANNOTATION;               // like //@.../n or /*@ ... */
 	ABSTRACT_DECLARATOR;      // declarator without identifier
 	ARGUMENT_LIST;            // list of arguments to an operator
 	ARRAY_ELEMENT_DESIGNATOR; // [idx]=expr
@@ -1537,16 +1538,37 @@ jumpStatement
 pragma
     : PRAGMA IDENTIFIER NEWLINE
         -> ^(PRAGMA IDENTIFIER ^(TOKEN_LIST) NEWLINE)
-    | PRAGMA IDENTIFIER pragmaBody NEWLINE
-        -> ^(PRAGMA IDENTIFIER ^(TOKEN_LIST pragmaBody) NEWLINE)
+    | PRAGMA IDENTIFIER inlineList NEWLINE
+        -> ^(PRAGMA IDENTIFIER ^(TOKEN_LIST inlineList) NEWLINE)
 	;
 
-/* A pragma body, which is any sequence of tokens not 
- * containing NEWLINE, used in pragma rule.
+/* inlineList : nonempty list of tokens not including NEWLINE */
+inlineList : (~ NEWLINE)+ ;
+
+
+/* Annotations
+ * Root: ANNOTATION
+ * child 0 : INLINE_ANNOTATION_START or ANNOTATION_START
+ * child 1 : TOKEN_LIST (children are list of tokens comprising annotation body)
+ * child 2 : ANNOTATION_END or NEWLINE (marking end of annotation) 
  */
-pragmaBody
-	:	(~ NEWLINE)+
-	;
+
+annotation
+  :  INLINE_ANNOTATION_START 
+     ( NEWLINE
+       -> ^(ANNOTATION INLINE_ANNOTATION_START ^(TOKEN_LIST) NEWLINE)
+     | inlineList NEWLINE
+       -> ^(ANNOTATION INLINE_ANNOTATION_START ^(TOKEN_LIST inlineList) NEWLINE)
+     )
+  |  ANNOTATION_START ANNOTATION_END
+       -> ^(ANNOTATION ANNOTATION_START ^(TOKEN_LIST) ANNOTATION_END)
+  |  ANNOTATION_START annotationBody ANNOTATION_END
+       -> ^(ANNOTATION ANNOTATION_START ^(TOKEN_LIST annotationBody) ANNOTATION_END)
+  ;
+
+annotationBody : (~ ANNOTATION_END)+ ;
+
+
 
 /* CIVL-C $when statement.  This is a guarded command.
  * Syntax: $when (expr) stmt, where expr is a boolean
@@ -1699,6 +1721,7 @@ blockItem
 	  functionDefinition
 	| declaration	
 	| pragma
+	| annotation
     | statement
 	;
 

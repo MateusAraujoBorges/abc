@@ -171,6 +171,9 @@ pptoken		:	HEADER_NAME
 		|	CHARACTER_CONSTANT
 		|	STRING_LITERAL
 		|	punctuator
+		|	INLINE_ANNOTATION_START
+		|	ANNOTATION_START
+		|	ANNOTATION_END
 		|	OTHER
 		;
 
@@ -181,13 +184,16 @@ nonPoundPpToken	:	HEADER_NAME
 		|	CHARACTER_CONSTANT
 		|	STRING_LITERAL
 		|	nonPoundPunctuator
+		|	INLINE_ANNOTATION_START
+		|	ANNOTATION_START
+		|	ANNOTATION_END
 		|	OTHER
 		;
 		
 /* An "identifier" for the preprocessor is any C IDENTIFIER or C keyword: */
 /* Added for CIVL-C: any CIVL-C keyword */
 
-identifier	:	IDENTIFIER | c_keyword | gnuc_keyword;
+identifier	:	IDENTIFIER | c_keyword | gnuc_keyword | EXTENDED_IDENTIFIER;
 
 c_keyword	:	AUTO | ASSIGNS | BREAK | CASE | CHAR | CONST | CONTINUE | DEFAULT
         |   DEPENDS | DO | DOUBLE | ELSE | ENUM | EXTERN | FLOAT | FOR | GOTO

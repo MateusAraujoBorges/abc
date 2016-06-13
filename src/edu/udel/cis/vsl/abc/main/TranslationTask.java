@@ -52,6 +52,13 @@ public class TranslationTask {
 	private boolean preprocOnly;
 
 	/**
+	 * If true, show preprocessor output as individual tokens with complete
+	 * token information, instead of just the text. Very detailed and long
+	 * output.
+	 */
+	private boolean preprocTokens;
+
+	/**
 	 * Print out information on intermediate steps, not just the final result.
 	 */
 	private boolean verbose;
@@ -242,6 +249,21 @@ public class TranslationTask {
 	 */
 	public void setPreprocOnly(boolean preprocOnly) {
 		this.preprocOnly = preprocOnly;
+	}
+
+	/**
+	 * @return the preprocTokens
+	 */
+	public boolean isPreprocTokens() {
+		return preprocTokens;
+	}
+
+	/**
+	 * @param preprocTokens
+	 *            the preprocTokens to set
+	 */
+	public void setPreprocTokens(boolean preprocTokens) {
+		this.preprocTokens = preprocTokens;
 	}
 
 	/**

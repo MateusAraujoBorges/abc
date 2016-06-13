@@ -414,11 +414,42 @@ HEADER_NAME	:	{inInclude}?=>
 
 /* ***** Comments: C11 Sec 6.4.9 ******/
 
-COMMENT		:	'//' ( options {greedy=true;} : ~('\n'|'\r') )*
-		|	'/*' ( options {greedy=false;} : . )* '*/'
+// and Annotations...
+
+INLINE_ANNOTATION_START : '//@';
+
+// the following is not quite perfect because in the case of the \n or \r
+// immediately following the // it counts that white space as part of the
+// comment, otherwise it doesn't.  Would like to make the \n or \r NOT
+// part of the comment always, but how --- need to look ahead one character?
+
+fragment
+INLINE_COMMENT : '//'
+                 (  (~('@' | '\n' | '\r') ( options {greedy=true;} : ~('\n'|'\r') )*)
+                 |  NEWLINE
+                 |  EOF
+                 )
+               ;
+
+fragment
+BLOCK_COMMENT : '/*'
+                ( '*/' | ~('@') ( options {greedy=false;} : . )* '*/')
+              ;
+              
+COMMENT : INLINE_COMMENT | BLOCK_COMMENT ;
+
+ANNOTATION_START : '/*@';
+
+ANNOTATION_END : '*/';
+
+/* Special keywords starting with backslash reserved for extensions
+ * such as ACSL */
+EXTENDED_IDENTIFIER	:	'\\' IdentifierNonDigit
+			(IdentifierNonDigit | Digit)* NotLineStart
 		;
-		
+
+
 /****** Other characters: C11 Sec. 6.4 ******/
 
-OTHER		:	. NotLineStart;
+OTHER		: . NotLineStart;
 
