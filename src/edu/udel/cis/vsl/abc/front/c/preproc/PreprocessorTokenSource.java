@@ -194,18 +194,32 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	// Constructors...
 
 	/**
-	 * Instantiates new CTokenSource object. The give source file is parsed, a
+	 * Instantiates new CTokenSource object. The given source file is parsed, a
 	 * file info object is created for it and pushed onto the stack. The output
 	 * tokens are not generated; this does not begin until "getToken" is called.
 	 * 
+	 * @param config
+	 *            the ABC configuration
 	 * @param source
 	 *            original C source file (before preprocessing)
+	 * @param parser
+	 *            the preprocessor parser
 	 * @param systemIncludePaths
 	 *            the directories where files included with angle brackets are
 	 *            searched
 	 * @param userIncludePaths
 	 *            the directories where files included with double quotes are
 	 *            searched
+	 * @param macroMap
+	 *            the predefined macro map, which includes macros from command
+	 *            line and macros added according to the configuration
+	 * @param tokenFactory
+	 *            the token factory to be used
+	 * @param worker
+	 *            the worker that performs the actual preprocessing
+	 * @param tmpFile
+	 *            true iff this is a temporary file created for processing
+	 *            predefined macros.
 	 * @throws PreprocessorException
 	 *             if and IOException or RecognitionException occurs while
 	 *             scanning and parsing the source file
@@ -227,12 +241,12 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			// start, int stop) {
 
 			if (!tmpFile && (config != null && config.svcomp())) {
-				CommonToken svcomp = new CommonToken(
-						tree.getToken().getInputStream(),
-						PreprocessorLexer.HEADER_NAME, 0, -1, -1);
-				CommonToken include = new CommonToken(
-						tree.getToken().getInputStream(),
-						PreprocessorLexer.PINCLUDE, 0, -1, -1);
+				CommonToken svcomp = new CommonToken(tree.getToken()
+						.getInputStream(), PreprocessorLexer.HEADER_NAME, 0,
+						-1, -1);
+				CommonToken include = new CommonToken(tree.getToken()
+						.getInputStream(), PreprocessorLexer.PINCLUDE, 0, -1,
+						-1);
 
 				svcomp.setText("<svcomp.h>");
 				include.setText("#include");
@@ -257,8 +271,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			this.expressionAnalyzer = new PreprocessorExpressionAnalyzer(
 					macroDefinedPredicate);
 		} catch (RecognitionException e) {
-			throw new PreprocessorException(
-					"Preprocessing " + source + " failed: " + e);
+			throw new PreprocessorException("Preprocessing " + source
+					+ " failed: " + e);
 		} catch (RuntimeException e) {
 			throw new PreprocessorException(e.getMessage());
 		}
@@ -266,6 +280,34 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			theTokens = new ArrayList<CivlcToken>();
 	}
 
+	/**
+	 * Instantiates new CTokenSource object. The given source file is parsed, a
+	 * file info object is created for it and pushed onto the stack. The output
+	 * tokens are not generated; this does not begin until "getToken" is called.
+	 * 
+	 * @param config
+	 *            the ABC configuration
+	 * @param source
+	 *            original C source file (before preprocessing)
+	 * @param parser
+	 *            the preprocessor parser
+	 * @param systemIncludePaths
+	 *            the directories where files included with angle brackets are
+	 *            searched
+	 * @param userIncludePaths
+	 *            the directories where files included with double quotes are
+	 *            searched
+	 * @param tokenFactory
+	 *            the token factory to be used
+	 * @param worker
+	 *            the worker that performs the actual preprocessing
+	 * @param tmpFile
+	 *            true iff this is a temporary file created for processing
+	 *            predefined macros.
+	 * @throws PreprocessorException
+	 *             if and IOException or RecognitionException occurs while
+	 *             scanning and parsing the source file
+	 */
 	public PreprocessorTokenSource(File source, PreprocessorParser parser,
 			File[] systemIncludePaths, File[] userIncludePaths,
 			TokenFactory tokenFactory, CPreprocessorWorker worker,
@@ -320,10 +362,13 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	/**
 	 * Looks to see if a {@link SourceFile} object has already been created for
 	 * the given {@link File}. If so, returns that one. Else creates a new one,
-	 * assigns it the next index, and stores it.
+	 * assigns it the next index, and, if it is not a temporary file created by
+	 * ABC, stores it.
 	 * 
 	 * @param file
 	 *            a file that is being read to produce this token source
+	 * @param tmpFile
+	 *            true iff this is a temporary file created by ABC
 	 * @return the {@link SourceFile} corresponding to the given file
 	 */
 	private SourceFile getOrMakeSourceFile(File file, boolean tmpFile) {
@@ -365,7 +410,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			return finalToken;
 		while (firstOutput == null
 				|| firstOutput.getType() != PreprocessorLexer.EOF
-						&& firstOutput == lastOutput)
+				&& firstOutput == lastOutput)
 			try {
 				processNextNode();
 			} catch (PreprocessorException e) {
@@ -517,8 +562,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		String name = identifierNode.getText();
 		Macro macro = macroMap.get(name);
 
-		if (macro != null && (macro instanceof ObjectMacro
-				|| peekAheadSkipWSHasType(PreprocessorLexer.LPAREN))) {
+		if (macro != null
+				&& (macro instanceof ObjectMacro || peekAheadSkipWSHasType(PreprocessorLexer.LPAREN))) {
 			processInvocation(macro, identifierNode);
 		} else {
 			shiftToOutput(identifierNode);
@@ -567,8 +612,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 			// note the call to findInvocationArguments updated
 			// position correctly.
-			result = processInvocation((FunctionMacro) macro, cToken,
-					arguments);
+			result = processInvocation((FunctionMacro) macro, cToken, arguments);
 		}
 		addOutputList(result);
 	}
@@ -628,7 +672,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private Pair<CivlcToken, CivlcToken> processInvocation(FunctionMacro macro,
 			CivlcToken origin, CivlcToken[] arguments)
-					throws PreprocessorException {
+			throws PreprocessorException {
 		for (int i = 0; i < arguments.length; i++)
 			arguments[i] = expandList(arguments[i]).left;
 		return performSecondExpansion(instantiate(macro, origin, arguments),
@@ -652,7 +696,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private Pair<CivlcToken, CivlcToken> performSecondExpansion(
 			Pair<CivlcToken, CivlcToken> tokenList, Macro macro)
-					throws PreprocessorException {
+			throws PreprocessorException {
 		String name = macro.getName();
 
 		// mark all occurrences of identifier M as "do not expand"...
@@ -834,8 +878,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 				} else {
 					CivlcToken next = current.getNext();
 
-					isInvocation = (next != null
-							&& next.getType() == PreprocessorLexer.LPAREN);
+					isInvocation = (next != null && next.getType() == PreprocessorLexer.LPAREN);
 				}
 			}
 			if (!isInvocation) { // ignore it
@@ -855,8 +898,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 				CivlcToken[] arguments = findInvocationArguments(
 						(FunctionMacro) macro, iter);
 
-				replacements = processInvocation((FunctionMacro) macro, current,
-						arguments);
+				replacements = processInvocation((FunctionMacro) macro,
+						current, arguments);
 				// move current to the token just after the closing ')'
 				// of the invocation, or null if the ')' was the last token:
 				if (iter.hasNext())
@@ -950,8 +993,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	private CivlcToken[] findInvocationArguments(FunctionMacro macro,
-			Iterator<CivlcToken> argumentIterator)
-					throws PreprocessorException {
+			Iterator<CivlcToken> argumentIterator) throws PreprocessorException {
 		try {
 			return findInvocationArgumentsWorker(macro, argumentIterator);
 		} catch (IllegalMacroArgumentException e) {
@@ -994,8 +1036,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * @return
 	 */
 	private CivlcToken[] findInvocationArgumentsWorker(FunctionMacro macro,
-			Iterator<CivlcToken> argumentIterator)
-					throws PreprocessorException {
+			Iterator<CivlcToken> argumentIterator) throws PreprocessorException {
 		int numFormals = macro.getNumFormals();
 		CivlcToken[] result = new CivlcToken[numFormals];
 		int argCount = 0, type, parenDepth;
@@ -1013,13 +1054,11 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		if (token.getType() != PreprocessorLexer.LPAREN)
 			throw new PreprocessorException(
 					"Invocation of function macro does not begin with '(': "
-							+ macro,
-					token);
+							+ macro, token);
 		if (numFormals == 0) {
 			if (!argumentIterator.hasNext())
-				throw new PreprocessorException(
-						"Macro invocation " + macro + " does not end in ')'",
-						token);
+				throw new PreprocessorException("Macro invocation " + macro
+						+ " does not end in ')'", token);
 			token = argumentIterator.next();
 			if (token.getType() != PreprocessorLexer.RPAREN)
 				throw new PreprocessorException(
@@ -1044,8 +1083,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					throw new PreprocessorException(
 							"Number of arguments to macro " + macro
 									+ " exceeds " + "expected number "
-									+ numFormals,
-							token);
+									+ numFormals, token);
 
 			} else {
 				if (type == PreprocessorLexer.LPAREN)
@@ -1068,10 +1106,9 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			}
 		}
 		if (argCount != numFormals)
-			throw new PreprocessorException(
-					"Invocation of macro " + macro.getName() + ": expected "
-							+ numFormals + " arguments but saw " + argCount,
-					token);
+			throw new PreprocessorException("Invocation of macro "
+					+ macro.getName() + ": expected " + numFormals
+					+ " arguments but saw " + argCount, token);
 		return result;
 	}
 
@@ -1135,16 +1172,15 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * @throws PreprocessorException
 	 *             if the macro has already been defined differently
 	 */
-	private void processMacroDefinition(Tree node)
-			throws PreprocessorException {
+	private void processMacroDefinition(Tree node) throws PreprocessorException {
 		SourceFile sourceFile = getCurrentSource();
 
 		if (node.getChildCount() == 3)
-			processMacroDefinition(
-					tokenFactory.newFunctionMacro(node, sourceFile));
+			processMacroDefinition(tokenFactory.newFunctionMacro(node,
+					sourceFile));
 		else
-			processMacroDefinition(
-					tokenFactory.newObjectMacro(node, sourceFile));
+			processMacroDefinition(tokenFactory
+					.newObjectMacro(node, sourceFile));
 	}
 
 	/**
@@ -1316,9 +1352,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		int firstChar, lastChar;
 
 		if (numChars < 3)
-			throw new PreprocessorException(
-					"Improper file name in #include: " + fullName,
-					filenameToken);
+			throw new PreprocessorException("Improper file name in #include: "
+					+ fullName, filenameToken);
 		firstChar = fullName.charAt(0);
 		lastChar = fullName.charAt(numChars - 1);
 		if (firstChar == '<') {
@@ -1336,13 +1371,12 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			name = fullName.substring(1, numChars - 1);
 			system = false;
 		} else {
-			throw new PreprocessorException(
-					"Improper file name in #include: " + fullName,
-					filenameToken);
+			throw new PreprocessorException("Improper file name in #include: "
+					+ fullName, filenameToken);
 		}
 		try {
-			CivlcToken amplifiedFilenameToken = tokenFactory
-					.newCivlcToken(filenameToken, getIncludeHistory());
+			CivlcToken amplifiedFilenameToken = tokenFactory.newCivlcToken(
+					filenameToken, getIncludeHistory());
 
 			newInfo = findInclude(amplifiedFilenameToken, name, system);
 		} catch (IOException e) {
@@ -1351,13 +1385,12 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					filenameToken);
 		} catch (RecognitionException e) {
 			throw new PreprocessorException(
-					"Preprocessor could not parse included file " + name + ":\n"
-							+ e,
-					filenameToken);
+					"Preprocessor could not parse included file " + name
+							+ ":\n" + e, filenameToken);
 		}
 		if (newInfo == null)
-			throw new PreprocessorException("Cannot find included file " + name,
-					filenameToken);
+			throw new PreprocessorException(
+					"Cannot find included file " + name, filenameToken);
 		sourceStack.push(newInfo);
 	}
 
@@ -1383,7 +1416,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private PreprocessorSourceFileInfo findInclude(CivlcToken filenameToken,
 			String filename, boolean system) throws IOException,
-					RecognitionException, PreprocessorException {
+			RecognitionException, PreprocessorException {
 		File file = null;
 		CharStream charStream;
 		Tree tree;
@@ -1423,9 +1456,9 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					+ file);
 		tree = (Tree) fileReturn.getTree();
 		addEofNodeToTree(tree, filename);
-		return new PreprocessorSourceFileInfo(tokenFactory
-				.newInclusion(getOrMakeSourceFile(file, false), filenameToken),
-				parser, tree, tree.getChild(0));
+		return new PreprocessorSourceFileInfo(tokenFactory.newInclusion(
+				getOrMakeSourceFile(file, false), filenameToken), parser, tree,
+				tree.getChild(0));
 	}
 
 	/**
@@ -1687,9 +1720,9 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		}
 		stringLiteralBuffer.clear();
 		try {
-			StringToken result = pureStringTokens.size() != 1
-					? tokenFactory.newStringToken(pureStringTokens)
-					: tokenFactory.newStringToken(pureStringTokens.get(0));
+			StringToken result = pureStringTokens.size() != 1 ? tokenFactory
+					.newStringToken(pureStringTokens) : tokenFactory
+					.newStringToken(pureStringTokens.get(0));
 
 			addOutputHelper(result);
 		} catch (SyntaxException e) {
@@ -1736,8 +1769,9 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			// first remove any white space tokens at the end of the list, as
 			// we throw away any white space between two adjacent string
 			// literals. Then add the literal to the SLB.
-			while (!stringLiteralBuffer.isEmpty() && PreprocessorUtils
-					.isWhiteSpace(stringLiteralBuffer.getLast()))
+			while (!stringLiteralBuffer.isEmpty()
+					&& PreprocessorUtils.isWhiteSpace(stringLiteralBuffer
+							.getLast()))
 				stringLiteralBuffer.removeLast();
 			stringLiteralBuffer.add(token);
 		} else if (type == PreprocessorParser.NEWLINE
@@ -1781,16 +1815,15 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * @param token
 	 * @throws PreprocessorException
 	 */
-	private void addOutputHelper(CivlcToken token)
-			throws PreprocessorException {
+	private void addOutputHelper(CivlcToken token) throws PreprocessorException {
 		int type = token.getType();
 
 		if (type == PreprocessorParser.CHARACTER_CONSTANT) {
 			try {
 				token = tokenFactory.characterToken(token);
 			} catch (SyntaxException e) {
-				throw new PreprocessorException(e.getMessage(),
-						e.getSource().getFirstToken());
+				throw new PreprocessorException(e.getMessage(), e.getSource()
+						.getFirstToken());
 			}
 		}
 		token.setIndex(outputTokenCount);

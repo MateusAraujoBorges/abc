@@ -142,10 +142,13 @@ public class CPreprocessorWorker {
 	/**
 	 * Looks to see if a {@link SourceFile} object has already been created for
 	 * the given {@link File}. If so, returns that one. Else creates a new one,
-	 * assigns it the next index, and stores it.
+	 * assigns it the next index, and, if it is not a temporary file created by
+	 * ABC, stores it.
 	 * 
 	 * @param file
 	 *            a file that is being read to produce this token source
+	 * @param tmpFile
+	 *            true iff this is a temporary file created by ABC
 	 * @return the {@link SourceFile} corresponding to the given file
 	 */
 	SourceFile getOrMakeSourceFile(File file, boolean tmpFile) {
