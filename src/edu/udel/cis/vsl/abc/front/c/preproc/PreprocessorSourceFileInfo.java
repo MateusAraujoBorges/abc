@@ -16,17 +16,19 @@ public class PreprocessorSourceFileInfo {
 
 	private Formation history;
 
-	private PreprocessorParser parser;
+	// private PreprocessorParser parser;
 
-	private Tree tree;
+	// private Tree tree;
 
 	private Tree position;
 
 	public PreprocessorSourceFileInfo(Formation history,
-			PreprocessorParser parser, Tree tree, Tree position) {
+			// PreprocessorParser parser,
+			// Tree tree,
+			Tree position) {
 		this.history = history;
-		this.parser = parser;
-		this.tree = tree;
+		// this.parser = parser;
+		// this.tree = tree;
 		this.position = position;
 	}
 
@@ -38,13 +40,13 @@ public class PreprocessorSourceFileInfo {
 		return history.getLastFile();
 	}
 
-	public PreprocessorParser getParser() {
-		return parser;
-	}
+	// public PreprocessorParser getParser() {
+	// return parser;
+	// }
 
-	public Tree getTree() {
-		return tree;
-	}
+	// public Tree getTree() {
+	// return tree;
+	// }
 
 	public Tree getPosition() {
 		return position;

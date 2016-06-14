@@ -2,6 +2,13 @@ package edu.udel.cis.vsl.abc.token.IF;
 
 import java.io.File;
 
+/**
+ * Information object for a source file processed by ABC. Wraps a {@link File}
+ * with a unique integer index that can be used to identify that file in this
+ * ABC invocation.
+ * 
+ * @author siegel
+ */
 public class SourceFile {
 
 	private File file;
