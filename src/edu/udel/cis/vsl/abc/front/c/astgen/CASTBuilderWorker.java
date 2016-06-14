@@ -9,6 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
@@ -85,10 +86,12 @@ import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.token.IF.CharacterToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
  * Builds an AST from an ANTLR tree.
@@ -130,6 +133,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	private int anonymousTagCount = 0;
 
 	private AcslContractHandler acslHandler;
+
+	private Stack<Pair<SimpleScope, SequenceNode<ContractNode>>> scopeAndContracts = new Stack<>();
 
 	/* *************************** Constructors *************************** */
 
@@ -1036,26 +1041,20 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			} else if (isFunction(data.type, scope)) {
 				FunctionTypeNode typeNode = (FunctionTypeNode) data.type;
 				FunctionDeclarationNode declaration;
-				CommonTree contractTree = (CommonTree) declarationTree
-						.getChild(2);
-				SequenceNode<ContractNode> contract = getContract(contractTree,
-						scope);
 
 				if (analysis.abstractSpecifier) {
 					declaration = nodeFactory
 							.newAbstractFunctionDefinitionNode(source,
-									data.identifier, typeNode, contract,
+									data.identifier, typeNode, getContract(),
 									analysis.continuity);
 				} else {
 					declaration = nodeFactory.newFunctionDeclarationNode(
-							source, data.identifier, typeNode, contract);
+							source, data.identifier, typeNode, getContract());
 				}
 				if (debug)
 					System.out.println("processing function "
 							+ data.identifier.name());
-				declaration.setContract(translateAcslContract(
-						AcslContractKind.FUNCTION_CONTRACT, declarationTree,
-						scope));
+				// declaration.setContract(getContract());
 				setFunctionSpecifiers(declaration, analysis);
 				setStorageSpecifiers(declaration, analysis, scope);
 				if (initializer != null)
@@ -1990,18 +1989,16 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	private CivlForNode translateCivlFor(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
 		Source statementSource = newSource(tree);
-		SimpleScope loopScope = new SimpleScope(scope);
+		SimpleScope loopScope = getNewScope(scope);
 		CommonTree typeNameTree = (CommonTree) tree.getChild(0);
 		CommonTree identifierListTree = (CommonTree) tree.getChild(1);
 		CommonTree domainTree = (CommonTree) tree.getChild(2);
 		CommonTree bodyTree = (CommonTree) tree.getChild(3);
-		CommonTree invariantTree = (CommonTree) tree.getChild(4);
+		// CommonTree invariantTree = (CommonTree) tree.getChild(4);
 		int numVars = identifierListTree.getChildCount();
 		DeclarationListNode declListNode;
 		ExpressionNode domainNode = translateExpression(domainTree, loopScope);
 		StatementNode bodyNode = translateStatement(bodyTree, loopScope);
-		SequenceNode<ContractNode> loopContractNode = translateAcslContract(
-				AcslContractKind.LOOP_CONTRACT, invariantTree, loopScope);
 		CivlForNode result;
 
 		if (typeNameTree.getType() != ABSENT) {
@@ -2027,18 +2024,37 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 							+ "$for (int i1, i2, ... : domain) ...", tree);
 		result = nodeFactory.newCivlForNode(statementSource,
 				tree.getType() == PARFOR, declListNode, domainNode, bodyNode,
-				loopContractNode);
+				getContract());
 		return result;
+	}
+
+	private SimpleScope getNewScope(SimpleScope scope) {
+		if (!this.scopeAndContracts.isEmpty())
+			if (this.scopeAndContracts.peek().left != null)
+				return scopeAndContracts.peek().left;
+		return new SimpleScope(scope);
+	}
+
+	private SequenceNode<ContractNode> getContract() {
+		if (!this.scopeAndContracts.isEmpty())
+			if (this.scopeAndContracts.peek().right != null)
+				return scopeAndContracts.peek().right;
+		return null;
+	}
+
+	private void clearScopeAndContract() {
+		if (!this.scopeAndContracts.isEmpty()) {
+			this.scopeAndContracts.peek().left = null;
+			this.scopeAndContracts.peek().right = null;
+		}
 	}
 
 	private StatementNode translateFor(CommonTree statementTree,
 			SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		SimpleScope loopScope = new SimpleScope(scope);
+		SimpleScope loopScope = getNewScope(scope);
 		CommonTree initializerTree = (CommonTree) statementTree.getChild(0);
 		ForLoopInitializerNode initializerNode;
-		SequenceNode<ContractNode> contracts = this.translateAcslContract(
-				AcslContractKind.LOOP_CONTRACT, statementTree, loopScope);
 
 		if (initializerTree.getType() == DECLARATION) {
 			List<BlockItemNode> definitions = translateDeclaration(
@@ -2066,37 +2082,33 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				translateExpression((CommonTree) statementTree.getChild(2),
 						loopScope),
 				translateStatement((CommonTree) statementTree.getChild(3),
-						new SimpleScope(loopScope)), contracts);
+						new SimpleScope(loopScope)), getContract());
 	}
 
 	private StatementNode translateDo(CommonTree statementTree,
 			SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		SimpleScope loopScope = new SimpleScope(scope);
-		SequenceNode<ContractNode> contracts = this.translateAcslContract(
-				AcslContractKind.LOOP_CONTRACT, statementTree, loopScope);
+		SimpleScope loopScope = getNewScope(scope);
 
 		return nodeFactory.newDoLoopNode(
 				statementSource,
 				translateExpression((CommonTree) statementTree.getChild(1),
 						loopScope),
 				translateStatement((CommonTree) statementTree.getChild(0),
-						new SimpleScope(loopScope)), contracts);
+						new SimpleScope(loopScope)), getContract());
 	}
 
 	private StatementNode translateWhile(CommonTree statementTree,
 			SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		SimpleScope loopScope = new SimpleScope(scope);
-		SequenceNode<ContractNode> contracts = this.translateAcslContract(
-				AcslContractKind.LOOP_CONTRACT, statementTree, loopScope);
+		SimpleScope loopScope = getNewScope(scope);
 
 		return nodeFactory.newWhileLoopNode(
 				statementSource,
 				translateExpression((CommonTree) statementTree.getChild(0),
 						loopScope),
 				translateStatement((CommonTree) statementTree.getChild(1),
-						new SimpleScope(loopScope)), contracts);
+						new SimpleScope(loopScope)), getContract());
 	}
 
 	private StatementNode translateSwitch(CommonTree statementTree,
@@ -2213,6 +2225,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
 		OmpExecutableNode ompStatementNode = null;
 
+		scopeAndContracts.push(new Pair<>(null, null));
 		for (int i = 0; i < numChildren; i++) {
 			CommonTree childTree = (CommonTree) blockItems.getChild(i);
 			List<BlockItemNode> newBlockItems = this.translateBlockItemNode(
@@ -2237,6 +2250,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			} else
 				items.addAll(newBlockItems);
 		}
+		scopeAndContracts.pop();
 
 		int numItems = items.size();
 		boolean changed = false;
@@ -2422,7 +2436,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 						(CommonTree) staticAssertTree.getChild(1)));
 	}
 
-	private SequenceNode<ContractNode> translateAcslContract(
+	@SuppressWarnings("unused")
+	private SequenceNode<ContractNode> translateAcslContractOld(
 			AcslContractKind kind, CommonTree blockItemTree, SimpleScope scope)
 			throws SyntaxException {
 		CivlcToken contractToken = this.parseTree
@@ -2449,13 +2464,13 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private BlockItemNode translateFunctionDefinition(
+	private FunctionDefinitionNode translateFunctionDefinition(
 			CommonTree functionDefinitionTree, SimpleScope scope)
 			throws SyntaxException {
 		// two different ways of declaring parameters:
 		// (1) parameter-type list and no declarations
 		// (2) identifier list and declarations
-		SimpleScope newScope = new SimpleScope(scope, true);
+		SimpleScope newScope = getNewScope(scope);
 		CommonTree specifiers = (CommonTree) functionDefinitionTree.getChild(0);
 		CommonTree declarator = (CommonTree) functionDefinitionTree.getChild(1);
 		CommonTree declarationList = (CommonTree) functionDefinitionTree
@@ -2474,7 +2489,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		DeclaratorData data = processDeclarator(declarator, baseType, newScope);
 		FunctionTypeNode functionType = (FunctionTypeNode) data.type;
 		CompoundStatementNode body;
-		BlockItemNode result;
+		FunctionDefinitionNode result;
 
 		if (functionType.hasIdentifierList()) {
 			SequenceNode<VariableDeclarationNode> formalSequenceNode = functionType
@@ -2551,9 +2566,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		// getContract(contractTree, newScope), body);
 		result = nodeFactory.newFunctionDefinitionNode(
 				newSource(functionDefinitionTree), data.identifier,
-				(FunctionTypeNode) data.type, this.translateAcslContract(
-						AcslContractKind.FUNCTION_CONTRACT,
-						functionDefinitionTree, newScope), body);
+				(FunctionTypeNode) data.type, getContract(), body);
 		// TODO: Should function specifiers actually be set here? I added this
 		// call because otherwise specifiers are not added to function
 		// definitions, only declarations
@@ -2561,6 +2574,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		return result;
 	}
 
+	@SuppressWarnings("unused")
 	private SequenceNode<ContractNode> getContract(CommonTree contractTree,
 			SimpleScope scope) throws SyntaxException {
 		SequenceNode<ContractNode> contract;
@@ -2688,6 +2702,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			throw error("Translation unit contains no definitions",
 					translationUnit);
 		}
+		scopeAndContracts.push(new Pair<>(null, null));
 		for (int i = 0; i < numChildren; i++) {
 			// TODO need to know what's the language and decide whether the
 			// external definition node type needs to be checked, because C
@@ -2695,7 +2710,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			definitions.addAll(this.translateBlockItemNode(
 					(CommonTree) translationUnit.getChild(i), scope, false));
 		}
-
+		scopeAndContracts.pop();
 		// TODO: maybe find a better way to handle this (e.g. only when Cuda
 		// flag specified so we don't have to rely on automatically detecting
 		// Cuda programs
@@ -2714,7 +2729,6 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				}
 			}
 		}
-
 		return nodeFactory.newTranslationUnitNode(newSource(translationUnit),
 				definitions);
 	}
@@ -2738,10 +2752,11 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			for (BlockItemNode declaration : translateDeclaration(
 					blockItemTree, scope))
 				items.add(declaration);
+			clearScopeAndContract();
 			break;
 		case FUNCTION_DEFINITION:
-			items.add((BlockItemNode) translateFunctionDefinition(
-					blockItemTree, scope));
+			items.add(translateFunctionDefinition(blockItemTree, scope));
+			clearScopeAndContract();
 			break;
 		case PRAGMA:
 			items.add((BlockItemNode) this
@@ -2749,13 +2764,18 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			break;
 		case STATEMENT:
 			if (checkCExternalDefs) {
-				throw new SyntaxException("statement is not allowed in ", null);
+				throw new SyntaxException(
+						"statement is not allowed in file scope", null);
 			}
 			items.add((BlockItemNode) this.translateStatement(blockItemTree,
 					scope));
+			clearScopeAndContract();
 			break;
 		case STATICASSERT:
 			items.add(translateStaticAssertion(blockItemTree, scope));
+			break;
+		case ANNOTATION:
+			translateAnnotation(blockItemTree, scope);
 			break;
 		default:
 			throw new ABCUnsupportedException("translating block item node of "
@@ -2765,6 +2785,19 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	}
 
 	/* ********************* ASTBuilderWorker Methods ********************* */
+
+	private void translateAnnotation(CommonTree annotationTree,
+			SimpleScope scope) throws SyntaxException {
+		CommonTree bodyTree = (CommonTree) annotationTree.getChild(1);
+		CivlcTokenSource tokenSource = parseTree.getTokenSourceProducer(
+				bodyTree).newSource();
+		Source source = this.newSource(annotationTree);
+		SimpleScope newScope = new SimpleScope(scope);
+
+		this.scopeAndContracts.peek().left = newScope;
+		this.scopeAndContracts.peek().right = acslHandler.processAnnotation(
+				source, tokenSource, newScope);
+	}
 
 	/**
 	 * The main method: given an ANTLR tree, produces a TranslationUnit.

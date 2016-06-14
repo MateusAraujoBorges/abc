@@ -41,6 +41,7 @@ public interface CivlcTokenConstant {
 	public static final int ALIGNOF = CivlCParser.ALIGNOF;
 	public static final int AMPERSAND = CivlCParser.AMPERSAND;
 	public static final int AND = CivlCParser.AND;
+	public static final int ANNOTATION = CivlCParser.ANNOTATION;
 	public static final int ARROW = CivlCParser.ARROW;
 	public static final int ASSIGN = CivlCParser.ASSIGN;
 	public static final int ASSIGNS = CivlCParser.ASSIGNS;

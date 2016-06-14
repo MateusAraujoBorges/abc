@@ -6,19 +6,24 @@ import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.Token;
+import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
+import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.parse.AcslParser;
+import edu.udel.cis.vsl.abc.front.c.parse.CAcslParser;
 import edu.udel.cis.vsl.abc.front.c.parse.CParser.RuleKind;
 import edu.udel.cis.vsl.abc.front.c.preproc.AcslLexer;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.common.parse.TreeUtils;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
@@ -53,6 +58,11 @@ public class AcslContractHandler {
 	private TokenFactory tokenFactory;
 
 	/**
+	 * parser for ACSL contract annotations
+	 */
+	private CAcslParser cAcslParser;
+
+	/**
 	 * creates a new instance of ACSL contract handler
 	 * 
 	 * @param factory
@@ -63,6 +73,7 @@ public class AcslContractHandler {
 	public AcslContractHandler(NodeFactory factory, TokenFactory tokenFactory) {
 		this.nodeFactory = factory;
 		this.tokenFactory = tokenFactory;
+		cAcslParser = new CAcslParser();
 	}
 
 	/**
@@ -89,7 +100,7 @@ public class AcslContractHandler {
 	 */
 	public List<ContractNode> translateContracts(int startLine, String text,
 			SimpleScope scope, Formation formation, AcslContractKind kind)
-					throws SyntaxException {
+			throws SyntaxException {
 		CParseTree contractTree = this.parse(startLine, text, formation, kind);
 		AcslContractWorker worker = new AcslContractWorker(nodeFactory,
 				tokenFactory, contractTree);
@@ -137,8 +148,8 @@ public class AcslContractHandler {
 				tree = (CommonTree) parser.loop_contract().getTree();
 				break;
 			default:
-				throw new SyntaxException("unknown ACSL contract kind: " + kind,
-						null);
+				throw new SyntaxException(
+						"unknown ACSL contract kind: " + kind, null);
 			}
 		} catch (RecognitionException e) {
 			throw new ABCRuntimeException(e.getMessage());
@@ -146,8 +157,7 @@ public class AcslContractHandler {
 		TreeUtils.postProcessTree(tree);
 		return new CParseTree(Language.CIVL_C, RuleKind.CONTRACT,
 				this.tokenFactory.getCivlcTokenSourceByTokens(
-						tokens.getTokens(), formation),
-				tree);
+						tokens.getTokens(), formation), tree);
 	}
 
 	/**
@@ -162,5 +172,25 @@ public class AcslContractHandler {
 		for (Token token : tokens.getTokens()) {
 			token.setLine(token.getLine() + offset);
 		}
+	}
+
+	public SequenceNode<ContractNode> processAnnotation(Source source,
+			CivlcTokenSource tokenSource, SimpleScope scope)
+			throws SyntaxException {
+		TokenStream tokens;
+		CommonTree tree;
+
+		tokens = new CommonTokenStream(tokenSource);
+		tree = this.cAcslParser.parse(source, tokens);
+		TreeUtils.postProcessTree(tree);
+
+		CParseTree parseTree = new CParseTree(Language.CIVL_C,
+				RuleKind.CONTRACT, tokenSource, tree);
+		AcslContractWorker worker = new AcslContractWorker(nodeFactory,
+				tokenFactory, parseTree);
+
+		return this.nodeFactory.newSequenceNode(source, "ACSL Annotation",
+				worker.generateASTNodes(scope));
+
 	}
 }

@@ -670,7 +670,9 @@ public class ASTPrettyPrinter {
 			out.print("\\mpi_collective(");
 			out.print(expression2Pretty(colBlock.getMPIComm()));
 			out.print("," + colBlock.getCollectiveKind());
+			out.print(")");
 			for (ContractNode clause : colBlock.getBody()) {
+				out.print(indentedNewLinePrefix);
 				pPrintContractNode(out, indentedNewLinePrefix, clause);
 			}
 			break;

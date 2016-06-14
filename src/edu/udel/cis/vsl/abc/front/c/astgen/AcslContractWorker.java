@@ -1,49 +1,48 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ACCESS_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AMPERSAND;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ANYACT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARROW;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ASSIGN;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BAR;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITXOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BOOLEAN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CAST;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHARACTER_CONSTANT;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CIVLFALSE;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CIVLTRUE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMMA;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMP;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.C_TYPE;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DIVIDE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DIV;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOTDOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOUBLE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ELLIPSIS;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EQ;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EQUALS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_BASE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_INTS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PARENTHESIZED;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PLUS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FALSE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FALSE_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOAT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOATING_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FUNC_CALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GTE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.HASH;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ID;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLY;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IDENTIFIER;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLIES_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INDEX;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER_CONSTANT;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LAND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LOGIC_TYPE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LONG;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LTE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MOD;
@@ -53,14 +52,14 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NEQ;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.NOTHING;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.OPERATOR;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.OR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.PLUS;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QMARK;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QUANTIFIED;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QUESTION;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REACH;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.READ;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REAL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.READ_ACSL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REAL_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REMOTE_ACCESS;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RESULT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RESULT_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SELF;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SET_BINDERS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHIFTLEFT;
@@ -71,7 +70,9 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STRING_LITERAL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TERM_PARENTHESIZED;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TILDE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TRUE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TRUE_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TYPE_BUILTIN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TYPE_ID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VALID;
@@ -80,7 +81,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_BASE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_SQUARE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_STAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VOID;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.WRITE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.WRITE_ACSL;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -371,7 +372,7 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 		boolean isComplete = false;
 		SequenceNode<IdentifierNode> idList = this.translateIdList(
-				(CommonTree) tree.getChild(0), scope);
+				(CommonTree) tree.getChild(2), scope);
 		Source source = this.parseTree.source(tree);
 
 		switch (kind) {
@@ -423,8 +424,8 @@ public class AcslContractWorker {
 	 */
 	private BehaviorNode translateBehavior(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
-		CommonTree idTree = (CommonTree) tree.getChild(0);
-		CommonTree bodyTree = (CommonTree) tree.getChild(1);
+		CommonTree idTree = (CommonTree) tree.getChild(1);
+		CommonTree bodyTree = (CommonTree) tree.getChild(2);
 		IdentifierNode id = this.translateIdentifier(idTree);
 		SequenceNode<ContractNode> body = this.translateBehaviorBody(bodyTree,
 				scope);
@@ -476,19 +477,19 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 
 		switch (kind) {
-		case AcslParser.REQUIRES:
+		case AcslParser.REQUIRES_ACSL:
 			return this.translateRequires(tree, scope);
-		case AcslParser.ENSURES:
+		case AcslParser.ENSURES_ACSL:
 			return this.translateEnsures(tree, scope);
-		case AcslParser.ASSIGNS:
+		case AcslParser.ASSIGNS_ACSL:
 			return this.translateReadsOrAssigns(tree, scope, false);
-		case AcslParser.ASSUMES:
+		case AcslParser.ASSUMES_ACSL:
 			return this.translateAssumes(tree, scope);
-		case AcslParser.READS:
+		case AcslParser.READS_ACSL:
 			return this.translateReadsOrAssigns(tree, scope, true);
-		case AcslParser.DEPENDS:
+		case AcslParser.DEPENDSON:
 			return this.translateDepends(tree, scope);
-		case AcslParser.GUARDS:
+		case AcslParser.EXECUTES_WHEN:
 			return this.translateGuards(tree, scope);
 		case AcslParser.WAITSFOR:
 			return this.translateWaitsfor(tree, scope);
@@ -511,7 +512,7 @@ public class AcslContractWorker {
 	 */
 	private GuardsNode translateGuards(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
-		CommonTree expressionTree = (CommonTree) tree.getChild(0);
+		CommonTree expressionTree = (CommonTree) tree.getChild(1);
 
 		return this.nodeFactory.newGuardNode(this.newSource(tree),
 				this.translateExpression(expressionTree, scope));
@@ -519,7 +520,7 @@ public class AcslContractWorker {
 
 	private WaitsforNode translateWaitsfor(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
-		CommonTree expressionTree = (CommonTree) tree.getChild(0);
+		CommonTree expressionTree = (CommonTree) tree.getChild(1);
 		SequenceNode<ExpressionNode> arguments = translateArgumentList(
 				expressionTree, scope);
 
@@ -540,7 +541,7 @@ public class AcslContractWorker {
 	 */
 	private AssumesNode translateAssumes(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
-		CommonTree exprTree = (CommonTree) tree.getChild(0);
+		CommonTree exprTree = (CommonTree) tree.getChild(1);
 		ExpressionNode predicate = this.translateExpression(exprTree, scope);
 		Source source = this.parseTree.source(tree);
 
@@ -551,7 +552,7 @@ public class AcslContractWorker {
 			SimpleScope scope, boolean isRead) throws SyntaxException {
 		Source source = this.parseTree.source(tree);
 		SequenceNode<ExpressionNode> memoryList = translateArgumentList(
-				(CommonTree) tree.getChild(0), scope);
+				(CommonTree) tree.getChild(1), scope);
 
 		if (isRead)
 			return this.nodeFactory.newReadsNode(source, memoryList);
@@ -562,7 +563,7 @@ public class AcslContractWorker {
 	private DependsNode translateDepends(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
 		Source source = this.parseTree.source(tree);
-		CommonTree argumentTree = (CommonTree) tree.getChild(0);
+		CommonTree argumentTree = (CommonTree) tree.getChild(1);
 		SequenceNode<DependsEventNode> argumentList = this
 				.translateDependsEventList(argumentTree, scope);
 
@@ -638,31 +639,31 @@ public class AcslContractWorker {
 		Source source = this.parseTree.source(tree);
 
 		switch (kind) {
-		case READ: {
+		case READ_ACSL: {
 			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
-					(CommonTree) tree.getChild(0), scope);
+					(CommonTree) tree.getChild(1), scope);
 
 			return nodeFactory.newMemoryEventNode(source,
 					MemoryEventNodeKind.READ, memList);
 		}
-		case WRITE: {
+		case WRITE_ACSL: {
 			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
-					(CommonTree) tree.getChild(0), scope);
+					(CommonTree) tree.getChild(1), scope);
 
 			return nodeFactory.newMemoryEventNode(source,
 					MemoryEventNodeKind.WRITE, memList);
 		}
-		case REACH: {
+		case ACCESS_ACSL: {
 			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
-					(CommonTree) tree.getChild(0), scope);
+					(CommonTree) tree.getChild(1), scope);
 
 			return nodeFactory.newMemoryEventNode(source,
 					MemoryEventNodeKind.REACH, memList);
 
 		}
-		case CALL: {
+		case CALL_ACSL: {
 			IdentifierNode function = this
-					.translateIdentifier((CommonTree) tree.getChild(0));
+					.translateIdentifier((CommonTree) tree.getChild(1));
 			SequenceNode<ExpressionNode> args = this.translateArgumentList(
 					(CommonTree) tree.getChild(1), scope);
 
@@ -684,7 +685,7 @@ public class AcslContractWorker {
 
 	private RequiresNode translateRequires(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
-		CommonTree expressionTree = (CommonTree) tree.getChild(0);
+		CommonTree expressionTree = (CommonTree) tree.getChild(1);
 		Source source = this.newSource(tree);
 		ExpressionNode expression = this.translateExpression(expressionTree,
 				scope);
@@ -695,7 +696,7 @@ public class AcslContractWorker {
 	private EnsuresNode translateEnsures(CommonTree tree, SimpleScope scope)
 			throws SyntaxException {
 		Source source = this.newSource(tree);
-		CommonTree expressionTree = (CommonTree) tree.getChild(0);
+		CommonTree expressionTree = (CommonTree) tree.getChild(1);
 		ExpressionNode expression = this.translateExpression(expressionTree,
 				scope);
 
@@ -724,7 +725,7 @@ public class AcslContractWorker {
 			return translateCharacterConstant(source, expressionTree);
 		case STRING_LITERAL:
 			return translateStringLiteral(source, expressionTree);
-		case ID: {
+		case IDENTIFIER: {
 			IdentifierNode identifier = translateIdentifier(expressionTree);
 			ExpressionNode enumerationConsant = translateEnumerationConstant(
 					identifier, scope);
@@ -744,18 +745,18 @@ public class AcslContractWorker {
 		case OPERATOR:
 			return translateOperatorExpression(source, expressionTree, scope);
 		case TRUE:
-		case CIVLTRUE:
+		case TRUE_ACSL:
 			return translateTrue(source);
 		case FALSE:
-		case CIVLFALSE:
+		case FALSE_ACSL:
 			return translateFalse(source);
-		case RESULT:
+		case RESULT_ACSL:
 			return nodeFactory.newResultNode(source);
 		case SELF:
 			return nodeFactory.newSelfNode(source);
 		case DOTDOT:
 			return translateRegularRange(source, expressionTree, scope);
-		case WRITE:
+		case WRITE_ACSL:
 			return translateWriteEvent(source, expressionTree, scope);
 		case NOTHING:
 			return this.nodeFactory.newNothingNode(source);
@@ -816,9 +817,9 @@ public class AcslContractWorker {
 		// ExpressionNode result = null;
 		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableList = new LinkedList<>();
 
-		if (quantifierTree.getType() == AcslParser.FORALL)
+		if (quantifierTree.getType() == AcslParser.FORALL_ACSL)
 			quantifier = Quantifier.FORALL;
-		else if (quantifierTree.getType() == AcslParser.EXISTS)
+		else if (quantifierTree.getType() == AcslParser.EXISTS_ACSL)
 			quantifier = Quantifier.EXISTS;
 		else
 			throw error("Unexpexted quantifier " + quantifierTree.getType(),
@@ -881,8 +882,8 @@ public class AcslContractWorker {
 	private ExpressionNode translateRemoteExpression(CommonTree tree,
 			Source source, SimpleScope scope) throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
-		CommonTree idTree = (CommonTree) tree.getChild(0);
-		CommonTree procTree = (CommonTree) tree.getChild(1);
+		CommonTree idTree = (CommonTree) tree.getChild(1);
+		CommonTree procTree = (CommonTree) tree.getChild(2);
 		ExpressionNode idArg, procArg;
 
 		idArg = translateExpression(idTree, newScope);
@@ -986,7 +987,7 @@ public class AcslContractWorker {
 			case INTEGER:
 				return this.nodeFactory.newBasicTypeNode(source,
 						BasicTypeKind.INT);
-			case REAL:
+			case REAL_ACSL:
 				return this.nodeFactory.newBasicTypeNode(source,
 						BasicTypeKind.REAL);
 			default:
@@ -1044,7 +1045,7 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 
 		switch (kind) {
-		case ID: {
+		case IDENTIFIER: {
 			IdentifierNode identifier = this.translateIdentifier(tree);
 
 			return this.nodeFactory.newVariableDeclarationNode(
@@ -1061,15 +1062,15 @@ public class AcslContractWorker {
 	// ////////////////////////////////////
 	private ExpressionNode translateValidNode(CommonTree tree, Source source,
 			SimpleScope scope) throws SyntaxException {
-		CommonTree pointer = (CommonTree) tree.getChild(0);
+		CommonTree pointer = (CommonTree) tree.getChild(1);
 		ExpressionNode ptrNode;
 		ExpressionNode rangeNode;
 
 		ptrNode = translateExpression(pointer, scope);
-		if (tree.getChildCount() > 1) {
+		if (tree.getChildCount() > 2) {
 			CommonTree range;
 
-			range = (CommonTree) tree.getChild(1);
+			range = (CommonTree) tree.getChild(2);
 			rangeNode = translateExpression(range, scope);
 			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode,
 					rangeNode);
@@ -1223,10 +1224,10 @@ public class AcslContractWorker {
 		case ASSIGN:
 			operator = Operator.ASSIGN;
 			break;
-		case COMP:
+		case TILDE:
 			operator = Operator.BITCOMPLEMENT;
 			break;
-		case BAR:
+		case BITOR:
 			operator = Operator.BITOR;
 			break;
 		case BITXOR:
@@ -1235,16 +1236,16 @@ public class AcslContractWorker {
 		case COMMA:
 			operator = Operator.COMMA;
 			break;
-		case QUESTION:
+		case QMARK:
 			operator = Operator.CONDITIONAL;
 			break;
 		case STAR:
 			operator = numArgs == 1 ? Operator.DEREFERENCE : Operator.TIMES;
 			break;
-		case DIVIDE:
+		case DIV:
 			operator = Operator.DIV;
 			break;
-		case EQ:
+		case EQUALS:
 			operator = Operator.EQUALS;
 			break;
 		case GT:
@@ -1256,13 +1257,13 @@ public class AcslContractWorker {
 		case HASH:
 			operator = Operator.HASH;
 			break;
-		case LAND:
+		case AND:
 			operator = Operator.LAND;
 			break;
-		case LOR:
+		case OR:
 			operator = Operator.LOR;
 			break;
-		case IMPLY:
+		case IMPLIES_ACSL:
 			operator = Operator.IMPLIES;
 			break;
 		case LT:
@@ -1340,9 +1341,9 @@ public class AcslContractWorker {
 
 	private MPICollectiveBlockNode translateMPICollectiveBlock(Source source,
 			CommonTree colBlock, SimpleScope scope) throws SyntaxException {
-		CommonTree mpiComm = (CommonTree) colBlock.getChild(0);
-		CommonTree kind = (CommonTree) colBlock.getChild(1);
-		CommonTree body = (CommonTree) colBlock.getChild(2);
+		CommonTree mpiComm = (CommonTree) colBlock.getChild(1);
+		CommonTree kind = (CommonTree) colBlock.getChild(2);
+		CommonTree body = (CommonTree) colBlock.getChild(3);
 		List<ContractNode> bodyComponents = new LinkedList<>();
 		SequenceNode<ContractNode> bodyNode;
 		ExpressionNode mpiCommNode;
@@ -1372,17 +1373,21 @@ public class AcslContractWorker {
 
 	private MPIContractConstantNode translateMPIConstantNode(CommonTree tree,
 			Source source) throws SyntaxException {
-		String text = tree.getChild(0).getText();
+		CommonTree constantTree = (CommonTree) tree.getChild(0);
 		MPIContractConstantNode result;
 
-		if (text.equals(MPI_COMM_RANK)) {
+		switch (constantTree.getType()) {
+		case AcslParser.MPI_COMM_RANK:
 			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK,
 					MPIConstantKind.MPI_COMM_RANK, ConstantKind.INT);
-		} else if (text.equals(MPI_COMM_SIZE)) {
+			break;
+		case AcslParser.MPI_COMM_SIZE:
 			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE,
 					MPIConstantKind.MPI_COMM_SIZE, ConstantKind.INT);
-		} else
-			throw error("Unknown MPI Constant " + text, tree);
+			break;
+		default:
+			throw error("Unknown MPI Constant", tree);
+		}
 		result.setInitialType(typeFactory.signedIntegerType(SignedIntKind.INT));
 		return result;
 	}
@@ -1398,6 +1403,7 @@ public class AcslContractWorker {
 		MPIContractExpressionKind mpiExprKind;
 		MPIContractExpressionNode result;
 		Type initialType;
+		int numChildren = expression.getChildCount();
 
 		switch (kind) {
 		case AcslParser.MPI_EMPTY_IN:
@@ -1428,7 +1434,8 @@ public class AcslContractWorker {
 		default:
 			throw error("Unknown MPI expression " + exprName, expressionTree);
 		}
-		for (int i = 0; i < numArgs; i++) {
+		assert numChildren == numArgs + 1;
+		for (int i = 1; i < numChildren; i++) {
 			args.add(this.translateExpression(
 					(CommonTree) expression.getChild(i), scope));
 		}

@@ -150,6 +150,7 @@ FORALL		:	'$forall';
 FATOMIC     	:   	'$atomic_f';
 GUARD       	:   	'$guard';
 HERE		:	'$here';
+IMPLIES_ACSL	:	'==>' |	NotLineStart; // can the NotLineStart be removed?
 IMPLIES		:	'=>'	|	NotLineStart; // can the NotLineStart be removed?
 INPUT		:	'$input';
 INVARIANT	:	'$invariant';

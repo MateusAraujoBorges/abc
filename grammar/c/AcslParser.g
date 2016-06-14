@@ -14,33 +14,52 @@ options
 	language=Java;
 	tokenVocab=AcslLexer;
 	output=AST;
-    backtrack=true;
+   	backtrack=true;
 }
 
 tokens{
+    ACCESS_ACSL;
+    ALLOC;
+    ANYACT;
     ARGUMENT_LIST;
+    ASSUMES_ACSL;
+    ASSIGNS_ACSL;
+    BEHAVIOR;
     BEHAVIOR_BODY;
     BEHAVIOR_COMPLETE;
     BEHAVIOR_DISJOINT;
     BINDER;
     BINDER_LIST;
+    BOOLEAN;
+    BOTH;
     C_TYPE;
+    CALL_ACSL;
     CAST;
     CLAUSE_NORMAL;
     CLAUSE_BEHAVIOR;
     CLAUSE_COMPLETE;
+    COL;
     CONTRACT;
+    DEPENDSON;
+    ENSURES_ACSL;
     EVENT_BASE;
     EVENT_PLUS;
     EVENT_SUB;
     EVENT_INTS;
     EVENT_LIST;
     EVENT_PARENTHESIZED;
+    EXECUTES_WHEN;
+    EXISTS_ACSL;
+    FALSE_ACSL;
+    FORALL_ACSL;
+    FREES;
     FUNC_CALL;
     FUNC_CONTRACT;
     FUNC_CONTRACT_BLOCK;
     ID_LIST;
     INDEX;
+    INTEGER;
+    INTER;
     LOGIC_TYPE;
     LOOP_ALLOC;
     LOOP_ASSIGNS;
@@ -51,21 +70,45 @@ tokens{
     LOOP_FREE;
     LOOP_INVARIANT;
     LOOP_VARIANT;
+    MPI_AGREE;
+    MPI_COLLECTIVE;
+    MPI_COMM_RANK;
+    MPI_COMM_SIZE;
     MPI_CONSTANT;
+    MPI_EMPTY_IN;
+    MPI_EMPTY_OUT;
+    MPI_EQUALS;
     MPI_EXPRESSION;
+    MPI_REGION;
+    NULL_ACSL;
+    NOTHING;
     OPERATOR;
+    P2P;
+    PURE;
     QUANTIFIED;
+    READ_ACSL;
+    READS_ACSL;
+    REAL_ACSL;
+    RESULT_ACSL;
+    REMOTE_ACCESS;
+    REQUIRES_ACSL;
     SET_BINDERS;
     SET_SIMPLE;
     SIZEOF_EXPR;
     SIZEOF_TYPE;
     TERM_PARENTHESIZED;
+    TERMINATES;
+    TRUE_ACSL;
     TYPE_BUILTIN;
     TYPE_ID;
+    UNION_ACSL;
+    VALID;
     VAR_ID;
     VAR_ID_BASE;
     VAR_ID_SQUARE;
     VAR_ID_STAR;
+    WAITSFOR;
+    WRITE_ACSL;
 }
 
 @header
@@ -74,14 +117,13 @@ package edu.udel.cis.vsl.abc.front.c.parse;
 }
 
 contract
-    : function_contract
-        -> ^(CONTRACT function_contract)
-    | loop_contract
-        -> ^(CONTRACT loop_contract)
+    : loop_contract 
+    | function_contract 
     ;
 
+/* Section 2.4.2 Loop Annotations */
 loop_contract
-    : LCOMMENT loop_contract_block RCOMMENT
+    : loop_contract_block
         ->^(LOOP_CONTRACT loop_contract_block)
     ;
 
@@ -91,28 +133,28 @@ loop_contract_block
     ;
 
 loop_clause
-    : loop_invariant SEMICOL
+    : loop_invariant SEMI
         ->^(LOOP_CLAUSE loop_invariant)
-    | loop_assigns SEMICOL
+    | loop_assigns SEMI
         ->^(LOOP_CLAUSE loop_assigns)
-    | loop_allocation SEMICOL
+    | loop_allocation SEMI
         ->^(LOOP_CLAUSE loop_allocation)
     ;
 
 loop_invariant
-    : LOOP INVARIANT term
+    : loop_key invariant_key term
         ->^(LOOP_INVARIANT term)
     ;
 
 loop_assigns
-    : LOOP ASSIGNS argumentExpressionList
+    : loop_key assigns_key argumentExpressionList
         ->^(LOOP_ASSIGNS argumentExpressionList)
     ;
 
 loop_allocation
-    : LOOP ALLOC argumentExpressionList (COMMA term)?
+    : loop_key alloc_key argumentExpressionList (COMMA term)?
         ->^(LOOP_ALLOC argumentExpressionList term?)
-    | LOOP FREES argumentExpressionList
+    | loop_key frees_key argumentExpressionList
         ->^(LOOP_FREE argumentExpressionList)
     ;
 
@@ -122,21 +164,20 @@ loop_behavior
     ;
 
 loop_variant
-    : LOOP VARIANT term
+    : loop_key variant_key term
         ->^(LOOP_VARIANT term)
-    | LOOP VARIANT term FOR ID
-        ->^(LOOP_VARIANT term ID)
+    | loop_key variant_key term FOR IDENTIFIER
+        ->^(LOOP_VARIANT term IDENTIFIER)
     ;
 
 /* sec. 2.3 Function contracts */
 function_contract
-    : LCOMMENT pure_function? full_contract_block RCOMMENT
+    : pure_function? full_contract_block
       -> ^(FUNC_CONTRACT full_contract_block pure_function?)
     ;
 
 pure_function
-    : PURE SEMICOL
-      ->^(PURE)
+    : pure_key SEMI
     ;
 
 /* a full contract block non-terminal represents an ACSL contract
@@ -167,9 +208,9 @@ contract_block
     ;
 
 function_clause
-    : requires_clause SEMICOL-> ^(CLAUSE_NORMAL requires_clause)
-    | terminates_clause SEMICOL-> ^(CLAUSE_NORMAL terminates_clause)
-    | simple_clause SEMICOL -> ^(CLAUSE_NORMAL simple_clause)
+    : requires_clause SEMI-> ^(CLAUSE_NORMAL requires_clause)
+    | terminates_clause SEMI-> ^(CLAUSE_NORMAL terminates_clause)
+    | simple_clause SEMI -> ^(CLAUSE_NORMAL simple_clause)
     ;
 
 named_behavior_block
@@ -177,19 +218,19 @@ named_behavior_block
     ;
 
 completeness_clause_block
-    : completeness_clause SEMICOL -> ^(CLAUSE_COMPLETE completeness_clause)
+    : completeness_clause SEMI -> ^(CLAUSE_COMPLETE completeness_clause)
     ;
 
 requires_clause
-    : REQUIRES term -> ^(REQUIRES term)
+    : requires_key term -> ^(REQUIRES_ACSL requires_key term)
     ;
 
 terminates_clause
-    : TEMINATES term -> ^(TERMINATES term)
+    : terminates_key term -> ^(TERMINATES terminates_key term)
     ;
 
 rel_op
-    : EQ | NEQ | LTE | GTE | LT | GT
+    : EQUALS | NEQ | LTE | GTE | LT | GT
     ;
 
 binders
@@ -209,7 +250,7 @@ type_expr
 
 logic_type_expr
     : built_in_logic_type ->^(TYPE_BUILTIN built_in_logic_type)
-    | ID ->^(TYPE_ID ID)
+    | IDENTIFIER ->^(TYPE_ID IDENTIFIER)
     ;
 
 c_type
@@ -217,7 +258,7 @@ c_type
     ;
 
 built_in_logic_type
-    : BOOLEAN | INTEGER | REAL
+    : boolean_type | integer_type | real_type
     ;
 
 variable_ident
@@ -230,14 +271,14 @@ variable_ident
     ;
 
 variable_ident_base
-    : ID
-      ->^(ID)
+    : IDENTIFIER
+      ->^(IDENTIFIER)
     | LPAREN variable_ident RPAREN
       ->^(VAR_ID_BASE variable_ident)
     ;
 
 guards_clause
-    : GUARDS term ->^(GUARDS term)
+    : executeswhen_key term ->^(EXECUTES_WHEN executeswhen_key term)
     ;
 
 simple_clause
@@ -251,32 +292,28 @@ simple_clause
     ;
 
 assigns_clause
-    : ASSIGNS argumentExpressionList ->^(ASSIGNS argumentExpressionList)
+    : assigns_key argumentExpressionList ->^(ASSIGNS_ACSL assigns_key argumentExpressionList)
     ;
 
 ensures_clause
-    : ENSURES term ->^(ENSURES term)
+    : ensures_key term ->^(ENSURES_ACSL ensures_key term)
     ;
 
 allocation_clause
-    : ALLOC argumentExpressionList (COMMA term)? ->^(ALLOC argumentExpressionList term?)
-    | FREES argumentExpressionList ->^(FREES argumentExpressionList)
+    : alloc_key argumentExpressionList (COMMA term)? ->^(ALLOC alloc_key argumentExpressionList term?)
+    | frees_key argumentExpressionList ->^(FREES frees_key argumentExpressionList)
     ;
 
 reads_clause
-    : READS argumentExpressionList ->^(READS argumentExpressionList)
+    : reads_key argumentExpressionList ->^(READS_ACSL reads_key argumentExpressionList)
     ;
 
 waitsfor_clause
-    : WAITSFOR argumentExpressionList -> ^(WAITSFOR argumentExpressionList)
+    : waitsfor_key argumentExpressionList -> ^(WAITSFOR waitsfor_key argumentExpressionList)
     ;
-/*
-reaches_clause
-    : REACHES argumentExpressionList ->^(REACHES argumentExpressionList)
-    ;
-*/
+
 depends_clause
-    : DEPENDS event_list ->^(DEPENDS event_list)
+    : dependson_key event_list ->^(DEPENDSON dependson_key event_list)
     ;
 
 event_list
@@ -295,37 +332,35 @@ event
     ;
 
 event_base
-    : READ LPAREN argumentExpressionList RPAREN
-        -> ^(READ argumentExpressionList)
-    | WRITE LPAREN argumentExpressionList RPAREN
-        -> ^(WRITE argumentExpressionList)
-    | REACH LPAREN argumentExpressionList RPAREN
-        -> ^(REACH argumentExpressionList)
-    | CALL LPAREN ID (COMMA argumentExpressionList)? RPAREN
-        -> ^(CALL ID argumentExpressionList?)
-    | NOTHING
-        -> ^(NOTHING)
-    | ANYACT
-        -> ^(ANYACT)
+    : read_key LPAREN argumentExpressionList RPAREN
+        -> ^(READ_ACSL read_key argumentExpressionList)
+    | write_key LPAREN argumentExpressionList RPAREN
+        -> ^(WRITE_ACSL write_key argumentExpressionList)
+    | access_key LPAREN argumentExpressionList RPAREN
+        -> ^(ACCESS_ACSL access_key argumentExpressionList)
+    | call_key LPAREN IDENTIFIER (COMMA argumentExpressionList)? RPAREN
+        -> ^(CALL_ACSL call_key IDENTIFIER argumentExpressionList?)
+    | nothing_key
+    | anyact_key
     | LPAREN event RPAREN
         -> ^(EVENT_PARENTHESIZED event)
     ;
 
 /* ACSL-MPI extensions: constructors */
 mpi_collective_block
-    : MPI_COLLECTIVE LPAREN ID COMMA kind=mpi_collective_kind  RPAREN COLON
-      c=partial_contract_block -> ^(MPI_COLLECTIVE ID $kind $c)
+    : mpicollective_key LPAREN IDENTIFIER COMMA kind=mpi_collective_kind  RPAREN COLON
+      c=partial_contract_block -> ^(MPI_COLLECTIVE mpicollective_key IDENTIFIER $kind $c)
     ;
 
 
 
 /* sec. 2.3.3 contracts with named behaviors */
 named_behavior
-    : BEHAVIOR ID COLON behavior_body ->^(BEHAVIOR ID behavior_body)
+    : behavior_key IDENTIFIER COLON behavior_body ->^(BEHAVIOR behavior_key IDENTIFIER behavior_body)
     ;
 
 behavior_body
-    : (b+=behavior_clause SEMICOL)+ -> ^(BEHAVIOR_BODY $b+)
+    : (b+=behavior_clause SEMI)+ -> ^(BEHAVIOR_BODY $b+)
     ;
 
 behavior_clause
@@ -335,17 +370,17 @@ behavior_clause
     ;
 
 assumes_clause
-    : ASSUMES term ->^(ASSUMES term)
+    : assumes_key term ->^(ASSUMES_ACSL assumes_key term)
     ;
 
 completeness_clause
-    : COMPLETE BEHAVIORS id_list ->^(BEHAVIOR_COMPLETE id_list)
-    | DISJOINT BEHAVIORS id_list ->^(BEHAVIOR_DISJOINT id_list)
+    : completes_key behaviors_key id_list ->^(BEHAVIOR_COMPLETE completes_key behaviors_key id_list)
+    | disjoint_key behaviors_key id_list ->^(BEHAVIOR_DISJOINT disjoint_key behaviors_key id_list)
     ;
 
 id_list
     :
-    | ID (COMMA ID)* ->^(ID_LIST ID+)
+    | IDENTIFIER (COMMA IDENTIFIER)* ->^(ID_LIST IDENTIFIER+)
     ;
 
 /* C11 section 6.5 Expressions: Grammar here is organized with a
@@ -397,8 +432,8 @@ assignmentExpression
 conditionalExpression
 	: quantifierExpression
 	( -> quantifierExpression
-    	| QUESTION term COLON conditionalExpression
-    	  -> ^(OPERATOR QUESTION
+    	| QMARK term COLON conditionalExpression
+    	  -> ^(OPERATOR QMARK
     	       ^(ARGUMENT_LIST
     	         quantifierExpression
     	         term
@@ -409,7 +444,7 @@ conditionalExpression
 /* DEV: put quantifiedExpression a higher precedence than logicalImpliesExpression */
 quantifierExpression
 	: logicalImpliesExpression
-    | quantifier binders SEMICOL a=logicalOrExpression IMPLY b=logicalOrExpression
+    | quantifier binders SEMI a=logicalOrExpression IMPLIES_ACSL b=logicalOrExpression
 	   -> ^(QUANTIFIED quantifier binders $a $b)
 	//| quantifier LCURLY id=IDENTIFIER ASSIGN
 	  //lower=additiveExpression DOTDOT upper=additiveExpression
@@ -429,8 +464,8 @@ quantifierExpression
  */
 logicalImpliesExpression
 	: ( logicalOrExpression -> logicalOrExpression )
-	  ( IMPLY y=logicalOrExpression
-	    -> ^(OPERATOR IMPLY ^(ARGUMENT_LIST $logicalImpliesExpression $y))
+	  ( IMPLIES_ACSL y=logicalOrExpression
+	    -> ^(OPERATOR IMPLIES_ACSL ^(ARGUMENT_LIST $logicalImpliesExpression $y))
 	  )*
     ;
 
@@ -441,8 +476,8 @@ logicalImpliesExpression
  */
 logicalOrExpression
 	: ( logicalAndExpression -> logicalAndExpression )
-	  ( LOR y=logicalAndExpression
-	    -> ^(OPERATOR LOR ^(ARGUMENT_LIST $logicalOrExpression $y))
+	  ( OR y=logicalAndExpression
+	    -> ^(OPERATOR OR ^(ARGUMENT_LIST $logicalOrExpression $y))
 	  )*
 	;	
 
@@ -453,8 +488,8 @@ logicalOrExpression
  */
 logicalAndExpression
 	: ( inclusiveOrExpression -> inclusiveOrExpression )
-	  ( LAND y=inclusiveOrExpression
-	    -> ^(OPERATOR LAND ^(ARGUMENT_LIST $logicalAndExpression $y))
+	  ( AND y=inclusiveOrExpression
+	    -> ^(OPERATOR AND ^(ARGUMENT_LIST $logicalAndExpression $y))
 	  )*
 	;
 
@@ -466,8 +501,8 @@ logicalAndExpression
  */
 inclusiveOrExpression
 	: ( exclusiveOrExpression -> exclusiveOrExpression )
-	  ( BAR y=exclusiveOrExpression
-	    -> ^(OPERATOR BAR ^(ARGUMENT_LIST $inclusiveOrExpression $y))
+	  ( BITOR y=exclusiveOrExpression
+	    -> ^(OPERATOR BITOR ^(ARGUMENT_LIST $inclusiveOrExpression $y))
 	  )*
 	;
 
@@ -510,7 +545,7 @@ equalityExpression
 	;
 
 equalityOperator
-	: EQ | NEQ
+	: EQUALS | NEQ
 	;
 
 /* 6.5.8 *
@@ -584,15 +619,15 @@ additiveExpression
  * In C11:
  * multiplicative-expression:
  *   cast-expression
- *   multiplicative-expression STAR/DIVIDE/MOD cast-expression
+ *   multiplicative-expression STAR/DIV/MOD cast-expression
  *
  */
 multiplicativeExpression
 	: (castExpression -> castExpression)
 	( STAR y=castExpression
 	  -> ^(OPERATOR STAR ^(ARGUMENT_LIST $multiplicativeExpression $y))
-	| DIVIDE y=castExpression
-	  -> ^(OPERATOR DIVIDE ^(ARGUMENT_LIST $multiplicativeExpression $y))
+	| DIV y=castExpression
+	  -> ^(OPERATOR DIV ^(ARGUMENT_LIST $multiplicativeExpression $y))
     | MOD y=castExpression
 	  -> ^(OPERATOR MOD ^(ARGUMENT_LIST $multiplicativeExpression $y))
     )*
@@ -627,12 +662,12 @@ unaryExpression
 	  -> ^(SIZEOF_TYPE type_expr)
 	| SIZEOF unaryExpression
 	  -> ^(SIZEOF_EXPR unaryExpression)
-    | UNION LPAREN argumentExpressionList RPAREN
-        -> ^(UNION argumentExpressionList)
-    | INTER LPAREN argumentExpressionList RPAREN
-        -> ^(INTER argumentExpressionList)
-    | VALID LPAREN term RPAREN
-        -> ^(VALID term)
+    | union_key LPAREN argumentExpressionList RPAREN
+        -> ^(UNION_ACSL union_key argumentExpressionList)
+    | inter_key LPAREN argumentExpressionList RPAREN
+        -> ^(INTER inter_key argumentExpressionList)
+    | valid_key LPAREN term RPAREN
+        -> ^(VALID valid_key term)
 	;
 
 /* 6.5.2 *
@@ -659,10 +694,10 @@ postfixExpression
 	    LPAREN argumentExpressionList RPAREN
 	    -> ^(FUNC_CALL $postfixExpression argumentExpressionList
 	    	 )
-	  | DOT ID
-	    -> ^(DOT $postfixExpression ID)
-	  | ARROW ID
-	    -> ^(ARROW $postfixExpression ID)
+	  | DOT IDENTIFIER
+	    -> ^(DOT $postfixExpression IDENTIFIER)
+	  | ARROW IDENTIFIER
+	    -> ^(ARROW $postfixExpression IDENTIFIER)
 	  )*
 	 ;
 
@@ -676,9 +711,9 @@ argumentExpressionList
 /* 6.5.1 */
 primaryExpression
 	: constant
-    | ID
+    | IDENTIFIER
 	| STRING_LITERAL
-    | LCURLY term BAR binders (SEMICOL term)? RCURLY
+    | LCURLY term BITOR binders (SEMI term)? RCURLY
         ->^(SET_BINDERS term binders term?)
     | LCURLY term RCURLY
         ->^(SET_SIMPLE term)
@@ -696,8 +731,8 @@ primaryExpression
  * identifier.
  */
 remoteExpression
-    : REMOTE_ACCESS LPAREN a=ID COMMA b=shiftExpression RPAREN
-	  -> ^(REMOTE_ACCESS  $a $b)
+    : remote_key LPAREN a=IDENTIFIER COMMA b=shiftExpression RPAREN
+	  -> ^(REMOTE_ACCESS remote_key  $a $b)
 	;
     
     
@@ -714,7 +749,8 @@ remoteExpression
  * UNIFORM represents uniform continuity.  
  */	
 quantifier
-	: FORALL | EXISTS
+	: forall_key
+	| exists_key
 	;
 
 /* 6.5.17
@@ -738,42 +774,311 @@ constant
 	: INTEGER_CONSTANT
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
-	| TRUE | FALSE | RESULT | NOTHING | ELLIPSIS
-    | SELF | NULL | CIVLTRUE | CIVLTRUE
+	| true_key | false_key  | result_key | nothing_key | ELLIPSIS
+    | SELF | null_key | TRUE | FALSE
     | mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
 
 /* ACSL-MPI extensions Expressions and Constants  */
 mpi_expression
-    : MPI_EMPTY_IN LPAREN primaryExpression RPAREN
-      -> ^(MPI_EMPTY_IN primaryExpression)
-    | MPI_EMPTY_OUT LPAREN primaryExpression RPAREN
-      -> ^(MPI_EMPTY_OUT primaryExpression)
-    | MPI_AGREE LPAREN a=variable_ident_base RPAREN /* seems variable_ident not ready yet */
-      -> ^(MPI_AGREE $a) 
-    | MPI_REGION LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
-      -> ^(MPI_REGION $a $b $c)
-    | MPI_EQUALS LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
-      -> ^(MPI_EQUALS $a $b $c $d)
+    : mpiemptyin_key LPAREN primaryExpression RPAREN
+      -> ^(MPI_EMPTY_IN mpiemptyin_key primaryExpression)
+    | mpiemptyout_key LPAREN primaryExpression RPAREN
+      -> ^(MPI_EMPTY_OUT mpiemptyout_key primaryExpression)
+    | mpiagree_key LPAREN a=variable_ident_base RPAREN /* seems variable_ident not ready yet */
+      -> ^(MPI_AGREE mpiagree_key $a) 
+    | mpiregion_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
+      -> ^(MPI_REGION mpiregion_key $a $b $c)
+    | mpiequals_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
+      -> ^(MPI_EQUALS mpiequals_key $a $b $c $d)
     ;
 
 mpi_constant
-    : MPI_COMM_RANK | MPI_COMM_SIZE
+    : mpicommrank_key |  mpicommsize_key
     ;
 
 mpi_collective_kind
-    : COL | P2P | BOTH
+    : col_key | p2p_key | both_key
     ;
 
 unary_op
-    : PLUS | MINUS | NOT | COMP | STAR | AMPERSAND
+    : PLUS | SUB | NOT | TILDE | STAR | AMPERSAND
     ;
 
 binary_op
-    : PLUS | MINUS | STAR | DIVIDE | MOD | LSHIFT | RSHIFT
-    | EQ | NEQ | LTE | GTE | LT | GT
-    | LAND | LOR | XOR | AMPERSAND | BAR | IMPLY | EQUIV | BITXOR
+    : PLUS | SUB | STAR | DIV | MOD | SHIFTLEFT | SHIFTRIGHT
+    | EQUALS | NEQ | LTE | GTE | LT | GT
+    | AND | OR | XOR | AMPERSAND | BITOR | IMPLIES_ACSL | EQUIV | BITXOR
+    ;
+    
+/* rules for ACSL types */
+boolean_type
+    : {input.LT(1).getText().equals("boolean")}? IDENTIFIER
+        -> ^(BOOLEAN IDENTIFIER)
+    ;
+
+integer_type
+    : {input.LT(1).getText().equals("integer")}? IDENTIFIER
+        -> ^(INTEGER IDENTIFIER)
+    ;
+
+real_type
+    : {input.LT(1).getText().equals("real")}? IDENTIFIER
+        -> ^(REAL_ACSL IDENTIFIER)
+    ;
+
+/* rules for ACSL contract clause keywords */
+    
+alloc_key 
+    : {input.LT(1).getText().equals("allocates")}? IDENTIFIER
+//    -> ^(ALLOC IDENTIFIER)
+    ; 
+
+assigns_key 
+    : {input.LT(1).getText().equals("assigns")}? IDENTIFIER
+//    -> ^(ASSIGNS_ACSL IDENTIFIER)
+    ; 
+
+assumes_key 
+    : {input.LT(1).getText().equals("assumes")}? IDENTIFIER
+//    -> ^(ASSUMES_ACSL IDENTIFIER)
+    ; 
+
+behaviors_key 
+    : {input.LT(1).getText().equals("behaviors")}? IDENTIFIER
+    ; 
+
+behavior_key 
+    : {input.LT(1).getText().equals("behavior")}? IDENTIFIER
+//    -> ^(BEHAVIOR IDENTIFIER)
+    ; 
+
+completes_key 
+    : {input.LT(1).getText().equals("complete")}? IDENTIFIER
+    ; 
+
+decreases_key
+    : {input.LT(1).getText().equals("decreases")}? IDENTIFIER
+    ; 
+
+disjoint_key 
+    : {input.LT(1).getText().equals("disjoint")}? IDENTIFIER
+    ; 
+
+ensures_key 
+    : {input.LT(1).getText().equals("ensures")}? IDENTIFIER
+//    -> ^(ENSURES_ACSL IDENTIFIER)
+    ;    
+  
+frees_key
+    : {input.LT(1).getText().equals("frees")}? IDENTIFIER
+//    -> ^(FREES IDENTIFIER)    
+    ; 
+  
+invariant_key
+    : {input.LT(1).getText().equals("invariant")}? IDENTIFIER
+    ;
+
+loop_key 
+    : {input.LT(1).getText().equals("loop")}? IDENTIFIER
+    ; 
+
+requires_key
+    : {input.LT(1).getText().equals("requires")}? IDENTIFIER
+//    -> ^(REQUIRES_ACSL IDENTIFIER)
+    ;
+    
+terminates_key
+    : {input.LT(1).getText().equals("terminates")}? IDENTIFIER
+//    -> ^(TERMINATES IDENTIFIER)
+    ;
+   
+variant_key
+    : {input.LT(1).getText().equals("variant")}? IDENTIFIER
+    ;
+
+waitsfor_key
+    : {input.LT(1).getText().equals("waitsfor")}? IDENTIFIER
+//    -> ^(WAITSFOR IDENTIFIER)
+    ;
+
+/* ACSL terms keywords */
+/* keywords of terms */
+empty_key
+    : {input.LT(1).getText().equals("\\empty")}? EXTENDED_IDENTIFIER
+    ;
+
+exists_key
+    : {input.LT(1).getText().equals("\\exists")}? EXTENDED_IDENTIFIER
+    -> ^(EXISTS_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+false_key
+    : {input.LT(1).getText().equals("\\false")}? EXTENDED_IDENTIFIER
+    -> ^(FALSE_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+forall_key
+    : {input.LT(1).getText().equals("\\forall")}? EXTENDED_IDENTIFIER
+    -> ^(FORALL_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+inter_key
+    : {input.LT(1).getText().equals("\\inter")}? EXTENDED_IDENTIFIER
+//    -> ^(INTER EXTENDED_IDENTIFIER)
+    ;
+
+let_key
+    : {input.LT(1).getText().equals("\\let")}? EXTENDED_IDENTIFIER
+    ;
+
+nothing_key
+    : {input.LT(1).getText().equals("\\nothing")}? EXTENDED_IDENTIFIER
+    -> ^(NOTHING EXTENDED_IDENTIFIER)
+    ;
+
+null_key
+    : {input.LT(1).getText().equals("\\null")}? EXTENDED_IDENTIFIER
+    -> ^(NULL_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+old_key
+    : {input.LT(1).getText().equals("\\old")}? EXTENDED_IDENTIFIER
+    ;
+
+result_key
+    : {input.LT(1).getText().equals("\\result")}? EXTENDED_IDENTIFIER
+    -> ^(RESULT_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+true_key
+    : {input.LT(1).getText().equals("\\true")}? EXTENDED_IDENTIFIER
+    -> ^(TRUE_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+union_key
+    : {input.LT(1).getText().equals("\\union")}? EXTENDED_IDENTIFIER
+//    -> ^(UNION_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+valid_key
+    : {input.LT(1).getText().equals("\\valid")}? EXTENDED_IDENTIFIER
+//    -> ^(VALID EXTENDED_IDENTIFIER)
+    ;
+
+with_key
+    : {input.LT(1).getText().equals("\\with")}? EXTENDED_IDENTIFIER
+    ;
+
+/* ACSL CIVL extension */
+executeswhen_key
+    : {input.LT(1).getText().equals("executes_when")}? IDENTIFIER
+//    -> ^(EXECUTES_WHEN IDENTIFIER)
+    ; 
+
+pure_key
+    : {input.LT(1).getText().equals("pure")}? IDENTIFIER
+    -> ^(PURE IDENTIFIER)
+    ;
+
+reads_key
+    : {input.LT(1).getText().equals("reads")}? IDENTIFIER
+//    -> ^(READS_ACSL IDENTIFIER)
+    ;
+    
+remote_key
+    : {input.LT(1).getText().equals("\\remote")}? EXTENDED_IDENTIFIER
+//    -> ^(REMOTE_ACCESS EXTENDED_IDENTIFIER)
+    ;
+
+/* ACSL dependence-specification extension */
+
+access_key
+    : {input.LT(1).getText().equals("\\access")}? EXTENDED_IDENTIFIER
+//    -> ^(ACCESS_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+anyact_key
+    : {input.LT(1).getText().equals("\\anyact")}? EXTENDED_IDENTIFIER
+    -> ^(ANYACT EXTENDED_IDENTIFIER)
     ;
 
 
+call_key
+    : {input.LT(1).getText().equals("\\call")}? EXTENDED_IDENTIFIER
+//    -> ^(CALL_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+dependson_key
+    : {input.LT(1).getText().equals("depends_on")}? IDENTIFIER
+//    -> ^(DEPENDSON IDENTIFIER)
+    ;
+
+read_key
+    : {input.LT(1).getText().equals("\\read")}? EXTENDED_IDENTIFIER
+//    -> ^(READ_ACSL EXTENDED_IDENTIFIER)
+    ;
+
+
+write_key
+    : {input.LT(1).getText().equals("\\write")}? EXTENDED_IDENTIFIER
+//    -> ^(WRITE_ACSL EXTENDED_IDENTIFIER)
+    ;
+    
+/* ACSL MPI-extension keywords */
+
+both_key
+    : {input.LT(1).getText().equals("BOTH")}? IDENTIFIER
+    -> ^(BOTH IDENTIFIER)
+    ;
+
+col_key
+    : {input.LT(1).getText().equals("COL")}? IDENTIFIER
+    -> ^(COL IDENTIFIER)
+    ;
+
+p2p_key
+    : {input.LT(1).getText().equals("P2P")}? IDENTIFIER
+    -> ^(P2P IDENTIFIER)
+    ;
+
+mpiagree_key
+    : {input.LT(1).getText().equals("\\mpi_agree")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_AGREE EXTENDED_IDENTIFIER)
+    ;
+
+mpicollective_key
+    : {input.LT(1).getText().equals("\\mpi_collective")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_COLLECTIVE EXTENDED_IDENTIFIER)
+    ;
+
+mpicommsize_key
+    : {input.LT(1).getText().equals("\\mpi_comm_size")}? EXTENDED_IDENTIFIER
+    -> ^(MPI_COMM_SIZE EXTENDED_IDENTIFIER)
+    ;
+
+mpicommrank_key
+    : {input.LT(1).getText().equals("\\mpi_comm_rank")}? EXTENDED_IDENTIFIER
+    -> ^(MPI_COMM_RANK EXTENDED_IDENTIFIER)
+    ;
+
+mpiemptyin_key
+    : {input.LT(1).getText().equals("\\mpi_empty_in")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_EMPTY_IN EXTENDED_IDENTIFIER)
+    ;
+
+mpiemptyout_key
+    : {input.LT(1).getText().equals("\\mpi_empty_out")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_EMPTY_OUT EXTENDED_IDENTIFIER)
+    ;
+
+mpiequals_key
+    : {input.LT(1).getText().equals("\\mpi_equals")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_EQUALS EXTENDED_IDENTIFIER)
+    ;
+
+mpiregion_key
+    : {input.LT(1).getText().equals("\\mpi_region")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_REGION EXTENDED_IDENTIFIER)
+    ;
 
