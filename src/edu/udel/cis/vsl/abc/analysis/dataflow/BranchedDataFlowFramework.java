@@ -9,6 +9,9 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.IfNode;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
@@ -49,7 +52,6 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 		if (succs(n) != null) {
 			for (ASTNode s : succs(n)) {
 				Set<E> inSet = getInSet(n);
-
 				inSet = update(inSet, n, s);
 				final Set<E> outSet = getOutSet(n, s);
 
@@ -72,6 +74,45 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 	 */
 	protected boolean isBranch(ASTNode n) {
 		return succs(n).size() > 1;
+	}
+	
+	/**
+	 * Access the branch condition for the branch edge.  This is purely an
+	 * operation on {@link ASTNode}s, but it is in this class because it is
+	 * essential for branched data flow analyses.
+	 * 
+	 * @param n node at the source of the edge
+	 * @param s successor at the destination of the edge
+	 * @return expression encoding branch condition
+	 */
+	protected ExpressionNode branchCondition(ASTNode n, ASTNode s) {
+		NodeFactory nf = n.getOwner().getASTFactory().getNodeFactory();
+		
+		if (isBranch(n)) {
+			assert n instanceof ExpressionNode : "Expected expression node for branch condition";
+			ExpressionNode en = (ExpressionNode)n;
+			
+			if (succs(n).size() == 2) {
+				// branch is an if-then
+				IfNode ifn = (IfNode) en.parent();
+				if (ifn.getTrueBranch().equals(s)) {
+					return en;
+				} 
+				// TBD wrap en in a negation and return it
+		
+			} else {
+				// branch is a switch
+				return en;
+				
+				// TBD select the matching case for s and exploit disjoint nature of cases by returning new condition 
+				// if it is default then construct the negated disjunction of all cases
+				
+			}
+		} else {
+			return nf.newBooleanConstantNode(n.getSource(), true);
+		}
+
+		return null;
 	}
 	
 	/*
@@ -110,7 +151,7 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 
 		if (preds(s) != null) {
 			for (final ASTNode pred : preds(s)) {
-				inSet = merge(inSet, getOutSet(s, pred));
+				inSet = merge(inSet, getOutSet(pred, s));
 			}
 		}
 

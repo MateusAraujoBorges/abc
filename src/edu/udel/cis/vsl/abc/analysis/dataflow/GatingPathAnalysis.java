@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
  * Compute the gating path expression for nodes in the control flow graph.
@@ -57,9 +58,10 @@ public class GatingPathAnalysis extends BranchedDataFlowFramework<PathExpression
 		cfa.analyze(f);
 		
 		HashSet<PathExpression> init = new HashSet<PathExpression>();
-		init.add(PathExpression.empty());
+		init.add(new PathExpression());
+		
+		// Unprocessed nodes are assigned an empty set
 		HashSet<PathExpression> bottom = new HashSet<PathExpression>();
-		bottom.add(PathExpression.identity());
 		computeFixPoint(init, bottom);
 	}
 	
@@ -67,7 +69,7 @@ public class GatingPathAnalysis extends BranchedDataFlowFramework<PathExpression
 		assert set.size() == 1 : "Expected singleton set";
 		return (PathExpression) set.toArray()[0];
 	}
-	
+		
 	@Override
 	/*
 	 * If this is an assignment statement create a new RD pair for the definition.
@@ -77,12 +79,14 @@ public class GatingPathAnalysis extends BranchedDataFlowFramework<PathExpression
 	protected Set<PathExpression> update(final Set<PathExpression> set, final ASTNode n, final ASTNode s) {
 		Set<PathExpression> result = new HashSet<PathExpression>();
 		if (isBranch(n)) {
-			PathExpression edge = PathExpression.edge(n, s);
-			result.add(PathExpression.closeSuffix(getPE(set), edge));
+			PathExpression edge = new PathExpression(new Pair<ASTNode,ASTNode>(n, s));
+			result.add(getPE(set).concat(edge));
 		} else {
 			result.addAll(set);
 		}
-		System.out.println("For node "+n+":\n   input = "+set+"\n   output = "+result);
+		System.out.println("Updating ("+n+","+s+")");
+		System.out.println("    in="+set);
+		System.out.println("    out="+result);
 		return result;	
 	}
 
@@ -121,14 +125,18 @@ public class GatingPathAnalysis extends BranchedDataFlowFramework<PathExpression
 
 	@Override
 	/*
-	 * Compute disjunction of arguments
+	 * Compute disjunction of argument path expressions.  In particular, if one argument is an empty
+	 * set, then just use the path expression(s) in the other argument.
 	 * 
 	 * @see edu.udel.cis.vsl.abc.analysis.dataflow.DataFlowFramework#merge(java.util.Set, java.util.Set)
 	 */
 	protected Set<PathExpression> merge(Set<PathExpression> s1, Set<PathExpression> s2) {
+		Set<PathExpression> peCollector = new HashSet<PathExpression>();
+		peCollector.addAll(s1);
+		peCollector.addAll(s2);
+		
 		Set<PathExpression> result = new HashSet<PathExpression>();
-		PathExpression or = PathExpression.or(getPE(s1),getPE(s2));
-		result.add(or);
+		result.add(PathExpression.union(peCollector));
 		return result;
 	}
 	

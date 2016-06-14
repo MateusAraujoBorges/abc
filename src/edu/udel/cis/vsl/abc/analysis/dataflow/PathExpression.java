@@ -1,137 +1,87 @@
 package edu.udel.cis.vsl.abc.analysis.dataflow;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+import dk.brics.automaton.Automaton;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.util.IF.Pair;
 
+/*
+ * Path expressions encode a regular language of edges in a flow graph.
+ * All of the regular language operations are supported for path expressions.
+ * In essence, this class provides an wrapper to an underlying regular language
+ * abstraction that maps edges to symbols in a UTF16 alphabet and back again.
+ */
 public class PathExpression {
-	PathExpression left = null;
-	PathExpression right = null;
-	ASTNode src = null;
-	ASTNode dest = null;
-	Kind kind = Kind.EMPTY;
-	
-	enum Kind {
-		OR, // disjunction of two expressions
-		CONCAT, // concatenation of two expressions
-		KLEENE, // Kleene closure of one expression
-		EDGE, // An edge in a path
-		EMPTY, // empty expression
-		IDENTITY; // the IDENTITY object for OR, i.e., x OR zero = x
-	}
+	Automaton auto;
+	static Map<Pair<ASTNode,ASTNode>,Character> edgeCharMap = new HashMap<Pair<ASTNode,ASTNode>,Character>();
+	static char charForMap = 'a';
 	
 	/**
-	 * Creates a single node path expression
-	 * @param n the AST node
+	 * Path expressions accept the empty string initially.
 	 */
-	static public PathExpression edge(ASTNode src, ASTNode dest) {
-		PathExpression p = new PathExpression();
-		p.kind = Kind.EDGE;
-		p.src = src;
-		p.dest = dest;
-		return p;
+	public PathExpression() {
+		auto = Automaton.makeEmptyString();
 	}
 	
-	/**
-	 * Creates an empty path expression
-	 */
-	static public PathExpression empty() {
-		PathExpression p = new PathExpression();
-		p.kind = Kind.EMPTY;
-		return p;
-	}
-	
-	static public PathExpression identity() {
-		PathExpression p = new PathExpression();
-		p.kind = Kind.IDENTITY;
-		return p;
-	}
-	
-	static public PathExpression or(PathExpression p1, PathExpression p2) {
-		if (p1.kind == Kind.IDENTITY) return p2;
-		if (p2.kind == Kind.IDENTITY) return p1;
-		PathExpression p = new PathExpression();
-		p.kind = Kind.OR;
-		p.left = p1;
-		p.right = p2;
-		return p;
-	}
-	
-	static public PathExpression concat(PathExpression p1, PathExpression p2) {
-		if (p1.kind == Kind.EMPTY) return p2;
-		if (p2.kind == Kind.EMPTY) return p1;
-		PathExpression p = new PathExpression();
-		p.kind = Kind.CONCAT;
-		p.left = p1;
-		p.right = p2;
-		return p;
-	}
-	
-	static public PathExpression kleene(PathExpression p1) {
-		if (p1.kind == Kind.EMPTY) return p1;
-		PathExpression p = new PathExpression();
-		p.kind = Kind.KLEENE;
-		p.left = p1;
-		return p;
-	}
-	
-	/**
-	 * Identify any suffixes in p that are rooted at edge e and transform them
-	 * to Kleene closure.   Any suffixes that are not rooted at e have e concatenated
-	 * onto them.
-	 * 
-	 * @param p the path expression being analyzed
-	 * @param e the edge
-	 * @return the resulting transformed path expression
-	 */
-	static public PathExpression closeSuffix(PathExpression p, PathExpression e) {
-		switch(p.kind) {
-		case IDENTITY:
-		case EMPTY: 
-			return e;
-		case EDGE: 
-			return concat(p,e);
-		case OR: 
-			return or(closeSuffix(p.left, e), 
-				      closeSuffix(p.right, e));
-		case CONCAT: 
-			if (p.left.equals(e)) {
-				return kleene(p);
-			} else {
-				return concat(p.left,closeSuffix(p.right, e));
-			}
-		case KLEENE: 
-			return kleene(closeSuffix(p.left, e));
+	public PathExpression(Pair<ASTNode, ASTNode> e) {
+		Character c = edgeCharMap.get(e);
+		if (c == null) {
+			c = new Character(charForMap);
+			charForMap++;
+			edgeCharMap.put(e, c);
 		}
-		assert false : "Unexpected path expression kind";
-		return null;
-	}
-
-	public String toString() {
-		switch(kind) {
-		case IDENTITY: return "ident";
-		case EMPTY: return "_";
-		case EDGE: return src+"->"+dest;
-		case OR: return "("+left+"|"+right+")";
-		case CONCAT: return "("+left+";"+right+")";
-		case KLEENE: return "("+left+")*";
-		}
-		assert false : "Unexpected path expression kind";
-		return null;
+		auto = Automaton.makeChar(c.charValue());
 	}
 	
-	public boolean equals(PathExpression p) {
-		if (this.kind != p.kind) return false;
-		switch(kind) {
-		case IDENTITY: 
-		case EMPTY: return true;
-		case EDGE: return this.src.equals(p.src) && p.src.equals(this.src);
-		case OR:  
-		case CONCAT:  
-		case KLEENE: return this.left.equals(p.left) && p.right.equals(this.right);
+	public PathExpression union(PathExpression p) {
+		PathExpression result = new PathExpression();
+		result.auto = this.auto.clone();
+		result.auto.union(p.auto);
+		return result;
+	}
+	
+	static public PathExpression union(Set<PathExpression> set) {
+		Set<Automaton> autoSet = new HashSet<Automaton>();
+		for (PathExpression p : set) {
+			autoSet.add(p.auto);
+		}
+		PathExpression result = new PathExpression();
+		result.auto = Automaton.union(autoSet);
+		return result;
+	}
+	
+	public PathExpression concat(PathExpression p) {
+		PathExpression result = new PathExpression();
+		result.auto = this.auto.clone();
+		result.auto = result.auto.concatenate(p.auto);
+		return result;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof PathExpression) {
+			PathExpression p = (PathExpression)o;
+			return this.auto.equals(p.auto);
 		}
 		return false;
 	}
 	
+	@Override
 	public int hashCode() {
-		return this.toString().hashCode();
+		return this.auto.hashCode();
 	}
+	
+	public String toString() {
+		String s = "## ";
+		for (Pair<ASTNode,ASTNode> e : edgeCharMap.keySet()) {
+			s += "("+e+"::"+edgeCharMap.get(e)+") ";
+		}
+		s += "##" + auto.toString();
+		return s;
+	}
+	
 }
