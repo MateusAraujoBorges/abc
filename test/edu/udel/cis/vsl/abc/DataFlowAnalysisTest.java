@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.analysis.common.CallAnalyzer;
+import edu.udel.cis.vsl.abc.analysis.dataflow.ConditionalConstantPropagation;
 import edu.udel.cis.vsl.abc.analysis.dataflow.DominatorAnalysis;
 import edu.udel.cis.vsl.abc.analysis.dataflow.ReachingDefinitionAnalysis;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
@@ -43,17 +44,22 @@ public class DataFlowAnalysisTest {
 	
 	private static ReachingDefinitionAnalysis rd;
 	private static DominatorAnalysis dom;
+	private static ConditionalConstantPropagation ccp;
+
 		
 	@Before
 	public void setUp() throws Exception {	
 		rd = ReachingDefinitionAnalysis.getInstance();
 		dom = DominatorAnalysis.getInstance();
+		ccp = ConditionalConstantPropagation.getInstance();
+
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		rd.clear();
 		dom.clear();
+		ccp.clear();
 	}
 
 	private void check(String filenameRoot) throws ABCException, IOException {
@@ -65,6 +71,7 @@ public class DataFlowAnalysisTest {
 		for (Function f : CallAnalyzer.functions(ast)) {
 			rd.analyze(f);	
 			dom.analyze(f);
+			ccp.analyze(f);
 		}		
 		
 		if (debug) {

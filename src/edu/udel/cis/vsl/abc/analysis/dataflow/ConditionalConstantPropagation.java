@@ -1,6 +1,8 @@
 package edu.udel.cis.vsl.abc.analysis.dataflow;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
@@ -13,6 +15,11 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
+import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
+import edu.udel.cis.vsl.abc.ast.value.IF.Value;
+import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
+import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
@@ -59,15 +66,20 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 		cfa = ControlFlowAnalysis.getInstance();
 		cfa.analyze(f);
 		
-		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> init = new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
+		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> init = 
+				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 		
 		// Unprocessed nodes are assigned an empty set
-		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> bottom = new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
+		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> bottom = 
+				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 
 		computeFixPoint(init, bottom);
 	}
 	
-	// The next three methods are stolen from reaching definitions.  They should be factored out into some utilities.
+	/*
+	 *  The next three methods are stolen from reaching definitions.  
+	 *  	They should be factored out into some utilities.
+	 */
 	private boolean isAssignment(final ASTNode s) {
 		if (s instanceof ExpressionStatementNode) {
 			ExpressionNode e = ((ExpressionStatementNode)s).getExpression();
@@ -124,18 +136,102 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 		return null;
 	}
 	
+	private Set<Entity> collectRefs(ASTNode node) {
+		Set<Entity> refs = new HashSet<Entity>();
+		collectRefs(node, refs);
+		return refs;
+	}
+	
+	private void collectRefs(ASTNode node, Set<Entity> refs) {
+		if (node instanceof IdentifierExpressionNode) {
+			Entity idEnt = ((IdentifierExpressionNode) node).getIdentifier()
+					.getEntity();
+			refs.add(idEnt);
+
+		} else if (node instanceof OperatorNode
+				&& ((OperatorNode) node).getOperator() == Operator.SUBSCRIPT) {
+			Entity idEnt = baseArray((OperatorNode) node).getIdentifier()
+					.getEntity();
+			refs.add(idEnt);
+
+		} else if (node != null) {
+			Iterable<ASTNode> children = node.children();
+			for (ASTNode child : children) {
+				collectRefs(child, refs);
+			}
+		}
+	}
+	
+	/**
+	 * 
+	 * @param expr 
+	 * @param constMap
+	 * @return Value expression under constant map; null if value is undefined
+	 */
+	private Answer eval(ExpressionNode expr, Pair<Entity, ConstantNode> constMap) {
+		Answer result;
+		ValueFactory vf = expr.getOwner().getASTFactory().getNodeFactory().getValueFactory();
+		ExpressionNode freshExpr = expr.copy();
+		replaceIdWithConst(freshExpr, constMap);
+		try {
+			result = vf.isZero(vf.evaluate(freshExpr));
+		} catch (SyntaxException se) {
+			// If the expression was not made constant by the map then we can't tell the value
+			result = Answer.MAYBE;
+		}
+		return result;
+	}
+
+	/**
+	 * Rewrite the expression replacing identifiers with constants given in the map.
+	 * 
+	 * @param expr
+	 * @param map
+	 */
+	private void replaceIdWithConst(ExpressionNode expr, Pair<Entity,ConstantNode> idConstMap) {
+		// this is a recursive walk that is the usual huge switch structure with recursion
+		if (expr instanceof IdentifierExpressionNode) {
+			Entity idEnt = ((IdentifierExpressionNode)expr).getIdentifier().getEntity();
+			if (idEnt.equals(idConstMap.left)) {
+				// replace expr in parent with idConstMap.right
+			}
+		}
+	}
+	
 	@Override
 	protected
 	/*
 	 * Kill constants that are assigned into for statements.
 	 * Kill constants that are inconsistent with branch conditions for edges.
 	 */
-	Set<Pair<Entity,Pair<Boolean,ConstantNode>>> kill(final Set<Pair<Entity,Pair<Boolean,ConstantNode>>> set, final ASTNode n, final ASTNode s) {
-		Set<Pair<Entity,Pair<Boolean,ConstantNode>>> result = new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
+	Set<Pair<Entity,Pair<Boolean,ConstantNode>>> kill(
+			final Set<Pair<Entity,Pair<Boolean,ConstantNode>>> set, final ASTNode n, final ASTNode s) {
+		Set<Pair<Entity,Pair<Boolean,ConstantNode>>> result = 
+				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 
 		if (isBranch(n)) {
-			// TBD TBD
-			result.addAll(set);
+			ExpressionNode cond = branchCondition(n,s);
+			Set<Entity> refs = collectRefs(cond);
+			
+			/*
+			 * Collect the <entry, constant> pairs involving referenced identifiers
+			 * that have a non-top value.  For each such pair, if it leads to the 
+			 * definite falsification of the branch condition, then kill it.
+			 */
+			for (Pair<Entity,Pair<Boolean,ConstantNode>> cpEntry : set) {
+				if (refs.contains(cpEntry.left)) {
+					if (!cpEntry.right.left) {
+						Pair<Entity, ConstantNode> constMap = 
+								new Pair<Entity, ConstantNode>(cpEntry.left, cpEntry.right.right);
+						if (eval(cond, constMap) == Answer.YES) {
+							// the branch condition is definitely false
+							result.add(cpEntry);
+						}
+					}
+				}			
+			}
+				
+			return result;
 		} else {
 			// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
 			if (isAssignment(n)) {
@@ -155,8 +251,10 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 	/*
 	 * Generate constants that are assigned from for statements.
 	 */
-	Set<Pair<Entity,Pair<Boolean,ConstantNode>>> gen(final Set<Pair<Entity,Pair<Boolean,ConstantNode>>> set, final ASTNode n, final ASTNode s) {
-		Set<Pair<Entity,Pair<Boolean,ConstantNode>>> result = new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
+	Set<Pair<Entity,Pair<Boolean,ConstantNode>>> gen(
+			final Set<Pair<Entity,Pair<Boolean,ConstantNode>>> set, final ASTNode n, final ASTNode s) {
+		Set<Pair<Entity,Pair<Boolean,ConstantNode>>> result = 
+				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 
 		// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
 		if (isAssignment(n)) {
@@ -164,8 +262,10 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 			ExpressionNode rhs = getRHS(n);
 
 			// The constant pair is "top" if the rhs is not a ConstantNode, otherwise we use the rhs
-			Pair<Boolean, ConstantNode> constPair = new Pair<Boolean, ConstantNode>(!(rhs instanceof ConstantNode), (ConstantNode)rhs);
-			Pair<Entity, Pair<Boolean,ConstantNode>> cpEntry = new Pair<Entity, Pair<Boolean,ConstantNode>>(lhsVar,constPair);
+			Pair<Boolean, ConstantNode> constPair = 
+					new Pair<Boolean, ConstantNode>(!(rhs instanceof ConstantNode), (ConstantNode)rhs);
+			Pair<Entity, Pair<Boolean,ConstantNode>> cpEntry = 
+					new Pair<Entity, Pair<Boolean,ConstantNode>>(lhsVar,constPair);
 			result.add(cpEntry);
 		}
 		return result;	
