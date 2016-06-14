@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
@@ -194,6 +193,15 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 	// Constructors...
 
+	// TODO: get rid of tmpFile and the special handling for svcomp.
+	// instead provide a way to transform a Map<String,String> to
+	// a macro map. (Maybe put this in Token module?). And provide
+	// a way to specify a list of Files that should be included at the beginning
+	// of the translation unit.
+	
+	// Could some of these constructor parameters instead be obtained
+	// from the Worker?
+
 	/**
 	 * Instantiates new CTokenSource object. The given source file is parsed, a
 	 * file info object is created for it and pushed onto the stack. The output
@@ -267,9 +275,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 			addEofNodeToTree(tree, source.getName());
 			this.macroMap = macroMap;
-			sourceStack.push(new PreprocessorSourceFileInfo(history, // parser,
-					// tree,
-					tree));
+			sourceStack.push(new PreprocessorSourceFileInfo(history, tree));
 			incrementNextNode(); // skip root "FILE" node
 			this.systemIncludePaths = systemIncludePaths;
 			this.userIncludePaths = userIncludePaths;
@@ -285,41 +291,46 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			theTokens = new ArrayList<CivlcToken>();
 	}
 
-	/**
-	 * Instantiates new CTokenSource object. The given source file is parsed, a
-	 * file info object is created for it and pushed onto the stack. The output
-	 * tokens are not generated; this does not begin until "getToken" is called.
-	 * 
-	 * @param config
-	 *            the ABC configuration
-	 * @param source
-	 *            original C source file (before preprocessing)
-	 * @param parser
-	 *            the preprocessor parser
-	 * @param systemIncludePaths
-	 *            the directories where files included with angle brackets are
-	 *            searched
-	 * @param userIncludePaths
-	 *            the directories where files included with double quotes are
-	 *            searched
-	 * @param tokenFactory
-	 *            the token factory to be used
-	 * @param worker
-	 *            the worker that performs the actual preprocessing
-	 * @param tmpFile
-	 *            true iff this is a temporary file created for processing
-	 *            predefined macros.
-	 * @throws PreprocessorException
-	 *             if and IOException or RecognitionException occurs while
-	 *             scanning and parsing the source file
-	 */
-	public PreprocessorTokenSource(File source, PreprocessorParser parser,
-			File[] systemIncludePaths, File[] userIncludePaths,
-			TokenFactory tokenFactory, CPreprocessorWorker worker,
-			boolean tmpFile) throws PreprocessorException {
-		this(null, source, parser, systemIncludePaths, userIncludePaths,
-				new HashMap<String, Macro>(), tokenFactory, worker, tmpFile);
-	}
+	// this method never called:
+
+	// /**
+	// * Instantiates new CTokenSource object. The given source file is parsed,
+	// a
+	// * file info object is created for it and pushed onto the stack. The
+	// output
+	// * tokens are not generated; this does not begin until "getToken" is
+	// called.
+	// *
+	// * @param config
+	// * the ABC configuration
+	// * @param source
+	// * original C source file (before preprocessing)
+	// * @param parser
+	// * the preprocessor parser
+	// * @param systemIncludePaths
+	// * the directories where files included with angle brackets are
+	// * searched
+	// * @param userIncludePaths
+	// * the directories where files included with double quotes are
+	// * searched
+	// * @param tokenFactory
+	// * the token factory to be used
+	// * @param worker
+	// * the worker that performs the actual preprocessing
+	// * @param tmpFile
+	// * true iff this is a temporary file created for processing
+	// * predefined macros.
+	// * @throws PreprocessorException
+	// * if and IOException or RecognitionException occurs while
+	// * scanning and parsing the source file
+	// */
+	// public PreprocessorTokenSource(File source, PreprocessorParser parser,
+	// File[] systemIncludePaths, File[] userIncludePaths,
+	// TokenFactory tokenFactory, CPreprocessorWorker worker,
+	// boolean tmpFile) throws PreprocessorException {
+	// this(null, source, parser, systemIncludePaths, userIncludePaths,
+	// new HashMap<String, Macro>(), tokenFactory, worker, tmpFile);
+	// }
 
 	// Helper
 
@@ -1473,11 +1484,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					+ file);
 		tree = (Tree) fileReturn.getTree();
 		addEofNodeToTree(tree, filename);
-		return new PreprocessorSourceFileInfo(
-				tokenFactory.newInclusion(getOrMakeSourceFile(file, false),
-						filenameToken),
-				// parser,
-				// tree,
+		return new PreprocessorSourceFileInfo(tokenFactory
+				.newInclusion(getOrMakeSourceFile(file, false), filenameToken),
 				tree.getChild(0));
 	}
 
