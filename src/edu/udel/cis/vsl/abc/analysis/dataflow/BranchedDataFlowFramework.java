@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -11,7 +12,13 @@ import java.util.TreeSet;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
+import edu.udel.cis.vsl.abc.ast.node.IF.label.SwitchLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.IfNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
@@ -81,38 +88,77 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 	 * operation on {@link ASTNode}s, but it is in this class because it is
 	 * essential for branched data flow analyses.
 	 * 
+	 * The returned expression does not share any structure with the existing
+	 * AST.
+	 * 
 	 * @param n node at the source of the edge
 	 * @param s successor at the destination of the edge
 	 * @return expression encoding branch condition
 	 */
 	protected ExpressionNode branchCondition(ASTNode n, ASTNode s) {
 		NodeFactory nf = n.getOwner().getASTFactory().getNodeFactory();
+		Source source = n.getSource();
 		
 		if (isBranch(n)) {
 			assert n instanceof ExpressionNode : "Expected expression node for branch condition";
-			ExpressionNode en = (ExpressionNode)n;
+		
+			// Copy the source node since it will be used in building the branch condition
+			ExpressionNode srcNode = (ExpressionNode)n.copy();
 			
 			if (succs(n).size() == 2) {
 				// branch is an if-then
-				IfNode ifn = (IfNode) en.parent();
+				IfNode ifn = (IfNode) n.parent();
+				
 				if (ifn.getTrueBranch().equals(s)) {
-					return en;
-				} 
-				// TBD wrap en in a negation and return it
+					// true branch has the original condition
+					return srcNode;
+				} else {
+					// false branch requires wrapping with a negation
+					OperatorNode notCond = nf.newOperatorNode(source, Operator.NOT, srcNode);
+					return notCond;
+				}				
 		
 			} else {
-				// branch is a switch
-				return en;
+				// branch is a switch, which means that the condition is the expression that is compared to cases
+				SwitchNode swn = (SwitchNode) n.parent();
 				
-				// TBD select the matching case for s and exploit disjoint nature of cases by returning new condition 
-				// if it is default then construct the negated disjunction of all cases
+				if (swn.getDefaultCase().equals(s)) {
+					// default condition is the conjunction of the negation of all case label conditions
+					ExpressionNode defaultCondition = nf.newBooleanConstantNode(source, true);
+					for (Iterator<LabeledStatementNode> iter = swn.getCases(); iter.hasNext();) {
+						LabeledStatementNode c = iter.next();
+						if (c.equals(s)) {
+							SwitchLabelNode sln = (SwitchLabelNode) c.getLabel();
+							
+							// Copy the case constant to assemble the switch edge condition
+							ExpressionNode caseConst = sln.getExpression().copy();
+							OperatorNode caseCompare = nf.newOperatorNode(source, Operator.NEQ, srcNode, caseConst);
+							
+							defaultCondition = nf.newOperatorNode(source, Operator.LAND, defaultCondition, caseCompare);	
+						}
+					}
+					return defaultCondition;
+				} else {
+					// match the case label and return its condition
+					for (Iterator<LabeledStatementNode> iter = swn.getCases(); iter.hasNext();) {
+						LabeledStatementNode c = iter.next();
+						if (c.equals(s)) {
+							SwitchLabelNode sln = (SwitchLabelNode) c.getLabel();
+							
+							// Copy the case constant to assemble the switch edge condition
+							ExpressionNode caseConst = sln.getExpression().copy();
+							OperatorNode caseCompare = nf.newOperatorNode(source, Operator.EQUALS, srcNode, caseConst);
+							return caseCompare;	
+						}
+					}
+					assert false : "Expected a matching case label";
+				}
 				
 			}
-		} else {
-			return nf.newBooleanConstantNode(n.getSource(), true);
-		}
-
-		return null;
+		} 
+		
+		// Return a trivial branch condition
+		return nf.newBooleanConstantNode(source, true);	
 	}
 	
 	/*
