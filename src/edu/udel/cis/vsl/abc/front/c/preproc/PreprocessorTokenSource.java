@@ -198,9 +198,56 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	// a macro map. (Maybe put this in Token module?). And provide
 	// a way to specify a list of Files that should be included at the beginning
 	// of the translation unit.
-	
-	// Could some of these constructor parameters instead be obtained
-	// from the Worker?
+
+	// Constructor #1: a list of character stream-Formation pairs?
+
+	// TODO: replace pptokens of the form "1..2" with 3 tokens
+	// 1, .., and 2.
+
+	/*
+	 * public PreprocessorTokenSource(Configuration config, CharStream
+	 * charStream, Formation formation, File[] systemIncludePaths, File[]
+	 * userIncludePaths, Map<String, Macro> macroMap, TokenFactory tokenFactory,
+	 * CPreprocessorWorker worker) throws PreprocessorException { assert
+	 * systemIncludePaths != null; assert userIncludePaths != null;
+	 * this.tokenFactory = tokenFactory; this.worker = worker;
+	 * this.originalSourceFile = formation.getLastFile(); try { CommonTree tree
+	 * = (CommonTree) parser.file().getTree();
+	 * 
+	 * // CommonToken(CharStream input, int type, int channel, int // start, int
+	 * stop)
+	 * 
+	 * // point of the following is just to include svcomp.h. // isn't there a
+	 * better way to specify this?
+	 * 
+	 * if (!tmpFile && (config != null && config.svcomp())) { CommonToken svcomp
+	 * = new CommonToken( tree.getToken().getInputStream(),
+	 * PreprocessorLexer.HEADER_NAME, 0, -1, -1); CommonToken include = new
+	 * CommonToken( tree.getToken().getInputStream(),
+	 * PreprocessorLexer.PINCLUDE, 0, -1, -1);
+	 * 
+	 * svcomp.setText("<svcomp.h>"); include.setText("#include");
+	 * 
+	 * CommonTree includeSvcomp = new CommonTree(include);
+	 * 
+	 * includeSvcomp.addChild(new CommonTree(svcomp)); tree.insertChild(0,
+	 * includeSvcomp); }
+	 * 
+	 * Formation history = tokenFactory.newInclusion(originalSourceFile);
+	 * StringPredicate macroDefinedPredicate = new MacroDefinedPredicate(
+	 * macroMap);
+	 * 
+	 * addEofNodeToTree(tree, source.getName()); this.macroMap = macroMap;
+	 * sourceStack.push(new PreprocessorSourceFileInfo(history, tree));
+	 * incrementNextNode(); // skip root "FILE" node this.systemIncludePaths =
+	 * systemIncludePaths; this.userIncludePaths = userIncludePaths;
+	 * this.expressionAnalyzer = new PreprocessorExpressionAnalyzer(
+	 * macroDefinedPredicate); } catch (RecognitionException e) { throw new
+	 * PreprocessorException( "Preprocessing " + source + " failed: " + e); }
+	 * catch (RuntimeException e) { throw new
+	 * PreprocessorException(e.getMessage()); } if (saveTokens) theTokens = new
+	 * ArrayList<CivlcToken>(); }
+	 */
 
 	/**
 	 * Instantiates new CTokenSource object. The given source file is parsed, a
@@ -560,11 +607,76 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 				assert (inTextBlock);
 				inBlockAnnotation = false;
 				break;
+			case PreprocessorLexer.PP_NUMBER:
+				processPPNumber(token);
+				return;
 			default:
 			}
 			shiftToOutput(textNode);
 			incrementNextNode();
 		}
+	}
+
+	/**
+	 * Processes a "PPNumber", which is any preprocessor number that is not a
+	 * standard integer or floating constant. The only possibility currently is
+	 * the CIVL-C range or fragment thereof, which has the form "a..b", or
+	 * "a..", or "..b", where a and b are integer constants. Ideally we would
+	 * like to have been parsed as 3 (or 2) separate tokens, but we just
+	 * couldn't find any way to do that with ANTLR. So we fix it here.
+	 * 
+	 * @param token
+	 *            the ppnumber token which should be a CIVL-C range expression
+	 *            or part thereof
+	 * @throws PreprocessorException
+	 *             if the text of that token does not have the form of a CIVL-C
+	 *             range expression or part thereof
+	 */
+	private void processPPNumber(Token token) throws PreprocessorException {
+		String text = token.getText();
+		int line = token.getLine();
+		int pos = token.getCharPositionInLine();
+		int length = text.length();
+		int index = text.indexOf("..");
+		int startIndex = ((CommonToken) token).getStartIndex();
+		int stopIndex = ((CommonToken) token).getStopIndex();
+		int chan = token.getChannel();
+		CharStream stream = token.getInputStream();
+		Formation formation = getIncludeHistory();
+
+		if (index < 0)
+			throw new PreprocessorException("Unknown preprocessor number",
+					token);
+		if (index > 0) {
+			CivlcToken leftToken = tokenFactory.newCivlcToken(stream,
+					PreprocessorLexer.INTEGER_CONSTANT, chan, startIndex,
+					startIndex + index-1, formation);
+
+			leftToken.setText(text.substring(0, index));
+			leftToken.setLine(line);
+			leftToken.setCharPositionInLine(pos);
+			addOutput(leftToken);
+		}
+
+		CivlcToken dotdot = tokenFactory.newCivlcToken(stream,
+				PreprocessorLexer.DOTDOT, chan, startIndex + index,
+				startIndex + index + 1, formation);
+
+		dotdot.setText("..");
+		dotdot.setLine(line);
+		dotdot.setCharPositionInLine(pos + index);
+		addOutput(dotdot);
+		if (index < length) {
+			CivlcToken rightToken = tokenFactory.newCivlcToken(stream,
+					PreprocessorLexer.INTEGER_CONSTANT, chan,
+					startIndex + index + 2, stopIndex, formation);
+
+			rightToken.setText(text.substring(index + 2, length));
+			rightToken.setCharPositionInLine(pos+index+2);
+			rightToken.setLine(line);
+			addOutput(rightToken);
+		}
+		incrementNextNode();
 	}
 
 	/**

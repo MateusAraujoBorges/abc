@@ -178,6 +178,8 @@ public class CPreprocessorWorker {
 		}
 		return null;
 	}
+	
+	// TODO: could this be a static public method somewhere?
 
 	CharStream findInternalSystemFile(File path, String filename) {
 		File file = new File(path, filename);
@@ -205,6 +207,9 @@ public class CPreprocessorWorker {
 		// look in directory "abc" in the class path:
 		return findInternalSystemFile(Preprocessor.ABC_INCLUDE_PATH, filename);
 	}
+	
+	// TODO: get rid of this tmpFile thing.
+	// need a way to take a character stream, not file, and preprocess it.
 
 	/**
 	 * Given a preprocessor source file, this returns a Token Source that emits

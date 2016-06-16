@@ -51,6 +51,12 @@ public class CPreprocessor implements Preprocessor {
 		this.config = config;
 	}
 
+	/*
+	public Map<String, Macro> makeMacros(Map<String, String> macroDefs) {
+		// create stream and process it...
+	}
+	*/
+
 	@Override
 	public Map<String, Macro> getMacros(Map<String, String> macroDefs)
 			throws PreprocessorException {
@@ -64,8 +70,8 @@ public class CPreprocessor implements Preprocessor {
 					tmpDirBase = System.getenv(tmpDirBase.substring(1));
 				}
 
-				File temp = new File(tmpDirBase, "tmp"
-						+ System.currentTimeMillis() + ".h");
+				File temp = new File(tmpDirBase,
+						"tmp" + System.currentTimeMillis() + ".h");
 				// Write to temp file
 				FileWriter tmpWriter = new FileWriter(temp);
 				BufferedWriter tmpOut = new BufferedWriter(tmpWriter);
@@ -78,8 +84,8 @@ public class CPreprocessor implements Preprocessor {
 				if (this.config != null && this.config.svcomp())
 					tmpOut.write("#define __attribute__(X)\r\n");
 				for (String macro : macroDefs.keySet())
-					tmpOut.write("#define " + macro + " "
-							+ macroDefs.get(macro) + "\r\n");
+					tmpOut.write("#define " + macro + " " + macroDefs.get(macro)
+							+ "\r\n");
 				tmpOut.write("\r\n");
 				tmpOut.flush();
 				tmpOut.close();
@@ -255,8 +261,8 @@ public class CPreprocessor implements Preprocessor {
 	@Override
 	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			String filename, boolean isSystem) throws PreprocessorException,
-			IOException {
+			String filename, boolean isSystem)
+					throws PreprocessorException, IOException {
 		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
 				systemIncludePaths, userIncludePaths, implicitMacros);
 
@@ -292,7 +298,7 @@ public class CPreprocessor implements Preprocessor {
 	@Override
 	public void printOutput(File[] systemIncludePaths, File[] userIncludePaths,
 			Map<String, Macro> implicitMacros, PrintStream out, File file)
-			throws PreprocessorException {
+					throws PreprocessorException {
 		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
 				systemIncludePaths, userIncludePaths, implicitMacros);
 		PreprocessorTokenSource source = worker.outputTokenSource(file, false);
@@ -316,7 +322,7 @@ public class CPreprocessor implements Preprocessor {
 	@Override
 	public void debug(File[] systemIncludePaths, File[] userIncludePaths,
 			Map<String, Macro> implicitMacros, PrintStream out, File file)
-			throws PreprocessorException {
+					throws PreprocessorException {
 		PreprocessorUtils.source(out, file);
 		out.println();
 		lex(out, file);
@@ -355,8 +361,8 @@ public class CPreprocessor implements Preprocessor {
 	public void printSourceFiles(PrintStream out) {
 		out.println("Source files:");
 		for (SourceFile sourceFile : sourceFiles) {
-			out.println(sourceFile.getIndexName() + "\t: "
-					+ sourceFile.getPath());
+			out.println(
+					sourceFile.getIndexName() + "\t: " + sourceFile.getPath());
 		}
 		out.println();
 		out.flush();
@@ -408,11 +414,13 @@ public class CPreprocessor implements Preprocessor {
 		if (debug)
 			p.debug(CPreprocessorWorker.defaultSystemIncludes,
 					CPreprocessorWorker.defaultUserIncludes,
-					CPreprocessorWorker.defaultImplicitMacros, System.out, file);
+					CPreprocessorWorker.defaultImplicitMacros, System.out,
+					file);
 		else
 			p.printOutput(CPreprocessorWorker.defaultSystemIncludes,
 					CPreprocessorWorker.defaultUserIncludes,
-					CPreprocessorWorker.defaultImplicitMacros, System.out, file);
+					CPreprocessorWorker.defaultImplicitMacros, System.out,
+					file);
 	}
 
 }

@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.token.IF;
 
+import java.io.File;
 import java.util.List;
 
 import org.antlr.runtime.CharStream;
@@ -49,7 +50,10 @@ public interface TokenFactory {
 	 * Creates a new formation which represents some code added by the system
 	 * itself, as opposed to code that emanated from an actual source file. The
 	 * identifier should be a short string indicating what part of the system
-	 * created the code. Examples: "The CIVL-MPI Transformer".
+	 * created the code. Examples: "The CIVL-MPI Transformer". The identifier
+	 * will be used to form a "fake" {@link File}, which will be used to form a
+	 * {@link SourceFile}, and that is what will be returned by the formation's
+	 * {@link Formation#getLastFile()} method.
 	 * 
 	 * @param identifier
 	 *            short string indicating what part of the system created this
@@ -66,8 +70,8 @@ public interface TokenFactory {
 
 	CivlcToken newCivlcToken(int type, String text, Formation formation);
 
-	CivlcToken newCivlcToken(CharStream input, int type, int channel,
-			int start, int stop, Formation formation);
+	CivlcToken newCivlcToken(CharStream input, int type, int channel, int start,
+			int stop, Formation formation);
 
 	// Characters and Strings...
 
@@ -113,7 +117,8 @@ public interface TokenFactory {
 	CivlcTokenSequence getTokenSubsequence(CivlcTokenSource fullSource,
 			CivlcToken startToken, CivlcToken stopToken);
 
-	CivlcTokenSequence getEmptyTokenSubsequence(CivlcTokenSource originalSource);
+	CivlcTokenSequence getEmptyTokenSubsequence(
+			CivlcTokenSource originalSource);
 
 	/**
 	 * creates a CivlC Token Source based on a give list of tokens (not
