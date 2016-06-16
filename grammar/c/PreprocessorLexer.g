@@ -150,8 +150,8 @@ FORALL		:	'$forall';
 FATOMIC     	:   	'$atomic_f';
 GUARD       	:   	'$guard';
 HERE		:	'$here';
-IMPLIES_ACSL	:	'==>' |	NotLineStart; // can the NotLineStart be removed?
-IMPLIES		:	'=>'	|	NotLineStart; // can the NotLineStart be removed?
+IMPLIES_ACSL	:	'==>'		NotLineStart; // can the NotLineStart be removed?
+IMPLIES		:	'=>'		NotLineStart; // can the NotLineStart be removed?
 INPUT		:	'$input';
 INVARIANT	:	'$invariant';
 LAMBDA		:	'$lambda';
@@ -351,9 +351,9 @@ SChar		:	~('"' | '\\' | '\n') | EscapeSequence ;
 
 /****** Punctuators: C11 Sec. 6.4.6 ******/
 
-ELLIPSIS	: '...' NotLineStart;
-DOTDOT		: '..' NotLineStart;
-DOT		:	'.' NotLineStart;
+ELLIPSIS	: 	'...' 		NotLineStart;
+DOTDOT		: 	'..' 		NotLineStart;
+DOT		:	'.' 		NotLineStart;
 AMPERSAND	:	'&'		NotLineStart;
 AND		:	'&&'		NotLineStart;
 ARROW		:	'->'		NotLineStart;
@@ -373,7 +373,7 @@ GTE		:	'>='		NotLineStart;
 //HASH		:	'#' | '%:'	NotLineStart;
 HASHHASH	:	'##' | '%:%:'	NotLineStart;
 LCURLY		:	'{' | '<%'	NotLineStart;
-LEXCON		:	'<<<' NotLineStart;
+LEXCON		:	'<<<' 		NotLineStart;
 LPAREN		:	'('		NotLineStart;
 LSQUARE		:	'[' | '<:'	NotLineStart;
 LT		:	'<'		NotLineStart;
@@ -389,7 +389,7 @@ PLUSEQ		:	'+='		NotLineStart;
 PLUSPLUS	:	'++'		NotLineStart;
 QMARK		:	'?'		NotLineStart;
 RCURLY		:	'}' | '%>'	NotLineStart;
-REXCON		:	'>>>' NotLineStart;
+REXCON		:	'>>>' 		NotLineStart;
 RPAREN		:	')'		NotLineStart;
 RSQUARE		:	']' | ':>'	NotLineStart;
 SEMI		:	';'		NotLineStart;
