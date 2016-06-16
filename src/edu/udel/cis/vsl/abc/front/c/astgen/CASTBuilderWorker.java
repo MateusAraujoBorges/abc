@@ -77,7 +77,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.err.IF.ABCUnsupportedException;
 import edu.udel.cis.vsl.abc.front.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.c.astgen.AcslContractHandler.AcslContractKind;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.ASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;
@@ -2436,28 +2435,6 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 						(CommonTree) staticAssertTree.getChild(1)));
 	}
 
-	@SuppressWarnings("unused")
-	private SequenceNode<ContractNode> translateAcslContractOld(
-			AcslContractKind kind, CommonTree blockItemTree, SimpleScope scope)
-			throws SyntaxException {
-		CivlcToken contractToken = this.parseTree
-				.getHiddenSubTokenSource(blockItemTree.getTokenStartIndex() - 1);
-		List<ContractNode> contracts = null;
-		Source source = null;
-
-		if (contractToken != null) {
-			String commentsText = contractToken.getText();
-
-			contracts = acslHandler.translateContracts(contractToken.getLine(),
-					commentsText, scope, contractToken.getFormation(), kind);
-			source = contracts.get(0).getSource();
-		}
-		if (contracts != null && contracts.size() > 0)
-			return this.nodeFactory.newSequenceNode(source, "ACSL contracts",
-					contracts);
-		return null;
-	}
-
 	/**
 	 * 
 	 * @param functionDefinitionTree
@@ -2795,7 +2772,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		SimpleScope newScope = new SimpleScope(scope);
 
 		this.scopeAndContracts.peek().left = newScope;
-		this.scopeAndContracts.peek().right = acslHandler.processAnnotation(
+		this.scopeAndContracts.peek().right = acslHandler.translateAcslAnnotation(
 				source, tokenSource, newScope);
 	}
 

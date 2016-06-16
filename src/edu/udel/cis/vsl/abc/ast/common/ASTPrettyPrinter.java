@@ -28,6 +28,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -1896,12 +1897,37 @@ public class ASTPrettyPrinter {
 			result.append("...");
 			break;
 		case MEMORY_SET:
-			result.append("MEMORY_SET in progress...");
+			result.append(memorySet2Pretty((MemorySetNode) expression));
+			// result.append("MEMORY_SET in progress...");
 			break;
 		default:
 			throw new ABCUnsupportedException(
 					"pretty print of expression node of " + kind + " kind");
 		}
+		return result;
+	}
+
+	private static StringBuffer memorySet2Pretty(MemorySetNode memSet) {
+		StringBuffer result = new StringBuffer();
+		boolean isFirstVar = true;
+
+		result.append("{");
+		result.append(expression2Pretty(memSet.getElements()));
+		result.append(" | ");
+		for (VariableDeclarationNode variable : memSet.getBinders()) {
+			if (isFirstVar)
+				isFirstVar = false;
+			else
+				result.append(", ");
+			result.append(type2Pretty("", variable.getTypeNode(), false));
+			result.append(" ");
+			result.append(variable.getName());
+		}
+		if (memSet.getBinders().numChildren() > 0)
+			result.append("; ");
+		if (memSet.getPredicate() != null)
+			result.append(expression2Pretty(memSet.getPredicate()));
+		result.append("}");
 		return result;
 	}
 

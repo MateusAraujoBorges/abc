@@ -1,11 +1,6 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
-import java.util.List;
-
-import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CommonTokenStream;
-import org.antlr.runtime.RecognitionException;
-import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
@@ -13,16 +8,12 @@ import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
-import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-import edu.udel.cis.vsl.abc.front.c.parse.AcslParser;
 import edu.udel.cis.vsl.abc.front.c.parse.CAcslParser;
 import edu.udel.cis.vsl.abc.front.c.parse.CParser.RuleKind;
-import edu.udel.cis.vsl.abc.front.c.preproc.AcslLexer;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.common.parse.TreeUtils;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
-import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
@@ -77,104 +68,30 @@ public class AcslContractHandler {
 	}
 
 	/**
-	 * translates a text representing an ACSL contract block into a list of
-	 * contract nodes
+	 * translates a CivlcTokenSource object representing an ACSL contract block,
+	 * which may be in the form of a multiple-line comment (<code>/*@ ...</code>
+	 * ) or single-line (<code>//@ ...</code>) comment, into a sequence of
+	 * contract nodes. First, the token source is parsed using the ACSL parser
+	 * into an ANTLR CommonTree object. Second, a CParseTree object is created
+	 * using the ANTLR tree. Finally, an AcslContractWorker is created to walk
+	 * through the CParseTree to create AST nodes.
 	 * 
-	 * @param startLine
-	 *            the start line of the contract block in the original source
-	 *            file
-	 * @param text
-	 *            the text representing the whole ACSL contract block, starting
-	 *            with <code>/*@</code> and ending at <code>*\/</code>.
+	 * @param source
+	 *            the source of the whole annotation block
+	 * @param tokenSource
+	 *            the CivlcTokenSource object representing the annotation, which
+	 *            is the result of preprocessing the annotation using the C
+	 *            preprocessor
 	 * @param scope
-	 *            the current scope, which is the same as the scope of the loop
-	 *            or the parameter scope of the function.
-	 * @param formation
-	 *            the formation to be used for transforming tokens into CToken.
-	 * @param kind
-	 *            the kind of the contract, whether it is for a loop or for a
-	 *            function.
-	 * @return a list of contract nodes which is the result of the translation.
-	 * @throws SyntaxException
-	 *             if there are any syntax errors
-	 */
-	public List<ContractNode> translateContracts(int startLine, String text,
-			SimpleScope scope, Formation formation, AcslContractKind kind)
-			throws SyntaxException {
-		CParseTree contractTree = this.parse(startLine, text, formation, kind);
-		AcslContractWorker worker = new AcslContractWorker(nodeFactory,
-				tokenFactory, contractTree);
-
-		return worker.generateASTNodes(scope);
-	}
-
-	/**
-	 * parses a text which represents an ACSL contract block into a CParseTree.
-	 * 
-	 * @param startLine
-	 *            the start line of the contract block in the original source
-	 *            file
-	 * @param text
-	 *            the text representing the whole ACSL contract block, starting
-	 *            with <code>/*@</code> and ending at <code>*\/</code>.
-	 * @param formation
-	 *            the formation to be used for transforming tokens into CToken.
-	 * @param kind
-	 *            the kind of the contract, whether it is for a loop or for a
-	 *            function.
-	 * @return the CParseTree after the parsing
+	 *            the scope of the annotation. For example, if this is a
+	 *            function scope, then it is the scope of the function
+	 *            parameters.
+	 * @return a sequence of contract nodes which are the result of the
+	 *         translation
 	 * @throws SyntaxException
 	 *             if there are any syntax errors.
 	 */
-	private CParseTree parse(int startLine, String text, Formation formation,
-			AcslContractKind kind) throws SyntaxException {
-		ANTLRStringStream input = new ANTLRStringStream(text);
-		AcslLexer lexer = new AcslLexer(input);
-
-		// TODO: need to filter out @s (where is this done?) and
-		// preprocess the sub-expressions occurring in the contracts
-
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		AcslParser parser = new AcslParser(tokens);
-		CommonTree tree;
-
-		updateLineNumber(startLine - 1, tokens);
-		try {
-			switch (kind) {
-			case FUNCTION_CONTRACT:
-				tree = (CommonTree) parser.function_contract().getTree();
-				break;
-			case LOOP_CONTRACT:
-				tree = (CommonTree) parser.loop_contract().getTree();
-				break;
-			default:
-				throw new SyntaxException(
-						"unknown ACSL contract kind: " + kind, null);
-			}
-		} catch (RecognitionException e) {
-			throw new ABCRuntimeException(e.getMessage());
-		}
-		TreeUtils.postProcessTree(tree);
-		return new CParseTree(Language.CIVL_C, RuleKind.CONTRACT,
-				this.tokenFactory.getCivlcTokenSourceByTokens(
-						tokens.getTokens(), formation), tree);
-	}
-
-	/**
-	 * updates the line number of each token using the given offset.
-	 * 
-	 * @param offset
-	 *            the offset to be used for the update
-	 * @param tokens
-	 *            the list of tokens whose line numbers are to be updated
-	 */
-	private void updateLineNumber(int offset, CommonTokenStream tokens) {
-		for (Token token : tokens.getTokens()) {
-			token.setLine(token.getLine() + offset);
-		}
-	}
-
-	public SequenceNode<ContractNode> processAnnotation(Source source,
+	public SequenceNode<ContractNode> translateAcslAnnotation(Source source,
 			CivlcTokenSource tokenSource, SimpleScope scope)
 			throws SyntaxException {
 		TokenStream tokens;
@@ -190,7 +107,7 @@ public class AcslContractHandler {
 				tokenFactory, parseTree);
 
 		return this.nodeFactory.newSequenceNode(source, "ACSL Annotation",
-				worker.generateASTNodes(scope));
+				worker.generateContractNodes(scope));
 
 	}
 }

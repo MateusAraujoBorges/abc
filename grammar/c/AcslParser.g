@@ -12,7 +12,7 @@ parser grammar AcslParser;
 options
 {
 	language=Java;
-	tokenVocab=AcslLexer;
+	tokenVocab=PreprocessorLexer;
 	output=AST;
    	backtrack=true;
 }
@@ -114,6 +114,12 @@ tokens{
 @header
 {
 package edu.udel.cis.vsl.abc.front.c.parse;
+}
+
+@members{
+	private Set<String> typeNames;
+	//private boolean isTypeName(String ){
+	//}
 }
 
 contract
@@ -498,10 +504,18 @@ logicalAndExpression
  * inclusive-OR-expression:
  *   exclusive-OR-expression
  *   inclusive-OR-expression | exclusive-OR-expression
+ *
+ * Note: the syntatic predicate before BITOR is to solve the ambiguity with
+ *       set expressions because ACSL type names are parsed as IDENTIFIER tokens.
+ * For example, {a|integer | integer a; a<10}.
+ * The first | is a bitor operator and the first "integer" is some variable name.
+ * Without the predicate, the grammar would consider the second | as an bitor operator
+ * and crashes, because "integer" is an IDENTIFIER token and it thinkgs that the second
+ * "integer" is an identifier expression.
  */
 inclusiveOrExpression
 	: ( exclusiveOrExpression -> exclusiveOrExpression )
-	  ( BITOR y=exclusiveOrExpression
+	  ( {!(input.LA(2)==IDENTIFIER && input.LA(3)==IDENTIFIER)}?BITOR y=exclusiveOrExpression
 	    -> ^(OPERATOR BITOR ^(ARGUMENT_LIST $inclusiveOrExpression $y))
 	  )*
 	;
@@ -711,16 +725,16 @@ argumentExpressionList
 /* 6.5.1 */
 primaryExpression
 	: constant
-    | IDENTIFIER
+    	| IDENTIFIER
 	| STRING_LITERAL
-    | LCURLY term BITOR binders (SEMI term)? RCURLY
-        ->^(SET_BINDERS term binders term?)
-    | LCURLY term RCURLY
-        ->^(SET_SIMPLE term)
+    	| LCURLY term BITOR binders (SEMI term)? RCURLY
+        	->^(SET_BINDERS term binders term?)
+    	| LCURLY term RCURLY
+       	 	->^(SET_SIMPLE term)
 	| LPAREN term RPAREN 
-	  -> ^(TERM_PARENTHESIZED term)
-    | mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
-    | remoteExpression
+	  	-> ^(TERM_PARENTHESIZED term)
+    	| mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
+    	| remoteExpression
 	;
 
 

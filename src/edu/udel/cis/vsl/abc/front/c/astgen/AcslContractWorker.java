@@ -9,7 +9,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ASSIGN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITXOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BOOLEAN;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CAST;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHAR;
@@ -149,7 +148,15 @@ import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 /**
  * This is responsible for translating a CParseTree that represents an ACSL
  * contract specification for a function or a loop into an ordered list of
- * Contract nodes. It serves as a helper for {@link AcslContractHandler}.
+ * Contract nodes. It serves as a helper for {@link AcslContractHandler}. <br>
+ * Precondition: all tokens are preprocessed with the regular program
+ * components. <br>
+ * Note: there are no separated lexer for the ACSL parser. All keywords are
+ * recognized as IDENTIFIER or EXTENDED_IDENTIFIER and semantic predicates are
+ * used to match different keywords, like <code>requires</code>,
+ * <code>ensures</code>, <code>assumes</code> as IDENTIFIER and
+ * <code>\valid</code>, <code>\result</code>, <code>\valid</code> as
+ * EXTENDED_IDENTIFIER.
  * 
  * @author Manchun Zheng (zmanchun)
  *
@@ -205,7 +212,9 @@ public class AcslContractWorker {
 	}
 
 	/**
-	 * translates the parse tree to a list of contract nodes
+	 * translates the parse tree to a list of contract nodes. Currently, two
+	 * kinds of contracts are supported, one is function contract, the other is
+	 * loop annotation.
 	 * 
 	 * @param scope
 	 *            the scope of the contract
@@ -214,7 +223,7 @@ public class AcslContractWorker {
 	 * @throws SyntaxException
 	 *             if there are syntax errors during the translation
 	 */
-	public List<ContractNode> generateASTNodes(SimpleScope scope)
+	public List<ContractNode> generateContractNodes(SimpleScope scope)
 			throws SyntaxException {
 		CommonTree contractTree = parseTree.getRoot();
 
@@ -737,8 +746,6 @@ public class AcslContractWorker {
 		case TERM_PARENTHESIZED:
 			return translateExpression((CommonTree) expressionTree.getChild(0),
 					scope);
-		case CALL:
-			return translateCall(source, expressionTree, scope);
 		case DOT:
 		case ARROW:
 			return translateDotOrArrow(source, expressionTree, scope);
