@@ -28,6 +28,8 @@ tokens{
     BEHAVIOR_BODY;
     BEHAVIOR_COMPLETE;
     BEHAVIOR_DISJOINT;
+    BEQUIV_ACSL;
+    BIMPLIES_ACSL;
     BINDER;
     BINDER_LIST;
     BOOLEAN;
@@ -114,12 +116,6 @@ tokens{
 @header
 {
 package edu.udel.cis.vsl.abc.front.c.parse;
-}
-
-@members{
-	private Set<String> typeNames;
-	//private boolean isTypeName(String ){
-	//}
 }
 
 contract
@@ -233,10 +229,6 @@ requires_clause
 
 terminates_clause
     : terminates_key term -> ^(TERMINATES terminates_key term)
-    ;
-
-rel_op
-    : EQUALS | NEQ | LTE | GTE | LT | GT
     ;
 
 binders
@@ -449,18 +441,17 @@ conditionalExpression
 
 /* DEV: put quantifiedExpression a higher precedence than logicalImpliesExpression */
 quantifierExpression
-	: logicalImpliesExpression
-    | quantifier binders SEMI a=logicalOrExpression IMPLIES_ACSL b=logicalOrExpression
+	: logicalEquivExpression
+    	| quantifier binders SEMI a=logicalOrExpression IMPLIES_ACSL b=logicalOrExpression
 	   -> ^(QUANTIFIED quantifier binders $a $b)
-	//| quantifier LCURLY id=IDENTIFIER ASSIGN
-	  //lower=additiveExpression DOTDOT upper=additiveExpression
-	  //RCURLY cond=assignmentExpression
-	  //-> ^(quantifier $id $lower $upper $cond)
-// eventually change to the following:
-//	| quantifier LCURLY id=IDENTIFIER ASSIGN rangeExpression
-//	  RCURLY cond=assignmentExpression
-//	  -> ^(quantifier $id rangeExpression $cond)
 	;
+
+logicalEquivExpression
+	: ( logicalImpliesExpression -> logicalImpliesExpression )
+	  ( EQUIV_ACSL y=logicalImpliesExpression
+	    -> ^(OPERATOR EQUIV_ACSL ^(ARGUMENT_LIST $logicalEquivExpression $y))
+	  )*
+    	;
 
 
 /* 6.5.14.5. Extended by CIVL-C and ACSL. *
@@ -470,20 +461,32 @@ quantifierExpression
  */
 logicalImpliesExpression
 	: ( logicalOrExpression -> logicalOrExpression )
-	  ( IMPLIES_ACSL y=logicalOrExpression
-	    -> ^(OPERATOR IMPLIES_ACSL ^(ARGUMENT_LIST $logicalImpliesExpression $y))
+	  ( op=(IMPLIES|IMPLIES_ACSL) y=logicalOrExpression
+	    -> ^(OPERATOR $op ^(ARGUMENT_LIST $logicalImpliesExpression $y))
 	  )*
-    ;
+    	;
 
 /* 6.5.14 *
  * logical-OR-expression:
- *   logical-AND-expression 
- *   logical-OR-expression || logical-AND-expression
+ *   logical-XOR-expression 
+ *   logical-XOR-expression || logical-XOR-expression
  */
 logicalOrExpression
-	: ( logicalAndExpression -> logicalAndExpression )
-	  ( OR y=logicalAndExpression
+	: ( logicalXorExpression -> logicalXorExpression )
+	  ( OR y=logicalXorExpression
 	    -> ^(OPERATOR OR ^(ARGUMENT_LIST $logicalOrExpression $y))
+	  )*
+	;	
+	
+/* ACSL operator
+ * logical-XOR-expression:
+ *   logical-AND-expression
+ *   logical-AND-expression ^^ logical-AND-expression:
+ */
+logicalXorExpression
+	: ( logicalAndExpression -> logicalAndExpression )
+	  ( XOR_ACSL y=logicalAndExpression
+	    -> ^(OPERATOR XOR_ACSL ^(ARGUMENT_LIST $logicalXorExpression $y))
 	  )*
 	;	
 
@@ -493,9 +496,23 @@ logicalOrExpression
  *   logical-AND-expression && inclusive-OR-expression
  */
 logicalAndExpression
-	: ( inclusiveOrExpression -> inclusiveOrExpression )
-	  ( AND y=inclusiveOrExpression
+	: ( bitwiseEquivExpression -> bitwiseEquivExpression )
+	  ( AND y=bitwiseEquivExpression
 	    -> ^(OPERATOR AND ^(ARGUMENT_LIST $logicalAndExpression $y))
+	  )*
+	;
+	
+bitwiseEquivExpression
+	: ( bitwiseImpliesExpression -> bitwiseImpliesExpression )
+	  ( bitequiv_op y=bitwiseImpliesExpression
+	    -> ^(OPERATOR BEQUIV_ACSL ^(ARGUMENT_LIST $bitwiseEquivExpression $y))
+	  )*
+	;
+	
+bitwiseImpliesExpression
+	: ( inclusiveOrExpression -> inclusiveOrExpression )
+	  ( bitimplies_op y=inclusiveOrExpression
+	    -> ^(OPERATOR BIMPLIES_ACSL ^(ARGUMENT_LIST $bitwiseImpliesExpression $y))
 	  )*
 	;
 
@@ -676,12 +693,12 @@ unaryExpression
 	  -> ^(SIZEOF_TYPE type_expr)
 	| SIZEOF unaryExpression
 	  -> ^(SIZEOF_EXPR unaryExpression)
-    | union_key LPAREN argumentExpressionList RPAREN
-        -> ^(UNION_ACSL union_key argumentExpressionList)
-    | inter_key LPAREN argumentExpressionList RPAREN
-        -> ^(INTER inter_key argumentExpressionList)
-    | valid_key LPAREN term RPAREN
-        -> ^(VALID valid_key term)
+    	| union_key LPAREN argumentExpressionList RPAREN
+          -> ^(UNION_ACSL union_key argumentExpressionList)
+    	| inter_key LPAREN argumentExpressionList RPAREN
+          -> ^(INTER inter_key argumentExpressionList)
+   	| valid_key LPAREN term RPAREN
+       	  -> ^(VALID valid_key term)
 	;
 
 /* 6.5.2 *
@@ -789,41 +806,43 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| true_key | false_key  | result_key | nothing_key | ELLIPSIS
-    | SELF | null_key | TRUE | FALSE
-    | mpi_constant -> ^(MPI_CONSTANT mpi_constant)
+    	| SELF | null_key | TRUE | FALSE
+    	| mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
 
 /* ACSL-MPI extensions Expressions and Constants  */
 mpi_expression
-    : mpiemptyin_key LPAREN primaryExpression RPAREN
-      -> ^(MPI_EMPTY_IN mpiemptyin_key primaryExpression)
-    | mpiemptyout_key LPAREN primaryExpression RPAREN
-      -> ^(MPI_EMPTY_OUT mpiemptyout_key primaryExpression)
-    | mpiagree_key LPAREN a=variable_ident_base RPAREN /* seems variable_ident not ready yet */
-      -> ^(MPI_AGREE mpiagree_key $a) 
-    | mpiregion_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
-      -> ^(MPI_REGION mpiregion_key $a $b $c)
-    | mpiequals_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
-      -> ^(MPI_EQUALS mpiequals_key $a $b $c $d)
-    ;
+    	: mpiemptyin_key LPAREN primaryExpression RPAREN
+      	  -> ^(MPI_EMPTY_IN mpiemptyin_key primaryExpression)
+   	| mpiemptyout_key LPAREN primaryExpression RPAREN
+      	  -> ^(MPI_EMPTY_OUT mpiemptyout_key primaryExpression)
+    	| mpiagree_key LPAREN a=variable_ident_base RPAREN /* seems variable_ident not ready yet */
+      	  -> ^(MPI_AGREE mpiagree_key $a) 
+    	| mpiregion_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
+      	  -> ^(MPI_REGION mpiregion_key $a $b $c)
+    	| mpiequals_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
+      	  -> ^(MPI_EQUALS mpiequals_key $a $b $c $d)
+    	;
 
 mpi_constant
-    : mpicommrank_key |  mpicommsize_key
-    ;
-
+    	: mpicommrank_key |  mpicommsize_key
+    	;
+	
 mpi_collective_kind
-    : col_key | p2p_key | both_key
-    ;
+    	: col_key | p2p_key | both_key
+    	;
+
+bitimplies_op
+	: MINUSMINUS GT
+	;	
+	
+bitequiv_op
+	: LT MINUSMINUS GT
+	;	
 
 unary_op
-    : PLUS | SUB | NOT | TILDE | STAR | AMPERSAND
-    ;
-
-binary_op
-    : PLUS | SUB | STAR | DIV | MOD | SHIFTLEFT | SHIFTRIGHT
-    | EQUALS | NEQ | LTE | GTE | LT | GT
-    | AND | OR | XOR | AMPERSAND | BITOR | IMPLIES_ACSL | EQUIV | BITXOR
-    ;
+    	: PLUS | SUB | NOT | TILDE | STAR | AMPERSAND
+    	;
     
 /* rules for ACSL types */
 boolean_type

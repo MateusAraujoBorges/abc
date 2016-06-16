@@ -28,11 +28,13 @@ public class ACSLTest {
 	@SuppressWarnings("unused")
 	private static File[] userIncludes = new File[0];
 	private static File root = new File(new File("examples"), "contract");
-	private static Configuration config = Configurations.newMinimalConfiguration();
+	private static Configuration config = Configurations
+			.newMinimalConfiguration();
 
 	private static FrontEnd frontEnd = new FrontEnd(config);
 
-	private void parse(String name) throws PreprocessorException, SyntaxException, ParseException {
+	private void parse(String name) throws PreprocessorException,
+			SyntaxException, ParseException {
 		File file = new File(root, name);
 		AST result;
 
@@ -40,77 +42,96 @@ public class ACSLTest {
 		// implicitMacros, file);
 		result = frontEnd.compile(file, Language.CIVL_C);
 		if (debug) {
-			result.print(out);
-			// result.prettyPrint(out, true);
+			// result.print(out);
+			result.prettyPrint(out, false);
 			out.println();
 			out.flush();
 		}
 	}
 
 	@Test
-	public void example1() throws PreprocessorException, SyntaxException, ParseException {
+	public void acslDemo() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("acslDemo.c");
 	}
 
 	@Test
-	public void cqueue() throws PreprocessorException, SyntaxException, ParseException {
+	public void acslOperators() throws PreprocessorException, SyntaxException,
+			ParseException {
+		this.parse("acslOperators.c");
+	}
+
+	@Test
+	public void cqueue() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("cqueue.c");
 	}
 
 	@Test
-	public void mpiCollective() throws PreprocessorException, SyntaxException, ParseException {
+	public void mpiCollective() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("mpiCollectiveTest.c");
 	}
 
 	@Test
-	public void mpiConstants() throws PreprocessorException, SyntaxException, ParseException {
+	public void mpiConstants() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("mpiConstants.c");
 	}
 
 	@Test
-	public void wildcard() throws PreprocessorException, SyntaxException, ParseException {
+	public void wildcard() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("wildcard_contract_bad.c");
 	}
 
 	@Test
-	public void quantifiers() throws PreprocessorException, SyntaxException, ParseException {
+	public void quantifiers() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("quantifiers.c");
 	}
 
 	@Test
-	public void emptyInBad() throws PreprocessorException, SyntaxException, ParseException {
+	public void emptyInBad() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("isRecvBufEmpty_BAD.c");
 	}
 
 	@Test
-	public void emptyInOk() throws PreprocessorException, SyntaxException, ParseException {
+	public void emptyInOk() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("isRecvBufEmpty_OK.c");
 	}
 
 	@Test
-	public void loopInvariant() throws PreprocessorException, SyntaxException, ParseException {
+	public void loopInvariant() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("loopInvariant.c");
 	}
 
 	@Test
-	public void validPointers() throws PreprocessorException, SyntaxException, ParseException {
+	public void validPointers() throws PreprocessorException, SyntaxException,
+			ParseException {
 		// this.parse("valid.c");
 		parse("validPointers.c");
 	}
 
 	@Test
-	public void remoteAccess() throws PreprocessorException, SyntaxException, ParseException {
+	public void remoteAccess() throws PreprocessorException, SyntaxException,
+			ParseException {
 		// this.parse("valid.c");
 		parse("remoteAccess.c");
 	}
 
 	@Test
-	public void memLocation1() throws PreprocessorException, SyntaxException, ParseException {
+	public void memLocation1() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("memLocation1.c");
 	}
 
 	@Test
-	public void pointers() throws PreprocessorException, SyntaxException, ParseException {
+	public void pointers() throws PreprocessorException, SyntaxException,
+			ParseException {
 		this.parse("pointers.c");
 	}
 }

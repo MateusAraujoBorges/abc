@@ -60,6 +60,16 @@ public interface OperatorNode extends ExpressionNode {
 		 */
 		BITCOMPLEMENT,
 		/**
+		 * The bit-wise equivalent operator <code><--></code> of ACSL extension,
+		 * as in <code>a <--> b</code>.
+		 */
+		BITEQUIV,
+		/**
+		 * The bit-wise implies operator <code>--></code> of ACSL extension, as
+		 * in <code>a --> b</code>.
+		 */
+		BITIMPLIES,
+		/**
 		 * The bit-wise inclusive or operator <code>|</code>, as in
 		 * <code>e|f</code>, which performs the logical or operation on the
 		 * corresponding bits of two integer values.
@@ -150,12 +160,24 @@ public interface OperatorNode extends ExpressionNode {
 		 */
 		LAND,
 		/**
+		 * The logical equivalent operator <code><==></code> of ACSL extension,
+		 * as in <code>e<==>f</code>, which returns the integer 1 if
+		 * <code>e</code> and <code>f</code> are logically equivalent.
+		 */
+		LEQ,
+		/**
 		 * The logical or operator <code>||</code>, as in <code>e||f</code>,
 		 * which returns the integer 1 if <code>e</code> or <code>f</code> is
 		 * true (not 0), else returns 1. This is a short-circuit operator, so if
 		 * <code>e</code> is true, <code>f</code> is not evaluated.
 		 */
 		LOR,
+		/**
+		 * The logical xor operator <code>^^</code> of ACSL extension, as in
+		 * <code>e^^f</code>, which returns the integer 1 if <code>e</code> and
+		 * <code>f</code> are not equivalent.
+		 */
+		LXOR,
 		/**
 		 * The less-than relational operator, as in <code>e&lt;f</code>, which
 		 * returns the integer 1 if <code>e</code> is less than <code>f</code>,

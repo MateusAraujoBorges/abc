@@ -6,6 +6,8 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ANYACT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARROW;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ASSIGN;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BEQUIV_ACSL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BIMPLIES_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITXOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BOOLEAN;
@@ -21,6 +23,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOTDOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOUBLE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ELLIPSIS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EQUALS;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EQUIV_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_BASE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_INTS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PARENTHESIZED;
@@ -81,6 +84,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_SQUARE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_STAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VOID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.WRITE_ACSL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.XOR_ACSL;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -1303,8 +1307,21 @@ public class AcslContractWorker {
 		case INDEX:
 			operator = Operator.SUBSCRIPT;
 			break;
+		case XOR_ACSL:
+			operator = Operator.LXOR;
+			break;
+		case BEQUIV_ACSL:
+			operator = Operator.BITEQUIV;
+			break;
+		case BIMPLIES_ACSL:
+			operator = Operator.BITIMPLIES;
+			break;
+		case EQUIV_ACSL:
+			operator = Operator.LEQ;
+			break;
 		default:
-			throw error("Unknown operator :", operatorTree);
+			throw error("Unknown operator : " + operatorTree.getText(),
+					operatorTree);
 		}
 		return nodeFactory.newOperatorNode(source, operator, arguments);
 	}

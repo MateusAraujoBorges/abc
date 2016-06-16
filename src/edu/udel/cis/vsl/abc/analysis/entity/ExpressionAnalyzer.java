@@ -1051,6 +1051,8 @@ public class ExpressionAnalyzer {
 		case BITAND: // & bit-wise and
 		case BITOR: // | bit-wise inclusive or
 		case BITXOR: // ^ bit-wise exclusive or
+		case BITEQUIV: // <--> bit-wise equivalent
+		case BITIMPLIES: // --> bit-wise implies
 			processBitwise(node);
 			break;
 		case BITANDEQ: // &= bit-wise and assignment
@@ -1079,8 +1081,10 @@ public class ExpressionAnalyzer {
 		case NEQ: // != not equals
 			processEqualityOperator(node);
 			break;
+		case LXOR: // ^^ logical xor
 		case LAND: // && logical and
 		case LOR: // || logical or
+		case LEQ:// <==> logical equiv
 		case NOT: // ! logical not
 		case IMPLIES: // => logical implication
 			processLANDorLORorNOT(node);

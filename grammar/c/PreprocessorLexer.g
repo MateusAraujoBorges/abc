@@ -144,6 +144,7 @@ DEPENDS     	:   	'$depends';
 DERIV		:	'$D';
 DOMAIN		:	'$domain';
 ENSURES		:	'$ensures';
+EQUIV_ACSL	:	'<==>'		NotLineStart;
 EXISTS		: 	'$exists';
 FALSE		:	'$false';
 FORALL		:	'$forall';
@@ -172,6 +173,7 @@ SYSTEM      	:   	'$system';
 TRUE		:	'$true';
 UNIFORM		:	'$uniform';
 WHEN		:	'$when';
+XOR_ACSL	:	'^^'		NotLineStart;
 
 /* Cuda-C keywords */
 

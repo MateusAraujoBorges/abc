@@ -2181,6 +2181,16 @@ public class ASTPrettyPrinter {
 			result.append("~");
 			result.append(argWtP0);
 			break;
+		case BITEQUIV:
+			result.append(argWtP0);
+			result.append("<-->");
+			result.append(argWtP1);
+			break;
+		case BITIMPLIES:
+			result.append(argWtP0);
+			result.append("-->");
+			result.append(argWtP1);
+			break;
 		case BITOR:
 			result.append(argWtP0);
 			result.append(" | ");
@@ -2255,6 +2265,16 @@ public class ASTPrettyPrinter {
 		case LOR:
 			result.append(argWtP0);
 			result.append(" || ");
+			result.append(argWtP1);
+			break;
+		case LXOR:
+			result.append(argWtP0);
+			result.append(" ^^ ");
+			result.append(argWtP1);
+			break;
+		case LEQ:
+			result.append(argWtP0);
+			result.append(" <==> ");
 			result.append(argWtP1);
 			break;
 		case LT:
