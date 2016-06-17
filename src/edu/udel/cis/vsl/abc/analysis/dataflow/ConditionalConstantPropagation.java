@@ -363,7 +363,7 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 
 		Set<Entity> idOverlap = new HashSet<Entity>();
 		
-		// Computer the set of overlapping identifiers in the incoming sets of CP entries
+		// Compute the set of overlapping identifiers in the incoming sets of CP entries
 		for (Pair<Entity,Pair<Boolean,ConstantNode>> p1 : s1) {
 			for (Pair<Entity,Pair<Boolean,ConstantNode>> p2 : s2) {
 				if (p1.left.equals(p2.left)) {
@@ -395,6 +395,7 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 		}	
 		
 		// Add the disjoint CP entries to the merge
+		// TBD: this seems wrong.  We want these entries to go to "top".  What's the cleanest way to do that with lambdas?
 		result.addAll(s1.stream().filter(p -> !idOverlap.contains(p.left)).collect(Collectors.toSet()));
 		result.addAll(s2.stream().filter(p -> !idOverlap.contains(p.left)).collect(Collectors.toSet()));
 				
