@@ -9,14 +9,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 
+import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.SwitchLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.IfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
@@ -32,7 +35,7 @@ import edu.udel.cis.vsl.abc.util.IF.Pair;
  *          
  * @author dwyer
  */
-public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> {
+public abstract class EdgeDataFlowFramework<E> extends DataFlowFramework<E> {
 	// Record outputs for edges in addition to nodes in base framework
 	protected Map<Pair<ASTNode, ASTNode>, Set<E>> edgeOutMap = new HashMap<Pair<ASTNode, ASTNode>, Set<E>>();
 
@@ -58,16 +61,24 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 		boolean newValues = false;
 		if (succs(n) != null) {
 			for (ASTNode s : succs(n)) {
+				//System.out.println("Edge ("+n.getSource()+"->"+s.getSource()+")");
+
 				Set<E> inSet = getInSet(n);
+				
+				//System.out.println("   in = "+inSet);
+				
 				inSet = update(inSet, n, s);
 				final Set<E> outSet = getOutSet(n, s);
-
+				
 				if (!inSet.containsAll(outSet) || !outSet.containsAll(inSet)) {
 					outSet.clear();
 					outSet.addAll(inSet);
 					inSet.clear();
 					newValues |= true;
 				}
+				
+				//System.out.println("   out = "+outSet);
+
 			}
 		}
 		return newValues;
@@ -81,6 +92,20 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 	 */
 	protected boolean isBranch(ASTNode n) {
 		return succs(n).size() > 1;
+	}
+	
+	protected boolean isChild(ASTNode n, ASTNode c) {
+		if (n.equals(c)) {
+			return true;
+		} else {
+			Iterable<ASTNode> children = n.children();
+			for (ASTNode child : children) {
+				if (isChild(child, c)) {
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 	
 	/**
@@ -106,17 +131,33 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 			ExpressionNode srcNode = (ExpressionNode)n.copy();
 			
 			if (succs(n).size() == 2) {
-				// branch is an if-then
-				IfNode ifn = (IfNode) n.parent();
-				
-				if (ifn.getTrueBranch().equals(s)) {
-					// true branch has the original condition
-					return srcNode;
+				if (n.parent() instanceof IfNode) {
+					IfNode ifn = (IfNode)n.parent();
+					
+					// if the successor is in the true branch somewhere
+					if (isChild(ifn.getTrueBranch(),s)) {
+						// true branch has the original condition
+						return srcNode;
+					} else {
+						// false branch requires wrapping with a negation
+						OperatorNode notCond = nf.newOperatorNode(source, Operator.NOT, srcNode);
+						return notCond;
+					}		
+				} else if (n.parent() instanceof LoopNode) {
+					LoopNode ln = (LoopNode)n.parent();
+
+					// if the successor is in the body
+					if (isChild(ln.getBody(),s)) {
+						// true branch has the original condition
+						return srcNode;
+					} else {
+						// false branch requires wrapping with a negation
+						OperatorNode notCond = nf.newOperatorNode(source, Operator.NOT, srcNode);
+						return notCond;
+					}	
 				} else {
-					// false branch requires wrapping with a negation
-					OperatorNode notCond = nf.newOperatorNode(source, Operator.NOT, srcNode);
-					return notCond;
-				}				
+					assert false : "Unexpected branching node";
+				}
 		
 			} else {
 				// branch is a switch, which means that the condition is the expression that is compared to cases
@@ -214,11 +255,6 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 	 */
 	public Set<E> getOutSet(final ASTNode n, final ASTNode s) {
 			assert n != null;
-			
-			if (!isBranch(n)) {
-				// If this is not a branch then just get the source out-set
-				return getOutSet(n);
-			}
 
 			Pair<ASTNode, ASTNode> edge = new Pair<ASTNode, ASTNode>(n, s);
 			Set<E> result = edgeOutMap.get(edge);
@@ -246,27 +282,26 @@ public abstract class BranchedDataFlowFramework<E> extends DataFlowFramework<E> 
 	private String getResultString(final boolean useInSet) {
 		final StringBuilder sb = new StringBuilder();
 		final ArrayList<String> list = new ArrayList<String>();
-		for (final ASTNode n : this.outMap.keySet()) {
-			for (final ASTNode s : succs(n)) {
-			sb.append("("+n+","+s+") ==> ");
-			final TreeSet<String> ts = new TreeSet<String>();
-			if (useInSet) {
-				for (final E e : getInSet(n)) {
-					ts.add(toString(e));
+		for (final Pair<ASTNode,ASTNode> p : this.edgeOutMap.keySet()) {
+				sb.append("("+p.left.getSource()+","+p.right.getSource()+") ==> ");
+				final TreeSet<String> ts = new TreeSet<String>();
+				if (useInSet) {
+					for (final E e : getInSet(p.left)) {
+						ts.add(toString(e));
+					}
+				} else {
+					for (final E e : getOutSet(p.left,p.right)) {
+						ts.add(toString(e));
+					}
 				}
-			} else {
-				for (final E e : getOutSet(n,s)) {
-					ts.add(toString(e));
+				sb.append("{");
+				for (final String str : ts) {
+					sb.append(str);
+					sb.append(", ");
 				}
-			}
-			for (final String str : ts) {
-				sb.append(str);
-				sb.append("  #  ");
-			}
-			final String str = sb.toString();
-			sb.setLength(0);
-			list.add(str.substring(0, str.length() - 5) + "\n");
-			}
+				final String str = sb.toString();
+				sb.setLength(0);
+				list.add(str.substring(0, str.length() - 2) + "}\n");
 		}
 		Collections.sort(list);
 		for (final String s : list) {

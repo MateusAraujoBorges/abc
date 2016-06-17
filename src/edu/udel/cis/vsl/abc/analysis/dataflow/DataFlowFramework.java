@@ -226,7 +226,7 @@ public abstract class DataFlowFramework<E> {
 		final StringBuilder sb = new StringBuilder();
 		final ArrayList<String> list = new ArrayList<String>();
 		for (final ASTNode s : this.outMap.keySet()) {
-			sb.append(s+" ==> ");
+			sb.append(s.getSource()+" ==> ");
 			final TreeSet<String> ts = new TreeSet<String>();
 			for (final E e : (useInSet ? getInSet(s) : getOutSet(s))) {
 				ts.add(toString(e));

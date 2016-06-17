@@ -1,22 +1,20 @@
 package edu.udel.cis.vsl.abc.analysis.dataflow;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
-import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
-import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
@@ -30,7 +28,7 @@ import edu.udel.cis.vsl.abc.util.IF.Pair;
  * 
  * @author dwyer
  */
-public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pair<Entity,Pair<Boolean,ConstantNode>>> {
+public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<Entity,Pair<Boolean,ConstantNode>>> {	
 	private static ConditionalConstantPropagation instance = null;
 
 	Function currentFunction;
@@ -77,7 +75,7 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 	}
 	
 	/*
-	 *  The next three methods are stolen from reaching definitions.  
+	 *  The next group of methods are stolen from reaching definitions, the OMP simplifier, and then expanded on significantly.
 	 *  	They should be factored out into some utilities.
 	 */
 	private boolean isAssignment(final ASTNode s) {
@@ -95,6 +93,14 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 					return true;
 				}
 			} 
+		} 
+		return false;
+	}
+	
+	private boolean isDefinition(final ASTNode s) {
+		if (s instanceof VariableDeclarationNode) {
+			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
+			return vdn.isDefinition() && vdn.getInitializer() != null;
 		}
 		return false;
 	}
@@ -124,14 +130,31 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 			} else {
 				assert false : "Unexpected LHS expression";
 			}
+		} else if (isDefinition(s)) {
+			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
+			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
+				return vdn.getEntity();
+			}
 		}
 		return null;
 	}
 	
 	private ExpressionNode getRHS(final ASTNode s) {
 		if (isAssignment(s)) {
-			ExpressionNode rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(1);
+			OperatorNode opn = (OperatorNode) ((ExpressionStatementNode)s).getExpression();
+			ExpressionNode rhs = null;
+			if (opn.getNumberOfArguments() == 1) {
+				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(0);
+			} else if (opn.getNumberOfArguments() == 2) {
+				// This might need refinement for, e.g., PLUSEQ, which has arg 0 on the LHS and RHS
+				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(1);
+			}
 			return rhs;
+		} else if (isDefinition(s)) {
+			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
+			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
+				return (ExpressionNode)vdn.getInitializer();
+			}
 		}
 		return null;
 	}
@@ -181,6 +204,21 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 		}
 		return result;
 	}
+	
+	private void replaceNode(ASTNode current, ASTNode replacement) {
+		ASTNode parent = current.parent();
+		
+		int indexOf = 0;
+		for (;indexOf < parent.numChildren(); indexOf++) {
+			if (parent.child(indexOf) == current) break;
+		}
+		
+		// check that current was found
+		assert indexOf < parent.numChildren() : "Node to replace was not found";
+		
+		parent.removeChild(indexOf);
+		parent.setChild(indexOf, replacement);
+	}
 
 	/**
 	 * Rewrite the expression replacing identifiers with constants given in the map.
@@ -188,12 +226,20 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 	 * @param expr
 	 * @param map
 	 */
-	private void replaceIdWithConst(ExpressionNode expr, Pair<Entity,ConstantNode> idConstMap) {
+	private void replaceIdWithConst(ExpressionNode expr, Pair<Entity,ConstantNode> idConst) {
 		// this is a recursive walk that is the usual huge switch structure with recursion
 		if (expr instanceof IdentifierExpressionNode) {
-			Entity idEnt = ((IdentifierExpressionNode)expr).getIdentifier().getEntity();
-			if (idEnt.equals(idConstMap.left)) {
-				// replace expr in parent with idConstMap.right
+			Entity id = ((IdentifierExpressionNode)expr).getIdentifier().getEntity();
+			if (id.equals(idConst.left)) {
+				replaceNode(expr, idConst.right);
+			}
+		} else {
+			Iterable<ASTNode> children = expr.children();
+			for (ASTNode child : children) {
+				if (child instanceof ExpressionNode) {
+					ExpressionNode childExpr = (ExpressionNode)child;
+					replaceIdWithConst(childExpr, idConst);
+				}
 			}
 		}
 	}
@@ -234,7 +280,7 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 			return result;
 		} else {
 			// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-			if (isAssignment(n)) {
+			if (isAssignment(n) || isDefinition(n)) {
 				Entity lhsVar = getLHSVar(n);
 				for (Pair<Entity,Pair<Boolean,ConstantNode>> cpEntry : set) {
 					if (cpEntry.left.equals(lhsVar)) {
@@ -257,13 +303,17 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 
 		// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-		if (isAssignment(n)) {
+		if (isAssignment(n) || isDefinition(n)) {
 			Entity lhsVar = getLHSVar(n);
 			ExpressionNode rhs = getRHS(n);
 
 			// The constant pair is "top" if the rhs is not a ConstantNode, otherwise we use the rhs
-			Pair<Boolean, ConstantNode> constPair = 
-					new Pair<Boolean, ConstantNode>(!(rhs instanceof ConstantNode), (ConstantNode)rhs);
+			Pair<Boolean, ConstantNode> constPair = null;
+			if (rhs instanceof ConstantNode) {
+				constPair = new Pair<Boolean, ConstantNode>(false, (ConstantNode)rhs);
+			} else {
+				constPair = new Pair<Boolean, ConstantNode>(true, null);
+			}
 			Pair<Entity, Pair<Boolean,ConstantNode>> cpEntry = 
 					new Pair<Entity, Pair<Boolean,ConstantNode>>(lhsVar,constPair);
 			result.add(cpEntry);
@@ -308,14 +358,53 @@ public class ConditionalConstantPropagation extends BranchedDataFlowFramework<Pa
 	@Override
 	protected Set<Pair<Entity, Pair<Boolean, ConstantNode>>> merge(Set<Pair<Entity, Pair<Boolean, ConstantNode>>> s1,
 			Set<Pair<Entity, Pair<Boolean, ConstantNode>>> s2) {
-		// TODO Auto-generated method stub
-		return null;
+		Set<Pair<Entity,Pair<Boolean,ConstantNode>>> result = 
+				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
+
+		Set<Entity> idOverlap = new HashSet<Entity>();
+		
+		// Computer the set of overlapping identifiers in the incoming sets of CP entries
+		for (Pair<Entity,Pair<Boolean,ConstantNode>> p1 : s1) {
+			for (Pair<Entity,Pair<Boolean,ConstantNode>> p2 : s2) {
+				if (p1.left.equals(p2.left)) {
+					idOverlap.add(p1.left);
+				}
+			}
+		}
+		
+		// For entries with common identifiers, merge their CP data
+		for (Pair<Entity,Pair<Boolean,ConstantNode>> p1 : s1) {
+			if (!idOverlap.contains(p1.left)) continue;
+			
+			for (Pair<Entity,Pair<Boolean,ConstantNode>> p2 : s2) {
+				if (!idOverlap.contains(p2.left)) continue;
+
+				if (p1.left.equals(p2.left)) {
+
+					// always generate the same top CP value
+					Pair<Boolean, ConstantNode> topCP = new Pair<Boolean, ConstantNode>(new Boolean(true), null);
+					Pair<Entity, Pair<Boolean, ConstantNode>> top = new Pair<Entity, Pair<Boolean, ConstantNode>>(p1.left, topCP);
+					if (!p1.right.left.booleanValue() && !p2.right.left.booleanValue() && 
+							p1.right.right.getConstantValue().equals(p2.right.right.getConstantValue())) {
+						result.add(p1);
+					} else {
+						result.add(top);
+					}
+				}
+			}
+		}	
+		
+		// Add the disjoint CP entries to the merge
+		result.addAll(s1.stream().filter(p -> !idOverlap.contains(p.left)).collect(Collectors.toSet()));
+		result.addAll(s2.stream().filter(p -> !idOverlap.contains(p.left)).collect(Collectors.toSet()));
+				
+		return result;
 	}
 
 	@Override
 	public String toString(Pair<Entity, Pair<Boolean, ConstantNode>> e) {
 		Pair<Boolean, ConstantNode> p = e.right;
-		String entry = e.left+"->"+((p.left.booleanValue()) ? "top" : (p.right.toString()));
+		String entry = e.left.getName()+"->"+((p.left.booleanValue()) ? "top" : (p.right.getConstantValue()));
 		return "<"+entry+">";
 	}
 

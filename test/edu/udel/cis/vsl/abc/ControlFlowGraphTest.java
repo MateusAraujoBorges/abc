@@ -103,5 +103,10 @@ public class ControlFlowGraphTest {
 	public void jumps() throws ABCException, IOException {
 		check("jumps");
 	}
+	
+	@Test
+	public void branchconst() throws ABCException, IOException {
+		check("branchconst");
+	}
 
 }

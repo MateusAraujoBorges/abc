@@ -16,18 +16,38 @@ public class Pair<S, T> {
 
 	@Override
 	public boolean equals(final Object o) {
+		if (o == null) return false;
+		
 		if (o instanceof Pair) {
 			@SuppressWarnings("unchecked")
 			final Pair<S, T> other = (Pair<S, T>) o;
-			return this.left.equals(other.left)
-					&& this.right.equals(other.right);
+			
+			// Partial nullity of pairs means inequality
+			if (this.left == null && other.left != null) {
+				return false;
+			} else if (this.left != null && other.left == null) {
+				return false;
+			}
+			
+			if (this.right == null && other.right != null) {
+				return false;
+			} else if (this.right != null && other.right == null) {
+				return false;
+			}
+			
+			boolean leftEqual = (this.left == null && other.left == null) || this.left.equals(other.left);
+			boolean rightEqual = (this.right == null && other.right == null) || this.right.equals(other.right);
+			
+			return leftEqual && rightEqual;
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return this.left.hashCode() + this.right.hashCode();
+		int leftHash = (this.left == null) ? 0 : this.left.hashCode();
+		int rightHash = (this.right == null) ? 0 : this.right.hashCode();
+		return leftHash + rightHash;
 	}
 
 	@Override

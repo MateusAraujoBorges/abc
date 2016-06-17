@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.analysis.common.CallAnalyzer;
@@ -27,6 +28,7 @@ import edu.udel.cis.vsl.abc.token.IF.Macro;
  * @author dwyer
  * 
  */
+@Ignore
 public class DataFlowAnalysisTest {
 
 	/**
@@ -73,10 +75,11 @@ public class DataFlowAnalysisTest {
 			dom.analyze(f);
 			ccp.analyze(f);
 		}		
-		
 		if (debug) {
 			System.out.println(rd.getResultString());
 			System.out.println(dom.getResultString());
+			System.out.println(ccp.getResultString());
+
 			for (Function f : CallAnalyzer.functions(ast)) {
 				System.out.println("Dominator tree for function "+f);
 				dom.printDominatorTree(f);
@@ -117,6 +120,11 @@ public class DataFlowAnalysisTest {
 	@Test
 	public void matprod() throws ABCException, IOException {
 		check("matprod");
+	}
+	
+	@Test
+	public void branchconst() throws ABCException, IOException {
+		check("branchconst");
 	}
 
 }

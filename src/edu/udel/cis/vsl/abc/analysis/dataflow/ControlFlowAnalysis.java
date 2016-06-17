@@ -13,6 +13,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.LabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
@@ -322,12 +323,11 @@ public class ControlFlowAnalysis {
 		 * a statement is a compound statement then this will create a false
 		 * successor, which will be cleaned up in the second pass below.
 		 */
-		StatementNode currStmt = node;
+		ASTNode currStmt = node;
 		for (BlockItemNode item : node) {
-			if (item instanceof StatementNode) {
-				StatementNode theStmt = (StatementNode) item;
-				addEdge(currStmt, theStmt);
-				currStmt = theStmt;
+			if (item instanceof StatementNode  || item instanceof VariableDeclarationNode) {
+				addEdge(currStmt, item);
+				currStmt = item;
 			}
 		}
 		addEdge(currStmt, compoundSucc);
