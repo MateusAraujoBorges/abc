@@ -92,8 +92,7 @@ public class FrontEnd {
 
 	private EntityFactory entityFactory = Entities.newEntityFactory();
 
-	private ConversionFactory conversionFactory = Conversions
-			.newConversionFactory(typeFactory);
+	private ConversionFactory conversionFactory = Conversions.newConversionFactory(typeFactory);
 
 	private Map<Language, Analyzer> analyzers = new HashMap<>();
 
@@ -116,37 +115,29 @@ public class FrontEnd {
 	 */
 	public FrontEnd(Configuration configuration) {
 		Parser cOrcivlcParser = Front.newParser(Language.CIVL_C);
-		Preprocessor cOrcivlcPreprocessor = Front
-				.newPreprocessor(Language.CIVL_C, configuration, sourceFactory);
+		Preprocessor cOrcivlcPreprocessor = Front.newPreprocessor(Language.CIVL_C, configuration, sourceFactory);
 		ASTBuilder cOrcivlcBuilder;
 
 		this.configuration = configuration;
 		valueFactory = Values.newValueFactory(configuration, typeFactory);
-		nodeFactory = Nodes.newNodeFactory(configuration, typeFactory,
-				valueFactory);
-		astFactory = ASTs.newASTFactory(nodeFactory, sourceFactory,
-				typeFactory);
-		analyzers.put(Language.C, Analysis.newStandardAnalyzer(Language.C,
-				configuration, astFactory, entityFactory, conversionFactory));
-		analyzers.put(Language.CIVL_C,
-				Analysis.newStandardAnalyzer(Language.CIVL_C, configuration,
-						astFactory, entityFactory, conversionFactory));
-		analyzers.put(Language.FORTRAN77,
-				Analysis.newStandardAnalyzer(Language.FORTRAN77, configuration,
-						astFactory, entityFactory, conversionFactory));
+		nodeFactory = Nodes.newNodeFactory(configuration, typeFactory, valueFactory);
+		astFactory = ASTs.newASTFactory(nodeFactory, sourceFactory, typeFactory);
+		analyzers.put(Language.C,
+				Analysis.newStandardAnalyzer(Language.C, configuration, astFactory, entityFactory, conversionFactory));
+		analyzers.put(Language.CIVL_C, Analysis.newStandardAnalyzer(Language.CIVL_C, configuration, astFactory,
+				entityFactory, conversionFactory));
+		analyzers.put(Language.FORTRAN77, Analysis.newStandardAnalyzer(Language.FORTRAN77, configuration, astFactory,
+				entityFactory, conversionFactory));
 		parsers.put(Language.C, cOrcivlcParser);
 		parsers.put(Language.CIVL_C, cOrcivlcParser);
 		parsers.put(Language.FORTRAN77, Front.newParser(Language.FORTRAN77));
 		preprocessors.put(Language.C, cOrcivlcPreprocessor);
 		preprocessors.put(Language.CIVL_C, cOrcivlcPreprocessor);
-		preprocessors.put(Language.FORTRAN77, Front.newPreprocessor(
-				Language.FORTRAN77, configuration, sourceFactory));
-		cOrcivlcBuilder = Front.newASTBuilder(Language.CIVL_C, configuration,
-				astFactory);
+		preprocessors.put(Language.FORTRAN77, Front.newPreprocessor(Language.FORTRAN77, configuration, sourceFactory));
+		cOrcivlcBuilder = Front.newASTBuilder(Language.CIVL_C, configuration, astFactory);
 		astBuilders.put(Language.C, cOrcivlcBuilder);
 		astBuilders.put(Language.CIVL_C, cOrcivlcBuilder);
-		astBuilders.put(Language.FORTRAN77, Front
-				.newASTBuilder(Language.FORTRAN77, configuration, astFactory));
+		astBuilders.put(Language.FORTRAN77, Front.newASTBuilder(Language.FORTRAN77, configuration, astFactory));
 	}
 
 	public FrontEnd(TranslationTask task) {
@@ -249,6 +240,18 @@ public class FrontEnd {
 		return Programs.newProgramFactory(astFactory, analyzer);
 	}
 
+	/**
+	 * This is the attribute key for macro _NO_CHECK_DIVISION_BY_ZERO. When user
+	 * does not want to check integer division by zero, user can define a macro
+	 * to disable it. The macro info will be put into the root node of ast as an
+	 * attribute and this attribute needs to be passed all the way to the
+	 * integer division transformer. During linking process (
+	 * {@link #link(AST[], Language)}), the attribute needs to be passed from
+	 * sub trees to the new tree and this is the reason why intDivAttributeKey
+	 * is passed to frontEnd.
+	 * 
+	 * @param intDivAttributeKey
+	 */
 	public void setIntDivAttributeKey(AttributeKey intDivAttributeKey) {
 		this.intDivAttributeKey = intDivAttributeKey;
 	}
@@ -284,10 +287,8 @@ public class FrontEnd {
 	 *             if the file violates some aspect of the syntax of the
 	 *             language
 	 */
-	public AST parse(Language language, File file, File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> implicitMacros)
-					throws PreprocessorException, SyntaxException,
-					ParseException {
+	public AST parse(Language language, File file, File[] systemIncludePaths, File[] userIncludePaths,
+			Map<String, Macro> implicitMacros) throws PreprocessorException, SyntaxException, ParseException {
 		Preprocessor preprocessor;
 		CivlcTokenSource tokens;
 		ParseTree parseTree;
@@ -296,8 +297,7 @@ public class FrontEnd {
 		ASTBuilder builder = this.getASTBuilder(language);
 
 		preprocessor = getPreprocessor(language);
-		tokens = preprocessor.outputTokenSource(systemIncludePaths,
-				userIncludePaths, implicitMacros, file);
+		tokens = preprocessor.outputTokenSource(systemIncludePaths, userIncludePaths, implicitMacros, file);
 		parseTree = parser.parse(tokens);
 		ast = builder.getTranslationUnit(parseTree);
 		return ast;
@@ -334,12 +334,9 @@ public class FrontEnd {
 	 *             if the file violates some aspect of the syntax of the
 	 *             language
 	 */
-	public AST compile(File file, Language language, File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> implicitMacros)
-					throws PreprocessorException, SyntaxException,
-					ParseException {
-		AST result = parse(language, file, systemIncludePaths, userIncludePaths,
-				implicitMacros);
+	public AST compile(File file, Language language, File[] systemIncludePaths, File[] userIncludePaths,
+			Map<String, Macro> implicitMacros) throws PreprocessorException, SyntaxException, ParseException {
+		AST result = parse(language, file, systemIncludePaths, userIncludePaths, implicitMacros);
 		Analyzer analyzer = getStandardAnalyzer(language);
 
 		analyzer.analyze(result);
@@ -368,10 +365,9 @@ public class FrontEnd {
 	 *             if the file violates some aspect of the syntax of the
 	 *             language
 	 */
-	public AST compile(File file, Language language)
-			throws PreprocessorException, SyntaxException, ParseException {
-		return compile(file, language, ABC.DEFAULT_SYSTEM_INCLUDE_PATHS,
-				ABC.DEFAULT_USER_INCLUDE_PATHS, ABC.DEFAULT_IMPLICIT_MACROS);
+	public AST compile(File file, Language language) throws PreprocessorException, SyntaxException, ParseException {
+		return compile(file, language, ABC.DEFAULT_SYSTEM_INCLUDE_PATHS, ABC.DEFAULT_USER_INCLUDE_PATHS,
+				ABC.DEFAULT_IMPLICIT_MACROS);
 	}
 
 	/**
@@ -391,8 +387,7 @@ public class FrontEnd {
 	 *             if any translation unit contains some statically detectable
 	 *             error or the units cannot be linked for some reason
 	 */
-	public Program link(AST[] translationUnits, Language language)
-			throws SyntaxException {
+	public Program link(AST[] translationUnits, Language language) throws SyntaxException {
 		Analyzer analyzer;
 		ProgramFactory programFactory;
 		Program result;
@@ -435,10 +430,8 @@ public class FrontEnd {
 	 *             language or the translation units cannot be linked for some
 	 *             reason
 	 */
-	public Program compileAndLink(File[] files, Language language,
-			File[] systemIncludePaths, File[] userIncludePaths,
-			Map<String, Macro> implicitMacros) throws PreprocessorException,
-					SyntaxException, ParseException {
+	public Program compileAndLink(File[] files, Language language, File[] systemIncludePaths, File[] userIncludePaths,
+			Map<String, Macro> implicitMacros) throws PreprocessorException, SyntaxException, ParseException {
 		Preprocessor preprocessor;
 		Analyzer analyzer;
 		ProgramFactory programFactory;
@@ -452,9 +445,8 @@ public class FrontEnd {
 		analyzer = getStandardAnalyzer(language);
 		programFactory = getProgramFactory(analyzer);
 		for (int i = 0; i < n; i++) {
-			CivlcTokenSource tokens = preprocessor.outputTokenSource(
-					systemIncludePaths, userIncludePaths, implicitMacros,
-					files[i]);
+			CivlcTokenSource tokens = preprocessor.outputTokenSource(systemIncludePaths, userIncludePaths,
+					implicitMacros, files[i]);
 			ParseTree parseTree = parser.parse(tokens);
 
 			asts[i] = builder.getTranslationUnit(parseTree);
@@ -487,8 +479,8 @@ public class FrontEnd {
 	 */
 	public Program compileAndLink(File[] files, Language language)
 			throws PreprocessorException, SyntaxException, ParseException {
-		return compileAndLink(files, language, ABC.DEFAULT_SYSTEM_INCLUDE_PATHS,
-				ABC.DEFAULT_USER_INCLUDE_PATHS, ABC.DEFAULT_IMPLICIT_MACROS);
+		return compileAndLink(files, language, ABC.DEFAULT_SYSTEM_INCLUDE_PATHS, ABC.DEFAULT_USER_INCLUDE_PATHS,
+				ABC.DEFAULT_IMPLICIT_MACROS);
 	}
 
 	/**
@@ -506,8 +498,7 @@ public class FrontEnd {
 	 *            if true, print the symbol and type tables in addition to the
 	 *            AST
 	 */
-	public void printProgram(PrintStream out, Program program, boolean pretty,
-			boolean showTables) {
+	public void printProgram(PrintStream out, Program program, boolean pretty, boolean showTables) {
 		if (pretty)
 			program.prettyPrint(out);
 		else
@@ -540,8 +531,8 @@ public class FrontEnd {
 	 *             language or the translation units cannot be linked for some
 	 *             reason
 	 */
-	public void showTranslation(TranslationTask task) throws IOException,
-			PreprocessorException, ParseException, SyntaxException {
+	public void showTranslation(TranslationTask task)
+			throws IOException, PreprocessorException, ParseException, SyntaxException {
 		PrintStream out = task.getOut();
 		boolean verbose = task.isVerbose();
 		boolean pretty = task.doPrettyPrint();
@@ -571,16 +562,15 @@ public class FrontEnd {
 				out.flush();
 				timer.markTime("print source for " + filename);
 			}
-			tokens = preprocessor.outputTokenSource(task.getSystemIncludes(),
-					task.getUserIncludes(), implicitMacros, file);
+			tokens = preprocessor.outputTokenSource(task.getSystemIncludes(), task.getUserIncludes(), implicitMacros,
+					file);
 			timer.markTime("construct preprocess tree");
 			if (task.isPreprocOnly()) {
 				CommonToken token;
 				int type;
 
 				if (verbose)
-					out.println(bar + " Preprocessor output for " + filename
-							+ " " + bar);
+					out.println(bar + " Preprocessor output for " + filename + " " + bar);
 				if (showTime) {
 					do {
 						token = (CommonToken) tokens.nextToken();
@@ -613,8 +603,7 @@ public class FrontEnd {
 				parseTree = parser.parse(tokens);
 				timer.markTime("preprocess, parse, and build ANTLR tree");
 				if (verbose) {
-					out.println(
-							bar + " ANTLR Tree for " + filename + " " + bar);
+					out.println(bar + " ANTLR Tree for " + filename + " " + bar);
 					ANTLRUtils.printTree(out, parseTree.getRoot());
 					out.println();
 					out.flush();
@@ -623,8 +612,7 @@ public class FrontEnd {
 				asts[i] = builder.getTranslationUnit(parseTree);
 				timer.markTime("build AST for " + filename);
 				if (verbose) {
-					out.println(bar + " Raw Translation Unit for " + filename
-							+ " " + bar);
+					out.println(bar + " Raw Translation Unit for " + filename + " " + bar);
 					if (pretty)
 						asts[i].prettyPrint(out, false);
 					else
@@ -650,13 +638,11 @@ public class FrontEnd {
 				if (verbose) {
 					printProgram(out, program, pretty, tables);
 					out.println();
-					out.println(
-							bar + " Program after " + transformer + " " + bar);
+					out.println(bar + " Program after " + transformer + " " + bar);
 					out.flush();
 				}
 				program.apply(transformer);
-				timer.markTime("apply transformer "
-						+ transformer.getShortDescription());
+				timer.markTime("apply transformer " + transformer.getShortDescription());
 			}
 			if (!showTime && !silent)
 				printProgram(out, program, pretty, tables);
@@ -689,8 +675,7 @@ public class FrontEnd {
 
 					if (!functionNames.contains(functionName)) {
 						if (i == 0)
-							System.out.println(
-									"==== functions without definition ====");
+							System.out.println("==== functions without definition ====");
 						else
 							System.out.print(",");
 						System.out.print(functionName);
@@ -705,8 +690,7 @@ public class FrontEnd {
 
 	}
 
-	public void compileAndCompare(TranslationTask task)
-			throws PreprocessorException, SyntaxException, ParseException {
+	public void compileAndCompare(TranslationTask task) throws PreprocessorException, SyntaxException, ParseException {
 		int nfiles = task.getFiles().length;
 		File file1, file2;
 		Language language = task.getLanguage();
@@ -724,8 +708,7 @@ public class FrontEnd {
 		ast2 = frontEnd2.compile(file2, language);
 		diffObj = ast1.diff(ast2);
 		if (diffObj == null)
-			System.out.println("The AST of " + file1.getName()
-					+ " is equivalent to that of " + file2.getName() + ".");
+			System.out.println("The AST of " + file1.getName() + " is equivalent to that of " + file2.getName() + ".");
 		else
 			diffObj.print(System.out);
 	}
@@ -740,8 +723,7 @@ public class FrontEnd {
 	 * @param task
 	 * @return
 	 */
-	private static Configuration getConfigurationFromTranslationTask(
-			TranslationTask task) {
+	private static Configuration getConfigurationFromTranslationTask(TranslationTask task) {
 		Configuration config = Configurations.newMinimalConfiguration();
 
 		config.setSvcomp(task.doSvcomp());
