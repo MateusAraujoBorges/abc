@@ -85,4 +85,9 @@ public class PruneTest {
 		check(new String[] { "structs1.c" }, "structs1_pruned.c");
 	}
 
+	@Test
+	public void function() throws ABCException {
+		check(new String[] { "func.c" }, "func_pruned.c");
+	}
+
 }
