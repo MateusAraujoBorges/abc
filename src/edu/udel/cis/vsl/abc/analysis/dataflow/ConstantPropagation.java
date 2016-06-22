@@ -24,7 +24,7 @@ import edu.udel.cis.vsl.abc.util.IF.Pair;
  * Constant propagation implementation
  * Most methods are stolen from dwyer, some modifications are indicated.
  * Needs more comments
- * @author edward
+ * @author dxu
  *
  */
 
@@ -200,67 +200,47 @@ public class ConstantPropagation extends DataFlowFramework<Pair<Entity,Pair<Bool
 	@Override
 	protected Set<Pair<Entity, Pair<Boolean, ConstantNode>>> merge(Set<Pair<Entity, Pair<Boolean, ConstantNode>>> s1,
 			Set<Pair<Entity, Pair<Boolean, ConstantNode>>> s2) {
-		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> result = new HashSet<Pair<Entity, Pair<Boolean, ConstantNode>>>();
-		assert s1 != null;
-		assert s2 != null;
-		/*
-		 * T, T => T    false, x
-		 * T, c => T
-		 * T, B => T
-		 * c, d (c!=d) => T
-		 * c, d (c==d) => c
-		 * c, B => c
-		 * B, B => B
-		 */
-		
-		/*
-		for(Pair<Entity, Pair<Boolean, ConstantNode>> s : s1){
-			Value v = s.right.right.getConstantValue();
-			int vInt = 0;
-			if (v.getType().kind() == TypeKind.BASIC) {
-				BasicTypeNode btn = (BasicTypeNode)v.getType();
-				switch (btn.getBasicTypeKind()) {
-				case INT:
-				case LONG:
-				case LONG_LONG:
-				case SHORT:
-					vInt = ((IntegerValue)v).getIntegerValue().intValue();
-					break;
-				default:
-						break;
-				}
-			} else
-				assert false : "Expected a basic type for a ConstantNode";
-			
-		}
+		Set<Pair<Entity,Pair<Boolean,ConstantNode>>> result = 
+				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 
+		Set<Entity> idOverlap = new HashSet<Entity>();
 		
-		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> constS1 = s1.stream().filter(a->a.right.left == true).collect(Collectors.toSet());
-		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> constS2 = s2.stream().filter(a->a.right.left == true).collect(Collectors.toSet());
-				
-		result.addAll(constS1);
-		result.retainAll(constS2);
-		*/
-		
-		assert(s1.size() == s2.size()) : "Size of two sets in merge differ!";
-		
-		for(Pair<Entity, Pair<Boolean, ConstantNode>> ss1 : s1){
-			for(Pair<Entity, Pair<Boolean, ConstantNode>> ss2 : s2){
-				if(ss1.equals(ss2)){
-					if(ss1.right.left == true && ss2.right.left == true){
-						if(ss1.right.right.equals(ss2.right.right)){
-							result.add(new Pair<Entity, Pair<Boolean,ConstantNode>>(ss1.left, new Pair<Boolean,ConstantNode>(true,ss1.right.right)));
-						}
-						else
-							result.add(new Pair<Entity, Pair<Boolean,ConstantNode>>(ss1.left, new Pair<Boolean,ConstantNode>(false,ss1.right.right)));
-					}
-					else{
-						result.add(new Pair<Entity, Pair<Boolean,ConstantNode>>(ss1.left, new Pair<Boolean,ConstantNode>(false,ss1.right.right)));						
-					}
+		// Compute the set of overlapping identifiers in the incoming sets of CP entries
+		for (Pair<Entity,Pair<Boolean,ConstantNode>> p1 : s1) {
+			for (Pair<Entity,Pair<Boolean,ConstantNode>> p2 : s2) {
+				if (p1.left.equals(p2.left)) {
+					idOverlap.add(p1.left);
 				}
-			}	
+			}
 		}
 		
+		// For entries with common identifiers, merge their CP data
+		for (Pair<Entity,Pair<Boolean,ConstantNode>> p1 : s1) {
+			if (!idOverlap.contains(p1.left)) continue;
+			
+			for (Pair<Entity,Pair<Boolean,ConstantNode>> p2 : s2) {
+				if (!idOverlap.contains(p2.left)) continue;
+
+				if (p1.left.equals(p2.left)) {
+
+					// always generate the same top CP value
+					Pair<Boolean, ConstantNode> topCP = new Pair<Boolean, ConstantNode>(new Boolean(true), null);
+					Pair<Entity, Pair<Boolean, ConstantNode>> top = new Pair<Entity, Pair<Boolean, ConstantNode>>(p1.left, topCP);
+					if (!p1.right.left.booleanValue() && !p2.right.left.booleanValue() && 
+							p1.right.right.getConstantValue().equals(p2.right.right.getConstantValue())) {
+						result.add(p1);
+					} else {
+						result.add(top);
+					}
+				}
+			}
+		}	
+		
+		// Add the disjoint CP entries to the merge
+		// TBD: this seems wrong.  We want these entries to go to "top".  What's the cleanest way to do that with lambdas?
+		result.addAll(s1.stream().filter(p -> !idOverlap.contains(p.left)).collect(Collectors.toSet()));
+		result.addAll(s2.stream().filter(p -> !idOverlap.contains(p.left)).collect(Collectors.toSet()));
+				
 		return result;
 	}
 
