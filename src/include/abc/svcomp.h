@@ -37,4 +37,7 @@ int __VERIFIER_nondet_bool(void);
 int __VERIFIER_nondet_int(void);
 long __VERIFIER_nondet_long(void);
 unsigned long __VERIFIER_nondet_ulong(void);
+char __VERIFIER_nondet_char(void);
+double __VERIFIER_nondet_double(void);
+float __VERIFIER_nondet_float(void);
 #endif
