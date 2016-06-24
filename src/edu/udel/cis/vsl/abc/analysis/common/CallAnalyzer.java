@@ -42,7 +42,6 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
  */
 public class CallAnalyzer implements Analyzer {
 	Map<FunctionType, Set<Function>> functionsOfAType = new HashMap<FunctionType, Set<Function>>();
-	static Map<AST, List<Function>> functionsAnalyzed = new HashMap<AST, List<Function>>();
 				
 	private void addCall(Function caller, Function callee) {
 		caller.getCallees().add(callee);
@@ -189,7 +188,6 @@ public class CallAnalyzer implements Analyzer {
 
 	private void processProgram(ASTNode node) {
 		if (node instanceof FunctionDefinitionNode) {
-			functionsAnalyzed.get(node.getOwner()).add(((FunctionDefinitionNode)node).getEntity());
 			processFunctionDefinitionNode((FunctionDefinitionNode) node);
 		} else if (node != null) {
 			for (ASTNode child : node.children()) {
@@ -198,14 +196,9 @@ public class CallAnalyzer implements Analyzer {
 		}
 	}
 	
-	static int count = 0;
-
 	@Override
 	public void clear(AST unit) {
 		functionsOfAType.clear();
-		if (functionsAnalyzed.get(unit) != null) {
-			functionsAnalyzed.get(unit).clear();
-		}
 		clearNode(unit.getRootNode());
 	}
 
@@ -233,9 +226,6 @@ public class CallAnalyzer implements Analyzer {
 		// functions of a type is temporary map used during analysis of an AST
 		functionsOfAType.clear();
 		
-		if (functionsAnalyzed.get(unit) == null) {
-			functionsAnalyzed.put(unit, new ArrayList<Function>());
-		}
 		ASTNode root = unit.getRootNode();
 
 		collectProgram(root);
@@ -244,8 +234,22 @@ public class CallAnalyzer implements Analyzer {
 		functionsOfAType.clear();
 	}
 	
-	static public List<Function> functions(AST unit) {
-		return functionsAnalyzed.get(unit);
+	static private void collectReachableCalls(Function f, Set<Function> funs) {
+		if (!funs.contains(f)) {
+			funs.add(f);
+			for (Function callee : f.getCallees()) {
+				collectReachableCalls(callee, funs);
+			}
+		}
+	}
+	
+	static public Set<Function> functions(AST unit) {
+		Set<Function> functionsAnalyzed = new HashSet<Function>();
+		Function mainFun = unit.getMain();
+		if (mainFun != null) {
+			collectReachableCalls(mainFun, functionsAnalyzed);
+		}
+		return functionsAnalyzed;
 	}
 	
 	static public void printCallGraph(AST unit) {

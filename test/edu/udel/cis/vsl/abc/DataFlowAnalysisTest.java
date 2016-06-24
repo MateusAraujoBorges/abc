@@ -28,6 +28,7 @@ import edu.udel.cis.vsl.abc.token.IF.Macro;
  * @author dwyer
  * 
  */
+
 @Ignore
 public class DataFlowAnalysisTest {
 
@@ -35,7 +36,7 @@ public class DataFlowAnalysisTest {
 	 * Turn on a lot of output for debugging? Set this to true only in your
 	 * local copy. Be sure to set it back to false before committing!
 	 */
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	private static File root = new File(new File("examples"), "c");
 
@@ -68,7 +69,7 @@ public class DataFlowAnalysisTest {
 		File file = new File(root, filenameRoot + ".c");
 		AST ast = fe.compile(file, Language.C, new File[0], new File[0],
 				new HashMap<String, Macro>());
-		
+				
 		// Call graph construction is a standard analysis
 		for (Function f : CallAnalyzer.functions(ast)) {
 			rd.analyze(f);	
