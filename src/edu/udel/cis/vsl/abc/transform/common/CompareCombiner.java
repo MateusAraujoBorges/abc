@@ -3,10 +3,13 @@ package edu.udel.cis.vsl.abc.transform.common;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTException;
@@ -23,12 +26,16 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant;
@@ -53,6 +60,8 @@ import edu.udel.cis.vsl.abc.transform.IF.Transformer;
 public class CompareCombiner implements Combiner {
 
 	private final static String MY_NAME = "CompareCombiner";
+
+	private final static String ASSUME = "$assume";
 
 	/**
 	 * The node factory that creates new AST nodes.
@@ -81,7 +90,7 @@ public class CompareCombiner implements Combiner {
 		SequenceNode<BlockItemNode> specRoot = spec.getRootNode();
 		SequenceNode<BlockItemNode> implRoot = impl.getRootNode();
 		SequenceNode<BlockItemNode> newRoot;
-		Map<String, VariableDeclarationNode> inputVariables;
+		List<BlockItemNode> inputVariablesAndAssumes;
 		Map<String, VariableDeclarationNode> specOutputs;
 		Map<String, VariableDeclarationNode> implOutputs;
 		FunctionDefinitionNode specSystem;
@@ -115,11 +124,11 @@ public class CompareCombiner implements Combiner {
 		specSource = this.getMainSource(specRoot);
 		implSource = this.getMainSource(implRoot);
 		factory = astFactory.getNodeFactory();
-		inputVariables = combineInputs(specRoot, implRoot);
+		inputVariablesAndAssumes = combineInputs(specRoot, implRoot);
 		nodes.add(this.assertFunctionNode(specSource));
 		nodes.add(definedFunctionNode(specSource));
 		nodes.add(assertEquals(specSource));
-		nodes.addAll(inputVariables.values());
+		nodes.addAll(inputVariablesAndAssumes);
 		specOutputs = getOutputs(specRoot);
 		implOutputs = getOutputs(implRoot);
 		checkOutputs(specOutputs, implOutputs);
@@ -376,53 +385,93 @@ public class CompareCombiner implements Combiner {
 	// }
 
 	/**
-	 * Take the input variable declaration nodes from the specification and the
-	 * implementation into a list. The input variables of the specification
-	 * should be a subset of those of the implementation.
+	 * <p>
+	 * <b>Summary :</b> Take the input variable declaration nodes and related
+	 * assumption call nodes from the specification and the implementation into
+	 * a list. The input variables of the specification should be a subset of
+	 * those of the implementation. Here related assumption call nodes are nodes
+	 * representing assumptions whose predicate involves at least one seen input
+	 * variables.
+	 * </p>
+	 * 
 	 * 
 	 * @param specRoot
 	 *            The root node of the specification AST.
 	 * @param implRoot
 	 *            The root node of the implementation AST.
-	 * @return The combined list of input variable declaration nodes, key is
-	 *         name of variable.
+	 * @return The combined list of input variable declaration nodes and
+	 *         assumption call nodes
 	 */
-	private Map<String, VariableDeclarationNode> combineInputs(
-			ASTNode specRoot, ASTNode implRoot) {
-		Map<String, VariableDeclarationNode> inputs = new LinkedHashMap<String, VariableDeclarationNode>();
+	private List<BlockItemNode> combineInputs(ASTNode specRoot, ASTNode implRoot) {
+		List<BlockItemNode> inputsAndAssumes = new LinkedList<BlockItemNode>();
+		Set<String> seenVariableIdentifiers = new HashSet<>();
+		boolean existsAssumeDecl = false;
 
-		// Put all input variables from the implementation into the map.
-		for (int i = 0; i < implRoot.numChildren(); i++) {
-			ASTNode child = implRoot.child(i);
+		existsAssumeDecl = combineInputsWorker(implRoot, inputsAndAssumes,
+				seenVariableIdentifiers, existsAssumeDecl);
+		combineInputsWorker(specRoot, inputsAndAssumes,
+				seenVariableIdentifiers, existsAssumeDecl);
+		return inputsAndAssumes;
+	}
 
-			if (child != null
-					&& child.nodeKind() == NodeKind.VARIABLE_DECLARATION) {
-				VariableDeclarationNode var = (VariableDeclarationNode) child;
+	/**
+	 * <p>
+	 * <b>Summary: </b> A helper method for the
+	 * {@link #combineInputs(ASTNode, ASTNode)}. This method takes the result
+	 * collection "inputsAndAssumes" and a seen variable set, continue to add
+	 * input variable declaration nodes and related assumption nodes in "root"
+	 * into the collection.
+	 * </p>
+	 * 
+	 * @param root
+	 *            The root node of a given tree which is searched for input
+	 *            variable declaration and assume nodes
+	 * @param inputsAndAssumes
+	 *            The result collection contains variable declaration and assume
+	 *            nodes
+	 * @param seenVariableIdentifiers
+	 *            A seen variable identifier set, used to determine if a assume
+	 *            node is a related assume node
+	 * 
+	 * @param existsAssumeDecl
+	 *            Informs this method if it is necessary to insert an
+	 *            <code>$assume</code> declaration when reaches a related assume
+	 *            node.
+	 */
+	private boolean combineInputsWorker(ASTNode root,
+			List<BlockItemNode> inputsAndAssumes,
+			Set<String> seenVariableIdentifiers, boolean existsAssumeDecl) {
+		boolean ret = existsAssumeDecl;
 
-				if (var.getTypeNode().isInputQualified()) {
-					inputs.put(var.getName(), var.copy());
-				}
-			}
-		}
-		// Check that all input variables from the spec were also in the impl.
-		for (int i = 0; i < specRoot.numChildren(); i++) {
-			ASTNode child = specRoot.child(i);
+		for (int i = 0; i < root.numChildren(); i++) {
+			ASTNode child = root.child(i);
 
-			if (child != null
-					&& child.nodeKind() == NodeKind.VARIABLE_DECLARATION) {
-				VariableDeclarationNode var = (VariableDeclarationNode) child;
+			if (child instanceof BlockItemNode) {
+				BlockItemNode castedChild = (BlockItemNode) child;
 
-				if (var.getTypeNode().isInputQualified()) {
-					if (!inputs.containsKey(var.getName())) {
-						// throw new ASTException(
-						// "Implementation program does not contain specification input variable "
-						// + var.getName() + ".");
-						inputs.put(var.getName(), var.copy());
+				if (isRelatedAssumptionNode(castedChild,
+						seenVariableIdentifiers)) {
+					if (!existsAssumeDecl) {
+						inputsAndAssumes
+								.add(assumeFunctionDeclaration(castedChild
+										.getSource()));
+						ret = true;
 					}
+					inputsAndAssumes.add(castedChild.copy());
+					continue;
+				}
+			}
+			if (child != null
+					&& child.nodeKind() == NodeKind.VARIABLE_DECLARATION) {
+				VariableDeclarationNode var = (VariableDeclarationNode) child;
+
+				if (var.getTypeNode().isInputQualified()) {
+					if (seenVariableIdentifiers.add(var.getName()))
+						inputsAndAssumes.add(var.copy());
 				}
 			}
 		}
-		return inputs;
+		return ret;
 	}
 
 	/**
@@ -680,5 +729,82 @@ public class CompareCombiner implements Combiner {
 						variable.setExternStorage(false);
 			}
 		}
+	}
+
+	/**
+	 * <p>
+	 * <b>Summary: </b> Returns true if and only if the given
+	 * {@link BlockItemNode} node is an assumption statement and the assumed
+	 * expression involves at least one of the identifiers.
+	 * </p>
+	 * 
+	 * @param node
+	 *            The {@link BlockItemNode} node
+	 * @param identifiers
+	 *            A set of {@link String} identifiers.
+	 * @return
+	 */
+	private boolean isRelatedAssumptionNode(BlockItemNode node,
+			Set<String> identifiers) {
+		StatementNode stmt;
+		ExpressionNode expr, function;
+
+		if (node.nodeKind() != NodeKind.STATEMENT)
+			return false;
+		stmt = (StatementNode) node;
+		if (stmt.statementKind() != StatementKind.EXPRESSION)
+			return false;
+		expr = ((ExpressionStatementNode) stmt).getExpression();
+		if (expr.expressionKind() != ExpressionKind.FUNCTION_CALL)
+			return false;
+		function = ((FunctionCallNode) expr).getFunction();
+		// TODO: not deal with calling $assume with function pointers
+		if (function.expressionKind() != ExpressionKind.IDENTIFIER_EXPRESSION)
+			return false;
+
+		String funcName = ((IdentifierExpressionNode) function).getIdentifier()
+				.name();
+		if (funcName.equals(ASSUME)) {
+			ExpressionNode arg = ((FunctionCallNode) expr).getArgument(0);
+			ASTNode next = arg;
+
+			while (next != null) {
+				if (next instanceof IdentifierExpressionNode) {
+					String nameInArg = ((IdentifierExpressionNode) next)
+							.getIdentifier().name();
+
+					return identifiers.contains(nameInArg);
+				}
+				next = next.nextDFS();
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * <p>
+	 * <b>Summary: </b> Create an <code>$assume</code> function declaration node
+	 * </p>
+	 * 
+	 * @param source
+	 *            The {@link Source} attached with the created node.
+	 * @return A new node which represents an <code>$assume</code> function
+	 *         declaration
+	 */
+	private FunctionDeclarationNode assumeFunctionDeclaration(Source source) {
+		IdentifierNode name = factory.newIdentifierNode(source, "$assume");
+		FunctionTypeNode funcType = factory.newFunctionTypeNode(source, factory
+				.newVoidTypeNode(source), factory.newSequenceNode(source,
+				"Formals", Arrays.asList(factory.newVariableDeclarationNode(
+						source,
+						factory.newIdentifierNode(source, "expression"),
+						factory.newBasicTypeNode(source, BasicTypeKind.BOOL))))
+
+		, false);
+		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
+				source, name, funcType, null);
+
+		function.setSystemFunctionSpecifier(true);
+		return function;
 	}
 }
