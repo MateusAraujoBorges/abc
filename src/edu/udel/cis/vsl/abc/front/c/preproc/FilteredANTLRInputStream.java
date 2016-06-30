@@ -9,13 +9,18 @@ import java.util.ArrayList;
 import org.antlr.runtime.ANTLRStringStream;
 
 /**
+ * <p>
  * An ANTLR stream which reads from an arbitrary {@link InputStream} and removes
  * any two consecutive characters that are backslash followed by newline. This
- * is part of the C translation process.
+ * is part of the C translation process. Also adds a newline at the end if one
+ * is not already present.
+ * </p>
  * 
+ * <p>
  * If your input stream is a file input stream, you should use
  * {@link FilteredANTLRFileStream} instead of this. It is more efficient,
  * because you know the size of the file from the beginning.
+ * </p>
  * 
  * @author siegel
  *

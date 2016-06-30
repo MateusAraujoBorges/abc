@@ -28,10 +28,27 @@ public class Configurations {
 		FORTRAN77,
 	};
 
+	/**
+	 * Returns new {@link Configuration} object in which all parameters have the
+	 * lowest possible values allowed by the C Standard.
+	 * 
+	 * @return new minimal configuration object
+	 */
 	public static Configuration newMinimalConfiguration() {
 		return new CommonConfiguration();
 	}
 
+	/**
+	 * Finds best common language of mix of languages. If all the given
+	 * languages are the same, that is the common language. Else the common
+	 * language is {@link Language#CIVL_C}.
+	 * 
+	 * @param langs
+	 *            a sequence of languages, none of which is <code>null</code>
+	 * @return the common language: <code>null</code> if the sequence is empty,
+	 *         the common language if all the languages are the same, else
+	 *         {@link Language#CIVL_C}.
+	 */
 	public static Language commonLanguage(Iterable<Language> langs) {
 		Language result = null;
 
@@ -50,6 +67,18 @@ public class Configurations {
 		return result;
 	}
 
+	/**
+	 * Finds the best language to use for translation based on filename
+	 * extensions.
+	 * 
+	 * @param filenames
+	 *            sequence of non-<code>null</code> strings
+	 * @return <code>null</code> if sequence is empty, else a {@link Language}
+	 *         determined as follows: if all filenames have a C extension (.c.,
+	 *         .h, or .i), then {@link Language#C}; else if all filenames have a
+	 *         Fortran extension, {@link Language#FORTRAN77}, else
+	 *         {@link Language#CIVL_C}.
+	 */
 	public static Language bestLanguage(Iterable<String> filenames) {
 		Language result = null;
 
@@ -86,6 +115,18 @@ public class Configurations {
 		return result;
 	}
 
+	/**
+	 * Finds the best language to use for translation based on filename
+	 * extensions.
+	 * 
+	 * @param filenames
+	 *            array of non-<code>null</code> strings
+	 * @return <code>null</code> if sequence is empty, else a {@link Language}
+	 *         determined as follows: if all filenames have a C extension (.c.,
+	 *         .h, or .i), then {@link Language#C}; else if all filenames have a
+	 *         Fortran extension, {@link Language#FORTRAN77}, else
+	 *         {@link Language#CIVL_C}.
+	 */
 	public static Language bestLanguage(String[] filenames) {
 		return bestLanguage(Arrays.asList(filenames));
 	}

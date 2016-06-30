@@ -69,8 +69,10 @@ public class TranslationTask {
 	private TranslationStage stage = TranslationStage.TRANSFORM_PROGRAM;
 
 	/**
-	 * The language used to link the translation units. Default is
-	 * {@link Language#CIVL_C}.
+	 * The language used to link the translation units. Default is determined by
+	 * the languages of the unit tasks. If all are in one language, that is used
+	 * as the link language. Otherwise, {@link Language#CIVL_C} is the link
+	 * language.
 	 */
 	private Language linkLanguage = Language.CIVL_C;
 
@@ -511,7 +513,9 @@ public class TranslationTask {
 
 	/**
 	 * Gets the language that will be in effect when the translation units are
-	 * linked. Default is {@link Language#CIVL_C}.
+	 * linked. Default is determined by the languages of the unit tasks. If all
+	 * are in one language, that is used as the link language. Otherwise,
+	 * {@link Language#CIVL_C} is the link language.
 	 * 
 	 * @return the language that will be in effect when the translation units
 	 *         are linked
@@ -522,7 +526,9 @@ public class TranslationTask {
 
 	/**
 	 * Sets the language that will be in effect when the translation units are
-	 * linked. Default is {@link Language#CIVL_C}.
+	 * linked. Default is determined by the languages of the unit tasks. If all
+	 * are in one language, that is used as the link language. Otherwise,
+	 * {@link Language#CIVL_C} is the link language.
 	 * 
 	 * @param language
 	 *            the language that will be in effect when the translation units
@@ -556,7 +562,8 @@ public class TranslationTask {
 	}
 
 	/**
-	 * Gets the architecture type for this translation task.
+	 * Gets the architecture type for this translation task. Default is
+	 * {@link Architecture#UNKNOWN}.
 	 * 
 	 * @return the architecture type
 	 */

@@ -27,16 +27,9 @@ public class UnitTask {
 
 	/**
 	 * The language in which the source files are all written. Default is
-	 * {@link Language#CIVL_C}.
+	 * determined by file suffix(es).
 	 */
-	private Language language = Language.CIVL_C;
-
-	// /**
-	// * The codes specifying the transformations to apply to the translation
-	// unit
-	// * after its AST is constructed. Default is the empty list.
-	// */
-	// private List<String> transformCodes = new LinkedList<>();
+	private Language language;
 
 	/**
 	 * List of system include paths for the preprocessor. The default is the
@@ -83,7 +76,7 @@ public class UnitTask {
 
 	/**
 	 * Gets the language in which the source files are written. Default is
-	 * {@link Language#CIVL_C}.
+	 * determined by file suffix(es).
 	 * 
 	 * @return the language in which all the source files are written
 	 */
@@ -93,7 +86,7 @@ public class UnitTask {
 
 	/**
 	 * Sets the language in which all source files are written. Default is
-	 * {@link Language#CIVL_C}.
+	 * determined from file suffix(es).
 	 * 
 	 * @param language
 	 *            the language in which all the source files are written

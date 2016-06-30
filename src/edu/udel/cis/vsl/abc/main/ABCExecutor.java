@@ -32,11 +32,13 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 import edu.udel.cis.vsl.abc.util.IF.Timer;
 
 /**
+ * <p>
  * An executor executes a {@link TranslationTask}. To use an executor, first
  * construct a {@link TranslationTask}. You can then create an executor for
  * executing that task using the constructor
  * {@link #ABCExecutor(TranslationTask)}. Then to actually execute that task,
  * invoke the executor's {@link #execute()} method.
+ * </p>
  * 
  * <p>
  * Alternatively, the construction of the {@link ABCExecutor} and the execution
@@ -53,12 +55,10 @@ import edu.udel.cis.vsl.abc.util.IF.Timer;
  * {@link #newExecutor(FrontEnd, TranslationTask)} to create a new executor that
  * re-uses that front end. Note however, that you can only re-use a front end
  * for a compatible task, that is, one that shares the same configuration
- * parameters on SV-COMP and Architecture.
+ * parameters on SV-COMP, GNUC, and Architecture.
  * </p>
  * 
- * 
  * @author siegel
- *
  */
 public class ABCExecutor {
 
@@ -170,10 +170,10 @@ public class ABCExecutor {
 	}
 
 	/**
-	 * Prints file scope functions that are used but no definitions are ever
-	 * provided.
+	 * Prints file scope functions that are used but not defined.
 	 * 
 	 * @param program
+	 *            a non-<code>null</code> {@link Program}
 	 */
 	private final static void printUnknownFunctions(PrintStream out,
 			Program program) {
@@ -208,26 +208,79 @@ public class ABCExecutor {
 
 	// Instance fields...
 
+	/**
+	 * The task to be executed. Set at construction.
+	 */
 	private TranslationTask task;
 
+	/**
+	 * The configuration. Typically determined from the task at construction, or
+	 * from the {@link FrontEnd} provided at construction.
+	 */
 	private Configuration configuration;
 
+	/**
+	 * The {@link FrontEnd} that will be used to actually carry out the tasks
+	 * specified by {@link #task}. This is either provided to a constructor, or
+	 * it is created by the constructor.
+	 */
 	private FrontEnd frontEnd;
 
+	/**
+	 * Where to send output; copy of what's in {@link #task} for convenience.
+	 */
 	private PrintStream out;
 
+	/**
+	 * Print a lot of information? Copy of what's in {@link #task} for
+	 * convenience.
+	 */
 	private boolean verbose;
 
+	/**
+	 * Report timing information? Copy of what's in {@link #task} for
+	 * convenience.
+	 */
 	private boolean showTime;
 
+	/**
+	 * The {@link Timer} that will be used to take timings. If {@link #showTime}
+	 * is <code>false</code>, this will be a (non-<code>null</code>) trivial
+	 * {@link Timer} that does nothing.
+	 */
 	private Timer timer;
 
+	/**
+	 * The results of preprocessing the input source units specified in the
+	 * {@link #task}. The length of this array is the number of {@link UnitTask}
+	 * s specified in the {@link #task}. Initially every entry is
+	 * <code>null</code>; they are filled in as the unit tasks are executed
+	 * through the preprocessing stage. Note that these sources have state: once
+	 * they have been consumed their next token methods will just return EOF
+	 * forever.
+	 */
 	private CivlcTokenSource[] tokenSources = null;
 
+	/**
+	 * The results of parsing the preprocessor output for each source unit. The
+	 * length of this array is the number of {@link UnitTask}s specified in the
+	 * {@link #task}. Initially every entry is <code>null</code>; they are
+	 * filled in as the unit tasks are executed through the parsing stage.
+	 */
 	private ParseTree[] parseTrees = null;
 
+	/**
+	 * The ASTs for the translation units. The length of this array is the
+	 * number of {@link UnitTask}s specified in the {@link #task}. Initially
+	 * every entry is <code>null</code>; they are filled in as the unit tasks
+	 * are executed through the AST-building stage.
+	 */
 	private AST[] asts = null;
 
+	/**
+	 * The complete program. Initially null, this is filled in after linking and
+	 * further modified after executing transformations.
+	 */
 	private Program program = null;
 
 	// Constructors...

@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import org.antlr.runtime.CharStream;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.front.c.preproc.FilteredANTLRFileStream;
@@ -65,7 +63,7 @@ public class FilteredCharStreamTest {
 			out.println();
 		}
 		if (!expected.endsWith("\n"))
-			expected=expected+"\n";
+			expected = expected + "\n";
 		// why? because the filtered stream adds \n at end if not
 		// already there.
 		assertEquals(expected, fileFilter(original));
