@@ -430,7 +430,7 @@ public class ABCExecutor {
 		}
 		timer.markTime("print source for " + name);
 
-		CivlcTokenSource tokens = preprocessor.outputTokenSource(
+		CivlcTokenSource tokens = preprocessor.preprocess(
 				unitTask.getSystemIncludes(), unitTask.getUserIncludes(),
 				unitTask.getMacros(), sourceFiles);
 

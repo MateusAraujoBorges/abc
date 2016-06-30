@@ -329,7 +329,7 @@ public class FrontEnd {
 			Map<String, String> predefinedMacros) throws PreprocessorException,
 					SyntaxException, ParseException {
 		Preprocessor preprocessor = getPreprocessor(language);
-		CivlcTokenSource tokens = preprocessor.outputTokenSource(
+		CivlcTokenSource tokens = preprocessor.preprocess(
 				systemIncludePaths, userIncludePaths, predefinedMacros,
 				sourceUnit);
 		Parser parser = this.getParser(language);

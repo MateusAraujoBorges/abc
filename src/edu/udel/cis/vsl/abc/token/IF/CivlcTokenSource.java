@@ -65,6 +65,4 @@ public interface CivlcTokenSource extends TokenSource {
 	 */
 	Collection<SourceFile> getSourceFiles();
 
-	// void printShorterFileNameMap(PrintStream out);
-
 }

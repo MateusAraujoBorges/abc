@@ -51,8 +51,8 @@ public class CParserTest {
 		File file = new File(root, filenameRoot + ".c");
 		Parser parser = Front.newParser(Language.C);
 		Map<String, String> macroMap = new HashMap<>();
-		CivlcTokenSource tokenSource = preprocessor.outputTokenSource(
-				systemIncludes, userIncludes, macroMap, new File[] { file });
+		CivlcTokenSource tokenSource = preprocessor.preprocess(systemIncludes,
+				userIncludes, macroMap, new File[] { file });
 		ParseTree parseTree = parser.parse(tokenSource);
 		CommonTree tree = parseTree.getRoot();
 

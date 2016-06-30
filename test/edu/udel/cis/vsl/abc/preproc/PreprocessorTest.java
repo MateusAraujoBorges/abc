@@ -70,7 +70,7 @@ public class PreprocessorTest {
 
 	private void check(String rootName) throws PreprocessorException {
 		File sourceFile = new File(root, rootName + ".txt");
-		TokenSource source = p.outputTokenSource(systemIncludes, userIncludes,
+		TokenSource source = p.preprocess(systemIncludes, userIncludes,
 				new HashMap<String, String>(), new File[] { sourceFile });
 
 		readSource(source);
@@ -112,9 +112,8 @@ public class PreprocessorTest {
 		File sourceFile = new File(root, rootName + ".txt");
 		File solutionFile = new File(root, rootName + ".sol.txt");
 
-		TokenSource actualSource = p.outputTokenSource(systemIncludes,
-				userIncludes, new HashMap<String, String>(),
-				new File[] { sourceFile });
+		TokenSource actualSource = p.preprocess(systemIncludes, userIncludes,
+				new HashMap<String, String>(), new File[] { sourceFile });
 		TokenSource expectedSource = p.lexer(solutionFile);
 
 		compare(actualSource, expectedSource);

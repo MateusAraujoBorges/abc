@@ -177,7 +177,9 @@ public class CPreprocessor implements Preprocessor {
 
 	/**
 	 * Creates character streams and formations from the files and adds them to
-	 * the given stream and formation vectors.
+	 * the given stream and formation vectors. ABC will first look for the file
+	 * in the usual file system. If it isn't there, it will then look
+	 * internally: look relative to the directories in the class path.
 	 * 
 	 * @param sourceFiles
 	 *            the list of source files that will form the input to the
@@ -198,14 +200,28 @@ public class CPreprocessor implements Preprocessor {
 		for (int i = 0; i < numFiles; i++) {
 			File file = sourceFiles[i];
 			SourceFile sourceFile = indexer.getOrAdd(file);
+			CharStream stream;
 
-			try {
-				streamVector.add(
-						PreprocessorUtils.newFilteredCharStreamFromFile(file));
-			} catch (IOException e) {
-				throw new PreprocessorException(
-						"Error in opening " + file + ": " + e.getMessage());
+			if (file.exists()) {
+				try {
+					stream = PreprocessorUtils
+							.newFilteredCharStreamFromFile(file);
+				} catch (IOException e) {
+					throw new PreprocessorException(
+							"Error in opening " + file + ": " + e.getMessage());
+				}
+			} else {
+				try {
+					stream = PreprocessorUtils
+							.newFilteredCharStreamFromResource(
+									file.getAbsolutePath(),
+									file.getAbsolutePath());
+				} catch (IOException e) {
+					throw new PreprocessorException(
+							"Error in opening " + file + ": " + e.getMessage());
+				}
 			}
+			streamVector.add(stream);
 			formationVector.add(tokenFactory.newInclusion(sourceFile));
 		}
 	}
@@ -355,7 +371,7 @@ public class CPreprocessor implements Preprocessor {
 	// Methods specified in Preprocessor interface...
 
 	@Override
-	public PreprocessorTokenSource outputTokenSource(File[] systemIncludePaths,
+	public PreprocessorTokenSource preprocess(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, String> predefinedMacros,
 			File[] sourceUnit) throws PreprocessorException {
 		ArrayList<CharStream> streamVector = new ArrayList<>();
@@ -403,8 +419,7 @@ public class CPreprocessor implements Preprocessor {
 				tokenFactory);
 		File file = new File(filename);
 		Map<String, String> predefinedMacros = new HashMap<>();
-		CivlcTokenSource ts = p.outputTokenSource(
-				Preprocessor.defaultSystemIncludes,
+		CivlcTokenSource ts = p.preprocess(Preprocessor.defaultSystemIncludes,
 				Preprocessor.defaultUserIncludes, predefinedMacros,
 				new File[] { file });
 		PrintStream out = System.out;

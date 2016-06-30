@@ -170,7 +170,7 @@ public class FortranPreprocessor implements Preprocessor {
 	}
 
 	@Override
-	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
+	public CivlcTokenSource preprocess(File[] systemIncludePaths,
 			File[] userIncludePaths, Map<String, String> predefinedMacros,
 			File[] sourceFiles) throws PreprocessorException {
 		// TODO Auto-generated method stub

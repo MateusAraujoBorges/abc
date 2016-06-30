@@ -287,20 +287,20 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * @return a new character stream obtained from the file or
 	 *         <code>null</code>
 	 */
-	private CharStream findInternalSystemFile(File path, String filename) {
+	private Pair<File, CharStream> findInternalSystemFile(File path,
+			String filename) {
 		File file = new File(path, filename);
+		String resource = file.getAbsolutePath();
 
-		if (file.getAbsoluteFile().equals(Preprocessor.ABC_INCLUDE_PATH))
-			return null; // why would this happen?
 		try {
-			CharStream charStream = PreprocessorUtils
-					.newFilteredCharStreamFromResource(filename,
-							file.getAbsolutePath());
+			CharStream stream = PreprocessorUtils
+					.newFilteredCharStreamFromResource(resource, resource);
 
-			return charStream;
+			if (stream != null)
+				return new Pair<File, CharStream>(file, stream);
 		} catch (IOException e) {
-			return null;
 		}
+		return null;
 	}
 
 	/**
@@ -312,15 +312,15 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * @return new character stream obtained from the file or <code>null</code>
 	 *         if no such file is found in the default include paths
 	 */
-	private CharStream findInternalSystemFile(String filename) {
+	private Pair<File, CharStream> findInternalSystemFile(String filename) {
 		for (File systemPath : systemIncludePaths) {
-			CharStream charStream = findInternalSystemFile(systemPath,
+			Pair<File, CharStream> result = findInternalSystemFile(systemPath,
 					filename);
 
-			if (charStream != null)
-				return charStream;
+			if (result != null)
+				return result;
 		}
-		// look in directory "abc" in the class path:
+		// look in directory "/include/abc" in the class path:
 		return findInternalSystemFile(Preprocessor.ABC_INCLUDE_PATH, filename);
 	}
 
@@ -1450,7 +1450,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	private Pair<File, CharStream> findIncludeStream(String filename,
 			boolean system) throws IOException {
 		File file = null;
-		CharStream charStream;
+		CharStream charStream = null;
 
 		if (!system) {
 			// first look in dir containing current file, then
@@ -1465,10 +1465,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		if (file == null)
 			file = PreprocessorUtils.findFile(systemIncludePaths, filename);
 		if (file == null) {
-			// last but not least: look internally in the class path
-			// directories:
-			charStream = findInternalSystemFile(filename);
-			file = new File(Preprocessor.ABC_INCLUDE_PATH, filename);
+			// last but not least: look internally in the class path:
+			return findInternalSystemFile(filename);
 		} else {
 			charStream = PreprocessorUtils.newFilteredCharStreamFromFile(file);
 		}
