@@ -154,7 +154,7 @@ public class FrontEnd {
 	 */
 	public ASTFactory getASTFactory() {
 		if (astFactory == null)
-			astFactory = ASTs.newASTFactory(getNodeFactory(), tokenFactory,
+			astFactory = ASTs.newASTFactory(getNodeFactory(), getTokenFactory(),
 					getTypeFactory());
 		return astFactory;
 	}
@@ -283,7 +283,7 @@ public class FrontEnd {
 	 * @return the new transformer
 	 */
 	public Transformer getTransformer(String code) {
-		return Transform.newTransformer(code, astFactory);
+		return Transform.newTransformer(code, getASTFactory());
 	}
 
 	// TODO: whoever created this method must add javadoc
@@ -329,9 +329,8 @@ public class FrontEnd {
 			Map<String, String> predefinedMacros) throws PreprocessorException,
 					SyntaxException, ParseException {
 		Preprocessor preprocessor = getPreprocessor(language);
-		CivlcTokenSource tokens = preprocessor.preprocess(
-				systemIncludePaths, userIncludePaths, predefinedMacros,
-				sourceUnit);
+		CivlcTokenSource tokens = preprocessor.preprocess(systemIncludePaths,
+				userIncludePaths, predefinedMacros, sourceUnit);
 		Parser parser = this.getParser(language);
 		ParseTree parseTree = parser.parse(tokens);
 		ASTBuilder builder = this.getASTBuilder(language);
