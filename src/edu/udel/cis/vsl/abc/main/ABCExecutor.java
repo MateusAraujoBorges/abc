@@ -660,4 +660,16 @@ public class ABCExecutor {
 		return program;
 	}
 
+	public int getNumUnitTasks() {
+		return numUnits;
+	}
+
+	public int getNumCompleteUnitTasks() {
+		return numUnitTasksDone;
+	}
+
+	public UnitTask getUnitTask(int index) {
+		return unitTasks.get(index);
+	}
+
 }
