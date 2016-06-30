@@ -45,10 +45,11 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
 
 /**
  * <p>
- * A {@link PreprocessorTokenSource} is created by opening a file, scanning that
- * file and executing the preprocessor directives to produce a stream of
- * (output) tokens. The directives may include <code>#include</code> directives,
- * which cause additional files to be opened and scanned.
+ * A {@link PreprocessorTokenSource} is created by scanning a sequence of
+ * character streams and executing the preprocessor directives in those streams
+ * to produce a stream of (output) tokens. The directives may include
+ * <code>#include</code> directives, which cause additional files to be opened
+ * and scanned.
  * </p>
  * 
  * <p>
@@ -57,31 +58,11 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
  * 
  * TODO: deal with '#' and '##' and #line.
  * 
+ * TODO: deal with variadic macros.
+ * 
  * @author Stephen F. Siegel
  */
 public class PreprocessorTokenSource implements CivlcTokenSource {
-
-	// Static...
-
-	public static PreprocessorTokenSource make(Configuration config,
-			FileIndexer indexer, File source, File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> macroMap,
-			TokenFactory tokenFactory) throws PreprocessorException {
-		try {
-			CharStream stream = PreprocessorUtils
-					.newFilteredCharStreamFromFile(source);
-			SourceFile sourceFile = indexer.getOrAdd(source);
-			Formation formation = tokenFactory.newInclusion(sourceFile);
-			PreprocessorTokenSource result = new PreprocessorTokenSource(config,
-					indexer, new CharStream[] { stream },
-					new Formation[] { formation }, systemIncludePaths,
-					userIncludePaths, macroMap, tokenFactory);
-
-			return result;
-		} catch (IOException e) {
-			throw new PreprocessorException("Unable to open file " + source);
-		}
-	}
 
 	// Fields...
 
@@ -293,6 +274,19 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 	// Helpers...
 
+	/**
+	 * Searches for an internal file, i.e., one which is stored in a directory
+	 * in the ABC class path. Returns a new character stream obtained by reading
+	 * the file, or <code>null</code> if the file cannot be found.
+	 * 
+	 * @param path
+	 *            the path leading to the file; this path is relative to the
+	 *            class path and starts with "/", e.g., "/include/abc".
+	 * @param filename
+	 *            the name of the file proper, e.g., "stdlib.h"
+	 * @return a new character stream obtained from the file or
+	 *         <code>null</code>
+	 */
 	private CharStream findInternalSystemFile(File path, String filename) {
 		File file = new File(path, filename);
 
@@ -309,6 +303,15 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		}
 	}
 
+	/**
+	 * Finds an internal system file in the default ABC include path,
+	 * {@link Preprocessor#ABC_INCLUDE_PATH}.
+	 * 
+	 * @param filename
+	 *            name of file, e.g., "stdlib.h"
+	 * @return new character stream obtained from the file or <code>null</code>
+	 *         if no such file is found in the default include paths
+	 */
 	private CharStream findInternalSystemFile(String filename) {
 		for (File systemPath : systemIncludePaths) {
 			CharStream charStream = findInternalSystemFile(systemPath,
@@ -321,44 +324,15 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		return findInternalSystemFile(Preprocessor.ABC_INCLUDE_PATH, filename);
 	}
 
-//	/**
-//	 * This method loads char stream for system implementation files. Paths are
-//	 * searched with following rules:
-//	 * <ol>
-//	 * <li>The first priority is user defined include paths and system paths
-//	 * (which is outside of the jar file)</li>
-//	 * <li>The second priority is internal resources in the jar file</li>
-//	 * <li>The lowest priority is the current path</li>
-//	 * </ol>
-//	 * 
-//	 * @param filename
-//	 * @return
-//	 * @throws IOException
-//	 */
-//	private CharStream getCharStreamFromSystem(String filename)
-//			throws IOException {
-//		File file = PreprocessorUtils.findFile(userIncludePaths, filename);
-//		CharStream charStream;
-//
-//		if (file == null)
-//			file = PreprocessorUtils.findFile(systemIncludePaths, filename);
-//		if (file == null) {
-//			charStream = findInternalSystemFile(filename);
-//			if (charStream == null)
-//				return null;
-//			file = new File(filename);
-//		} else {
-//			charStream = PreprocessorUtils.newFilteredCharStreamFromFile(file);
-//		}
-//		return charStream;
-//	}
-
 	/**
 	 * Pushes a new character stream onto the {@link #sourceStack}.
 	 * 
 	 * @param charStream
+	 *            the new character stream to push
 	 * @param formation
+	 *            a formation which specifies the origin of the character stream
 	 * @throws PreprocessorException
+	 *             if something goes wrong parsing the character stream
 	 */
 	private void pushStream(CharStream charStream, Formation formation)
 			throws PreprocessorException {
@@ -401,22 +375,11 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 	// Implementation of methods from CTokenSource...
 
-	// @Override
-	// public void printShorterFileNameMap(PrintStream out) {
-	// out.println();
-	// out.println("File name list:");
-	// for (SourceFile sourceFile : sourceFiles)
-	// out.println(sourceFile.getIndex() + "\t: " + sourceFile.getName());
-	// }
-
-	// public Map<String, Macro> getMacroMap() {
-	// return macroMap;
-	// }
-
 	/**
 	 * Returns current file being processed.
 	 * 
-	 * @return current file or null
+	 * @return current file or <code>null</code> if the source stack is
+	 *         currently empty
 	 */
 	private SourceFile getCurrentSource() {
 		if (sourceStack.isEmpty())
@@ -424,8 +387,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		else
 			return sourceStack.peek().getFile();
 	}
-
-	// Options...
 
 	// The implementation methods...
 
