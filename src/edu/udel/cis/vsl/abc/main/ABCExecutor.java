@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.main;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -250,6 +251,12 @@ public class ABCExecutor {
 	 */
 	private Timer timer;
 
+	private int numUnits;
+
+	private int numUnitTasksDone = 0;
+
+	private ArrayList<UnitTask> unitTasks;
+
 	/**
 	 * The results of preprocessing the input source units specified in the
 	 * {@link #task}. The length of this array is the number of {@link UnitTask}
@@ -259,7 +266,7 @@ public class ABCExecutor {
 	 * they have been consumed their next token methods will just return EOF
 	 * forever.
 	 */
-	private CivlcTokenSource[] tokenSources = null;
+	private ArrayList<CivlcTokenSource> tokenSources = null;
 
 	/**
 	 * The results of parsing the preprocessor output for each source unit. The
@@ -267,7 +274,7 @@ public class ABCExecutor {
 	 * {@link #task}. Initially every entry is <code>null</code>; they are
 	 * filled in as the unit tasks are executed through the parsing stage.
 	 */
-	private ParseTree[] parseTrees = null;
+	private ArrayList<ParseTree> parseTrees = null;
 
 	/**
 	 * The ASTs for the translation units. The length of this array is the
@@ -275,7 +282,7 @@ public class ABCExecutor {
 	 * every entry is <code>null</code>; they are filled in as the unit tasks
 	 * are executed through the AST-building stage.
 	 */
-	private AST[] asts = null;
+	private ArrayList<AST> asts = null;
 
 	/**
 	 * The complete program. Initially null, this is filled in after linking and
@@ -332,6 +339,17 @@ public class ABCExecutor {
 
 	// Helpers...
 
+	private <T> void addNulls(int n, ArrayList<T> vec) {
+		for (int i = 0; i < n; i++)
+			vec.add(null);
+	}
+
+	private void addNulls(int n) {
+		addNulls(n, tokenSources);
+		addNulls(n, parseTrees);
+		addNulls(n, asts);
+	}
+
 	/**
 	 * Initializes internal data structures. To be used by constructors.
 	 * 
@@ -346,12 +364,14 @@ public class ABCExecutor {
 		this.out = task.getOut();
 		this.verbose = task.getVerbose();
 		this.showTime = task.getShowTime();
-
-		int numUnits = task.getUnitTasks().length;
-
-		this.tokenSources = new CivlcTokenSource[numUnits];
-		this.parseTrees = new ParseTree[numUnits];
-		this.asts = new AST[numUnits];
+		this.numUnits = task.getUnitTasks().length;
+		this.unitTasks = new ArrayList<UnitTask>();
+		for (UnitTask t : task.getUnitTasks())
+			this.unitTasks.add(t);
+		this.tokenSources = new ArrayList<CivlcTokenSource>();
+		this.parseTrees = new ArrayList<ParseTree>();
+		this.asts = new ArrayList<AST>();
+		addNulls(numUnits);
 	}
 
 	/**
@@ -383,7 +403,7 @@ public class ABCExecutor {
 			throw new ABCException(
 					"-showDiff requires exactly two source units.");
 
-		DifferenceObject diffObj = asts[0].diff(asts[1]);
+		DifferenceObject diffObj = asts.get(0).diff(asts.get(1));
 
 		if (diffObj == null && !task.isSilent())
 			out.println("The AST of " + getName(unitTasks[0].getSourceFiles())
@@ -406,7 +426,7 @@ public class ABCExecutor {
 	 */
 	private void executeUnit(int index) throws ABCException {
 		TranslationStage stage = task.getStage();
-		UnitTask unitTask = task.getUnitTasks()[index];
+		UnitTask unitTask = unitTasks.get(index);
 		File[] sourceFiles = unitTask.getSourceFiles();
 		String name = getName(sourceFiles);
 		Language language = unitTask.getLanguage();
@@ -434,7 +454,7 @@ public class ABCExecutor {
 				unitTask.getSystemIncludes(), unitTask.getUserIncludes(),
 				unitTask.getMacros(), sourceFiles);
 
-		tokenSources[index] = tokens;
+		tokenSources.set(index, tokens);
 		timer.markTime("construct preprocess tree");
 		if (stage == TranslationStage.PREPROCESS)
 			return;
@@ -478,7 +498,7 @@ public class ABCExecutor {
 		Parser parser = frontEnd.getParser(language);
 		ParseTree parseTree = parser.parse(tokens);
 
-		parseTrees[index] = parseTree;
+		parseTrees.set(index, parseTree);
 		timer.markTime("preprocess, parse, and build ANTLR tree");
 		if (verbose) {
 			out.println(bar + " ANTLR Tree for " + name + " " + bar);
@@ -493,7 +513,7 @@ public class ABCExecutor {
 		ASTBuilder builder = frontEnd.getASTBuilder(language);
 		AST ast = builder.getTranslationUnit(parseTree);
 
-		asts[index] = ast;
+		asts.set(index, ast);
 		timer.markTime("build AST for " + name);
 		if (verbose) {
 			out.println(bar + " Raw Translation Unit for " + name + " " + bar);
@@ -526,10 +546,24 @@ public class ABCExecutor {
 	 *             syntax or semantics violations in the source code
 	 */
 	public void execute() throws ABCException {
-		int numUnits = asts.length;
+		while (numUnitTasksDone < numUnits) {
+			for (int i = numUnitTasksDone; i < numUnits; i++) {
+				executeUnit(i);
+				numUnitTasksDone++;
+			}
+			if (task.getDynamicTask() != null) {
+				UnitTask[] newUnitTasks = task.getDynamicTask().generateTasks();
+				int numNew = newUnitTasks.length;
 
-		for (int i = 0; i < numUnits; i++)
-			executeUnit(i);
+				if (numNew == 0)
+					break;
+				numUnits += numNew;
+				for (int j = 0; j < numNew; j++) {
+					unitTasks.add(newUnitTasks[j]);
+				}
+				addNulls(numNew);
+			}
+		}
 		if (task.getShowDiff()) {
 			executeComparison();
 			return;
@@ -537,7 +571,8 @@ public class ABCExecutor {
 		if (task.getStage().compareTo(TranslationStage.LINK) < 0)
 			return;
 
-		program = frontEnd.link(asts, task.getLinkLanguage());
+		program = frontEnd.link(asts.toArray(new AST[numUnits]),
+				task.getLinkLanguage());
 		timer.markTime("link " + numUnits + " translation units");
 		if (verbose) {
 			out.println(bar + " Program " + bar);
@@ -588,7 +623,7 @@ public class ABCExecutor {
 	 * @return the preprocessing output token source for that translation unit
 	 */
 	public CivlcTokenSource getTokenSource(int index) {
-		return tokenSources[index];
+		return tokenSources.get(index);
 	}
 
 	/**
@@ -600,7 +635,7 @@ public class ABCExecutor {
 	 * @return the parse tree for the <code>index</code>-th translation unit
 	 */
 	public ParseTree getParseTree(int index) {
-		return parseTrees[index];
+		return parseTrees.get(index);
 	}
 
 	/**
@@ -612,7 +647,7 @@ public class ABCExecutor {
 	 * @return the AST for the <code>index</code>-th translation unit
 	 */
 	public AST getAST(int index) {
-		return asts[index];
+		return asts.get(index);
 	}
 
 	/**

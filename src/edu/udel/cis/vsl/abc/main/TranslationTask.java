@@ -151,6 +151,8 @@ public class TranslationTask {
 	 */
 	private Architecture architecture = Architecture.UNKNOWN;
 
+	private DynamicTask dynamicTask = null;
+
 	/**
 	 * Constructs a new translation task from given unit tasks. All other
 	 * parameters have their default values.
@@ -613,7 +615,7 @@ public class TranslationTask {
 	 * 
 	 * @return value of the GNUC flag
 	 */
-	boolean getGNUC() {
+	public boolean getGNUC() {
 		return gnuc;
 	}
 
@@ -625,8 +627,16 @@ public class TranslationTask {
 	 * @param flag
 	 *            value of GNUC flag
 	 */
-	void setGNUC(boolean flag) {
+	public void setGNUC(boolean flag) {
 		this.gnuc = flag;
+	}
+
+	public DynamicTask getDynamicTask() {
+		return dynamicTask;
+	}
+
+	public void setDynamicTask(DynamicTask dtask) {
+		this.dynamicTask = dtask;
 	}
 
 }
