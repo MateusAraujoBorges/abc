@@ -61,7 +61,7 @@ public class Transform {
 				}
 			}
 
-	// add more here.
+			// add more here.
 
 	};
 
@@ -77,8 +77,8 @@ public class Transform {
 	static {
 		for (TransformRecord record : records) {
 			if (codeToRecord.put(record.code, record) != null)
-				throw new ABCRuntimeException("Two transformations named "
-						+ record.code);
+				throw new ABCRuntimeException(
+						"Two transformations named " + record.code);
 		}
 	}
 
@@ -97,8 +97,8 @@ public class Transform {
 	 */
 	public static void addTransform(TransformRecord record) {
 		if (codeToRecord.put(record.code, record) != null)
-			throw new ABCRuntimeException("Two transformations named "
-					+ record.code);
+			throw new ABCRuntimeException(
+					"Two transformations named " + record.code);
 	}
 
 	/**
@@ -123,7 +123,8 @@ public class Transform {
 		TransformRecord record = codeToRecord.get(code);
 
 		if (record == null)
-			throw new ABCRuntimeException("No transformation with code " + code);
+			throw new ABCRuntimeException(
+					"No transformation with code " + code);
 		return record.shortDescription;
 	}
 
@@ -140,8 +141,21 @@ public class Transform {
 		TransformRecord record = codeToRecord.get(code);
 
 		if (record == null)
-			throw new ABCRuntimeException("No transformation with code " + code);
+			throw new ABCRuntimeException(
+					"No transformation with code " + code);
 		return record.name;
+	}
+
+	/**
+	 * Returns the {@link TransformRecord} with the given <code>code</code>, or
+	 * <code>null</code> if no such record exists.
+	 * 
+	 * @param code
+	 *            a transformer code
+	 * @return the {@link TransformRecord} with that code or <code>null</code>
+	 */
+	public static TransformRecord getRecord(String code) {
+		return codeToRecord.get(code);
 	}
 
 	/**
@@ -166,11 +180,13 @@ public class Transform {
 	 * @throws ABCRuntimeException
 	 *             if there is no such code in the current collection
 	 */
-	public static Transformer newTransformer(String code, ASTFactory astFactory) {
+	public static Transformer newTransformer(String code,
+			ASTFactory astFactory) {
 		TransformRecord record = codeToRecord.get(code);
 
 		if (record == null)
-			throw new ABCRuntimeException("No transformation with code " + code);
+			throw new ABCRuntimeException(
+					"No transformation with code " + code);
 		return record.create(astFactory);
 	}
 

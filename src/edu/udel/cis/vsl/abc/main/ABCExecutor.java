@@ -26,7 +26,7 @@ import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.main.TranslationTask.TranslationStage;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
-import edu.udel.cis.vsl.abc.transform.IF.Transform;
+import edu.udel.cis.vsl.abc.transform.IF.TransformRecord;
 import edu.udel.cis.vsl.abc.transform.IF.Transformer;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 import edu.udel.cis.vsl.abc.util.IF.Timer;
@@ -545,9 +545,8 @@ public class ABCExecutor {
 		}
 		if (task.getStage() == TranslationStage.LINK)
 			return;
-		for (String code : task.getTransformCodes()) {
-			Transformer transformer = Transform.newTransformer(code,
-					frontEnd.getASTFactory());
+		for (TransformRecord record : task.getTransformRecords()) {
+			Transformer transformer = record.create(frontEnd.getASTFactory());
 
 			if (verbose) {
 				printProgram();

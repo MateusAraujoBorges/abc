@@ -171,7 +171,7 @@ public class ABC {
 	}
 
 	private static TranslationTask parseCommandLine(String[] args)
-			throws FileNotFoundException {
+			throws FileNotFoundException, ABCException {
 		ArrayList<UnitTask> unitTasks = new ArrayList<>();
 		String outfileName = null;
 		// the following are updated by -I
@@ -397,6 +397,11 @@ public class ABC {
 			err.println(e.toString());
 			err.flush();
 			System.exit(1);
+		} catch (ABCException e) {
+			// illegal transform code
+			err.println(e.toString());
+			err.flush();
+			System.exit(2);
 		}
 
 		ABCExecutor executor = new ABCExecutor(task);
@@ -406,23 +411,23 @@ public class ABC {
 		} catch (PreprocessorException e) {
 			err.println(e.toString());
 			err.flush();
-			System.exit(2);
+			System.exit(3);
 		} catch (PreprocessorRuntimeException e) {
 			err.println(e.toString());
 			err.flush();
-			System.exit(2);
+			System.exit(4);
 		} catch (ParseException e) {
 			err.println(e.toString());
 			err.flush();
-			System.exit(3);
+			System.exit(5);
 		} catch (SyntaxException e) {
 			err.println(e.toString());
 			err.flush();
-			System.exit(4);
+			System.exit(6);
 		} catch (ABCException e) {
 			err.println(e.toString());
 			err.flush();
-			System.exit(5);
+			System.exit(7);
 		}
 		task.getOut().close();
 	}

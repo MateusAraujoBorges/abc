@@ -7,9 +7,12 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.config.IF.Configuration.Architecture;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.transform.IF.Transform;
+import edu.udel.cis.vsl.abc.transform.IF.TransformRecord;
 
 /**
  * A {@link TranslationTask} object specifies all of the options and parameters
@@ -77,10 +80,10 @@ public class TranslationTask {
 	private Language linkLanguage = Language.CIVL_C;
 
 	/**
-	 * The codes specifying the transformations to apply to the program after
-	 * linking the translation units. Default is empty list.
+	 * Records for the transformations to apply to the program after linking the
+	 * translation units. Default is empty list.
 	 */
-	private List<String> transformCodes = new LinkedList<>();
+	private List<TransformRecord> transformRecords = new LinkedList<>();
 
 	/**
 	 * Output stream: where to print human-readable descriptions of translation
@@ -344,38 +347,61 @@ public class TranslationTask {
 	}
 
 	/**
-	 * Returns the sequence of transformation codes as a Java {@link Collection}
-	 * . The order does matter. These are the transformation that will be
+	 * Returns the sequence of transform records as a Java {@link Collection} .
+	 * The order does matter. These are the transformations that will be applied
+	 * to the program AFTER linking the translation units to form the whole
+	 * program.
+	 * 
+	 * @return the sequence of transformers
+	 */
+	public Collection<TransformRecord> getTransformRecords() {
+		return transformRecords;
+	}
+
+	/**
+	 * Adds the given transform record to the end of the transform record
+	 * sequence.
+	 * 
+	 * @param record
+	 *            a non-<code>null</code> transform record
+	 */
+	public void addTransformRecord(TransformRecord record) {
+		transformRecords.add(record);
+	}
+
+	/**
+	 * Adds the transformation record specified by the given code to the end of
+	 * the transform record sequence. These are the transformations that will be
 	 * applied to the program AFTER linking the translation units to form the
 	 * whole program.
 	 * 
-	 * @return the sequence of transformation codes
-	 */
-	public Collection<String> getTransformCodes() {
-		return transformCodes;
-	}
-
-	/**
-	 * Adds the given transformation code to the end of the transformation code
-	 * sequence. These are the transformation that will be applied to the
-	 * program AFTER linking the translation units to form the whole program.
-	 * 
 	 * @param code
 	 *            an AST transformation code
+	 * @throws ABCException
+	 *             if no record for that code exists
 	 */
-	public void addTransformCode(String code) {
-		transformCodes.add(code);
+	public void addTransformCode(String code) throws ABCException {
+		TransformRecord record = Transform.getRecord(code);
+
+		if (record == null)
+			throw new ABCException("Unknown transformer code: " + code);
+		transformRecords.add(record);
 	}
 
 	/**
-	 * Adds all of the given transformation codes (in order) to the
-	 * transformation code sequence of this translation task.
+	 * Add records for all of the given transformation codes (in order) to the
+	 * transform record sequence of this translation task.
 	 * 
 	 * @param codes
 	 *            a sequence of AST transformation codes
+	 * @throws ABCException
+	 *             if for some code in the collection, no record for that code
+	 *             exists
 	 */
-	public void addAllTransformCodes(Collection<String> codes) {
-		transformCodes.addAll(codes);
+	public void addAllTransformCodes(Collection<String> codes)
+			throws ABCException {
+		for (String code : codes)
+			addTransformCode(code);
 	}
 
 	/**
