@@ -156,7 +156,8 @@ public class FilteredANTLRInputStream extends ANTLRStringStream {
 	 */
 	public FilteredANTLRInputStream(String name, String string, int chunkSize)
 			throws IOException {
-		this(name, new ByteArrayInputStream(string.getBytes()), null, chunkSize);
+		this(name, new ByteArrayInputStream(string.getBytes()), null,
+				chunkSize);
 	}
 
 	/**
@@ -220,6 +221,21 @@ public class FilteredANTLRInputStream extends ANTLRStringStream {
 		// count the filtered characters and allocate data...
 		for (Chunk chunk : chunks)
 			numFilteredChars += chunk.filteredLength;
+
+		int numChunks = chunks.size();
+		boolean addNewline = true;
+
+		for (int index = numChunks - 1; index >= 0; index--) {
+			Chunk chunk = chunks.get(index);
+			int len = chunk.filteredLength;
+
+			if (len != 0) {
+				addNewline = chunk.buf[len - 1] != '\n';
+				break;
+			}
+		}
+		if (addNewline)
+			numFilteredChars++;
 		super.data = new char[numFilteredChars];
 		super.n = numFilteredChars;
 		// copy chunk bufs into data...
@@ -228,6 +244,8 @@ public class FilteredANTLRInputStream extends ANTLRStringStream {
 					chunk.filteredLength);
 			pos += chunk.filteredLength;
 		}
+		if (addNewline)
+			super.data[pos] = '\n';
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package edu.udel.cis.vsl.abc.config.IF;
 
+import java.util.Arrays;
+
 import edu.udel.cis.vsl.abc.config.common.CommonConfiguration;
 
 public class Configurations {
@@ -14,8 +16,9 @@ public class Configurations {
 		C,
 		/**
 		 * The programming language CIVL-C, an extension of C for concurrency
-		 * and verification. See <a
-		 * href="http://vsl.cis.udel.edu/civl">http://vsl.cis.udel.edu/civl</a>.
+		 * and verification. See
+		 * <a href="http://vsl.cis.udel.edu/civl">http://vsl.cis.udel.edu/civl
+		 * </a>.
 		 */
 		CIVL_C,
 		/**
@@ -27,6 +30,64 @@ public class Configurations {
 
 	public static Configuration newMinimalConfiguration() {
 		return new CommonConfiguration();
+	}
+
+	public static Language commonLanguage(Iterable<Language> langs) {
+		Language result = null;
+
+		for (Language lang : langs) {
+			if (lang == Language.CIVL_C) {
+				result = lang;
+				break;
+			}
+			if (result == null)
+				result = lang;
+			else if (result != lang) {
+				result = Language.CIVL_C;
+				break;
+			}
+		}
+		return result;
+	}
+
+	public static Language bestLanguage(Iterable<String> filenames) {
+		Language result = null;
+
+		for (String name : filenames) {
+			if (name.endsWith(".c") || name.endsWith(".h")
+					|| name.endsWith(".i")) {
+				// C code
+				if (result == null)
+					result = Language.C;
+				else if (result != Language.C) {
+					result = Language.CIVL_C;
+					break;
+				}
+			} else {
+				String lc = name.toLowerCase();
+
+				if (lc.endsWith(".f") || lc.endsWith(".for")
+						|| lc.endsWith(".f77") || lc.endsWith(".f90")
+						|| lc.endsWith(".f95") || lc.endsWith(".f03")) {
+					// Fortran code
+					if (result == null)
+						result = Language.FORTRAN77;
+					else if (result != Language.FORTRAN77) {
+						result = Language.CIVL_C;
+						break;
+					}
+				} else {
+					// something else: assume CIVL-C
+					result = Language.CIVL_C;
+					break;
+				}
+			}
+		}
+		return result;
+	}
+
+	public static Language bestLanguage(String[] filenames) {
+		return bestLanguage(Arrays.asList(filenames));
 	}
 
 }

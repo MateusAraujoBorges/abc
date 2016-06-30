@@ -8,11 +8,8 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.main.FrontEnd;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
@@ -24,23 +21,13 @@ public class CIVLTranslationTest {
 
 	private File root = new File(new File("examples"), "civl");
 
-	private static Configuration config = Configurations
-			.newMinimalConfiguration();
-
-	private static FrontEnd f = new FrontEnd(config);
-
 	private void check(String filenameRoot) throws ABCException, IOException {
 		File file = new File(root, filenameRoot + ".cvl");
+		TranslationTask task = new TranslationTask(file);
 
-		if (debug) {
-			TranslationTask config = new TranslationTask(Language.CIVL_C, file);
-
-			config.addAllTransformCodes(codes);
-			f.showTranslation(config);
-		} else {
-			f.compileAndLink(new File[] { file }, Language.CIVL_C)
-					.applyTransformers(codes);
-		}
+		task.addAllTransformCodes(codes);
+		task.setVerbose(debug);
+		ABCExecutor.execute(task);
 	}
 
 	@Test

@@ -15,9 +15,10 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration.Architecture;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.ParseException;
+import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorRuntimeException;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
+import edu.udel.cis.vsl.abc.main.TranslationTask.TranslationStage;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.transform.IF.Transform;
 
@@ -70,18 +71,18 @@ public class ABC {
 	/**
 	 * The default list of system include paths.
 	 */
-	public final static File[] DEFAULT_SYSTEM_INCLUDE_PATHS = new File[] {};
+	public final static File[] DEFAULT_SYSTEM_INCLUDE_PATHS = Preprocessor.defaultSystemIncludes;
 
 	/**
 	 * The default list of user include paths.
 	 */
-	public final static File[] DEFAULT_USER_INCLUDE_PATHS = new File[] {};
+	public final static File[] DEFAULT_USER_INCLUDE_PATHS = Preprocessor.defaultUserIncludes;
 
 	/**
 	 * The default list of pre-defined macros, specifies as a mapping from
 	 * Strings (macro name) to macros.
 	 */
-	public final static Map<String, Macro> DEFAULT_IMPLICIT_MACROS = new TreeMap<>();
+	public final static Map<String, String> DEFAULT_IMPLICIT_MACROS = new TreeMap<>();
 
 	/**
 	 * Determines language from filename. If it ends in ".cvl" or ".cvh", it's
@@ -112,14 +113,16 @@ public class ABC {
 	 *            the stream to which the output should be printed
 	 */
 	private static void help(PrintStream out) {
-		out.println("Usage: abc [options] filename0 filename1 ...");
+		out.println("Usage: abc (option* filename)+ option*");
 		out.println("Options:");
 		out.println("-I <path>");
 		out.println("  add path to system include list");
 		out.println("-iquote <path>");
 		out.println("  add path to user include list");
+		out.println("-include <filename>");
+		out.println("  include filename before preprocessing next source file");
 		out.println("-D<macro> or -D<macro>=<object>");
-		out.println("  define a macro for compilation");
+		out.println("  define a macro for preprocessor");
 		out.println("-o <filename>");
 		out.println("  send output to filename");
 		out.println("-E");
@@ -145,7 +148,7 @@ public class ABC {
 		out.println("-unknownFunc");
 		out.println(
 				"  print functions that are used in the program but no definition is given");
-		out.println("-lang=[c|civlc]");
+		out.println("-lang=[c|civlc|f77]");
 		out.println("  set language (default determined by file suffix)");
 		out.println("-arch=[i386|amd64|unknown]");
 		out.println("  set the architecture, unknown by default");
@@ -169,7 +172,7 @@ public class ABC {
 
 	private static TranslationTask parseCommandLine(String[] args)
 			throws FileNotFoundException {
-		ArrayList<String> infileNames = new ArrayList<>();
+		ArrayList<UnitTask> unitTasks = new ArrayList<>();
 		String outfileName = null;
 		// the following are updated by -I
 		ArrayList<File> systemIncludeList = new ArrayList<>();
@@ -186,13 +189,12 @@ public class ABC {
 		boolean showDiff = false;
 		boolean gnuc = false;
 		boolean silent = false;
-		boolean unkownFunc = false;
+		boolean showUndefinedFunctions = false;
 		boolean svcomp = false;
 		Architecture architecture = Architecture.UNKNOWN;
 		List<String> transformCodes = new LinkedList<>();
-		Language language = null;
-		TranslationTask result = new TranslationTask();
-		int nfiles;
+		Language language = null, linkLang = null;
+		ArrayList<File> includeFiles = new ArrayList<>();
 
 		for (int i = 0; i < args.length; i++) {
 			String arg = args[i];
@@ -273,15 +275,15 @@ public class ABC {
 			} else if (arg.equals("-gnuc")) {
 				gnuc = true;
 			} else if (arg.equals("-unknownFunc")) {
-				unkownFunc = true;
+				showUndefinedFunctions = true;
 			} else if (arg.equals("-svcomp")) {
 				svcomp = true;
 			} else if (arg.startsWith("-lang")) {
-				if (arg.equals("-lang=C"))
+				if (arg.equals("-lang=c"))
 					language = Language.C;
 				else if (arg.equals("-lang=civlc"))
 					language = Language.CIVL_C;
-				else if (arg.equals("-lang=fortran77"))
+				else if (arg.equals("-lang=f77"))
 					language = Language.FORTRAN77;
 				else
 					err("Unknown command line option: " + arg);
@@ -296,6 +298,15 @@ public class ABC {
 					err("Unknown command line option: " + arg);
 			} else if (arg.equals("-silent")) {
 				silent = true;
+			} else if (arg.startsWith("-linkLang=")) {
+				if (arg.equals("-linkLang=c"))
+					linkLang = Language.C;
+				else if (arg.equals("-linkLang=civlc"))
+					linkLang = Language.CIVL_C;
+				else if (arg.equals("-linkLang=f77"))
+					linkLang = Language.FORTRAN77;
+				else
+					err("Unknown command line option: " + arg);
 			} else if (arg.startsWith("-")) {
 				// try transform code...
 				String code = arg.substring(1);
@@ -305,38 +316,55 @@ public class ABC {
 				else
 					err("Unknown command line option: " + arg);
 			} else {
-				infileNames.add(arg);
+				File file = new File(arg);
+				int numIncludes = includeFiles.size();
+				File[] files = new File[numIncludes + 1];
+
+				for (int j = 0; j < numIncludes; j++)
+					files[j] = includeFiles.get(j);
+				files[numIncludes] = file;
+
+				UnitTask unitTask = new UnitTask(files);
+
+				if (language == null)
+					language = getLanguageFromName(arg);
+				unitTask.setLanguage(language);
+				unitTask.setGNUC(gnuc);
+				unitTask.setMacros(new HashMap<String, String>(macros));
+				unitTask.setSystemIncludes(
+						systemIncludeList.toArray(new File[0]));
+				unitTask.setUserIncludes(userIncludeList.toArray(new File[0]));
+				unitTasks.add(unitTask);
+				language = null;
+				gnuc = false;
 			}
 		}
-		nfiles = infileNames.size();
-		if (nfiles == 0)
+		if (unitTasks.isEmpty())
 			err("No input file specified");
-		result.setFiles(new File[nfiles]);
-		for (int i = 0; i < nfiles; i++)
-			result.getFiles()[i] = new File(infileNames.get(i));
-		result.setUserIncludes(userIncludeList.toArray(new File[0]));
-		result.setSystemIncludes(systemIncludeList.toArray(new File[0]));
-		result.setMacroNames(macros);
+
+		TranslationTask task = new TranslationTask(
+				unitTasks.toArray(new UnitTask[unitTasks.size()]));
+
 		if (outfileName == null)
-			result.setOut(System.out);
+			task.setOut(System.out);
 		else
-			result.setOut(new PrintStream(new File(outfileName)));
-		result.setLanguage(language == null
-				? getLanguageFromName(infileNames.get(0)) : language);
-		result.setVerbose(verbose);
-		result.setPrettyPrint(pretty);
-		result.setShowTables(tables);
-		result.setShowTime(showTime);
-		result.setPreprocOnly(preprocOnly);
-		result.setPreprocTokens(ppt);
-		result.setShowDiff(showDiff);
-		result.setGnuc(gnuc);
-		result.setSilent(silent);
-		result.setUnkownFunc(unkownFunc);
-		result.setSvcomp(svcomp);
-		result.setArchitecture(architecture);
-		result.addAllTransformCodes(transformCodes);
-		return result;
+			task.setOut(new PrintStream(new File(outfileName)));
+		if (linkLang != null)
+			task.setLinkLanguage(linkLang);
+		task.setVerbose(verbose);
+		task.setPrettyPrint(pretty);
+		task.setShowTables(tables);
+		task.setShowTime(showTime);
+		if (preprocOnly)
+			task.setStage(TranslationStage.PREPROCESS_CONSUME);
+		task.setPreprocTokens(ppt);
+		task.setShowDiff(showDiff);
+		task.setSilent(silent);
+		task.setShowUndefinedFunctions(showUndefinedFunctions);
+		task.setSVCOMP(svcomp);
+		task.setArchitecture(architecture);
+		task.addAllTransformCodes(transformCodes);
+		return task;
 	}
 
 	/**
@@ -352,7 +380,6 @@ public class ABC {
 	 */
 	public static void main(String[] args) {
 		TranslationTask task = null;
-		FrontEnd frontEnd;
 		PrintStream err = System.err, out = System.out;
 		boolean silent = false;
 
@@ -371,13 +398,11 @@ public class ABC {
 			err.flush();
 			System.exit(1);
 		}
-		frontEnd = new FrontEnd(task);
+
+		ABCExecutor executor = new ABCExecutor(task);
+
 		try {
-			if (task.doShowDiff()) {
-				frontEnd.compileAndCompare(task);
-			} else {
-				frontEnd.showTranslation(task);
-			}
+			executor.execute();
 		} catch (PreprocessorException e) {
 			err.println(e.toString());
 			err.flush();
@@ -394,7 +419,7 @@ public class ABC {
 			err.println(e.toString());
 			err.flush();
 			System.exit(4);
-		} catch (IOException e) {
+		} catch (ABCException e) {
 			err.println(e.toString());
 			err.flush();
 			System.exit(5);

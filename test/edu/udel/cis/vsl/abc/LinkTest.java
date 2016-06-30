@@ -5,9 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.PrintStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
@@ -15,10 +12,18 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.front.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.main.TranslationTask;
+import edu.udel.cis.vsl.abc.main.TranslationTask.TranslationStage;
+
+// TODO: problem is too many copies of civlc.cvh inserted:
+// one for each translation unit, then linked, and they all
+// remain.
+
+// 1. why doesn't linker remove duplicates?
+
+// 2. do we really want to keep including civlc.cvh?
 
 /**
  * Tests compilation of multiple translation units. All tests have the following
@@ -35,7 +40,7 @@ public class LinkTest {
 
 	public final static PrintStream out = System.out;
 
-	public final static boolean debug = false;
+	public final static boolean debug = true;
 
 	private File root = new File(new File("examples"), "link");
 
@@ -44,26 +49,24 @@ public class LinkTest {
 
 	private static FrontEnd fe = new FrontEnd(config);
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
+	private void check(File[] inputs, File oracle) throws ABCException {
+		TranslationTask task = new TranslationTask(inputs);
 
-	@Before
-	public void setUp() throws Exception {
-	}
+		task.setLinkLanguage(Language.C);
 
-	@After
-	public void tearDown() throws Exception {
-	}
+		AST actual = ABCExecutor.execute(fe, task).getProgram().getAST();
 
-	private void check(File[] inputs, File oracle)
-			throws PreprocessorException, SyntaxException, ParseException {
-		AST actual = fe.compileAndLink(inputs, Language.CIVL_C).getAST();
-		AST expected = fe.compile(oracle, Language.CIVL_C);
+		task = new TranslationTask(oracle);
+		task.setLinkLanguage(Language.C);
+		task.setStage(TranslationStage.ANALYZE_ASTS);
+
+		AST expected = ABCExecutor.execute(fe, task).getAST(0);
 
 		if (debug) {
+			out.println("Expected program:");
 			expected.prettyPrint(out, false);
 			out.println();
+			out.println("Actual program:");
 			actual.prettyPrint(out, false);
 		}
 		assertTrue(actual.getRootNode().equiv(expected.getRootNode()));
@@ -140,6 +143,10 @@ public class LinkTest {
 				"struct4_3.c" }, "struct4.c");
 	}
 
+	// TODO: problem here is that the actual program will have
+	// 2 copies of civlc.cvh and the oracle will have one, so they
+	// appear different. Should fix the linker so that it eliminates
+	// duplicate decls in same scope.
 	@Test
 	public void sys() throws ABCException {
 		check(new String[] { "sys_0.cvl", "sys_1.cvl" }, "sys.cvl");

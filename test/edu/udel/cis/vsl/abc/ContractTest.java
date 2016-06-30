@@ -9,11 +9,10 @@ import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
-import edu.udel.cis.vsl.abc.program.IF.Program;
 
 public class ContractTest {
 
@@ -30,18 +29,14 @@ public class ContractTest {
 
 	private void check(String filenameRoot) throws ABCException, IOException {
 		File file = new File(root, filenameRoot + ".cvl");
+		TranslationTask task = new TranslationTask(file);
 
-		if (debug) {
-			TranslationTask config = new TranslationTask(Language.CIVL_C, file);
-
-			config.addAllTransformCodes(codes);
-			f.showTranslation(config);
-		} else {
-			Program p = f.compileAndLink(new File[] { file }, Language.CIVL_C);
-
-			p.applyTransformers(codes);
-			// p.prettyPrint(System.out);
-		}
+		task.addAllTransformCodes(codes);
+		task.setVerbose(debug);
+		task.setSilent(!debug);
+		if (debug)
+			task.setPrettyPrint(true);
+		ABCExecutor.execute(f, task);
 	}
 
 	@Test

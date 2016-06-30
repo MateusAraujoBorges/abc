@@ -5,17 +5,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
-import edu.udel.cis.vsl.abc.program.IF.Program;
 
 /**
  * Checks programs from the FEVS suite. These use libraries such as MPI and GD.
@@ -35,35 +32,21 @@ public class FEVSTranslationTest {
 
 	// removed "sef" from below since FEVS contains some function calls
 	// as arguments in function calls...
-	private static List<String> codes = Arrays.asList("prune");
+	private static List<String> codes = Arrays.asList("prune", "sef");
 
 	private static Configuration config = Configurations
 			.newMinimalConfiguration();
 
 	private static FrontEnd fe = new FrontEnd(config);
 
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
 	private void check(String directory, String filenameRoot)
 			throws ABCException, IOException {
 		File file = new File(new File(root, directory), filenameRoot + ".c");
+		TranslationTask task = new TranslationTask(file);
 
-		if (debug) {
-			TranslationTask config = new TranslationTask(Language.C, file);
-
-			config.addAllTransformCodes(codes);
-			fe.showTranslation(config);
-		} else {
-			Program p = fe.compileAndLink(new File[] { file }, Language.C);
-
-			p.applyTransformers(codes);
-		}
+		task.addAllTransformCodes(codes);
+		task.setVerbose(debug);
+		ABCExecutor.execute(fe, task);
 	}
 
 	@Test

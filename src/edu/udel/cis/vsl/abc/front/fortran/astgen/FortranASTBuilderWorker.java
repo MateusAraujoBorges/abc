@@ -84,7 +84,8 @@ public class FortranASTBuilderWorker {
 	private boolean hasSTDIO = false;
 
 	private Map<String, TypeNode> localMap = new HashMap<String, TypeNode>();
-	//private Map<String, VariableDeclarationNode> localMap2 = new HashMap<String, VariableDeclarationNode>();
+	// private Map<String, VariableDeclarationNode> localMap2 = new
+	// HashMap<String, VariableDeclarationNode>();
 
 	private List<BlockItemNode> tempItems = null;
 
@@ -96,7 +97,9 @@ public class FortranASTBuilderWorker {
 		this.parseTree = parseTree;
 		this.filePath = filePath;
 		this.astFactory = astFactory;
-		this.libFactory = new LibraryASTFactory();
+		// TODO: create a preprocessor, parser, astBuilder and use
+		// them in the following:
+		this.libFactory = new LibraryASTFactory(null, null, null);
 		this.nodeFactory = astFactory.getNodeFactory();
 		this.tokenFactory = astFactory.getTokenFactory();
 		this.programUnits = new ArrayList<BlockItemNode>();
@@ -152,8 +155,8 @@ public class FortranASTBuilderWorker {
 		int numNodes = sourceNodes.length;
 		int counter = 0;
 		CivlcToken lToken = null, rToken = null;
-		Formation dummyFormation = tokenFactory.newInclusion(new SourceFile(
-				new File(this.filePath), 0));
+		Formation dummyFormation = tokenFactory
+				.newInclusion(new SourceFile(new File(this.filePath), 0));
 		Source result = null;
 
 		for (counter = 0; counter < numNodes; counter++) {
@@ -181,8 +184,8 @@ public class FortranASTBuilderWorker {
 			}
 		}
 		if (lToken == null) {
-			result = tokenFactory.newSource(tokenFactory.newCivlcToken(
-					new CommonToken(0, ""), dummyFormation));
+			result = tokenFactory.newSource(tokenFactory
+					.newCivlcToken(new CommonToken(0, ""), dummyFormation));
 		} else if (rToken == null) {
 			rToken = lToken;
 			result = tokenFactory.newSource(lToken);
@@ -218,8 +221,8 @@ public class FortranASTBuilderWorker {
 				 * and any other letter type real, unless an IMPLICIT statement
 				 * is used to change the default implied type.
 				 */
-				IdentifierNode formalIdNode = translateIdentifier(parameterNode
-						.getChildByIndex(i));
+				IdentifierNode formalIdNode = translateIdentifier(
+						parameterNode.getChildByIndex(i));
 				String formalName = formalIdNode.name();
 				String pattern = "^(I|J|K|L|M|N|i|j|k|l|m|n).*$";
 				TypeNode defaultType = null;
@@ -238,8 +241,8 @@ public class FortranASTBuilderWorker {
 				formalList.add(formal);
 			}
 		}
-		formals = nodeFactory.newSequenceNode(typeSource,
-				"FormalParameterList", formalList);
+		formals = nodeFactory.newSequenceNode(typeSource, "FormalParameterList",
+				formalList);
 		functionType = nodeFactory.newFunctionTypeNode(typeSource, returnType,
 				formals, hasIdentifierList);
 		return functionType;
@@ -259,7 +262,8 @@ public class FortranASTBuilderWorker {
 					"_dummy_arg_" + i);
 			TypeNode formalTypeNode = generateType(actual);
 
-			if (actual.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
+			if (actual
+					.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
 				// formalIdNode = ((IdentifierNode) actual.child(0)).copy();
 			}
 			formalList.add(nodeFactory.newVariableDeclarationNode(source,
@@ -320,7 +324,7 @@ public class FortranASTBuilderWorker {
 	private List<BlockItemNode> translateTypeDeclaration(
 			FortranTree declarationNode, SimpleScope scope,
 			Map<String, VariableDeclarationNode> argsMap)
-			throws SyntaxException {
+					throws SyntaxException {
 		ArrayList<BlockItemNode> definitionList = new ArrayList<BlockItemNode>();
 		// FortranTree labelDefinition = declarationNode.getChildByIndex(0);
 		FortranTree declarationSpecifier = declarationNode.getChildByIndex(1);
@@ -333,8 +337,8 @@ public class FortranASTBuilderWorker {
 			FortranTree entityNode = declarationEntityList.getChildByIndex(i);
 			FortranTree identifierNode = entityNode.getChildByIndex(0);
 			IdentifierNode name = this.translateIdentifier(identifierNode);
-			TypeNode type = this.translateType(declarationSpecifier
-					.getChildByIndex(0));
+			TypeNode type = this
+					.translateType(declarationSpecifier.getChildByIndex(0));
 			VariableDeclarationNode declaration = null;
 			boolean isArray = false;
 			boolean hasInit = false;
@@ -399,8 +403,8 @@ public class FortranASTBuilderWorker {
 					arguments.add(endIndexExprNode);
 					arguments.add(startIndexExprNode);
 
-					OperatorNode extentNode = nodeFactory.newOperatorNode(
-							source, operator, arguments);
+					OperatorNode extentNode = nodeFactory
+							.newOperatorNode(source, operator, arguments);
 
 					operator = Operator.PLUS;
 					arguments.clear();
@@ -504,7 +508,8 @@ public class FortranASTBuilderWorker {
 
 			operator = Operator.ASSIGN;
 			arguments = new LinkedList<ExpressionNode>();
-			if (lhsArgExprNode.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
+			if (lhsArgExprNode
+					.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
 				IdentifierNode assignedIdNode = (IdentifierNode) lhsArgExprNode
 						.child(0);
 				String assignedIdName = assignedIdNode.name();
@@ -521,8 +526,8 @@ public class FortranASTBuilderWorker {
 						type = nodeFactory.newBasicTypeNode(source,
 								BasicTypeKind.DOUBLE);
 					}
-					varDeclNode = nodeFactory.newVariableDeclarationNode(
-							source, assignedIdNode.copy(), type);
+					varDeclNode = nodeFactory.newVariableDeclarationNode(source,
+							assignedIdNode.copy(), type);
 					localMap.put(assignedIdName, type);
 					tempItems.add(0, varDeclNode);
 				}
@@ -667,9 +672,11 @@ public class FortranASTBuilderWorker {
 
 						for (int i = 0; i < 2; i++) {
 							ExpressionNode argument = translateExpression(
-									source, refNode.getChildByIndex(1)
+									source,
+									refNode.getChildByIndex(1)
 											.getChildByIndex(i)
-											.getChildByIndex(0), scope);
+											.getChildByIndex(0),
+									scope);
 
 							arguments.add(argument);
 						}
@@ -787,8 +794,8 @@ public class FortranASTBuilderWorker {
 			result = translateComputedGoto(blockItemNode, scope);
 			break;
 		case 1218: /* CallStatement */
-			result = translateCall(generateSource(blockItemNode),
-					blockItemNode, scope);
+			result = translateCall(generateSource(blockItemNode), blockItemNode,
+					scope);
 			break;
 		case 1236: /* ReaturnStatement */
 			// TODO: Return Statement for Fortran represents a exit for a
@@ -832,13 +839,14 @@ public class FortranASTBuilderWorker {
 
 				condition = translateExpression(condSource,
 						condNode.getChildByIndex(2), ifScope);
-				trueBranch = translateBody(null, blockNode, new SimpleScope(
-						ifScope), null);
+				trueBranch = translateBody(null, blockNode,
+						new SimpleScope(ifScope), null);
 
-				result = falseBranch == null ? nodeFactory.newIfNode(
-						blockSource, condition, trueBranch) : nodeFactory
-						.newIfNode(blockSource, condition, trueBranch,
-								falseBranch);
+				result = falseBranch == null
+						? nodeFactory.newIfNode(blockSource, condition,
+								trueBranch)
+						: nodeFactory.newIfNode(blockSource, condition,
+								trueBranch, falseBranch);
 			} else if (rule == 804) {
 				// ELSE IF
 				Source blockSource = generateSource(blockNode);
@@ -846,16 +854,17 @@ public class FortranASTBuilderWorker {
 
 				condition = translateExpression(condSource,
 						condNode.getChildByIndex(2), ifScope);
-				trueBranch = translateBody(null, blockNode, new SimpleScope(
-						ifScope), null);
-				falseBranch = falseBranch == null ? nodeFactory.newIfNode(
-						blockSource, condition, trueBranch) : nodeFactory
-						.newIfNode(blockSource, condition, trueBranch,
-								falseBranch);
+				trueBranch = translateBody(null, blockNode,
+						new SimpleScope(ifScope), null);
+				falseBranch = falseBranch == null
+						? nodeFactory.newIfNode(blockSource, condition,
+								trueBranch)
+						: nodeFactory.newIfNode(blockSource, condition,
+								trueBranch, falseBranch);
 			} else { /* 805 */
 				// ELSE
-				falseBranch = translateBody(null, blockNode, new SimpleScope(
-						ifScope), null);
+				falseBranch = translateBody(null, blockNode,
+						new SimpleScope(ifScope), null);
 			}
 			blockIndex -= 2;
 		}
@@ -864,15 +873,15 @@ public class FortranASTBuilderWorker {
 
 	private StatementNode translateCall(Source source,
 			FortranTree blockItemNode, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		FortranTree functionTree = blockItemNode.getChildByIndex(1);
 		FortranTree functionIdNode = functionTree.getChildByIndex(0)
 				.getChildByIndex(0);
 		FortranTree argumentListTree = null;
-		IdentifierNode idNode = translateIdentifier(functionIdNode
-				.getChildByIndex(0));
-		ExpressionNode functionNode = nodeFactory.newIdentifierExpressionNode(
-				source, idNode);
+		IdentifierNode idNode = translateIdentifier(
+				functionIdNode.getChildByIndex(0));
+		ExpressionNode functionNode = nodeFactory
+				.newIdentifierExpressionNode(source, idNode);
 		boolean hasActualArgs = blockItemNode.numChildren() > 2;
 		boolean hasSubScripts = functionIdNode.numChildren() > 1;
 		int numArgs = 0;
@@ -1047,7 +1056,7 @@ public class FortranASTBuilderWorker {
 
 	private CompoundStatementNode translateGotoLabelList(Source source,
 			FortranTree labelListNode, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		int numOfLabel = labelListNode.numChildren();
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
 
@@ -1055,13 +1064,12 @@ public class FortranASTBuilderWorker {
 			FortranTree labelNode = labelListNode.getChildByIndex(i);
 			Source labelSource = generateSource(labelNode);
 			String labelStr = labelNode.cTokens()[0].getText();
-			IntegerConstantNode caseNum = nodeFactory.newIntegerConstantNode(
-					labelSource, "" + (i + 1));
+			IntegerConstantNode caseNum = nodeFactory
+					.newIntegerConstantNode(labelSource, "" + (i + 1));
 			StatementNode gotoStatement = nodeFactory.newGotoNode(source,
 					nodeFactory.newIdentifierNode(labelSource, labelStr));
-			SwitchLabelNode labelDecl = nodeFactory
-					.newCaseLabelDeclarationNode(labelSource, caseNum,
-							gotoStatement);
+			SwitchLabelNode labelDecl = nodeFactory.newCaseLabelDeclarationNode(
+					labelSource, caseNum, gotoStatement);
 			LabeledStatementNode tempItemNode = nodeFactory
 					.newLabeledStatementNode(source, labelDecl, gotoStatement);
 			items.add(tempItemNode);
@@ -1071,7 +1079,7 @@ public class FortranASTBuilderWorker {
 
 	private List<BlockItemNode> translateBlockItem(FortranTree blockItemNode,
 			SimpleScope scope, Map<String, VariableDeclarationNode> argsMap)
-			throws SyntaxException {
+					throws SyntaxException {
 		List<BlockItemNode> result = null;
 		int rule = blockItemNode.rule();
 
@@ -1110,8 +1118,8 @@ public class FortranASTBuilderWorker {
 			break;
 		case 912: /* PrintStatement */
 			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this.translatePrintStatement(
-					blockItemNode, scope));
+			result.add((BlockItemNode) this
+					.translatePrintStatement(blockItemNode, scope));
 			break;
 		case 1218: /* CallStatement */
 			result = new ArrayList<BlockItemNode>();
@@ -1137,8 +1145,8 @@ public class FortranASTBuilderWorker {
 		FortranTree outputListTree = printStatementTree.getChildByIndex(2);
 		IdentifierNode printfIdNode = nodeFactory.newIdentifierNode(source,
 				"printf");
-		ExpressionNode functionNode = nodeFactory.newIdentifierExpressionNode(
-				source, printfIdNode);
+		ExpressionNode functionNode = nodeFactory
+				.newIdentifierExpressionNode(source, printfIdNode);
 		ExpressionNode formatNode = null;
 		int numOfOutputItem = outputListTree.numChildren();
 		List<ExpressionNode> argumentList = new LinkedList<ExpressionNode>();
@@ -1159,8 +1167,8 @@ public class FortranASTBuilderWorker {
 			formatStr += "%s";
 		}
 		formatStr += "\n\"";
-		cToken = tokenFactory.newCivlcToken(0, formatStr, blockItemNode
-				.getChildByIndex(1).cTokens()[0].getFormation());
+		cToken = tokenFactory.newCivlcToken(0, formatStr,
+				blockItemNode.getChildByIndex(1).cTokens()[0].getFormation());
 		strToken = tokenFactory.newStringToken(cToken);
 		formatNode = nodeFactory.newStringLiteralNode(source, formatStr,
 				strToken.getStringLiteral());
@@ -1172,7 +1180,7 @@ public class FortranASTBuilderWorker {
 
 	private List<BlockItemNode> translateParameterStatement(
 			FortranTree parameterStmtNode, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		ArrayList<BlockItemNode> paramterItems = new ArrayList<BlockItemNode>();
 		// FortranTree labelDefinition = parameterStmtNode.getChildByIndex(0);
 		FortranTree constList = parameterStmtNode.getChildByIndex(2);
@@ -1195,15 +1203,15 @@ public class FortranASTBuilderWorker {
 			arguments.add(constValExpr);
 			expressionNode = nodeFactory.newOperatorNode(source, operator,
 					arguments);
-			paramterItems.add(nodeFactory
-					.newExpressionStatementNode(expressionNode));
+			paramterItems.add(
+					nodeFactory.newExpressionStatementNode(expressionNode));
 		}
 		return paramterItems;
 	}
 
 	private LabeledStatementNode translateIdentifierLabeledStatement(
 			FortranTree blockItemNode, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		Source source = generateSource(blockItemNode);
 		IdentifierNode labelName = null;
 		StatementNode statement = null;
@@ -1231,14 +1239,14 @@ public class FortranASTBuilderWorker {
 				.newStandardLabelDeclarationNode(labelName.getSource(),
 						labelName, statement);
 
-		return nodeFactory
-				.newLabeledStatementNode(source, labelDecl, statement);
+		return nodeFactory.newLabeledStatementNode(source, labelDecl,
+				statement);
 	}
 
 	private CompoundStatementNode translateBody(
 			FortranTree specificationPartNode, FortranTree executionPartNode,
 			SimpleScope scope, Map<String, VariableDeclarationNode> argsMap)
-			throws SyntaxException {
+					throws SyntaxException {
 		CompoundStatementNode result;
 		SimpleScope newScope = new SimpleScope(scope);
 		Source source = null;
@@ -1328,8 +1336,8 @@ public class FortranASTBuilderWorker {
 		FortranTree identifierNode = programStatementNode.getChildByIndex(2);
 		FortranTree argsNode = null;
 		FortranTree specificationPartNode = programUnitNode.getChildByIndex(1);
-		FortranTree executionPartNode = numChildren > 3 ? programUnitNode
-				.getChildByIndex(2) : null;
+		FortranTree executionPartNode = numChildren > 3
+				? programUnitNode.getChildByIndex(2) : null;
 		/*
 		 * FortranTree endProgramStatementNode = programUnitNode
 		 * .getChildByIndex(numChildren - 1);
@@ -1349,10 +1357,10 @@ public class FortranASTBuilderWorker {
 			argsNode = programStatementNode.getChildByIndex(3);
 		}
 		type = this.translateFunctionType(null, argsNode, true, argsMap);
-		body = translateBody(specificationPartNode, executionPartNode,
-				newScope, argsMap);
-		result = nodeFactory.newFunctionDefinitionNode(source, name, type,
-				null, body);
+		body = translateBody(specificationPartNode, executionPartNode, newScope,
+				argsMap);
+		result = nodeFactory.newFunctionDefinitionNode(source, name, type, null,
+				body);
 		localMap.clear();
 		return result;
 	}
@@ -1364,11 +1372,11 @@ public class FortranASTBuilderWorker {
 		FortranTree subroutineStatementTree = subroutineTree.getChildByIndex(0);
 		boolean hasArgs = subroutineStatementTree.numChildren() > 3;
 		FortranTree idTree = subroutineStatementTree.getChildByIndex(2);
-		FortranTree argsNode = hasArgs ? subroutineStatementTree
-				.getChildByIndex(3) : null;
+		FortranTree argsNode = hasArgs
+				? subroutineStatementTree.getChildByIndex(3) : null;
 		FortranTree specificationPartNode = subroutineTree.getChildByIndex(1);
-		FortranTree executionPartNode = numChildren > 3 ? subroutineTree
-				.getChildByIndex(2) : null;
+		FortranTree executionPartNode = numChildren > 3
+				? subroutineTree.getChildByIndex(2) : null;
 		/*
 		 * FortranTree endSubroutineStatementNode = subroutineTree
 		 * .getChildByIndex(numChildren - 1);
@@ -1384,8 +1392,8 @@ public class FortranASTBuilderWorker {
 		name = this.translateIdentifier(idTree);
 		functionType = this.translateFunctionType(null, argsNode, false,
 				argsMap);
-		body = translateBody(specificationPartNode, executionPartNode,
-				newScope, argsMap);
+		body = translateBody(specificationPartNode, executionPartNode, newScope,
+				argsMap);
 		result = nodeFactory.newFunctionDefinitionNode(source, name,
 				functionType, null, body);
 		localMap.clear();
@@ -1402,7 +1410,7 @@ public class FortranASTBuilderWorker {
 	 */
 	private List<BlockItemNode> translateProgramUnit(
 			FortranTree programUnitNode, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		int rule = programUnitNode.rule();
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
 
@@ -1434,8 +1442,8 @@ public class FortranASTBuilderWorker {
 
 		assert numOfProgramUnit >= 0;
 		for (int i = 0; i < numOfProgramUnit; i++) {
-			programUnits.addAll(this.translateProgramUnit(
-					parseTree.getChildByIndex(i), scope));
+			programUnits.addAll(this
+					.translateProgramUnit(parseTree.getChildByIndex(i), scope));
 		}
 		source = generateSource(parseTree);
 		return nodeFactory.newTranslationUnitNode(source, programUnits);
@@ -1457,10 +1465,9 @@ public class FortranASTBuilderWorker {
 
 	private AST addLib(SequenceNode<BlockItemNode> oldRootNode,
 			Set<SourceFile> sourceFiles) throws PreprocessorException,
-			ParseException, SyntaxException {
+					ParseException, SyntaxException {
 		if (hasSTDIO) {
-			AST stdioAST = libFactory.getASTofLibrary(LibraryASTFactory.STDIO,
-					configuration, tokenFactory, astFactory);
+			AST stdioAST = libFactory.getASTofLibrary(LibraryASTFactory.STDIO);
 			SequenceNode<BlockItemNode> stdioNodes = stdioAST.getRootNode();
 			List<BlockItemNode> nodes = new ArrayList<BlockItemNode>();
 

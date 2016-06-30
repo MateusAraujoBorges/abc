@@ -3,7 +3,7 @@ package edu.udel.cis.vsl.abc;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,140 +11,152 @@ import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
+import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 
 public class SideEffectRemoverTest {
 
-	private static boolean debug = false;
+	public static boolean debug = false;
 
-	private static List<String> codes = Arrays.asList("prune", "sef");
+	/**
+	 * Prune, remove side effects, and prune again. Second prune is necessary
+	 * because after removing side-effects, variable might emerge that is never
+	 * read.
+	 */
+	private final static List<String> codes = Arrays.asList("prune", "sef",
+			"prune");
 
-	private File root = new File(new File("examples"), "side-effects");
+	private final static File root = new File(new File("examples"),
+			"side-effects");
 
-	private static Configuration config = Configurations
+	private final static Configuration config = Configurations
 			.newMinimalConfiguration();
 
-	private static FrontEnd f = new FrontEnd(config);
+	private final static FrontEnd f = new FrontEnd(config);
 
-	private void check(String filename) throws ABCException, IOException {
+	private final static PrintStream out = System.out;
+
+	private void check(String filename) throws ABCException {
 		File file = new File(root, filename);
 		File outputFile = new File(root, "out_" + filename);
-		Program program = f
-				.compileAndLink(new File[] { file }, Language.CIVL_C);
+		TranslationTask task = new TranslationTask(file);
 
-		program.applyTransformers(codes);
-		if (debug)
-			program.prettyPrint(System.out);
+		task.addAllTransformCodes(codes);
 
-		Program outputProgram = f.compileAndLink(new File[] { outputFile },
-				Language.CIVL_C);
+		ABCExecutor executor = ABCExecutor.execute(f, task);
+		Program program = executor.getProgram();
+
+		task = new TranslationTask(outputFile);
+		task.addTransformCode("prune");
+		executor = ABCExecutor.execute(f, task);
+
+		Program outputProgram = executor.getProgram();
 		boolean equiv = program.getAST().equiv(outputProgram.getAST());
 
-		if (debug) {
-			if (!equiv) {
-				System.out.println(program.getAST()
-						.diff(outputProgram.getAST()));
-				outputProgram.prettyPrint(System.out);
-			}
+		if (debug && !equiv) {
+			out.println("Difference:");
+			out.println(program.getAST().diff(outputProgram.getAST()));
+			out.println("Output program:");
+			outputProgram.prettyPrint(out);
 		}
 		assertTrue(equiv);
 	}
 
 	@Test
-	public void assign1() throws ABCException, IOException {
+	public void assign1() throws ABCException {
 		check("assign1.c");
 	}
 
 	@Test
-	public void assign2() throws ABCException, IOException {
+	public void assign2() throws ABCException {
 		check("assign2.c");
 	}
 
 	@Test
-	public void assign3() throws ABCException, IOException {
+	public void assign3() throws ABCException {
 		check("assign3.c");
 	}
 
 	@Test
-	public void comma() throws ABCException, IOException {
+	public void comma() throws ABCException {
 		check("comma.c");
 	}
 
 	@Test
-	public void enums() throws ABCException, IOException {
+	public void enums() throws ABCException {
 		check("enums.c");
 	}
 
 	@Test
-	public void for_se() throws ABCException, IOException {
+	public void for_se() throws ABCException {
 		check("for-se.c");
 	}
 
 	@Test
-	public void inc() throws ABCException, IOException {
+	public void inc() throws ABCException {
 		check("inc.c");
 	}
 
 	@Test
-	public void recurse() throws ABCException, IOException {
+	public void recurse() throws ABCException {
 		check("recurse.c");
 	}
 
 	@Test
-	public void returns() throws ABCException, IOException {
+	public void returns() throws ABCException {
 		check("returns.c");
 	}
 
 	@Test
-	public void types() throws ABCException, IOException {
+	public void types() throws ABCException {
 		check("types.c");
 	}
 
 	@Test
-	public void doWhile() throws ABCException, IOException {
+	public void doWhile() throws ABCException {
 		check("doWhile.c");
 	}
 
 	@Test
-	public void cond() throws ABCException, IOException {
+	public void cond() throws ABCException {
 		check("cond.c");
 	}
 
 	@Test
-	public void dereference() throws ABCException, IOException {
+	public void dereference() throws ABCException {
 		check("dereference.c");
 	}
 
 	@Test
-	public void stmtExpr() throws ABCException, IOException {
+	public void stmtExpr() throws ABCException {
 		check("stmtExpression.c");
 	}
 
 	@Test
-	public void shortCircuit() throws ABCException, IOException {
+	public void shortCircuit() throws ABCException {
 		check("shortCircuit.c");
 	}
 
 	@Test
-	public void loopShortCircuit() throws ABCException, IOException {
+	public void loopShortCircuit() throws ABCException {
 		check("loopShortCircuit.c");
 	}
 
 	@Test
-	public void nestedLoop() throws ABCException, IOException {
+	public void nestedLoop() throws ABCException {
 		check("nestedLoop.c");
 	}
 
 	@Test
-	public void abstractFunc() throws ABCException, IOException {
+	public void abstractFunc() throws ABCException {
 		check("abstractFunctions.cvl");
 	}
 
 	@Test
-	public void funcalls() throws ABCException, IOException {
+	public void funcalls() throws ABCException {
 		check("funcalls.c");
 	}
 

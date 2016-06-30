@@ -205,7 +205,7 @@ public class SpecifierAnalysis {
 		int numChildren = specifierListNode.getChildCount();
 
 		if (numChildren == 0) {
-			if (this.configuration.svcomp()) {
+			if (this.configuration.getSVCOMP()) {
 				typeNameKind = TypeNodeKind.BASIC;
 				basicTypeKind = BasicTypeKind.INT;
 			} else

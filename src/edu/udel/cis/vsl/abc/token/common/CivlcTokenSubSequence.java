@@ -1,6 +1,5 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import java.io.PrintStream;
 import java.util.Collection;
 
 import org.antlr.runtime.Token;
@@ -9,6 +8,7 @@ import edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
@@ -66,8 +66,8 @@ public class CivlcTokenSubSequence implements CivlcTokenSequence {
 		}
 
 		@Override
-		public void printShorterFileNameMap(PrintStream out) {
-			rootSource.printShorterFileNameMap(out);
+		public FileIndexer getIndexer() {
+			return rootSource.getIndexer();
 		}
 
 		@Override
@@ -76,13 +76,13 @@ public class CivlcTokenSubSequence implements CivlcTokenSequence {
 		}
 	}
 
-	public CivlcTokenSubSequence(CivlcTokenSource rootSource, int startTokenIndex,
-			int lastTokenIndex) {
+	public CivlcTokenSubSequence(CivlcTokenSource rootSource,
+			int startTokenIndex, int lastTokenIndex) {
 		this.rootSource = rootSource;
 		this.startTokenIndex = startTokenIndex;
 		this.lastTokenIndex = lastTokenIndex;
-		this.eofToken = rootSource.getTokenFactory().newCivlcToken(
-				CivlcTokenConstant.EOF, "EOF", null);
+		this.eofToken = rootSource.getTokenFactory()
+				.newCivlcToken(CivlcTokenConstant.EOF, "EOF", null);
 	}
 
 	@Override

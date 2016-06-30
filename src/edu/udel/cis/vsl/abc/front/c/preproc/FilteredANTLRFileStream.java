@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 
 import org.antlr.runtime.ANTLRStringStream;
 
+// TODO: make this platform-independent newline?
+
 /**
  * An ANTLR stream which reads from a file and removes any two consecutive
  * characters that are backslash followed by newline. This is part of the C
@@ -45,7 +47,8 @@ public class FilteredANTLRFileStream extends ANTLRStringStream {
 			isr = new InputStreamReader(fis);
 		}
 		try {
-			data = new char[size];
+			// adding one in case a newline needs to be added at end...
+			data = new char[size + 1];
 			int numUnfilteredChars = isr.read(data);
 			int numFilteredChars = 0;
 
@@ -59,6 +62,10 @@ public class FilteredANTLRFileStream extends ANTLRStringStream {
 					data[numFilteredChars] = c;
 					numFilteredChars++;
 				}
+			}
+			if (numFilteredChars == 0 || data[numFilteredChars - 1] != '\n') {
+				data[numFilteredChars] = '\n';
+				numFilteredChars++;
 			}
 			// I believe the following truncation of array data is
 			// unnecessary. It suffices to set n.
@@ -77,7 +84,8 @@ public class FilteredANTLRFileStream extends ANTLRStringStream {
 	}
 
 	private void load(String string) throws IOException {
-		load(new ByteArrayInputStream(string.getBytes()), string.length(), null);
+		load(new ByteArrayInputStream(string.getBytes()), string.length(),
+				null);
 	}
 
 	@Override

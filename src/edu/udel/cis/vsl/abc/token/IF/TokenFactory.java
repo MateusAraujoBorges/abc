@@ -133,4 +133,8 @@ public interface TokenFactory {
 	 */
 	CivlcTokenSource getCivlcTokenSourceByTokens(List<? extends Token> tokens,
 			Formation formation);
+
+	// FileIndexers....
+
+	FileIndexer newFileIndexer();
 }

@@ -5,14 +5,11 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
@@ -33,35 +30,40 @@ public class CTranslationTest {
 	 */
 	private static boolean debug = false;
 
+	/**
+	 * The diretory in which the examples are located.
+	 */
 	private static File root = new File("examples");
 
+	/**
+	 * The transformation which will be applie to each example.
+	 */
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
-	private static Configuration config = Configurations
-			.newMinimalConfiguration();
+	/**
+	 * Re-use a single front end for all tests in this class.
+	 */
+	private static FrontEnd fe = new FrontEnd(
+			Configurations.newMinimalConfiguration());
 
-	private static FrontEnd fe = new FrontEnd(config);
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
-	private void check(String filenameRoot) throws ABCException, IOException {
+	/**
+	 * Compile and transform the specified example.
+	 * 
+	 * @param filenameRoot
+	 *            the name of the source file without the ".c" suffix
+	 * @throws ABCException
+	 *             if anything goes wrong with compiling or transforming
+	 */
+	private void check(String filenameRoot) throws ABCException {
 		File file = new File(root, filenameRoot + ".c");
+		TranslationTask task = new TranslationTask(file);
 
-		if (debug) {
-			TranslationTask config = new TranslationTask(Language.C, file);
+		task.addAllTransformCodes(codes);
+		task.setVerbose(debug);
 
-			config.addAllTransformCodes(codes);
-			fe.showTranslation(config);
-		} else {
-			fe.compileAndLink(new File[] { file }, Language.CIVL_C)
-					.applyTransformers(codes);
-		}
+		ABCExecutor executor = ABCExecutor.newExecutor(fe, task);
+
+		executor.execute();
 	}
 
 	@Test

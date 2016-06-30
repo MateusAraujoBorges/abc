@@ -11,11 +11,10 @@ import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
-import edu.udel.cis.vsl.abc.program.IF.Program;
 
 /**
  * Checks a number of simple C programs to make sure they pass on the parsing
@@ -50,19 +49,13 @@ public class MPITranslationTest {
 	public void tearDown() throws Exception {
 	}
 
-	private void check(String filenameRoot) throws ABCException, IOException {
+	private void check(String filenameRoot) throws ABCException {
 		File file = new File(root, filenameRoot + ".c");
+		TranslationTask task = new TranslationTask(file);
 
-		if (debug) {
-			TranslationTask config = new TranslationTask(Language.CIVL_C, file);
-
-			config.addAllTransformCodes(codes);
-			fe.showTranslation(config);
-		} else {
-			Program p = fe.compileAndLink(new File[] { file }, Language.CIVL_C);
-
-			p.applyTransformers(codes);
-		}
+		task.addAllTransformCodes(codes);
+		task.setVerbose(debug);
+		ABCExecutor.execute(fe, task);
 	}
 
 	@Test

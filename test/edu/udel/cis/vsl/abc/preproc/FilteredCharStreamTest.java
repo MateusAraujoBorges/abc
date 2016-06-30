@@ -27,14 +27,6 @@ public class FilteredCharStreamTest {
 
 	private static PrintStream out = System.out;
 
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
 	private String filter(CharStream output) throws IOException {
 		String result = "";
 		int index0 = 0;
@@ -62,7 +54,8 @@ public class FilteredCharStreamTest {
 	}
 
 	String streamFilter(String original, int chunkSize) throws IOException {
-		return filter(new FilteredANTLRInputStream("test", original, chunkSize));
+		return filter(
+				new FilteredANTLRInputStream("test", original, chunkSize));
 	}
 
 	private void test(String expected, String original) throws IOException {
@@ -71,6 +64,10 @@ public class FilteredCharStreamTest {
 			out.println(" (size=" + original.length() + ")");
 			out.println();
 		}
+		if (!expected.endsWith("\n"))
+			expected=expected+"\n";
+		// why? because the filtered stream adds \n at end if not
+		// already there.
 		assertEquals(expected, fileFilter(original));
 		assertEquals(expected, streamFilter(original, 1));
 		assertEquals(expected, streamFilter(original, 2));

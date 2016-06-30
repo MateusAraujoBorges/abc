@@ -2,7 +2,6 @@ package edu.udel.cis.vsl.abc.front.c.preproc;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -24,12 +23,14 @@ import org.antlr.runtime.tree.Tree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.front.IF.IllegalMacroArgumentException;
+import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser.file_return;
 import edu.udel.cis.vsl.abc.front.common.preproc.CTokenIterator;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.FunctionMacro;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
@@ -60,13 +61,51 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
  */
 public class PreprocessorTokenSource implements CivlcTokenSource {
 
+	// Static...
+
+	public static PreprocessorTokenSource make(Configuration config,
+			FileIndexer indexer, File source, File[] systemIncludePaths,
+			File[] userIncludePaths, Map<String, Macro> macroMap,
+			TokenFactory tokenFactory) throws PreprocessorException {
+		try {
+			CharStream stream = PreprocessorUtils
+					.newFilteredCharStreamFromFile(source);
+			SourceFile sourceFile = indexer.getOrAdd(source);
+			Formation formation = tokenFactory.newInclusion(sourceFile);
+			PreprocessorTokenSource result = new PreprocessorTokenSource(config,
+					indexer, new CharStream[] { stream },
+					new Formation[] { formation }, systemIncludePaths,
+					userIncludePaths, macroMap, tokenFactory);
+
+			return result;
+		} catch (IOException e) {
+			throw new PreprocessorException("Unable to open file " + source);
+		}
+	}
+
 	// Fields...
 
+	/** The list of character streams to be parsed and preprocessed */
+	private CharStream[] theStreams;
+
 	/**
-	 * Information object for the original source file that is being
-	 * preprocessed.
+	 * The list of formations corresponding to {@link #theStreams}. The
+	 * {@link Formation} corresponding to a {@link CharStream} provides
+	 * information on where the stream came from.
 	 */
-	private SourceFile originalSourceFile;
+	private Formation[] theFormations;
+
+	/**
+	 * Object to track of all source files encountered by this preprocessing
+	 * instance.
+	 */
+	private FileIndexer indexer;
+
+	/**
+	 * The index of the current stream being processed. Runs from 0 to
+	 * <code>theStreams.length - 1</code>.
+	 */
+	private int currentSource = 0;
 
 	/**
 	 * The source files used to build this token stream only. These do not
@@ -186,80 +225,26 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private int outputTokenCount = 0;
 
-	/**
-	 * The worker who created this token source.
-	 */
-	private CPreprocessorWorker worker;
-
 	// Constructors...
 
-	// TODO: get rid of tmpFile and the special handling for svcomp.
-	// instead provide a way to transform a Map<String,String> to
-	// a macro map. (Maybe put this in Token module?). And provide
-	// a way to specify a list of Files that should be included at the beginning
-	// of the translation unit.
-
-	// Constructor #1: a list of character stream-Formation pairs?
-
-	// TODO: replace pptokens of the form "1..2" with 3 tokens
-	// 1, .., and 2.
-
-	/*
-	 * public PreprocessorTokenSource(Configuration config, CharStream
-	 * charStream, Formation formation, File[] systemIncludePaths, File[]
-	 * userIncludePaths, Map<String, Macro> macroMap, TokenFactory tokenFactory,
-	 * CPreprocessorWorker worker) throws PreprocessorException { assert
-	 * systemIncludePaths != null; assert userIncludePaths != null;
-	 * this.tokenFactory = tokenFactory; this.worker = worker;
-	 * this.originalSourceFile = formation.getLastFile(); try { CommonTree tree
-	 * = (CommonTree) parser.file().getTree();
-	 * 
-	 * // CommonToken(CharStream input, int type, int channel, int // start, int
-	 * stop)
-	 * 
-	 * // point of the following is just to include svcomp.h. // isn't there a
-	 * better way to specify this?
-	 * 
-	 * if (!tmpFile && (config != null && config.svcomp())) { CommonToken svcomp
-	 * = new CommonToken( tree.getToken().getInputStream(),
-	 * PreprocessorLexer.HEADER_NAME, 0, -1, -1); CommonToken include = new
-	 * CommonToken( tree.getToken().getInputStream(),
-	 * PreprocessorLexer.PINCLUDE, 0, -1, -1);
-	 * 
-	 * svcomp.setText("<svcomp.h>"); include.setText("#include");
-	 * 
-	 * CommonTree includeSvcomp = new CommonTree(include);
-	 * 
-	 * includeSvcomp.addChild(new CommonTree(svcomp)); tree.insertChild(0,
-	 * includeSvcomp); }
-	 * 
-	 * Formation history = tokenFactory.newInclusion(originalSourceFile);
-	 * StringPredicate macroDefinedPredicate = new MacroDefinedPredicate(
-	 * macroMap);
-	 * 
-	 * addEofNodeToTree(tree, source.getName()); this.macroMap = macroMap;
-	 * sourceStack.push(new PreprocessorSourceFileInfo(history, tree));
-	 * incrementNextNode(); // skip root "FILE" node this.systemIncludePaths =
-	 * systemIncludePaths; this.userIncludePaths = userIncludePaths;
-	 * this.expressionAnalyzer = new PreprocessorExpressionAnalyzer(
-	 * macroDefinedPredicate); } catch (RecognitionException e) { throw new
-	 * PreprocessorException( "Preprocessing " + source + " failed: " + e); }
-	 * catch (RuntimeException e) { throw new
-	 * PreprocessorException(e.getMessage()); } if (saveTokens) theTokens = new
-	 * ArrayList<CivlcToken>(); }
-	 */
-
 	/**
+	 * 
 	 * Instantiates new CTokenSource object. The given source file is parsed, a
 	 * file info object is created for it and pushed onto the stack. The output
 	 * tokens are not generated; this does not begin until "getToken" is called.
 	 * 
 	 * @param config
 	 *            the ABC configuration
-	 * @param source
-	 *            original C source file (before preprocessing)
-	 * @param parser
-	 *            the preprocessor parser
+	 * @param FileIndexer
+	 *            indexer the file indexer that will be used to index all source
+	 *            files encountered by this preprocessing session
+	 * @param streams
+	 *            the input character streams that will be concatenated to form
+	 *            a single stream that will be the input to the preprocessing
+	 *            algorithm
+	 * @param formations
+	 *            an array specifying the formation history of each input
+	 *            stream, basically used to give a name to that stream
 	 * @param systemIncludePaths
 	 *            the directories where files included with angle brackets are
 	 *            searched
@@ -267,119 +252,143 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 *            the directories where files included with double quotes are
 	 *            searched
 	 * @param macroMap
-	 *            the predefined macro map, which includes macros from command
-	 *            line and macros added according to the configuration
+	 *            the predefined macros; maps a macro name to its definition
+	 *            body
 	 * @param tokenFactory
-	 *            the token factory to be used
-	 * @param worker
-	 *            the worker that performs the actual preprocessing
-	 * @param tmpFile
-	 *            true iff this is a temporary file created for processing
-	 *            predefined macros.
+	 *            the token factory to be used for producing new
+	 *            {@link CivlcToken}s
 	 * @throws PreprocessorException
 	 *             if and IOException or RecognitionException occurs while
 	 *             scanning and parsing the source file
 	 */
-	public PreprocessorTokenSource(Configuration config, File source,
-			PreprocessorParser parser, File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> macroMap,
-			TokenFactory tokenFactory, CPreprocessorWorker worker,
-			boolean tmpFile) throws PreprocessorException {
+	public PreprocessorTokenSource(Configuration config, FileIndexer indexer,
+			CharStream[] streams, Formation[] formations,
+			File[] systemIncludePaths, File[] userIncludePaths,
+			Map<String, Macro> macroMap, TokenFactory tokenFactory)
+					throws PreprocessorException {
+		int numStreams = streams.length;
+
 		assert systemIncludePaths != null;
 		assert userIncludePaths != null;
+		this.indexer = indexer;
 		this.tokenFactory = tokenFactory;
-		this.worker = worker;
-		this.originalSourceFile = getOrMakeSourceFile(source, tmpFile);
+		assert numStreams == formations.length;
+		this.theStreams = streams;
+		this.theFormations = formations;
+		this.systemIncludePaths = systemIncludePaths;
+		this.userIncludePaths = userIncludePaths;
+		this.expressionAnalyzer = new PreprocessorExpressionAnalyzer(
+				new MacroDefinedPredicate(macroMap));
+		this.macroMap = macroMap;
+		if (saveTokens)
+			theTokens = new ArrayList<CivlcToken>();
+		for (Formation formation : formations) {
+			SourceFile sourceFile = formation.getLastFile();
+
+			sourceFiles.add(sourceFile);
+			indexer.getOrAdd(sourceFile.getFile());
+		}
+		pushStream(streams[0], formations[0]);
+	}
+
+	// Helpers...
+
+	private CharStream findInternalSystemFile(File path, String filename) {
+		File file = new File(path, filename);
+
+		if (file.getAbsoluteFile().equals(Preprocessor.ABC_INCLUDE_PATH))
+			return null; // why would this happen?
 		try {
-			CommonTree tree = (CommonTree) parser.file().getTree();
+			CharStream charStream = PreprocessorUtils
+					.newFilteredCharStreamFromResource(filename,
+							file.getAbsolutePath());
 
-			// CommonToken(CharStream input, int type, int channel, int
-			// start, int stop)
+			return charStream;
+		} catch (IOException e) {
+			return null;
+		}
+	}
 
-			// point of the following is just to include svcomp.h.
-			// isn't there a better way to specify this?
+	private CharStream findInternalSystemFile(String filename) {
+		for (File systemPath : systemIncludePaths) {
+			CharStream charStream = findInternalSystemFile(systemPath,
+					filename);
 
-			if (!tmpFile && (config != null && config.svcomp())) {
-				CommonToken svcomp = new CommonToken(
-						tree.getToken().getInputStream(),
-						PreprocessorLexer.HEADER_NAME, 0, -1, -1);
-				CommonToken include = new CommonToken(
-						tree.getToken().getInputStream(),
-						PreprocessorLexer.PINCLUDE, 0, -1, -1);
+			if (charStream != null)
+				return charStream;
+		}
+		// look in directory "abc" in the class path:
+		return findInternalSystemFile(Preprocessor.ABC_INCLUDE_PATH, filename);
+	}
 
-				svcomp.setText("<svcomp.h>");
-				include.setText("#include");
+//	/**
+//	 * This method loads char stream for system implementation files. Paths are
+//	 * searched with following rules:
+//	 * <ol>
+//	 * <li>The first priority is user defined include paths and system paths
+//	 * (which is outside of the jar file)</li>
+//	 * <li>The second priority is internal resources in the jar file</li>
+//	 * <li>The lowest priority is the current path</li>
+//	 * </ol>
+//	 * 
+//	 * @param filename
+//	 * @return
+//	 * @throws IOException
+//	 */
+//	private CharStream getCharStreamFromSystem(String filename)
+//			throws IOException {
+//		File file = PreprocessorUtils.findFile(userIncludePaths, filename);
+//		CharStream charStream;
+//
+//		if (file == null)
+//			file = PreprocessorUtils.findFile(systemIncludePaths, filename);
+//		if (file == null) {
+//			charStream = findInternalSystemFile(filename);
+//			if (charStream == null)
+//				return null;
+//			file = new File(filename);
+//		} else {
+//			charStream = PreprocessorUtils.newFilteredCharStreamFromFile(file);
+//		}
+//		return charStream;
+//	}
 
-				CommonTree includeSvcomp = new CommonTree(include);
+	/**
+	 * Pushes a new character stream onto the {@link #sourceStack}.
+	 * 
+	 * @param charStream
+	 * @param formation
+	 * @throws PreprocessorException
+	 */
+	private void pushStream(CharStream charStream, Formation formation)
+			throws PreprocessorException {
+		String name = formation.getLastFile().getName();
 
-				includeSvcomp.addChild(new CommonTree(svcomp));
-				tree.insertChild(0, includeSvcomp);
-			}
+		try {
+			PreprocessorLexer lexer = new PreprocessorLexer(charStream);
+			PreprocessorParser parser = new PreprocessorParser(
+					new CommonTokenStream(lexer));
+			file_return fileReturn = parser.file();
+			int numErrors = parser.getNumberOfSyntaxErrors();
 
-			Formation history = tokenFactory.newInclusion(originalSourceFile);
-			StringPredicate macroDefinedPredicate = new MacroDefinedPredicate(
-					macroMap);
+			if (numErrors != 0)
+				throw new PreprocessorException(numErrors
+						+ " syntax errors occurred while scanning included file "
+						+ name);
 
-			addEofNodeToTree(tree, source.getName());
-			this.macroMap = macroMap;
-			sourceStack.push(new PreprocessorSourceFileInfo(history, tree));
+			Tree tree = (Tree) fileReturn.getTree();
+
+			// TODO: why can't ANTLR do this:
+			addEofNodeToTree(tree, name);
+			sourceStack.push(new PreprocessorSourceFileInfo(formation, tree));
 			incrementNextNode(); // skip root "FILE" node
-			this.systemIncludePaths = systemIncludePaths;
-			this.userIncludePaths = userIncludePaths;
-			this.expressionAnalyzer = new PreprocessorExpressionAnalyzer(
-					macroDefinedPredicate);
 		} catch (RecognitionException e) {
 			throw new PreprocessorException(
-					"Preprocessing " + source + " failed: " + e);
+					"Preprocessing " + formation.toString() + " failed: " + e);
 		} catch (RuntimeException e) {
 			throw new PreprocessorException(e.getMessage());
 		}
-		if (saveTokens)
-			theTokens = new ArrayList<CivlcToken>();
 	}
-
-	// this method never called:
-
-	// /**
-	// * Instantiates new CTokenSource object. The given source file is parsed,
-	// a
-	// * file info object is created for it and pushed onto the stack. The
-	// output
-	// * tokens are not generated; this does not begin until "getToken" is
-	// called.
-	// *
-	// * @param config
-	// * the ABC configuration
-	// * @param source
-	// * original C source file (before preprocessing)
-	// * @param parser
-	// * the preprocessor parser
-	// * @param systemIncludePaths
-	// * the directories where files included with angle brackets are
-	// * searched
-	// * @param userIncludePaths
-	// * the directories where files included with double quotes are
-	// * searched
-	// * @param tokenFactory
-	// * the token factory to be used
-	// * @param worker
-	// * the worker that performs the actual preprocessing
-	// * @param tmpFile
-	// * true iff this is a temporary file created for processing
-	// * predefined macros.
-	// * @throws PreprocessorException
-	// * if and IOException or RecognitionException occurs while
-	// * scanning and parsing the source file
-	// */
-	// public PreprocessorTokenSource(File source, PreprocessorParser parser,
-	// File[] systemIncludePaths, File[] userIncludePaths,
-	// TokenFactory tokenFactory, CPreprocessorWorker worker,
-	// boolean tmpFile) throws PreprocessorException {
-	// this(null, source, parser, systemIncludePaths, userIncludePaths,
-	// new HashMap<String, Macro>(), tokenFactory, worker, tmpFile);
-	// }
-
-	// Helper
 
 	private void addEofNodeToTree(Tree tree, String filename) {
 		Formation eofFormation = tokenFactory.newSystemFormation("EOF");
@@ -392,114 +401,31 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 	// Implementation of methods from CTokenSource...
 
-	@Override
-	public void printShorterFileNameMap(PrintStream out) {
-		out.println();
-		out.println("File name list:");
-		for (SourceFile sourceFile : sourceFiles)
-			out.println(sourceFile.getIndex() + "\t: " + sourceFile.getName());
-	}
+	// @Override
+	// public void printShorterFileNameMap(PrintStream out) {
+	// out.println();
+	// out.println("File name list:");
+	// for (SourceFile sourceFile : sourceFiles)
+	// out.println(sourceFile.getIndex() + "\t: " + sourceFile.getName());
+	// }
 
-	@Override
-	public TokenFactory getTokenFactory() {
-		return tokenFactory;
-	}
-
-	public Map<String, Macro> getMacroMap() {
-		return macroMap;
-	}
+	// public Map<String, Macro> getMacroMap() {
+	// return macroMap;
+	// }
 
 	/**
-	 * Returns current file being processed or null if file is not known.
+	 * Returns current file being processed.
 	 * 
 	 * @return current file or null
 	 */
 	private SourceFile getCurrentSource() {
-		if (sourceStack.isEmpty()) {
-			// only way this could happen is before initial push...
-			return originalSourceFile;
-		} else
+		if (sourceStack.isEmpty())
+			return theFormations[currentSource].getLastFile();
+		else
 			return sourceStack.peek().getFile();
 	}
 
-	/**
-	 * Looks to see if a {@link SourceFile} object has already been created for
-	 * the given {@link File}. If so, returns that one. Else creates a new one,
-	 * assigns it the next index, and, if it is not a temporary file created by
-	 * ABC, stores it.
-	 * 
-	 * @param file
-	 *            a file that is being read to produce this token source
-	 * @param tmpFile
-	 *            true iff this is a temporary file created by ABC
-	 * @return the {@link SourceFile} corresponding to the given file
-	 */
-	private SourceFile getOrMakeSourceFile(File file, boolean tmpFile) {
-		SourceFile result = worker.getOrMakeSourceFile(file, tmpFile);
-
-		sourceFiles.add(result);
-		return result;
-	}
-
-	/**
-	 * Returns name of current file being scanned. I.e., the name returned by
-	 * this method will change dynamically as new files are included.
-	 */
-	@Override
-	public String getSourceName() {
-		SourceFile sourceFile = getCurrentSource();
-
-		if (sourceFile != null)
-			return sourceFile.getPath();
-		return "<unknown source>";
-	}
-
-	/**
-	 * Returns the next token in the post-preprocessing stream. This is the main
-	 * method that must be implemented in order to implement ANTLR's TokenSource
-	 * interface.
-	 * 
-	 * EOF will be the last token returned, and if subsequent calls to this
-	 * method are made, it will continue to return EOF forever. This seems to be
-	 * what ANTLR's parsers expect.
-	 * 
-	 * @exception PreprocessorRuntimeException
-	 *                if anything goes wrong in trying to find the next token
-	 */
-	@Override
-	public CivlcToken nextToken() {
-		// nextToken_calls++;
-		if (finalToken != null)
-			return finalToken;
-		while (firstOutput == null
-				|| firstOutput.getType() != PreprocessorLexer.EOF
-						&& firstOutput == lastOutput)
-			try {
-				processNextNode();
-			} catch (PreprocessorException e) {
-				throw new PreprocessorRuntimeException(e);
-			} catch (PreprocessorRuntimeException e) {
-				throw e;
-			} catch (RuntimeException e) {
-				throw new PreprocessorRuntimeException(e.toString(),
-						firstOutput);
-			}
-		if (firstOutput.getType() == PreprocessorLexer.EOF)
-			finalToken = firstOutput;
-		return removeOutput();
-	}
-
 	// Options...
-
-	@Override
-	public int getNumTokens() {
-		return theTokens.size();
-	}
-
-	@Override
-	public CivlcToken getToken(int index) {
-		return theTokens.get(index);
-	}
 
 	// The implementation methods...
 
@@ -650,7 +576,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		if (index > 0) {
 			CivlcToken leftToken = tokenFactory.newCivlcToken(stream,
 					PreprocessorLexer.INTEGER_CONSTANT, chan, startIndex,
-					startIndex + index-1, formation);
+					startIndex + index - 1, formation);
 
 			leftToken.setText(text.substring(0, index));
 			leftToken.setLine(line);
@@ -672,7 +598,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					startIndex + index + 2, stopIndex, formation);
 
 			rightToken.setText(text.substring(index + 2, length));
-			rightToken.setCharPositionInLine(pos+index+2);
+			rightToken.setCharPositionInLine(pos + index + 2);
 			rightToken.setLine(line);
 			addOutput(rightToken);
 		}
@@ -1262,11 +1188,21 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		PreprocessorSourceFileInfo o = sourceStack.pop();
 
 		if (sourceStack.isEmpty()) {
-			CivlcToken myEof = tokenFactory.newCivlcToken(eof,
-					o.getIncludeHistory());
+			if (currentSource == theStreams.length - 1) {
+				CivlcToken myEof = tokenFactory.newCivlcToken(eof,
+						o.getIncludeHistory());
 
-			// myEof.setText(text)
-			addOutput(myEof);
+				addOutput(myEof);
+			} else {
+				currentSource++;
+				inTextBlock = false;
+				inPragma = false;
+				inInlineAnnotation = false;
+				inBlockAnnotation = false;
+				pushStream(theStreams[currentSource],
+						theFormations[currentSource]);
+				processNextNode();
+			}
 		} else {
 			// you were at the include node. jump to next node ignoring
 			// children of include node.
@@ -1300,7 +1236,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * macro, child 0 is the identifier being defined. Child 1 is the "body"
 	 * node, whose children form a (possibly empty) list of tokens.
 	 * 
-	 * For a function macro. Child 0 is the idenitifer being defined. Child 1 is
+	 * For a function macro. Child 0 is the identifier being defined. Child 1 is
 	 * the formal parameter list node. Child 2 is the body.
 	 * 
 	 * @param node
@@ -1485,7 +1421,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		int numChars = fullName.length();
 		String name;
 		boolean system;
-		PreprocessorSourceFileInfo newInfo;
 		int firstChar, lastChar;
 
 		if (numChars < 3)
@@ -1513,56 +1448,48 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					"Improper file name in #include: " + fullName,
 					filenameToken);
 		}
-		try {
-			CivlcToken amplifiedFilenameToken = tokenFactory
-					.newCivlcToken(filenameToken, getIncludeHistory());
 
-			newInfo = findInclude(amplifiedFilenameToken, name, system);
+		Pair<File, CharStream> pair;
+
+		try {
+			pair = findIncludeStream(name, system);
 		} catch (IOException e) {
 			throw new PreprocessorException(
 					"I/O error when attempting to include " + name + ":\n" + e,
 					filenameToken);
-		} catch (RecognitionException e) {
-			throw new PreprocessorException(
-					"Preprocessor could not parse included file " + name + ":\n"
-							+ e,
-					filenameToken);
 		}
-		if (newInfo == null)
+		if (pair == null)
 			throw new PreprocessorException("Cannot find included file " + name,
 					filenameToken);
-		sourceStack.push(newInfo);
+
+		SourceFile sourceFile = indexer.getOrAdd(pair.left);
+
+		sourceFiles.add(sourceFile);
+		pushStream(pair.right,
+				tokenFactory.newInclusion(sourceFile, tokenFactory
+						.newCivlcToken(filenameToken, getIncludeHistory())));
 	}
 
 	/**
-	 * Locates an include file, parses it, and creates a
-	 * PreprocessorSourceFileInfo record for it.
+	 * Locates an include file, opens it, and creates a {@link CharStream} from
+	 * it.
 	 * 
-	 * @param filenameToken
-	 *            the token in the #include line in the original source file
-	 *            with the name of the file, used for error reporting
 	 * @param filename
 	 *            the name of the file, as extracted from the token
 	 * @param system
-	 *            true if angular brackes were used around the filename in the
-	 *            #include directive, false if double quotes were used
-	 * @return the PreprocessorSourceFileInfo record for the parsed file
+	 *            <code>true</code> if angular brackets were used around the
+	 *            filename in the <code>#include</code> directive,
+	 *            <code>false</code> if double quotes were used
+	 * @return if the file can't be found, returns <code>null</code>, otherwise,
+	 *         returns a pair consisting of the {@link File} object which wraps
+	 *         the file name and the {@link CharStream} generated from the file
 	 * @throws IOException
 	 *             if something goes wrong trying to read or open the file
-	 * @throws RecognitionException
-	 *             if the file does not conform to the Preprocessor grammar
-	 * @throws PreprocessorException
-	 *             if some other syntax error occurs in processing the file
 	 */
-	private PreprocessorSourceFileInfo findInclude(CivlcToken filenameToken,
-			String filename, boolean system) throws IOException,
-					RecognitionException, PreprocessorException {
+	private Pair<File, CharStream> findIncludeStream(String filename,
+			boolean system) throws IOException {
 		File file = null;
 		CharStream charStream;
-		Tree tree;
-		PreprocessorParser parser;
-		PreprocessorLexer lexer;
-		int numErrors;
 
 		if (!system) {
 			// first look in dir containing current file, then
@@ -1572,33 +1499,21 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 			file = new File(currentDir, filename);
 			if (!file.isFile())
-				file = worker.findFile(userIncludePaths, filename);
+				file = PreprocessorUtils.findFile(userIncludePaths, filename);
 		}
 		if (file == null)
-			file = worker.findFile(systemIncludePaths, filename);
+			file = PreprocessorUtils.findFile(systemIncludePaths, filename);
 		if (file == null) {
 			// last but not least: look internally in the class path
 			// directories:
-			charStream = worker.findInternalSystemFile(filename);
-			if (charStream == null)
-				return null;
-			file = new File(filename);
+			charStream = findInternalSystemFile(filename);
+			file = new File(Preprocessor.ABC_INCLUDE_PATH, filename);
 		} else {
 			charStream = PreprocessorUtils.newFilteredCharStreamFromFile(file);
 		}
-		lexer = new PreprocessorLexer(charStream);
-		parser = new PreprocessorParser(new CommonTokenStream(lexer));
-		file_return fileReturn = parser.file();
-		numErrors = parser.getNumberOfSyntaxErrors();
-		if (numErrors != 0)
-			throw new PreprocessorException(numErrors
-					+ " syntax errors occurred while scanning included file "
-					+ file);
-		tree = (Tree) fileReturn.getTree();
-		addEofNodeToTree(tree, filename);
-		return new PreprocessorSourceFileInfo(tokenFactory
-				.newInclusion(getOrMakeSourceFile(file, false), filenameToken),
-				tree.getChild(0));
+		if (charStream == null)
+			return null;
+		return new Pair<>(file, charStream);
 	}
 
 	/**
@@ -2049,14 +1964,98 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		return result;
 	}
 
+	// Public methods...
+
+	@Override
+	public String toString() {
+		return "PreprocessorTokenSource[" + getSourceName() + "]";
+	}
+
+	// @Override
+	// public void printShorterFileNameMap(PrintStream out) {
+	// out.println();
+	// out.println("File name list:");
+	// for (SourceFile sourceFile : sourceFiles)
+	// out.println(sourceFile.getIndex() + "\t: " + sourceFile.getName());
+	// }
+
+	@Override
+	public TokenFactory getTokenFactory() {
+		return tokenFactory;
+	}
+
+	@Override
+	public FileIndexer getIndexer() {
+		return indexer;
+	}
+
+	/**
+	 * Returns name of current file being scanned. I.e., the name returned by
+	 * this method will change dynamically as new files are included.
+	 */
+	@Override
+	public String getSourceName() {
+		SourceFile sourceFile = getCurrentSource();
+
+		if (sourceFile != null)
+			return sourceFile.getPath();
+		return "<unknown source>";
+	}
+
+	@Override
+	public int getNumTokens() {
+		return theTokens.size();
+	}
+
+	@Override
+	public CivlcToken getToken(int index) {
+		return theTokens.get(index);
+	}
+
 	@Override
 	public Collection<SourceFile> getSourceFiles() {
 		return sourceFiles;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p>
+	 * Returns the next token in the post-preprocessing stream. This is the main
+	 * method that must be implemented in order to implement ANTLR's
+	 * {@link TokenSource} interface.
+	 * </p>
+	 * 
+	 * <p>
+	 * EOF will be the last token returned, and if subsequent calls to this
+	 * method are made, it will continue to return EOF forever. This seems to be
+	 * what ANTLR's parsers expect.
+	 * </p>
+	 * 
+	 * @exception PreprocessorRuntimeException
+	 *                if anything goes wrong in trying to find the next token
+	 */
 	@Override
-	public String toString() {
-		return originalSourceFile.getName();
+	public CivlcToken nextToken() {
+		// nextToken_calls++;
+		if (finalToken != null)
+			return finalToken;
+		while (firstOutput == null
+				|| firstOutput.getType() != PreprocessorLexer.EOF
+						&& firstOutput == lastOutput)
+			try {
+				processNextNode();
+			} catch (PreprocessorException e) {
+				throw new PreprocessorRuntimeException(e);
+			} catch (PreprocessorRuntimeException e) {
+				throw e;
+			} catch (RuntimeException e) {
+				throw new PreprocessorRuntimeException(e.toString(),
+						firstOutput);
+			}
+		if (firstOutput.getType() == PreprocessorLexer.EOF)
+			finalToken = firstOutput;
+		return removeOutput();
 	}
 
 }

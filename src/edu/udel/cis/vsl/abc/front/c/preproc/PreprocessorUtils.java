@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Map;
+import java.util.Map.Entry;
 
+import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
@@ -99,8 +102,7 @@ public class PreprocessorUtils {
 	public static boolean isWhiteSpace(Token token) {
 		int type = token.getType();
 
-		return type == PreprocessorLexer.WS
-				|| type == PreprocessorLexer.COMMENT
+		return type == PreprocessorLexer.WS || type == PreprocessorLexer.COMMENT
 				|| type == PreprocessorLexer.NEWLINE;
 	}
 
@@ -246,6 +248,22 @@ public class PreprocessorUtils {
 		return new FilteredANTLRFileStream(file);
 	}
 
+	/**
+	 * Creates new filtered character stream from the specified internal
+	 * resource. Used to read files that are stored inside the class path
+	 * (including inside a jar file).
+	 * 
+	 * @param name
+	 *            a name to assign to the stream; used only for reporting
+	 *            errors, referring to the stream, etc.
+	 * @param resource
+	 *            the actual name of the resource, which is absolute path
+	 *            relative to the class path
+	 * @return the character stream or <code>null</code> if the resource could
+	 *         not be found
+	 * @throws IOException
+	 *             if something goes wrong reading from the stream
+	 */
 	public static CharStream newFilteredCharStreamFromResource(String name,
 			String resource) throws IOException {
 		InputStream inputStream = PreprocessorUtils.class
@@ -254,6 +272,61 @@ public class PreprocessorUtils {
 		if (inputStream == null)
 			return null;
 		return new FilteredANTLRInputStream(name, inputStream);
+	}
+
+	/**
+	 * Find the file with the given name by looking through the directories in
+	 * the given list. Go through list from first to last. Returns first
+	 * instance found.
+	 * 
+	 * Note: the filename may itself containing directory structure, e.g.,
+	 * "sys/stdio.h".
+	 * 
+	 * @param paths
+	 *            list of directories to search
+	 * @param filename
+	 *            name of file
+	 * @return file named filename, or null if not found
+	 */
+	public static File findFile(File[] paths, String filename) {
+		for (File path : paths) {
+			File result = new File(path, filename);
+
+			if (result.isFile())
+				return result;
+		}
+		return null;
+	}
+
+	/**
+	 * Converts a macro map to an ANTLR character stream. The macro map
+	 * specifies macros as key-value pairs, where the key is the name of the
+	 * macro (and possible formal parameter list, if the macro is a
+	 * function-like macro) and the value is the body. The character stream
+	 * return follows the C preprocessor format: a sequence of
+	 * newline-terminated lines of the form "#define NAME BODY"
+	 * 
+	 * @param macroMap
+	 *            map from macro names to bodies
+	 * @return character stream defining macros in the C preprocessor format
+	 */
+	public static CharStream macroMapToCharStream(
+			Map<String, String> macroMap) {
+		StringBuffer sb = new StringBuffer();
+
+		for (Entry<String, String> entry : macroMap.entrySet()) {
+			sb.append("#define ");
+			sb.append(entry.getKey());
+			sb.append(" ");
+			sb.append(entry.getValue());
+			sb.append(System.lineSeparator());
+		}
+
+		int n = sb.length();
+		char[] charArray = new char[n];
+
+		sb.getChars(0, n, charArray, 0);
+		return new ANTLRStringStream(charArray, n);
 	}
 
 }

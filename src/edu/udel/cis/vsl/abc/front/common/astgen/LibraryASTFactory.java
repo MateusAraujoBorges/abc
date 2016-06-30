@@ -1,42 +1,83 @@
 package edu.udel.cis.vsl.abc.front.common.astgen;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
-import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
-import edu.udel.cis.vsl.abc.front.IF.Front;
+import edu.udel.cis.vsl.abc.front.IF.ASTBuilder;
 import edu.udel.cis.vsl.abc.front.IF.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.ParseTree;
+import edu.udel.cis.vsl.abc.front.IF.Parser;
+import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
+/**
+ * A factory for producing the AST of any system library translation unit, given
+ * a library file name.
+ * 
+ * @author siegel
+ *
+ */
 public class LibraryASTFactory {
 
-	public static String STDLIB = "stdlib.h";
-	public static String STDIO = "stdio.h";
+	public final static String STDLIB = "stdlib.h";
+
+	public final static String STDIO = "stdio.h";
+
+	private final static Map<String, String> EMPTY_MACRO_MAP = new HashMap<>();
+
+	private Preprocessor preprocessor;
+
+	private Parser parser;
+
+	private ASTBuilder astBuilder;
 
 	/**
+	 * Constructs new library AST factory from given front-end components.
+	 * 
+	 * @param preprocessor
+	 *            the preprocessor that will be used to preprocess the library
+	 *            file
+	 * @param parser
+	 *            the parser that will be used to parse the resulting token
+	 *            stream
+	 * @param astBuilder
+	 *            the builder that will translate the parse tree into an ASt
+	 */
+	public LibraryASTFactory(Preprocessor preprocessor, Parser parser,
+			ASTBuilder astBuilder) {
+		this.preprocessor = preprocessor;
+		this.parser = parser;
+		this.astBuilder = astBuilder;
+	}
+
+	/**
+	 * Constructs the raw (unanalyzed) AST for the translation unit specified by
+	 * a standard library file name.
 	 * 
 	 * @param name
-	 *            the file name of the header, including the suffix (.h/.cvh)
-	 * @return
+	 *            the file name of the system library file, including the suffix
+	 *            (e.g., ".h" or ".cvh") but not including a directory; e.g.,
+	 *            "stdlib.h"
+	 * @return the raw AST for the specified translation unit
 	 * @throws PreprocessorException
+	 *             if something goes wrong preprocessing the file (opening and
+	 *             reading the file, tokenizing the character stream, executing
+	 *             preprocessor directives, and generating CIVLC tokens)
 	 * @throws ParseException
+	 *             if something goes wrong parsing the file (converting the
+	 *             token stream to a parse tree)
 	 * @throws SyntaxException
+	 *             if something goes wrong translating the parse tree to an AST
 	 */
-	public AST getASTofLibrary(String name, Configuration configuration,
-			TokenFactory tokenFactory, ASTFactory astFactory)
+	public AST getASTofLibrary(String name)
 			throws PreprocessorException, ParseException, SyntaxException {
-		CPreprocessor cpreprocessor = (CPreprocessor) Front.newPreprocessor(
-				Language.CIVL_C, configuration, tokenFactory);
-		CivlcTokenSource tokenSource = cpreprocessor.tokenSourceOfLibrary(name);
-		ParseTree parseTree = Front.newParser(Language.CIVL_C).parse(
-				tokenSource);
+		CivlcTokenSource tokenSource = preprocessor
+				.preprocessLibrary(EMPTY_MACRO_MAP, name);
+		ParseTree parseTree = parser.parse(tokenSource);
 
-		return Front.newASTBuilder(Language.CIVL_C, configuration, astFactory)
-				.getTranslationUnit(parseTree);
+		return astBuilder.getTranslationUnit(parseTree);
 	}
 }

@@ -127,8 +127,8 @@ public class CommonValueFactory implements ValueFactory {
 	 * @throws UnsourcedException
 	 *             if expr is not a constant expression
 	 */
-	private Value evaluateHelper(ExpressionNode expr) throws SyntaxException,
-			UnsourcedException {
+	private Value evaluateHelper(ExpressionNode expr)
+			throws SyntaxException, UnsourcedException {
 		if (expr instanceof AlignOfNode) {
 			return alignofValue(((AlignOfNode) expr).getArgument().getType());
 		} else if (expr instanceof ArrowNode) {
@@ -137,7 +137,8 @@ public class CommonValueFactory implements ValueFactory {
 					.getStructurePointer();
 			IdentifierNode fieldIdentifier = arrowNode.getFieldName();
 			Field field = (Field) fieldIdentifier.getEntity();
-			Value structOrUnionValue = evaluateDereference(structOrUnionPointer);
+			Value structOrUnionValue = evaluateDereference(
+					structOrUnionPointer);
 
 			return evaluateMemberAccess(structOrUnionValue, field);
 		} else if (expr instanceof CastNode) {
@@ -202,7 +203,8 @@ public class CommonValueFactory implements ValueFactory {
 	}
 
 	@Override
-	public AddressValue addressValue(ExpressionNode lhs) throws SyntaxException {
+	public AddressValue addressValue(ExpressionNode lhs)
+			throws SyntaxException {
 		if (lhs instanceof IdentifierExpressionNode) {
 			Entity entity = ((IdentifierExpressionNode) lhs).getIdentifier()
 					.getEntity();
@@ -217,8 +219,8 @@ public class CommonValueFactory implements ValueFactory {
 						lhs);
 			}
 		} else if (lhs instanceof DotNode) {
-			AddressValue structureOrUnionReference = addressValue(((DotNode) lhs)
-					.getStructure());
+			AddressValue structureOrUnionReference = addressValue(
+					((DotNode) lhs).getStructure());
 			Field field = (Field) ((DotNode) lhs).getFieldName().getEntity();
 
 			return memberReference(structureOrUnionReference, field);
@@ -227,8 +229,8 @@ public class CommonValueFactory implements ValueFactory {
 			Operator operator = ((OperatorNode) lhs).getOperator();
 
 			if (operator == Operator.SUBSCRIPT) {
-				AddressValue arrayReference = addressValue(opNode
-						.getArgument(0));
+				AddressValue arrayReference = addressValue(
+						opNode.getArgument(0));
 				Value index = evaluate(opNode.getArgument(1));
 
 				return arrayElementReference(arrayReference, index);
@@ -240,8 +242,10 @@ public class CommonValueFactory implements ValueFactory {
 	}
 
 	@Override
-	public IntegerValue integerValue(IntegerType type, BigInteger integerValue) {
-		return (IntegerValue) canonic(new CommonIntegerValue(type, integerValue));
+	public IntegerValue integerValue(IntegerType type,
+			BigInteger integerValue) {
+		return (IntegerValue) canonic(
+				new CommonIntegerValue(type, integerValue));
 	}
 
 	@Override
@@ -253,21 +257,21 @@ public class CommonValueFactory implements ValueFactory {
 	public RealFloatingValue realFloatingValue(FloatingType type, int radix,
 			BigInteger wholePartValue, BigInteger fractionPartValue,
 			int fractionLength, BigInteger exponentValue) {
-		return (RealFloatingValue) canonic(new CommonRealFloatingValue(type,
-				radix, wholePartValue, fractionPartValue, fractionLength,
-				exponentValue));
+		return (RealFloatingValue) canonic(
+				new CommonRealFloatingValue(type, radix, wholePartValue,
+						fractionPartValue, fractionLength, exponentValue));
 	}
 
 	@Override
 	public ComplexValue complexValue(FloatingType type,
 			RealFloatingValue realPart, RealFloatingValue imaginaryPart) {
-		return (ComplexValue) canonic(new CommonComplexValue(type, realPart,
-				imaginaryPart));
+		return (ComplexValue) canonic(
+				new CommonComplexValue(type, realPart, imaginaryPart));
 	}
 
 	@Override
 	public Value sizeofValue(Type type) {
-		if (this.configuration.svcomp()) {
+		if (this.configuration.getSVCOMP()) {
 			int sizeofType = this.sizeofType(type);
 
 			if (sizeofType > 0)
@@ -304,7 +308,7 @@ public class CommonValueFactory implements ValueFactory {
 	 *         statically.
 	 */
 	private int sizeofType(Type type) {
-		if (this.configuration.architecture() == Architecture.UNKNOWN)
+		if (this.configuration.getArchitecture() == Architecture.UNKNOWN)
 			return -1;
 
 		TypeKind typeKind = type.kind();
@@ -328,7 +332,8 @@ public class CommonValueFactory implements ValueFactory {
 				return 4;
 			case UNSIGNED_LONG:
 			case LONG:
-				if (this.configuration.architecture() == Architecture._32_BIT)
+				if (this.configuration
+						.getArchitecture() == Architecture._32_BIT)
 					return 4;
 				else
 					return 8;
@@ -354,7 +359,7 @@ public class CommonValueFactory implements ValueFactory {
 		case OTHER_INTEGER:
 			return 4;
 		case POINTER: {
-			if (this.configuration.architecture() == Architecture._32_BIT)
+			if (this.configuration.getArchitecture() == Architecture._32_BIT)
 				return 4;
 			else
 				return 8;
@@ -379,8 +384,8 @@ public class CommonValueFactory implements ValueFactory {
 	@Override
 	public OperatorValue operatorValue(Type type, Operator operator,
 			Value[] arguments) {
-		return (OperatorValue) canonic(new CommonOperatorValue(type, operator,
-				arguments));
+		return (OperatorValue) canonic(
+				new CommonOperatorValue(type, operator, arguments));
 	}
 
 	@Override
@@ -389,10 +394,10 @@ public class CommonValueFactory implements ValueFactory {
 	}
 
 	@Override
-	public UnionValue newUnionValue(StructureOrUnionType unionType,
-			Field field, Value memberValue) {
-		return (UnionValue) canonic(new CommonUnionValue(unionType, field,
-				memberValue));
+	public UnionValue newUnionValue(StructureOrUnionType unionType, Field field,
+			Value memberValue) {
+		return (UnionValue) canonic(
+				new CommonUnionValue(unionType, field, memberValue));
 	}
 
 	@Override
@@ -425,14 +430,14 @@ public class CommonValueFactory implements ValueFactory {
 		default:
 			throw new RuntimeException("unreachable");
 		}
-		return (CharacterValue) canonic(new CommonCharacterValue(type,
-				character));
+		return (CharacterValue) canonic(
+				new CommonCharacterValue(type, character));
 	}
 
 	@Override
 	/**
-	 * Precondition: string literal should already have the \0 appended.
-	 * In particular, it has at least one character.
+	 * Precondition: string literal should already have the \0 appended. In
+	 * particular, it has at least one character.
 	 * 
 	 */
 	public StringValue stringValue(StringLiteral literal) {
@@ -465,15 +470,15 @@ public class CommonValueFactory implements ValueFactory {
 	public VariableReference variableReference(Variable variable) {
 		PointerType pointerType = typeFactory.pointerType(variable.getType());
 
-		return (VariableReference) canonic(new CommonVariableReference(
-				pointerType, variable));
+		return (VariableReference) canonic(
+				new CommonVariableReference(pointerType, variable));
 	}
 
 	public FunctionReference functionReference(Function function) {
 		PointerType pointerType = typeFactory.pointerType(function.getType());
 
-		return (FunctionReference) canonic(new CommonFunctionReference(
-				pointerType, function));
+		return (FunctionReference) canonic(
+				new CommonFunctionReference(pointerType, function));
 	}
 
 	public ArrayElementReference arrayElementReference(
@@ -587,11 +592,13 @@ public class CommonValueFactory implements ValueFactory {
 			case MOD:
 				bigVal = big0.mod(big1);
 			default:
-				throw new UnsourcedException("Unexpected operator: " + operator);
+				throw new UnsourcedException(
+						"Unexpected operator: " + operator);
 			}
 			return integerValue((IntegerType) type, bigVal);
 		} else {
-			throw new UnsourcedException("multiplication of floating constants");
+			throw new UnsourcedException(
+					"multiplication of floating constants");
 		}
 
 	}
@@ -835,7 +842,8 @@ public class CommonValueFactory implements ValueFactory {
 			if (v3 != null && type instanceof StandardSignedIntegerType
 					&& ((StandardSignedIntegerType) type).inMinimumRange(v3)
 					|| type instanceof StandardUnsignedIntegerType
-					&& ((StandardUnsignedIntegerType) type).inMinimumRange(v3)) {
+							&& ((StandardUnsignedIntegerType) type)
+									.inMinimumRange(v3)) {
 				return integerValue(type, v3);
 			}
 		}

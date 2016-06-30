@@ -17,6 +17,7 @@ import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.Concatenation;
 import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter;
 import edu.udel.cis.vsl.abc.token.IF.ExecutionCharacter.CharacterKind;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.FunctionMacro;
 import edu.udel.cis.vsl.abc.token.IF.Inclusion;
@@ -50,7 +51,8 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public CivlcToken newCivlcToken(int type, String text, Formation formation) {
+	public CivlcToken newCivlcToken(int type, String text,
+			Formation formation) {
 		return new CommonCivlcToken(type, text, formation);
 	}
 
@@ -82,7 +84,8 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public Formation newTransformFormation(String transformerName, String method) {
+	public Formation newTransformFormation(String transformerName,
+			String method) {
 		SourceFile transformer = transformerMap.get(transformerName);
 
 		if (transformer == null) {
@@ -170,7 +173,8 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public SyntaxException newSyntaxException(String message, CivlcToken token) {
+	public SyntaxException newSyntaxException(String message,
+			CivlcToken token) {
 		return newSyntaxException(message, newSource(token));
 	}
 
@@ -186,7 +190,8 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
-	public FunctionMacro newFunctionMacro(Tree definitionNode, SourceFile file) {
+	public FunctionMacro newFunctionMacro(Tree definitionNode,
+			SourceFile file) {
 		return new CommonFunctionMacro(definitionNode, file);
 	}
 
@@ -234,5 +239,10 @@ public class CommonTokenFactory implements TokenFactory {
 			return new CommonCivlcTokenSource(ctokens, this);
 		} else
 			return new CommonCivlcTokenSource((List<CivlcToken>) tokens, this);
+	}
+
+	@Override
+	public FileIndexer newFileIndexer() {
+		return new CommonFileIndexer();
 	}
 }

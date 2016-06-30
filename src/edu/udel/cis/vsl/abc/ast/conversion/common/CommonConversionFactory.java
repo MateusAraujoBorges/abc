@@ -106,8 +106,8 @@ public class CommonConversionFactory implements ConversionFactory {
 		TypeKind kind = type.kind();
 
 		if (kind == TypeKind.QUALIFIED)
-			return lvalueConversionType(((QualifiedObjectType) type)
-					.getBaseType());
+			return lvalueConversionType(
+					((QualifiedObjectType) type).getBaseType());
 		if (kind == TypeKind.ATOMIC)
 			return lvalueConversionType(((AtomicType) type).getBaseType());
 		return (UnqualifiedObjectType) type;
@@ -116,18 +116,18 @@ public class CommonConversionFactory implements ConversionFactory {
 	@Override
 	public ArrayConversion arrayConversion(ArrayType type) {
 		// get rid of $input/$output qualifiers on type.getElementType?
-		return new CommonArrayConversion(type, typeFactory.pointerType(type
-				.getElementType()));
+		return new CommonArrayConversion(type,
+				typeFactory.pointerType(type.getElementType()));
 	}
 
 	@Override
 	public FunctionConversion functionConversion(FunctionType type) {
-		return new CommonFunctionConversion(type, typeFactory.pointerType(type));
+		return new CommonFunctionConversion(type,
+				typeFactory.pointerType(type));
 	}
 
-	private void checkQualifierConsistency(PointerType type1,
-			PointerType type2, boolean checkBaseCompatibility)
-			throws UnsourcedException {
+	private void checkQualifierConsistency(PointerType type1, PointerType type2,
+			boolean checkBaseCompatibility) throws UnsourcedException {
 		Type base1 = type1.referencedType();
 		Type base2 = type2.referencedType();
 
@@ -137,26 +137,31 @@ public class CommonConversionFactory implements ConversionFactory {
 			QualifiedObjectType qualified2;
 
 			if (!(base2 instanceof QualifiedObjectType))
-				throw error("Referenced type of left-hand of assignment lacks qualifiers of right-hand side");
+				throw error(
+						"Referenced type of left-hand of assignment lacks qualifiers of right-hand side");
 			qualified2 = (QualifiedObjectType) base2;
 			if (qualified1.isConstQualified() && !qualified2.isConstQualified())
-				throw error("Type referenced by pointer on left-hand side of assignment"
-						+ " lacks const qualifier occurring on right-hand side");
+				throw error(
+						"Type referenced by pointer on left-hand side of assignment"
+								+ " lacks const qualifier occurring on right-hand side");
 			if (qualified1.isRestrictQualified()
 					&& !qualified2.isRestrictQualified())
-				throw error("Type referenced by pointer on left-hand side of assignment"
-						+ " lacks restrict qualifier occurring on right-hand side");
+				throw error(
+						"Type referenced by pointer on left-hand side of assignment"
+								+ " lacks restrict qualifier occurring on right-hand side");
 			if (qualified1.isVolatileQualified()
 					&& !qualified2.isVolatileQualified())
-				throw error("Type referenced by pointer on left-hand side of assignment"
-						+ " lacks volatile qualifier occurring on right-hand side");
+				throw error(
+						"Type referenced by pointer on left-hand side of assignment"
+								+ " lacks volatile qualifier occurring on right-hand side");
 			base1 = qualified1.getBaseType();
 			base2 = qualified2.getBaseType();
 		}
 		if (base1 instanceof AtomicType) {
 			if (!(base2 instanceof AtomicType))
-				throw error("Type referenced by pointer on left-hand side of assigment "
-						+ "lacks atomic qualifier occurring on right-hand side");
+				throw error(
+						"Type referenced by pointer on left-hand side of assigment "
+								+ "lacks atomic qualifier occurring on right-hand side");
 			base1 = ((AtomicType) base1).getBaseType();
 			base2 = ((AtomicType) base2).getBaseType();
 		}
@@ -166,8 +171,9 @@ public class CommonConversionFactory implements ConversionFactory {
 			if (base2 instanceof QualifiedObjectType)
 				base2 = ((QualifiedObjectType) base2).getBaseType();
 			if (!base1.compatibleWith(base2)) {
-				throw error("Type referenced by pointer on left-hand side of assignment "
-						+ "is incompatible with corresponding type on right-hand side");
+				throw error(
+						"Type referenced by pointer on left-hand side of assignment "
+								+ "is incompatible with corresponding type on right-hand side");
 			}
 		}
 	}
@@ -178,8 +184,8 @@ public class CommonConversionFactory implements ConversionFactory {
 			CastNode castNode = (CastNode) node;
 			Type castType = castNode.getCastType().getType();
 
-			if (castType instanceof PointerType
-					&& ((PointerType) castType).referencedType().kind() == TypeKind.VOID)
+			if (castType instanceof PointerType && ((PointerType) castType)
+					.referencedType().kind() == TypeKind.VOID)
 				node = castNode.getArgument();
 			else
 				return false;
@@ -235,7 +241,8 @@ public class CommonConversionFactory implements ConversionFactory {
 			StructureOrUnionType type2 = (StructureOrUnionType) newType;
 
 			if (!type1.compatibleWith(type2))
-				throw error("Assignment to incompatible structure or union type");
+				throw error(
+						"Assignment to incompatible structure or union type");
 			return new CommonCompatibleStructureOrUnionConversion(type1, type2);
 		}
 		if (newType instanceof PointerType && isNullPointerConstant(rhs))
@@ -247,17 +254,17 @@ public class CommonConversionFactory implements ConversionFactory {
 
 			if (isPointerToObject(type1) && isPointerToVoid(type2)
 					|| isPointerToObject(type2) && isPointerToVoid(type1)) {
-				if (config == null || !config.svcomp())
+				if (config == null || !config.getSVCOMP())
 					checkQualifierConsistency(type1, type2, false);
 				return voidPointerConversion(type1, type2);
 			}
-			if (config == null || !config.svcomp())
+			if (config == null || !config.getSVCOMP())
 				checkQualifierConsistency(type1, type2, true);
 			return new CommonCompatiblePointerConversion(type1, type2);
 		}
 		if (oldType instanceof PointerType && isBool(newType))
 			return pointerBoolConversion((PointerType) oldType);
-		if (config != null && config.svcomp()) {
+		if (config != null && config.getSVCOMP()) {
 			if (oldType instanceof PointerType
 					&& newType instanceof IntegerType)
 				return this.pointer2IntegerConversion((PointerType) oldType,
@@ -267,8 +274,9 @@ public class CommonConversionFactory implements ConversionFactory {
 				return this.integer2PointerConversion((IntegerType) oldType,
 						(PointerType) newType);
 		}
-		throw error("No conversion from type of right hand side to that of left:\n"
-				+ oldType + "\n" + newType);
+		throw error(
+				"No conversion from type of right hand side to that of left:\n"
+						+ oldType + "\n" + newType);
 	}
 
 	@Override
@@ -277,8 +285,8 @@ public class CommonConversionFactory implements ConversionFactory {
 	}
 
 	private boolean isBool(Type type) {
-		return type instanceof StandardBasicType
-				&& ((StandardBasicType) type).getBasicTypeKind() == BasicTypeKind.BOOL;
+		return type instanceof StandardBasicType && ((StandardBasicType) type)
+				.getBasicTypeKind() == BasicTypeKind.BOOL;
 	}
 
 	@Override

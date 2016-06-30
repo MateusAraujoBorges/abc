@@ -16,7 +16,6 @@ import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
@@ -51,8 +50,8 @@ public class CallGraphTest {
 
 	private AST getAST(File file) throws ParseException, SyntaxException,
 			PreprocessorException {
-		AST ast = fe.compile(file, Language.C, new File[0], new File[0],
-				new HashMap<String, Macro>());
+		AST ast = fe.compile(new File[] {file}, Language.C, new File[0], new File[0],
+				new HashMap<String, String>());
 		return ast;
 	}
 

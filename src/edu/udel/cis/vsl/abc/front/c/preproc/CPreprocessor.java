@@ -1,14 +1,10 @@
 package edu.udel.cis.vsl.abc.front.c.preproc;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -20,95 +16,208 @@ import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser.file_return;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
+import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.token.IF.Tokens;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
 
 /**
- * The class provides easy access to all services exported by the preproc module
- * (a la Facade Pattern). It includes a main method which preprocesses the file
- * and sends result to stdout.
+ * A standard C preprocessor.
  * 
  * @author Stephen F. Siegel, University of Delaware
  */
 public class CPreprocessor implements Preprocessor {
 
-	public final static String SHORT_FILE_NAME_PREFIX = "f";
+	// Static members...
 
-	public final static boolean debug = true;
+	// public final static String SHORT_FILE_NAME_PREFIX = "f";
 
-	private Map<File, SourceFile> sourceFileMap = new LinkedHashMap<>();
+	/**
+	 * Print debugging information.
+	 */
+	public final static boolean debug = false;
 
-	private ArrayList<SourceFile> sourceFiles = new ArrayList<>();
+	// Instance fields...
 
+	/**
+	 * The configuration governs a number of choices which influence
+	 * preprocessing, e.g., shall gnuc.h be included automatically (yes if the
+	 * configuration says so).
+	 * 
+	 */
 	private Configuration config;
 
-	public CPreprocessor(Configuration config) {
+	/**
+	 * The language in which the source files that will be encountered by this
+	 * preprocessor are written. A preprocessor can be applied to one and only
+	 * one language. For now there is not much difference between CIVL-C and C.
+	 * If the language is CIVL-C, then the file civlc.cvh will be automatically
+	 * included at the beginning of the translation unit.
+	 */
+	private Language language;
+
+	/**
+	 * The file indexing object which is used to number and track all source
+	 * files encountered by this preprocessor, giving each file a unique ID
+	 * number. The indexer may be shared with other ABC component, so this
+	 * preprocessor is not necessarily the only component which will be adding
+	 * files to the indexer.
+	 */
+	private FileIndexer indexer;
+
+	/**
+	 * Factory to be used to create new tokens and related objects.
+	 */
+	private TokenFactory tokenFactory;
+
+	// Constructors...
+
+	public CPreprocessor(Configuration config, Language language,
+			FileIndexer indexer, TokenFactory tokenFactory) {
 		this.config = config;
+		this.language = language;
+		this.indexer = indexer;
+		this.tokenFactory = tokenFactory;
 	}
 
-	/*
-	public Map<String, Macro> makeMacros(Map<String, String> macroDefs) {
-		// create stream and process it...
-	}
-	*/
+	// Helpers...
 
-	@Override
-	public Map<String, Macro> getMacros(Map<String, String> macroDefs)
-			throws PreprocessorException {
-		if ((this.config != null && this.config.svcomp())
-				|| (macroDefs != null && macroDefs.size() > 0)) {
+	/**
+	 * Finds the internal library resource and new stream to given stream vector
+	 * and adds new formation to given formation vector.
+	 * 
+	 * @param libraryFilename
+	 *            name of library file, e.g., "civlc.cvh" or "gnuc.h"
+	 * @param streamVector
+	 *            list of streams in which to add new entry
+	 * @param formationVector
+	 *            list of formations in which to add new entry
+	 * @throws PreprocessorException
+	 *             if the resource cannot be opened for some reason
+	 */
+	private void addLibrary(String libraryFilename,
+			ArrayList<CharStream> streamVector,
+			ArrayList<Formation> formationVector) throws PreprocessorException {
+		File file = new File(Preprocessor.ABC_INCLUDE_PATH, libraryFilename);
+		SourceFile sourceFile = indexer.getOrAdd(file);
+		Formation formation = tokenFactory.newInclusion(sourceFile);
+		String resource = file.getAbsolutePath();
+
+		try {
+			CharStream stream = PreprocessorUtils
+					.newFilteredCharStreamFromResource(libraryFilename,
+							resource);
+
+			streamVector.add(stream);
+			formationVector.add(formation);
+		} catch (IOException e) {
+			throw new PreprocessorException(
+					"Error in opening civlc.cvh: " + e.getMessage());
+		}
+	}
+
+	private void addMacros(Map<String, String> predefinedMacros,
+			ArrayList<CharStream> streamVector,
+			ArrayList<Formation> formationVector) throws PreprocessorException {
+		if (!predefinedMacros.isEmpty()) {
+			CharStream macroStream = PreprocessorUtils
+					.macroMapToCharStream(predefinedMacros);
+			File file = new File("predefined macros");
+			SourceFile sourceFile = indexer.getOrAdd(file);
+			Formation formation = tokenFactory.newInclusion(sourceFile);
+
+			streamVector.add(macroStream);
+			formationVector.add(formation);
+		}
+	}
+
+	/**
+	 * Adds streams for macros, svcomp.h, gnuc.h, and civlc.cvh, as needed, to
+	 * the stream and formation vectors.
+	 * 
+	 * @param predefinedMacros
+	 * @param streamVector
+	 * @param formationVector
+	 * @throws PreprocessorException
+	 */
+	private void addAuxStreams(Map<String, String> predefinedMacros,
+			ArrayList<CharStream> streamVector,
+			ArrayList<Formation> formationVector) throws PreprocessorException {
+		addMacros(predefinedMacros, streamVector, formationVector);
+		// note that svcomp.h #includes gnuc.h so no need to include both:
+		if (config.getSVCOMP())
+			addLibrary("svcomp.h", streamVector, formationVector);
+		else if (config.getGNUC())
+			addLibrary("gnuc.h", streamVector, formationVector);
+		if (language == Language.CIVL_C)
+			addLibrary("civlc.cvh", streamVector, formationVector);
+	}
+
+	/**
+	 * Creates character streams and formations from the files and adds them to
+	 * the given stream and formation vectors.
+	 * 
+	 * @param sourceFiles
+	 * @param streamVector
+	 * @param formationVector
+	 * @throws PreprocessorException
+	 */
+	private void addFiles(File[] sourceFiles,
+			ArrayList<CharStream> streamVector,
+			ArrayList<Formation> formationVector) throws PreprocessorException {
+		int numFiles = sourceFiles.length;
+
+		for (int i = 0; i < numFiles; i++) {
+			File file = sourceFiles[i];
+			SourceFile sourceFile = indexer.getOrAdd(file);
+
 			try {
-				// use temporary file to store the macro definitions
-				String tmpDirBase = System.getProperty("java.io.tmpdir");
-				// when -Duser.home=$HOME is used, this returns $HOME
-				if (tmpDirBase.startsWith("$")) {
-					tmpDirBase = System.getenv(tmpDirBase.substring(1));
-				}
-
-				File temp = new File(tmpDirBase,
-						"tmp" + System.currentTimeMillis() + ".h");
-				// Write to temp file
-				FileWriter tmpWriter = new FileWriter(temp);
-				BufferedWriter tmpOut = new BufferedWriter(tmpWriter);
-				CPreprocessorWorker worker;
-				PreprocessorTokenSource tokenSource;
-				Token token;
-
-				// macros for GNU C features
-				// for now, put this here. Find a better place:
-				if (this.config != null && this.config.svcomp())
-					tmpOut.write("#define __attribute__(X)\r\n");
-				for (String macro : macroDefs.keySet())
-					tmpOut.write("#define " + macro + " " + macroDefs.get(macro)
-							+ "\r\n");
-				tmpOut.write("\r\n");
-				tmpOut.flush();
-				tmpOut.close();
-				tmpWriter.close();
-				worker = new CPreprocessorWorker(config, this,
-						CPreprocessorWorker.defaultSystemIncludes,
-						CPreprocessorWorker.defaultSystemIncludes,
-						new HashMap<String, Macro>());
-				tokenSource = worker.outputTokenSource(temp, true);
-				do {
-					token = tokenSource.nextToken();
-				} while (token.getType() != PreprocessorLexer.EOF);
-				// delete the temporary file
-				temp.delete();
-				return tokenSource.macroMap;
+				streamVector.add(
+						PreprocessorUtils.newFilteredCharStreamFromFile(file));
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				// why doesn't this throw an exception????????
-				return new HashMap<String, Macro>();
+				throw new PreprocessorException(
+						"Error in opening " + file + ": " + e.getMessage());
 			}
-		} else
-			return new HashMap<String, Macro>();
+			formationVector.add(tokenFactory.newInclusion(sourceFile));
+		}
 	}
+
+	/**
+	 * Produces new {@link PreprocessorTokenSource} object from the given
+	 * character streams.
+	 * 
+	 * @param systemIncludePaths
+	 * @param userIncludePaths
+	 * @param streamVector
+	 * @param formationVector
+	 * @return
+	 * @throws PreprocessorException
+	 */
+	private PreprocessorTokenSource newTokenSource(File[] systemIncludePaths,
+			File[] userIncludePaths, ArrayList<CharStream> streamVector,
+			ArrayList<Formation> formationVector) throws PreprocessorException {
+		CharStream[] streams = streamVector
+				.toArray(new CharStream[streamVector.size()]);
+		Formation[] formations = formationVector
+				.toArray(new Formation[formationVector.size()]);
+		Map<String, Macro> macroMap = new HashMap<>();
+		PreprocessorTokenSource result = new PreprocessorTokenSource(config,
+				indexer, streams, formations, systemIncludePaths,
+				userIncludePaths, macroMap, tokenFactory);
+
+		return result;
+	}
+
+	// Public methods...
 
 	/**
 	 * Returns a lexer for the given preprocessor source file. The lexer removes
@@ -122,7 +231,6 @@ public class CPreprocessor implements Preprocessor {
 	 * @throws IOException
 	 *             if an I/O error occurs while reading the file
 	 */
-	@Override
 	public PreprocessorLexer lexer(File file) throws PreprocessorException {
 		try {
 			CharStream charStream = PreprocessorUtils
@@ -148,7 +256,6 @@ public class CPreprocessor implements Preprocessor {
 	 *             a file which does not conform lexically to the preprocessor
 	 *             grammar
 	 */
-	@Override
 	public void lex(PrintStream out, File file) throws PreprocessorException {
 		out.println("Lexical analysis of " + file + ":");
 		try {
@@ -175,13 +282,11 @@ public class CPreprocessor implements Preprocessor {
 	 * @throws PreprocessorException
 	 *             if an I/O error occurs in attempting to open the file
 	 */
-	@SuppressWarnings("unchecked")
-	@Override
 	public PreprocessorParser parser(File file) throws PreprocessorException {
 		PreprocessorLexer lexer = lexer(file);
 		CommonTokenStream tokenStream = new CommonTokenStream(lexer);
 
-		if (config != null && config.svcomp()) {
+		if (config != null && config.getSVCOMP()) {
 			int numTokens = tokenStream.getNumberOfOnChannelTokens();
 			// the second last token is the token before EOF
 			Token secondLastToken = tokenStream.get(numTokens - 2);
@@ -214,7 +319,6 @@ public class CPreprocessor implements Preprocessor {
 	 *             if the file does not conform to the preprocessor grammar, or
 	 *             an I/O error occurs in reading the file
 	 */
-	@Override
 	public void parse(PrintStream out, File file) throws PreprocessorException {
 		try {
 			PreprocessorParser parser = parser(file);
@@ -238,169 +342,41 @@ public class CPreprocessor implements Preprocessor {
 		}
 	}
 
-	/**
-	 * Given a preprocessor source file, this returns a Token Source that emits
-	 * the tokens resulting from preprocessing the file.
-	 * 
-	 * @param file
-	 * @return a token source for the token resulting from preprocessing the
-	 *         file
-	 * @throws PreprocessorException
-	 *             if an I/O error occurs
-	 */
+	// Methods specified in Preprocessor interface...
+
 	@Override
 	public PreprocessorTokenSource outputTokenSource(File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			File file) throws PreprocessorException {
-		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
-				systemIncludePaths, userIncludePaths, implicitMacros);
+			File[] userIncludePaths, Map<String, String> predefinedMacros,
+			File[] sourceUnit) throws PreprocessorException {
+		ArrayList<CharStream> streamVector = new ArrayList<>();
+		ArrayList<Formation> formationVector = new ArrayList<>();
 
-		return worker.outputTokenSource(file, false);
+		addAuxStreams(predefinedMacros, streamVector, formationVector);
+		addFiles(sourceUnit, streamVector, formationVector);
+		return newTokenSource(systemIncludePaths, userIncludePaths,
+				streamVector, formationVector);
 	}
 
 	@Override
-	public CivlcTokenSource outputTokenSource(File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			String filename, boolean isSystem)
-					throws PreprocessorException, IOException {
-		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
-				systemIncludePaths, userIncludePaths, implicitMacros);
-
-		return worker.outputTokenSource(isSystem, filename);
-	}
-
-	/**
-	 * Prints the list of tokens that result from preprocessing the file. One
-	 * token is printed per line, along with information on the origin of that
-	 * token. Useful mainly for debugging.
-	 * 
-	 * @param out
-	 *            where to send output list
-	 * @param file
-	 *            a preprocessor source file
-	 * @throws PreprocessorException
-	 *             if the file fails to adhere to the preprocessor grammar, or
-	 *             an I/O occurs
-	 */
-	@Override
-	public void printOutputTokens(File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			PrintStream out, File file) throws PreprocessorException {
-		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
-				systemIncludePaths, userIncludePaths, implicitMacros);
-		PreprocessorTokenSource source = worker.outputTokenSource(file, false);
-
-		out.println("Post-preprocessing token stream for " + file + ":\n");
-		PreprocessorUtils.printTokenSource(out, source);
-		out.flush();
-	}
-
-	@Override
-	public void printOutput(File[] systemIncludePaths, File[] userIncludePaths,
-			Map<String, Macro> implicitMacros, PrintStream out, File file)
+	public CivlcTokenSource preprocessLibrary(
+			Map<String, String> predefinedMacros, String libraryFileName)
 					throws PreprocessorException {
-		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
-				systemIncludePaths, userIncludePaths, implicitMacros);
-		PreprocessorTokenSource source = worker.outputTokenSource(file, false);
+		ArrayList<CharStream> streamVector = new ArrayList<>();
+		ArrayList<Formation> formationVector = new ArrayList<>();
 
-		PreprocessorUtils.sourceTokenSource(out, source);
-		out.flush();
+		addAuxStreams(predefinedMacros, streamVector, formationVector);
+		addLibrary(libraryFileName, streamVector, formationVector);
+		return newTokenSource(Preprocessor.defaultSystemIncludes,
+				Preprocessor.defaultUserIncludes, streamVector,
+				formationVector);
 	}
 
 	@Override
-	public void printOutputDebug(File[] systemIncludePaths,
-			File[] userIncludePaths, Map<String, Macro> implicitMacros,
-			PrintStream out, File file) throws PreprocessorException {
-		out.println("Post-preprocessing output for " + file + ":\n");
-		out.println("----------------------------------->");
-		printOutput(systemIncludePaths, userIncludePaths, implicitMacros, out,
-				file);
-		out.println("<-----------------------------------");
-		out.flush();
+	public FileIndexer getFileIndexer() {
+		return indexer;
 	}
 
-	@Override
-	public void debug(File[] systemIncludePaths, File[] userIncludePaths,
-			Map<String, Macro> implicitMacros, PrintStream out, File file)
-					throws PreprocessorException {
-		PreprocessorUtils.source(out, file);
-		out.println();
-		lex(out, file);
-		out.println();
-		parse(out, file);
-		out.println();
-		printOutputTokens(systemIncludePaths, userIncludePaths, implicitMacros,
-				out, file);
-		out.println();
-		printOutputDebug(systemIncludePaths, userIncludePaths, implicitMacros,
-				out, file);
-		out.println();
-	}
-
-	@Override
-	public Collection<SourceFile> getSourceFiles() {
-		return sourceFiles;
-	}
-
-	@Override
-	public SourceFile getSourceFile(File file) {
-		return sourceFileMap.get(file);
-	}
-
-	@Override
-	public int getNumSourceFiles() {
-		return sourceFiles.size();
-	}
-
-	@Override
-	public SourceFile getSourceFile(int index) {
-		return sourceFiles.get(index);
-	}
-
-	@Override
-	public void printSourceFiles(PrintStream out) {
-		out.println("Source files:");
-		for (SourceFile sourceFile : sourceFiles) {
-			out.println(
-					sourceFile.getIndexName() + "\t: " + sourceFile.getPath());
-		}
-		out.println();
-		out.flush();
-	}
-
-	/**
-	 * Looks to see if a {@link SourceFile} object has already been created for
-	 * the given {@link File}. If so, returns that one. Else creates a new one,
-	 * assigns it the next index, and, if it is not a temporary file created by
-	 * ABC, stores it.
-	 * 
-	 * @param file
-	 *            a file that is being read to produce this token source
-	 * @param tmpFile
-	 *            true iff this is a temporary file created by ABC
-	 * @return the {@link SourceFile} corresponding to the given file
-	 */
-	SourceFile getOrMakeSourceFile(File file, boolean tmpFile) {
-		SourceFile result = sourceFileMap.get(file);
-
-		if (result == null) {
-			result = new SourceFile(file, sourceFiles.size());
-			if (!tmpFile) {
-				// don't keep track of temp files created by parsing command
-				// line macros
-				sourceFiles.add(result);
-				sourceFileMap.put(file, result);
-			}
-		}
-		return result;
-	}
-
-	public CivlcTokenSource tokenSourceOfLibrary(String name) {
-		CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
-				new File[0], new File[0], new HashMap<String, Macro>());
-
-		return worker.tokenSourceOfLibrary(name);
-	}
+	// The main method...
 
 	/**
 	 * This main method is just here for simple tests. The real main method is
@@ -408,19 +384,171 @@ public class CPreprocessor implements Preprocessor {
 	 */
 	public final static void main(String[] args) throws PreprocessorException {
 		String filename = args[0];
-		CPreprocessor p = new CPreprocessor(null);
-		File file = new File(filename);
+		Configuration config = Configurations.newMinimalConfiguration();
+		TokenFactory tokenFactory = Tokens.newTokenFactory();
+		FileIndexer indexer = tokenFactory.newFileIndexer();
+		Language language;
 
-		if (debug)
-			p.debug(CPreprocessorWorker.defaultSystemIncludes,
-					CPreprocessorWorker.defaultUserIncludes,
-					CPreprocessorWorker.defaultImplicitMacros, System.out,
-					file);
+		if (filename.endsWith(".c") || filename.endsWith(".h"))
+			language = Language.C;
+		else if (filename.endsWith(".F") || filename.endsWith(".F77")
+				|| filename.endsWith(".f77") || filename.endsWith(".f")
+				|| filename.endsWith(".f90") || filename.endsWith(".F90"))
+			language = Language.FORTRAN77;
 		else
-			p.printOutput(CPreprocessorWorker.defaultSystemIncludes,
-					CPreprocessorWorker.defaultUserIncludes,
-					CPreprocessorWorker.defaultImplicitMacros, System.out,
-					file);
+			language = Language.CIVL_C;
+
+		CPreprocessor p = new CPreprocessor(config, language, indexer,
+				tokenFactory);
+		File file = new File(filename);
+		Map<String, String> predefinedMacros = new HashMap<>();
+
+		CivlcTokenSource ts = p.outputTokenSource(
+				Preprocessor.defaultSystemIncludes,
+				Preprocessor.defaultUserIncludes, predefinedMacros,
+				new File[] { file });
+		PrintStream out = System.out;
+
+		ANTLRUtils.print(out, ts);
 	}
 
+	// /**
+	// * Prints the list of tokens that result from preprocessing the file. One
+	// * token is printed per line, along with information on the origin of that
+	// * token. Useful mainly for debugging.
+	// *
+	// * @param out
+	// * where to send output list
+	// * @param file
+	// * a preprocessor source file
+	// * @throws PreprocessorException
+	// * if the file fails to adhere to the preprocessor grammar, or
+	// * an I/O occurs
+	// */
+	// @Override
+	// public void printOutputTokens(File[] systemIncludePaths,
+	// File[] userIncludePaths, Map<String, String> implicitMacros,
+	// PrintStream out, File[] sourceUnit) throws PreprocessorException {
+	// CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
+	// systemIncludePaths, userIncludePaths, implicitMacros);
+	// PreprocessorTokenSource source = worker.outputTokenSource(sourceUnit,
+	// false);
+	//
+	// out.println(
+	// "Post-preprocessing token stream for " + sourceUnit + ":\n");
+	// PreprocessorUtils.printTokenSource(out, source);
+	// out.flush();
+	// }
+	//
+	// @Override
+	// public void printOutput(File[] systemIncludePaths, File[]
+	// userIncludePaths,
+	// Map<String, String> implicitMacros, PrintStream out,
+	// File[] sourceUnit) throws PreprocessorException {
+	// CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
+	// systemIncludePaths, userIncludePaths, implicitMacros);
+	// PreprocessorTokenSource source = worker.outputTokenSource(sourceUnit,
+	// false);
+	//
+	// PreprocessorUtils.sourceTokenSource(out, source);
+	// out.flush();
+	// }
+	//
+	// @Override
+	// public void printOutputDebug(File[] systemIncludePaths,
+	// File[] userIncludePaths, Map<String, String> implicitMacros,
+	// PrintStream out, File[] sourceUnit) throws PreprocessorException {
+	// out.println("Post-preprocessing output for " + file + ":\n");
+	// out.println("----------------------------------->");
+	// printOutput(systemIncludePaths, userIncludePaths, implicitMacros, out,
+	// file);
+	// out.println("<-----------------------------------");
+	// out.flush();
+	// }
+	//
+	// @Override
+	// public void debug(File[] systemIncludePaths, File[] userIncludePaths,
+	// Map<String, String> implicitMacros, PrintStream out,
+	// File[] sourceUnit) throws PreprocessorException {
+	// PreprocessorUtils.source(out, file);
+	// out.println();
+	// lex(out, file);
+	// out.println();
+	// parse(out, file);
+	// out.println();
+	// printOutputTokens(systemIncludePaths, userIncludePaths, implicitMacros,
+	// out, file);
+	// out.println();
+	// printOutputDebug(systemIncludePaths, userIncludePaths, implicitMacros,
+	// out, file);
+	// out.println();
+	// }
+
+	// @Override
+	// public Collection<SourceFile> getSourceFiles() {
+	// return sourceFiles;
+	// }
+	//
+	// @Override
+	// public SourceFile getSourceFile(File file) {
+	// return sourceFileMap.get(file);
+	// }
+	//
+	// @Override
+	// public int getNumSourceFiles() {
+	// return sourceFiles.size();
+	// }
+	//
+	// @Override
+	// public SourceFile getSourceFile(int index) {
+	// return sourceFiles.get(index);
+	// }
+
+	// @Override
+	// public void printSourceFiles(PrintStream out) {
+	// out.println("Source files:");
+	// for (SourceFile sourceFile : sourceFiles) {
+	// out.println(
+	// sourceFile.getIndexName() + "\t: " + sourceFile.getPath());
+	// }
+	// out.println();
+	// out.flush();
+	// }
+
+	// /**
+	// * Looks to see if a {@link SourceFile} object has already been created
+	// for
+	// * the given {@link File}. If so, returns that one. Else creates a new
+	// one,
+	// * assigns it the next index, and, if it is not a temporary file created
+	// by
+	// * ABC, stores it.
+	// *
+	// * @param file
+	// * a file that is being read to produce this token source
+	// * @param tmpFile
+	// * true iff this is a temporary file created by ABC
+	// * @return the {@link SourceFile} corresponding to the given file
+	// */
+	// SourceFile getOrMakeSourceFile(File file, boolean tmpFile) {
+	// SourceFile result = sourceFileMap.get(file);
+	//
+	// if (result == null) {
+	// result = new SourceFile(file, sourceFiles.size());
+	// if (!tmpFile) {
+	// // don't keep track of temp files created by parsing command
+	// // line macros
+	// sourceFiles.add(result);
+	// sourceFileMap.put(file, result);
+	// }
+	// }
+	// return result;
+	// }
+
+	// public CivlcTokenSource tokenSourceOfLibrary(String name) {
+	// CPreprocessorWorker worker = new CPreprocessorWorker(config, this,
+	// new File[0], new File[0], new HashMap<String, Macro>());
+	//
+	// return worker.tokenSourceOfLibrary(name);
+	// }
 }

@@ -1,6 +1,5 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import java.io.PrintStream;
 import java.util.Collection;
 import java.util.List;
 
@@ -8,6 +7,7 @@ import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
@@ -16,7 +16,8 @@ public class CommonCivlcTokenSource implements CivlcTokenSource {
 	private List<CivlcToken> tokens;
 	private TokenFactory tokenFactory;
 
-	public CommonCivlcTokenSource(List<CivlcToken> tokens, TokenFactory factory) {
+	public CommonCivlcTokenSource(List<CivlcToken> tokens,
+			TokenFactory factory) {
 		this.tokens = tokens;
 		this.tokenFactory = factory;
 	}
@@ -49,12 +50,15 @@ public class CommonCivlcTokenSource implements CivlcTokenSource {
 	}
 
 	@Override
-	public Collection<SourceFile> getSourceFiles() {
+	public FileIndexer getIndexer() {
+		// TODO Auto-generated method stub
 		return null;
 	}
 
 	@Override
-	public void printShorterFileNameMap(PrintStream out) {
+	public Collection<SourceFile> getSourceFiles() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

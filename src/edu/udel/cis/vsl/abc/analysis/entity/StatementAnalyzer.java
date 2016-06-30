@@ -239,7 +239,7 @@ public class StatementAnalyzer {
 			boolean returnTypeIsVoid = returnType.kind() == TypeKind.VOID;
 
 			if (expression == null) {
-				if (!this.configuration.svcomp() && !returnTypeIsVoid)
+				if (!this.configuration.getSVCOMP() && !returnTypeIsVoid)
 					throw error("Missing expression in return statement",
 							statement);
 			} else {

@@ -17,6 +17,13 @@ import java.math.BigInteger;
  */
 public interface Configuration {
 
+	/**
+	 * The different machine architectures that can be used to specialize
+	 * translation and analysis.
+	 * 
+	 * @author siegel
+	 *
+	 */
 	public enum Architecture {
 		_32_BIT, _64_BIT, UNKNOWN
 	}
@@ -76,21 +83,51 @@ public interface Configuration {
 	boolean inRangeSignedLongLongInt(BigInteger value);
 
 	/**
-	 * is svcomp feature enabled?
+	 * Is this configuration being used to solve an SV-COMP problem?
 	 * 
-	 * @return
+	 * @return <code>true</code> iff this is an SV-COMP problem
 	 */
-	boolean svcomp();
-
-	void setSvcomp(boolean value);
+	boolean getSVCOMP();
 
 	/**
-	 * the architecture of this translation task, which could be 32-bit, 64-bit,
-	 * or unknown.
+	 * Sets the SVCOMP flag, which specifies whether this configuration is being
+	 * used to solve an SV-COMP problem.
 	 * 
-	 * @return
+	 * @param flag
+	 *            <code>true</code> iff this is an SV-COMP problem
 	 */
-	Architecture architecture();
+	void setSVCOMP(boolean value);
 
+	/**
+	 * Gets the architecture type for this translation task.
+	 * 
+	 * @return the architecture type
+	 */
+	Architecture getArchitecture();
+
+	/**
+	 * Sets the architecture type for this translation task. Default is
+	 * {@link Architecture#UNKNOWN}.
+	 * 
+	 * @param architecture
+	 *            the architecture type
+	 */
 	void setArchitecture(Architecture arch);
+
+	/**
+	 * Are the GNU extensions to the C language allowed?
+	 * 
+	 * @return value of the GNUC flag
+	 */
+	boolean getGNUC();
+
+	/**
+	 * Specifies whether the GNU extensions to the C language are allowed.
+	 * Default is false. This flag is also automatically set to true when the
+	 * SVCOMP flag is set to true
+	 * 
+	 * @param flag
+	 *            value of GNUC flag
+	 */
+	void setGNUC(boolean flag);
 }

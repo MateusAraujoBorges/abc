@@ -5,11 +5,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.util.HashMap;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
@@ -19,14 +15,10 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.config.IF.Configuration;
-import edu.udel.cis.vsl.abc.config.IF.Configurations;
-import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
-import edu.udel.cis.vsl.abc.front.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
-import edu.udel.cis.vsl.abc.main.FrontEnd;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
+import edu.udel.cis.vsl.abc.main.TranslationTask;
+import edu.udel.cis.vsl.abc.main.TranslationTask.TranslationStage;
 
 /**
  * Tests linkage issues: internal, external, or "none".
@@ -38,34 +30,15 @@ public class CLinkageTest {
 
 	private File root = new File("examples");
 
-	private static Configuration config = Configurations
-			.newMinimalConfiguration();
+	private AST getAST(File file) throws ABCException {
+		TranslationTask task = new TranslationTask(file);
 
-	private static FrontEnd fe = new FrontEnd(config);
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
-
-	private AST getAST(File file) throws ParseException, SyntaxException,
-			PreprocessorException {
-		AST ast = fe.compile(file, Language.C, new File[0], new File[0],
-				new HashMap<String, Macro>());
-
-		return ast;
+		task.setStage(TranslationStage.ANALYZE_ASTS);
+		return ABCExecutor.execute(task).getAST(0);
 	}
 
 	@Test
-	public void inner_func() throws ParseException, SyntaxException,
-			PreprocessorException {
+	public void inner_func() throws ABCException {
 		File file = new File(root, "inner_func.c");
 		AST ast = getAST(file);
 		OrdinaryEntity entity = ast.getInternalOrExternalEntity("f");

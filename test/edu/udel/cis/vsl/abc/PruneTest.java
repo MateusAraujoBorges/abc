@@ -5,9 +5,6 @@ import static org.junit.Assert.assertTrue;
 import java.io.File;
 import java.io.PrintStream;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
@@ -15,11 +12,10 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.front.IF.ParseException;
-import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
+import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.program.IF.Program;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Tests pruner.
@@ -40,32 +36,27 @@ public class PruneTest {
 
 	private static FrontEnd fe = new FrontEnd(config);
 
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
+	private void check(File[] inputs, File oracle) throws ABCException {
+		TranslationTask task = new TranslationTask(inputs);
 
-	@Before
-	public void setUp() throws Exception {
-	}
+		task.addTransformCode("prune");
 
-	@After
-	public void tearDown() throws Exception {
-	}
-
-	private void check(File[] inputs, File oracle)
-			throws PreprocessorException, SyntaxException, ParseException {
-		Program program = fe.compileAndLink(inputs, Language.C);
-		AST actual, expected;
-
-		program.applyTransformer("prune");
-		actual = program.getAST();
-		expected = fe.compile(oracle, Language.C);
-		if (debug) {
-			expected.prettyPrint(out, false);
-			out.println();
-			actual.prettyPrint(out, false);
+		ABCExecutor executor = ABCExecutor.execute(fe, task);
+		Program program = executor.getProgram();
+		AST actual = program.getAST();
+		AST expected = fe.compile(new File[] { oracle }, Language.C);
+		if (actual.getRootNode().equiv(expected.getRootNode())) {
+			// OK
+		} else {
+			if (debug) {
+				out.println("Expected:");
+				expected.prettyPrint(out, false);
+				out.println();
+				out.println("Actual:");
+				actual.prettyPrint(out, false);
+			}
+			assertTrue(false);
 		}
-		assertTrue(actual.getRootNode().equiv(expected.getRootNode()));
 	}
 
 	private void check(String[] inputNames, String oracleName)

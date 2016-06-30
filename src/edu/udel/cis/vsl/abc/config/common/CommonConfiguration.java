@@ -6,8 +6,19 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 
 public class CommonConfiguration implements Configuration {
 
+	/**
+	 * Is this an SV-COMP problem?
+	 */
 	private boolean svcomp = false;
 
+	/**
+	 * Should the GNU extensions to the C language be allowed?
+	 */
+	private boolean gnuc = false;
+
+	/**
+	 * The targeted machine architecture.
+	 */
 	private Architecture architecture = Architecture.UNKNOWN;
 
 	/** number of bits for smallest object that is not a bit-field (byte) */
@@ -201,12 +212,22 @@ public class CommonConfiguration implements Configuration {
 	}
 
 	@Override
-	public boolean svcomp() {
+	public boolean getGNUC() {
+		return this.gnuc;
+	}
+
+	@Override
+	public void setGNUC(boolean flag) {
+		this.gnuc = flag;
+	}
+
+	@Override
+	public boolean getSVCOMP() {
 		return this.svcomp;
 	}
 
 	@Override
-	public void setSvcomp(boolean svcomp) {
+	public void setSVCOMP(boolean svcomp) {
 		this.svcomp = svcomp;
 	}
 
@@ -216,7 +237,7 @@ public class CommonConfiguration implements Configuration {
 	}
 
 	@Override
-	public Architecture architecture() {
+	public Architecture getArchitecture() {
 		return this.architecture;
 	}
 

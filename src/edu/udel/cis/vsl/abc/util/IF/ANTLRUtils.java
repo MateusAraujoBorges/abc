@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 
 import org.antlr.runtime.Token;
+import org.antlr.runtime.TokenSource;
 import org.antlr.runtime.tree.CommonTree;
 import org.antlr.runtime.tree.Tree;
 
@@ -87,6 +88,25 @@ public class ANTLRUtils {
 		out.flush();
 		bufferedReader.close();
 		fileReader.close();
+	}
+
+	/**
+	 * Prints all tokens from the token source.
+	 * 
+	 * @param out
+	 *            where to print
+	 * @param ts
+	 *            token source
+	 */
+	public static void print(PrintStream out, TokenSource ts) {
+		while (true) {
+			Token token = ts.nextToken();
+
+			out.println(token);
+			if (token.getType() == Token.EOF)
+				break;
+		}
+		out.flush();
 	}
 
 }

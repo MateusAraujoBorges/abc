@@ -928,7 +928,7 @@ public class ExpressionAnalyzer {
 
 		if (entity == null) {
 			if (isFirstRound
-					&& (config.svcomp() || isContract)
+					&& (config.getSVCOMP() || isContract)
 					&& ((node.parent() instanceof FunctionCallNode) || node
 							.parent() instanceof CallEventNode)) {
 				node.setAttribute(unknownIdentifier, true);
@@ -1616,7 +1616,7 @@ public class ExpressionAnalyzer {
 					restrictQ, false, false);
 		} else {
 			if (this.config == null
-					|| !config.svcomp()
+					|| !config.getSVCOMP()
 					|| (type1.kind() != TypeKind.VOID && type2.kind() != TypeKind.VOID))
 				throw error(
 						"Incompatible types for second and third arguments of conditional operator:\n"

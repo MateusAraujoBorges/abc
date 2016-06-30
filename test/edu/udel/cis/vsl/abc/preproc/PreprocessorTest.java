@@ -3,24 +3,31 @@ package edu.udel.cis.vsl.abc.preproc;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
 import org.junit.Before;
 import org.junit.Test;
 
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
+import edu.udel.cis.vsl.abc.config.IF.Configurations;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorUtils;
-import edu.udel.cis.vsl.abc.token.IF.Macro;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
+import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.token.IF.Tokens;
 
 public class PreprocessorTest {
 
 	private static boolean debug = false;
+
+	private static PrintStream out = System.out;
 
 	private static File root = new File(new File("examples"), "preproc");
 
@@ -34,13 +41,15 @@ public class PreprocessorTest {
 
 	private static File[] userIncludes = new File[] { dir1, dir11 };
 
-	private static Map<String, Macro> implicitMacros = new HashMap<>();
-
 	private CPreprocessor p;
 
 	@Before
 	public void setUp() throws Exception {
-		p = new CPreprocessor(null);
+		Configuration config = Configurations.newMinimalConfiguration();
+		TokenFactory tf = Tokens.newTokenFactory();
+		FileIndexer indexer = tf.newFileIndexer();
+
+		p = new CPreprocessor(config, Language.C, indexer, tf);
 	}
 
 	private void readSource(TokenSource source) throws PreprocessorException {
@@ -48,6 +57,9 @@ public class PreprocessorTest {
 			while (true) {
 				Token token = source.nextToken();
 
+				if (debug) {
+					out.println(token);
+				}
 				if (token.getType() == PreprocessorParser.EOF)
 					break;
 			}
@@ -58,13 +70,9 @@ public class PreprocessorTest {
 
 	private void check(String rootName) throws PreprocessorException {
 		File sourceFile = new File(root, rootName + ".txt");
-		TokenSource source;
+		TokenSource source = p.outputTokenSource(systemIncludes, userIncludes,
+				new HashMap<String, String>(), new File[] { sourceFile });
 
-		if (debug)
-			p.debug(systemIncludes, userIncludes, implicitMacros, System.out,
-					sourceFile);
-		source = p.outputTokenSource(systemIncludes, userIncludes,
-				implicitMacros, sourceFile);
 		readSource(source);
 	}
 
@@ -104,12 +112,9 @@ public class PreprocessorTest {
 		File sourceFile = new File(root, rootName + ".txt");
 		File solutionFile = new File(root, rootName + ".sol.txt");
 
-		if (debug)
-			p.debug(systemIncludes, userIncludes, implicitMacros, System.out,
-					sourceFile);
-
 		TokenSource actualSource = p.outputTokenSource(systemIncludes,
-				userIncludes, implicitMacros, sourceFile);
+				userIncludes, new HashMap<String, String>(),
+				new File[] { sourceFile });
 		TokenSource expectedSource = p.lexer(solutionFile);
 
 		compare(actualSource, expectedSource);

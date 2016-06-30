@@ -10,6 +10,7 @@ import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilder;
 import edu.udel.cis.vsl.abc.front.fortran.parse.FortranParser;
 import edu.udel.cis.vsl.abc.front.fortran.preproc.FortranPreprocessor;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 
 /**
@@ -33,14 +34,18 @@ public class Front {
 	 * @param config
 	 *            the configuration of the translation task (e.g., is svcomp
 	 *            enabled?)
+	 * @param indexer
+	 *            the file indexer that will be used to index all source files
+	 *            encountered by the new preprocessor
 	 * @return a new Preprocessor
 	 */
 	public static Preprocessor newPreprocessor(Language language,
-			Configuration config, TokenFactory tokenFactory) {
+			Configuration config, FileIndexer indexer,
+			TokenFactory tokenFactory) {
 		switch (language) {
 		case C:
 		case CIVL_C:
-			return new CPreprocessor(config);
+			return new CPreprocessor(config, language, indexer, tokenFactory);
 		case FORTRAN77:
 			return new FortranPreprocessor(config, tokenFactory);
 		default:
@@ -66,7 +71,8 @@ public class Front {
 			return new FortranParser();
 		default:
 			throw new ABCRuntimeException(
-					"ABC doesn't support parsing programs in " + language + ".");
+					"ABC doesn't support parsing programs in " + language
+							+ ".");
 		}
 	}
 
