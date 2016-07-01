@@ -2532,9 +2532,11 @@ public class SideEffectRemover extends BaseTransformer {
 		List<BlockItemNode> result = new LinkedList<>();
 
 		for (BlockItemNode item : compound) {
-			List<BlockItemNode> tmp = translateBlockItem(item);
+			if (item != null) {
+				List<BlockItemNode> tmp = translateBlockItem(item);
 
-			blockItems.addAll(tmp);
+				blockItems.addAll(tmp);
+			}
 		}
 		removeNodes(blockItems);
 		result.add(makeOneBlockItem(compound.getSource(), blockItems));
@@ -2890,19 +2892,22 @@ public class SideEffectRemover extends BaseTransformer {
 			EnumerationTypeNode enumeration) {
 		SequenceNode<EnumeratorDeclarationNode> enumerators = enumeration
 				.enumerators();
-		int numEnumerators = enumerators.numChildren();
 		List<BlockItemNode> result = new ArrayList<>();
 
-		for (int i = 0; i < numEnumerators; i++) {
-			EnumeratorDeclarationNode enumerator = enumerators
-					.getSequenceChild(i);
-			ExpressionNode value = enumerator.getValue();
+		if (enumerators != null) {
+			int numEnumerators = enumerators.numChildren();
 
-			if (value != null) {
-				ExprTriple expr = this.translate(value, false);
+			for (int i = 0; i < numEnumerators; i++) {
+				EnumeratorDeclarationNode enumerator = enumerators
+						.getSequenceChild(i);
+				ExpressionNode value = enumerator.getValue();
 
-				result.addAll(expr.getBefore());
-				enumerator.setValue(expr.getNode());
+				if (value != null) {
+					ExprTriple expr = this.translate(value, false);
+
+					result.addAll(expr.getBefore());
+					enumerator.setValue(expr.getNode());
+				}
 			}
 		}
 		result.add(enumeration);
@@ -3252,15 +3257,21 @@ public class SideEffectRemover extends BaseTransformer {
 
 		assert this.astFactory == ast.getASTFactory();
 		assert this.nodeFactory == astFactory.getNodeFactory();
+		// System.out
+		// .println("=================== before  SideEffectRemover ===================");
+		// ast.prettyPrint(System.out, false);
 		ast.release();
 		transformShortCircuitWork(rootNode);
 		// rootNode.prettyPrint(System.out);
 		for (int i = 0; i < rootNode.numChildren(); i++) {
 			BlockItemNode node = rootNode.getSequenceChild(i);
-			List<BlockItemNode> normalNodes = this.translateBlockItem(node);
 
-			removeNodes(normalNodes);
-			newBlockItems.addAll(normalNodes);
+			if (node != null) {
+				List<BlockItemNode> normalNodes = this.translateBlockItem(node);
+
+				removeNodes(normalNodes);
+				newBlockItems.addAll(normalNodes);
+			}
 		}
 		rootNode = nodeFactory.newTranslationUnitNode(rootNode.getSource(),
 				newBlockItems);

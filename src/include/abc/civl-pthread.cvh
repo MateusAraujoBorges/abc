@@ -2,9 +2,13 @@
 #define _CIVLPTHREAD_
 
 #include <civlc.cvh>
-#include <pthread.h>
 
 // types
+
+typedef struct _pthread_attr_t pthread_attr_t;
+typedef struct _pthread_t pthread_t;
+
+
 /* A global pthread pool which must only be operated by local pthread pool. */
 typedef struct _pthread_gpool_t * $pthread_gpool_t;
 

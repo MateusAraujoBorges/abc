@@ -22,6 +22,7 @@ appropriate definitions are changed to input variables
 // don't think this should be here, but this is using CIVL's $proc
 // need to talk about it...
 #include <civlc.cvh>
+#include<civl-pthread.cvh>
 
 //Mutex types
 enum{
@@ -75,12 +76,12 @@ typedef struct pthread_mutex_t pthread_mutex_t;
 typedef struct pthread_barrierattr_t pthread_barrierattr_t;
 typedef struct pthread_barrier_t pthread_barrier_t;
 typedef struct pthread_spinlock_t pthread_spinlock_t;
-typedef struct pthread_attr_t pthread_attr_t;
+//typedef struct pthread_attr_t pthread_attr_t;
 typedef struct pthread_rwlockattr_t pthread_rwlockattr_t;
 typedef struct pthread_rwlock_t pthread_rwlock_t;
 typedef struct pthread_cond_t pthread_cond_t;
 typedef int pthread_condattr_t;
-typedef struct pthread_t pthread_t;
+//typedef struct pthread_t pthread_t;
 
 pthread_mutex_t PTHREAD_MUTEX_INITIALIZER;// {0,$proc_null,0,0,{0,0,0,PTHREAD_MUTEX_NORMAL,0}}
 
