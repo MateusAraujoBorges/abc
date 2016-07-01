@@ -147,14 +147,14 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, Interval>>{
 		if (isAssignment(n) || isDefinition(n)) {
 			Entity lhsVar = getLHSVar(n);
 			ExpressionNode rhs = getRHS(n);
-			
+
 			Map<Entity, Interval> map = new HashMap<Entity, Interval>();
 			for(Pair<Entity, Interval> setElement : set){
 				map.put(setElement.left, setElement.right);
 			}
-			
+
 			Interval interval = ee.evaluate(rhs,map);
-			
+
 
 			/*if (rhs instanceof ConstantNode) {
 				ConstantNode conNode = (ConstantNode)rhs;
@@ -177,7 +177,7 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, Interval>>{
 				} else
 					assert false : "Expected a basic type for a ConstantNode";
 			}
-			*/
+			 */
 			Pair<Entity, Interval> inEntry = 
 					new Pair<Entity, Interval>(lhsVar, interval);
 			result.add(inEntry);
@@ -276,9 +276,9 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, Interval>>{
 		return "<"+entry+">";
 	}
 
-	
-	class EvaluateIntervalExpression implements Evaluation<Interval>{
-		
+
+	private class EvaluateIntervalExpression implements Evaluation<Interval>{
+
 		@Override
 		public Interval evaluate(ASTNode expr, Map<Entity, Interval> map) {
 
@@ -288,32 +288,33 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, Interval>>{
 				ASTNode rightNode = expr.child(1);
 				Interval leftValue = evaluate(leftNode, map);
 				Interval rightValue = evaluate(rightNode, map);
-				
+
 				Operator op = ((OperatorNode) expr).getOperator();
-				
+
 				switch(op){
-					case PLUS: leftValue.plus(rightValue); break;
-					case MINUS: leftValue.minus(rightValue); break;
-					case TIMES: leftValue.multiply(rightValue); break;
-					case DIV: leftValue.divide(rightValue); break;
-					
-					default:
-						assert false : "Unsupported operation!";
-				}
 				
+				case PLUS: leftValue.plus(rightValue); break;
+				case MINUS: leftValue.minus(rightValue); break;
+				case TIMES: leftValue.multiply(rightValue); break;
+				case DIV: leftValue.divide(rightValue); break;
+
+				default:
+					assert false : "Unsupported operation!";
+				}
+
 				return leftValue;
 			}
-			
+
 			//Handles an identifier node
 			if (expr instanceof IdentifierExpressionNode){
 				Entity e = ((IdentifierExpressionNode) expr).getIdentifier().getEntity();
 				Interval i = map.get(e);
 				return i;
 			}
-			
+
 			//Handles a constant node
 			if (expr instanceof ConstantNode){
-				
+
 				ConstantNode conNode = (ConstantNode) expr;
 				Value v = conNode.getConstantValue();
 				Interval interval = null;
@@ -334,12 +335,12 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, Interval>>{
 					}
 				} else
 					assert false : "Expected a basic type for a ConstantNode";
-				
+
 				return interval;
 			}
 			
 			assert false : "Unsupported node type";
-			
+
 			return null;
 		}
 	}
