@@ -2,9 +2,13 @@ package edu.udel.cis.vsl.abc.util.IF;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.io.Reader;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
@@ -66,6 +70,38 @@ public class ANTLRUtils {
 	}
 
 	/**
+	 * Looks for file in file system and as resource located under class path;
+	 * returns buffered reader in either case. Returns <code>null</code> if file
+	 * cannot be found in either location.
+	 * 
+	 * @param file
+	 *            the file which could be name of resource
+	 * @return buffered reader or <code>null</code> i
+	 */
+	private static BufferedReader readFileOrResource(File file) {
+		Reader reader;
+
+		try {
+			reader = new FileReader(file);
+		} catch (FileNotFoundException e) {
+			reader = null;
+		}
+		if (reader == null) {
+			InputStream stream = ANTLRUtils.class
+					.getResourceAsStream(file.getAbsolutePath());
+
+			if (stream == null)
+				reader = null;
+			else
+				reader = new InputStreamReader(stream);
+		}
+		if (reader == null)
+			return null;
+		else
+			return new BufferedReader(reader);
+	}
+
+	/**
 	 * Prints the original text file to the give output stream, unaltered.
 	 * 
 	 * @param out
@@ -78,8 +114,13 @@ public class ANTLRUtils {
 	public static void source(PrintStream out, File file) throws IOException {
 		out.println("Contents of file " + file + ":\n");
 		out.println("----------------------------------->");
-		FileReader fileReader = new FileReader(file);
-		BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+		BufferedReader bufferedReader = readFileOrResource(file);
+
+		if (bufferedReader == null) {
+			throw new IOException("Cannot find file " + file.getAbsolutePath());
+		}
+
 		String line;
 
 		while ((line = bufferedReader.readLine()) != null)
@@ -87,7 +128,7 @@ public class ANTLRUtils {
 		out.println("<-----------------------------------");
 		out.flush();
 		bufferedReader.close();
-		fileReader.close();
+		// I _think_ that closes all the underlying readers/streams
 	}
 
 	/**
