@@ -553,8 +553,6 @@ public class ABCExecutor {
 	/**
 	 * Executes the complete translation task.
 	 * 
-	 * @throws IOException
-	 *             if a file is not found
 	 * @throws ABCException
 	 *             if there are any problems with preprocessing or parsing, or
 	 *             syntax or semantics violations in the source code
@@ -674,14 +672,33 @@ public class ABCExecutor {
 		return program;
 	}
 
+	/**
+	 * Gets the current number of unit tasks. This number may increase as
+	 * executor proceeds due to {@link DynamicTask}s.
+	 * 
+	 * @return current number of unit tasks
+	 */
 	public int getNumUnitTasks() {
 		return numUnits;
 	}
 
+	/**
+	 * Gets the number of unit tasks which have been completely executed.
+	 * 
+	 * @return number of unit tasks that have been executed
+	 */
 	public int getNumCompleteUnitTasks() {
 		return numUnitTasksDone;
 	}
 
+	/**
+	 * Gets the unit task of given index. Indexes run from 0 to
+	 * {@link #getNumUnitTasks()} - 1.
+	 * 
+	 * @param index
+	 *            index of unit task
+	 * @return that unit task
+	 */
 	public UnitTask getUnitTask(int index) {
 		return unitTasks.get(index);
 	}
