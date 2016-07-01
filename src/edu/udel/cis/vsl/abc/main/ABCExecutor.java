@@ -527,11 +527,25 @@ public class ABCExecutor {
 		}
 		if (stage == TranslationStage.GENERATE_ASTS)
 			return;
-		if (stage == TranslationStage.ANALYZE_ASTS) {
-			Analyzer analyzer = frontEnd.getStandardAnalyzer(language);
 
-			analyzer.analyze(ast);
+		Analyzer analyzer = frontEnd.getStandardAnalyzer(language);
+
+		// if you are going to link, there is no need to do final
+		// analysis because the linker will do it anyway...
+
+		if (stage.compareTo(TranslationStage.TRANSFORM_ASTS) >= 0) {
+			for (TransformRecord record : unitTask.getTransformRecords()) {
+				Transformer transformer = record
+						.create(frontEnd.getASTFactory());
+
+				analyzer.analyze(ast);
+				ast = transformer.transform(ast);
+			}
+			asts.set(index, ast);
+			if (stage.compareTo(TranslationStage.LINK) >= 0)
+				return;
 		}
+		analyzer.analyze(ast);
 	}
 
 	// Public methods...

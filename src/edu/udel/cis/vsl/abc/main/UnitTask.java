@@ -1,12 +1,17 @@
 package edu.udel.cis.vsl.abc.main;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.err.IF.ABCException;
+import edu.udel.cis.vsl.abc.transform.IF.Transform;
+import edu.udel.cis.vsl.abc.transform.IF.TransformRecord;
 
 /**
  * A {@link UnitTask} specifies how a single source unit will be processed in
@@ -53,6 +58,12 @@ public class UnitTask {
 	 * Allow GNU C features in the source files? Default is <code>false</code>.
 	 */
 	private boolean gnuc = false;
+
+	/**
+	 * Records for the transformations to apply to the translation unit after
+	 * analysis. Default is empty list.
+	 */
+	private List<TransformRecord> transformRecords = new LinkedList<>();
 
 	/**
 	 * Constructs new unit task with the given sequence of source files and
@@ -170,37 +181,61 @@ public class UnitTask {
 		return sourceFiles;
 	}
 
-	// /**
-	// * Gets the sequence of transformation codes that will be applied to the
-	// * translation unit after preprocessing.
-	// *
-	// * @return the sequence of transformation codes
-	// */
-	// public Collection<String> getTransformCodes() {
-	// return transformCodes;
-	// }
-	//
-	// /**
-	// * Adds a transformation code to the end of the list of transformation
-	// * codes.
-	// *
-	// * @param code
-	// * an AST transformation code
-	// */
-	// public void addTransformCode(String code) {
-	// transformCodes.add(code);
-	// }
-	//
-	// /**
-	// * Adds a complete sequence of transformation codes to the end of the list
-	// * of transformation codes for this unit task.
-	// *
-	// * @param codes
-	// * a sequence of AST transformation codes
-	// */
-	// public void addAllTransformCodes(Collection<String> codes) {
-	// transformCodes.addAll(codes);
-	// }
+	/**
+	 * Returns the sequence of transform records as a Java {@link Collection} .
+	 * The order does matter. These are the transformations that will be applied
+	 * to the translation unit AST after analysis.
+	 * 
+	 * @return the sequence of transformers
+	 */
+	public Collection<TransformRecord> getTransformRecords() {
+		return transformRecords;
+	}
+
+	/**
+	 * Adds the given transform record to the end of the transform record
+	 * sequence.
+	 * 
+	 * @param record
+	 *            a non-<code>null</code> transform record
+	 */
+	public void addTransformRecord(TransformRecord record) {
+		transformRecords.add(record);
+	}
+
+	/**
+	 * Adds the transformation record specified by the given code to the end of
+	 * the transform record sequence. These are the transformations that will be
+	 * applied to the translation unit AST after analysis.
+	 * 
+	 * @param code
+	 *            an AST transformation code
+	 * @throws ABCException
+	 *             if no record for that code exists
+	 */
+	public void addTransformCode(String code) throws ABCException {
+		TransformRecord record = Transform.getRecord(code);
+
+		if (record == null)
+			throw new ABCException("Unknown transformer code: " + code);
+		transformRecords.add(record);
+	}
+
+	/**
+	 * Add records for all of the given transformation codes (in order) to the
+	 * transform record sequence of this translation task.
+	 * 
+	 * @param codes
+	 *            a sequence of AST transformation codes
+	 * @throws ABCException
+	 *             if for some code in the collection, no record for that code
+	 *             exists
+	 */
+	public void addAllTransformCodes(Collection<String> codes)
+			throws ABCException {
+		for (String code : codes)
+			addTransformCode(code);
+	}
 
 	/**
 	 * Are the GNU C extensions allowed in the source files for this translation

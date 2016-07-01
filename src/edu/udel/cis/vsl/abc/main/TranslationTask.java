@@ -46,13 +46,19 @@ public class TranslationTask {
 		 */
 		ANALYZE_ASTS,
 		/**
-		 * Preprocess, parse, generate and analyze an AST for each translation
-		 * unit, and link those translation units to form a whole, analyzed
-		 * program.
+		 * Preprocess, parse, generate, analyze and transform the AST for each
+		 * translation unit.
+		 */
+		TRANSFORM_ASTS,
+		/**
+		 * Preprocess, parse, generate, analyze, and transform an AST for each
+		 * translation unit, and link those translation units to form a whole,
+		 * analyzed program.
 		 */
 		LINK,
 		/**
-		 * Preprocess, parse, generate, analyze, link and analyze the resulting
+		 * Preprocess, parse, generate, analyze, and transform the translation
+		 * units, link the translation units and and analyze the resulting
 		 * program, and finally perform the specified transformations to the
 		 * whole program.
 		 */
