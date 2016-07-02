@@ -19,10 +19,11 @@ public interface ProgramEntity extends Entity {
 	}
 
 	/**
-	 * Returns an iterator over all the known delcarations of this entity. An
-	 * entity may be declared multiple times. This includes the definition.
+	 * Returns an iterator over all the known declarations of this entity. An
+	 * entity may be declared multiple times. This includes the definition. The
+	 * declarations will be returned in program order.
 	 * 
-	 * @return iterator over declarations of this entity
+	 * @return iterator over declarations of this entity, in program order
 	 */
 	Iterable<DeclarationNode> getDeclarations();
 

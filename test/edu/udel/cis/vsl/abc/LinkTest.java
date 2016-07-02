@@ -17,14 +17,6 @@ import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.main.TranslationTask.TranslationStage;
 
-// TODO: problem is too many copies of civlc.cvh inserted:
-// one for each translation unit, then linked, and they all
-// remain.
-
-// 1. why doesn't linker remove duplicates?
-
-// 2. do we really want to keep including civlc.cvh?
-
 /**
  * Tests compilation of multiple translation units. All tests have the following
  * structure: (1) there is a sequence of n filenames which form the inputs, (2)
@@ -40,7 +32,7 @@ public class LinkTest {
 
 	public final static PrintStream out = System.out;
 
-	public final static boolean debug = true;
+	public final static boolean debug = false;
 
 	private File root = new File(new File("examples"), "link");
 
@@ -143,13 +135,9 @@ public class LinkTest {
 				"struct4_3.c" }, "struct4.c");
 	}
 
-	// TODO: problem here is that the actual program will have
-	// 2 copies of civlc.cvh and the oracle will have one, so they
-	// appear different. Should fix the linker so that it eliminates
-	// duplicate decls in same scope.
 	@Test
 	public void sys() throws ABCException {
-		check(new String[] { "sys_0.cvl", "sys_1.cvl" }, "sys.cvl");
+		check(new String[] { "sys_0.c", "sys_1.c" }, "sys.c");
 	}
 
 	@Test

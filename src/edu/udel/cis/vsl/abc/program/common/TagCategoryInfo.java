@@ -106,7 +106,8 @@ public class TagCategoryInfo {
 		if (completeClasses.size() == 1 && !incompletes.isEmpty()) {
 			ArrayList<Pair<Integer, TaggedEntity>> completeClass = completeClasses
 					.get(0);
-			TaggedEntity completeEntity = getCompleteClassRepresentative(completeClass).right;
+			TaggedEntity completeEntity = getCompleteClassRepresentative(
+					completeClass).right;
 
 			for (Pair<Integer, TaggedEntity> pair : incompletes)
 				complete(pair.right, completeEntity);
@@ -175,7 +176,7 @@ public class TagCategoryInfo {
 	}
 
 	/**
-	 * Returns the translation unit ID of one of the entities controled by this
+	 * Returns the translation unit ID of one of the entities controlled by this
 	 * info object.
 	 * 
 	 * @return tuid of one entity
@@ -201,7 +202,8 @@ public class TagCategoryInfo {
 	 */
 	void addToEnumMergeMap(Map<EnumerationType, Integer> enumMergeMap) {
 		for (ArrayList<Pair<Integer, TaggedEntity>> completeClass : completeClasses) {
-			int representative = getCompleteClassRepresentative(completeClass).left;
+			int representative = getCompleteClassRepresentative(
+					completeClass).left;
 
 			for (Pair<Integer, TaggedEntity> pair : completeClass) {
 				enumMergeMap.put((EnumerationType) pair.right, representative);
@@ -258,7 +260,8 @@ public class TagCategoryInfo {
 		// is the same whether exclusive or not...
 		if (!consistent) {
 			for (ArrayList<Pair<Integer, TaggedEntity>> completeClass : completeClasses) {
-				int representative = getCompleteClassRepresentative(completeClass).left;
+				int representative = getCompleteClassRepresentative(
+						completeClass).left;
 				String newName = parent.newName(representative);
 
 				for (Pair<Integer, TaggedEntity> pair : completeClass)
@@ -288,7 +291,8 @@ public class TagCategoryInfo {
 		}
 		// add incompletion actions...
 		for (ArrayList<Pair<Integer, TaggedEntity>> completeClass : completeClasses) {
-			int representative = getCompleteClassRepresentative(completeClass).left;
+			int representative = getCompleteClassRepresentative(
+					completeClass).left;
 
 			for (Pair<Integer, TaggedEntity> pair : completeClass) {
 				int tuid = pair.left;

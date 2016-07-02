@@ -174,8 +174,24 @@ public class PrunerWorker {
 			if (defn != null && defn != firstDecl)
 				markReachable(defn);
 		} else {
-			for (DeclarationNode dn : entity.getDeclarations())
-				markReachable(dn);
+			// if a decl is equivalent to any previous decl for this entity
+			// don't mark it reachable. Correctness of below requires that
+			// getDeclarations are returned in program order.
+			for (DeclarationNode current : entity.getDeclarations()) {
+				for (DeclarationNode previous : entity.getDeclarations()) {
+					if (previous == current) {
+						markReachable(current);
+						break;
+					}
+					if (current.equiv(previous))
+						break;
+				}
+			}
+
+			// TODO:
+
+			// are these dns guaranteed to occur in program order?
+
 			// special case: if you use at least one enumerator
 			// in the enumeration, you use the whole enumeration...
 			if (entity instanceof Enumerator) {
