@@ -191,8 +191,7 @@ public class ABCExecutor {
 
 					if (!functionNames.contains(functionName)) {
 						if (i == 0)
-							out.println(
-									"==== functions without definition ====");
+							out.println("==== functions without definition ====");
 						else
 							out.print(",");
 						out.print(functionName);
@@ -463,8 +462,8 @@ public class ABCExecutor {
 			int type;
 
 			if (verbose)
-				out.println(
-						bar + " Preprocessor output for " + name + " " + bar);
+				out.println(bar + " Preprocessor output for " + name + " "
+						+ bar);
 			if (showTime) {
 				do {
 					token = (CommonToken) tokens.nextToken();
@@ -535,9 +534,10 @@ public class ABCExecutor {
 
 		if (stage.compareTo(TranslationStage.TRANSFORM_ASTS) >= 0) {
 			for (TransformRecord record : unitTask.getTransformRecords()) {
-				Transformer transformer = record
-						.create(frontEnd.getASTFactory());
+				Transformer transformer = record.create(frontEnd
+						.getASTFactory());
 
+				analyzer.clear(ast);
 				analyzer.analyze(ast);
 				ast = transformer.transform(ast);
 			}
@@ -602,8 +602,8 @@ public class ABCExecutor {
 				out.flush();
 			}
 			program.apply(transformer);
-			timer.markTime(
-					"apply transformer " + transformer.getShortDescription());
+			timer.markTime("apply transformer "
+					+ transformer.getShortDescription());
 		}
 		if (!showTime && !task.isSilent())
 			printProgram();
