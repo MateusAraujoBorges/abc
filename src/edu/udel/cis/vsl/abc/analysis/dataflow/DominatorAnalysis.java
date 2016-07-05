@@ -84,6 +84,10 @@ public class DominatorAnalysis extends DataFlowFramework<ASTNode> {
 		return idom.get(n);
 	}
 	
+	public Set<ASTNode> idomR(ASTNode n) {
+		return idomR.get(n);
+	}
+	
 	protected void computeImmediateDominators() {
 		for (ASTNode n : cfa.allNodes(currentFunction)) {
 			Set<ASTNode> candidates = new HashSet<ASTNode>();
