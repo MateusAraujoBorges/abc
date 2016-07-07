@@ -59,7 +59,8 @@ $system[pthread] void $pthread_gpool_join($pthread_gpool_t gpool);
 $atomic_f $pthread_pool_t $pthread_pool_create($scope scope, $pthread_gpool_t gpool);
 
 /* Terminates this thread */
-$system[pthread] void $pthread_pool_terminates($pthread_pool_t pool, void* value);
+/*@ depends_on \nothing; */
+$atomic_f void $pthread_pool_terminates($pthread_pool_t pool, void* value);
 
 $system[pthread] _Bool $pthread_pool_get_terminated($pthread_pool_t pool);
 
@@ -90,6 +91,7 @@ $system[pthread] pthread_t $pthread_pool_thread($pthread_pool_t pool);
   *            The length of the array of threads to be waited upon
   * @return Returns 0 upon successful completion
   */
-$system[pthread] void $pthread_exit(void *value_ptr, $pthread_pool_t $pthread_pool);
+/*@ depends_on \nothing; */
+$atomic_f void $pthread_exit(void *value_ptr, $pthread_pool_t $pthread_pool);
 
 #endif

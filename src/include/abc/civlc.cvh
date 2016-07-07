@@ -49,6 +49,16 @@ $system void $waitall($proc *procs, int numProcs);
   @*/
 $system void $exit(void);
 
+/* Checks if the given process has terminated.
+ * 
+ * TODO: the contract should be 
+ *       depends_on \proc(p);
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$system _Bool $is_terminated($proc p);
+
 /* Nondeterministic choice of integer i, such that 0<=i<n. */
 /*@ depends_on \nothing;
   @ executes_when \true;

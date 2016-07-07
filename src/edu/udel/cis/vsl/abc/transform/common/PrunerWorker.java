@@ -169,8 +169,12 @@ public class PrunerWorker {
 			ASTNode firstDecl = entity.getFirstDeclaration();
 			ASTNode defn = entity.getDefinition();
 
-			if (firstDecl != null)
-				markReachable(firstDecl);
+			if (firstDecl != null) {
+				if (firstDecl.parent().parent() instanceof TypedefDeclarationNode)
+					markReachable(firstDecl.parent().parent());
+				else
+					markReachable(firstDecl);
+			}
 			if (defn != null && defn != firstDecl)
 				markReachable(defn);
 		} else {

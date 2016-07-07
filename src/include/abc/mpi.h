@@ -230,9 +230,9 @@ typedef int (MPI_Grequest_query_function)(void *, MPI_Status *);
 
 /**************************** Communicators  ************************************/
 MPI_Comm MPI_COMM_WORLD;
-MPI_Comm MPI_COMM_SELF;
-MPI_Comm MPI_COMM_PARENT;
-MPI_Comm MPI_COMM_TYPE_SHARED;
+extern MPI_Comm MPI_COMM_SELF;
+extern MPI_Comm MPI_COMM_PARENT;
+extern MPI_Comm MPI_COMM_TYPE_SHARED;
 
 /* We require that the C compiler support prototypes */
 /* Begin Prototypes */

@@ -4,6 +4,8 @@
 #ifndef _STDIO_
 #define _STDIO_
 
+#include<civl-stdio.cvh>
+
 /* Needed from stdarg.h: */
 
 #include <stdarg.h>
@@ -11,8 +13,6 @@
 /* Types */
 
 typedef unsigned long int size_t;
-
-typedef struct FILE FILE;
 
 typedef int fpos_t;
 
