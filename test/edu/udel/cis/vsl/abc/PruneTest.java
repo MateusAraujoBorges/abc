@@ -17,12 +17,6 @@ import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 
-/**
- * Tests pruner.
- * 
- * @author siegel
- * 
- */
 public class PruneTest {
 
 	public final static PrintStream out = System.out;
@@ -79,6 +73,18 @@ public class PruneTest {
 	@Test
 	public void function() throws ABCException {
 		check(new String[] { "func.c" }, "func_pruned.c");
+	}
+
+	@Test
+	public void structsInFunction() throws ABCException {
+		check(new String[] { "structsInFunction.cvl" },
+				"structsInFunction_pruned.cvl");
+	}
+	
+	@Test
+	public void structsInFunction1() throws ABCException {
+		check(new String[] { "structsInFunction1.cvl" },
+				"structsInFunction_pruned.cvl");
 	}
 
 }
