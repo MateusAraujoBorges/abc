@@ -83,7 +83,7 @@ typedef struct pthread_cond_t pthread_cond_t;
 typedef int pthread_condattr_t;
 //typedef struct pthread_t pthread_t;
 
-pthread_mutex_t PTHREAD_MUTEX_INITIALIZER;// {0,$proc_null,0,0,{0,0,0,PTHREAD_MUTEX_NORMAL,0}}
+extern pthread_mutex_t PTHREAD_MUTEX_INITIALIZER;// {0,$proc_null,0,0,{0,0,0,PTHREAD_MUTEX_NORMAL,0}}
 
 // Function Prototypes
 int pthread_attr_destroy(pthread_attr_t *);
@@ -133,5 +133,14 @@ int pthread_cond_signal(pthread_cond_t *);
 int pthread_cond_broadcast(pthread_cond_t *);
 pthread_t pthread_self(void);
 
+
+// function declarations needed for transformer:
+void $pthread_exit_main(void *value_ptr, $pthread_pool_t $pthread_pool);
+
+pthread_t $pthread_self($pthread_pool_t pool);
+
+int $pthread_mutex_lock(pthread_mutex_t *mutex, $pthread_pool_t $pthread_pool);
+
+int $pthread_cond_wait(pthread_cond_t *cond, pthread_mutex_t *mutex, $pthread_pool_t $pthread_pool);
 
 #endif
