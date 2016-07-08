@@ -23,7 +23,9 @@ import edu.udel.cis.vsl.abc.util.IF.Pair;
 public class GatingExpression  {
 	boolean unconditional = false;
 	boolean notTaken = false;
-	ASTNode src = null; // Null for unconditional or not taken expressions
+	
+	// source node for edge: null for unconditional or not taken expressions
+	ASTNode src = null; 
 	
 	/**
 	 * There is a map from destinations of branches, from a common source,
@@ -32,6 +34,11 @@ public class GatingExpression  {
 	Map<ASTNode, ASTNode> edgeConditionMap;
 	Map<ASTNode, GatingExpression> edgeGExprMap;
 
+	/**
+	 * Create an unconditional or not taken GatingExpression.
+	 * 
+	 * @param unconditionalOrNotTaken if true then an unconditional GExpr is created, else not taken
+	 */
 	public GatingExpression(boolean unconditionalOrNotTaken) {
 		if (unconditionalOrNotTaken) {
 			this.unconditional = true;
@@ -40,6 +47,27 @@ public class GatingExpression  {
 		}
 	}
 	
+	/**
+	 * Create a conditional GatingExpression for a CFG branch edge.  The designated edge has an unconditional
+	 * GExpr associated with it and all other edges are marked as not taken.
+	 * 
+	 * @param src the source node of the edge
+	 * @param dest  the destination node of the branch
+	 * @param cond the conditional expression govrning the branch
+	 */
+	public GatingExpression(ASTNode src, ASTNode dest, ASTNode cond) {
+		this.src = src;
+		this.edgeConditionMap = new HashMap<ASTNode, ASTNode>();
+		this.edgeGExprMap = new HashMap<ASTNode, GatingExpression>();
+		this.edgeConditionMap.put(dest, cond);
+		this.edgeGExprMap.put(dest, new GatingExpression(true));
+	}
+	
+	/**
+	 * Internal constructor used to implement GExpr operators.
+	 * 
+	 * @param src the source of a set of branch edges
+	 */
 	private GatingExpression(ASTNode src) {
 		this.src = src;
 		this.edgeConditionMap = new HashMap<ASTNode, ASTNode>();
@@ -65,7 +93,7 @@ public class GatingExpression  {
 	 */
 	public GatingExpression or(GatingExpression ge1, GatingExpression ge2) {
 		assert !ge1.isUnconditional() && !ge2.isUnconditional() : 
-			"Expected conditional or not taken GatingExpressions";
+			"Unconditional GatingExpressions cannot be disjoined";
 		
 		if (ge1.isNotTaken()) {
 			return ge2;
@@ -158,6 +186,20 @@ public class GatingExpression  {
 				}				
 			}
 			return or;
+		}
+	}
+	
+	public String toString() {
+		if (isUnconditional()) {
+			return "uncond";
+		} else if (isNotTaken()) {
+			return "not taken";
+		} else {
+			String result = "[\n   ";
+			for (ASTNode n : edgeConditionMap.keySet()) {
+				result += "   "+src+"->"+n+" on "+edgeConditionMap.get(n)+" with "+edgeGExprMap.get(n)+"\n";
+			}
+			return result+"]";
 		}
 	}
 	
