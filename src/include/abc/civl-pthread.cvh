@@ -64,7 +64,7 @@ $atomic_f void $pthread_pool_terminates($pthread_pool_t pool, void* value);
 
 $system[pthread] _Bool $pthread_pool_get_terminated($pthread_pool_t pool);
 
-$system[pthread] _Bool $pthread_pool_is_terminated($pthread_pool_t pool, $proc pid);
+$atomic_f _Bool $pthread_pool_is_terminated($pthread_pool_t pool, $proc pid);
 
 /* De-allocation a _pthread_gpool_t object */
 /*@ depends_on \access(pool);
