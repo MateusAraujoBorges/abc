@@ -9,6 +9,10 @@ import edu.udel.cis.vsl.abc.analysis.dataflow.ControlFlowAnalysis;
 import edu.udel.cis.vsl.abc.analysis.dataflow.DominatorAnalysis;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
@@ -195,12 +199,33 @@ public class GatingExpression  {
 		} else if (isNotTaken()) {
 			return "not taken";
 		} else {
-			String result = "[\n   ";
+			String result = "{";
 			for (ASTNode n : edgeConditionMap.keySet()) {
-				result += "   "+src+"->"+n+" on "+edgeConditionMap.get(n)+" with "+edgeGExprMap.get(n)+"\n";
+				result += "("+src+"->"+n+" on "+condString(edgeConditionMap.get(n))+" with "+edgeGExprMap.get(n)+") ";
 			}
-			return result+"]";
+			return result+"}";
 		}
+	}
+	
+	private String condString(ASTNode expr) {
+		assert expr instanceof ExpressionNode : "Condition must be an expression";
+		String result = "";
+		
+		if (expr instanceof IdentifierExpressionNode) {
+			result = ((IdentifierExpressionNode)expr).getIdentifier().name();
+		} else if (expr instanceof ConstantNode) {
+			result = ((ConstantNode)expr).getStringRepresentation();
+		} else if (expr instanceof OperatorNode) {
+			OperatorNode on = (OperatorNode)expr;
+			result = "("+on.getOperator();
+			for (int i=0; i<on.getNumberOfArguments(); i++) {
+				result += " "+condString(on.getArgument(i));
+			}
+			result += ")";
+		} else {
+			assert false : "Unexpected subexpression in condition:"+expr;
+		}
+		return result;
 	}
 	
 }

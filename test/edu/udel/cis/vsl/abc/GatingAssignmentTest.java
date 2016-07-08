@@ -112,7 +112,6 @@ public class GatingAssignmentTest {
 					// merge
 					GatingExpression current = new GatingExpression(false);
 					for (ASTNode p : cfa.predecessors(n)) {
-						System.out.println("  current is : "+current);
 						current = current.or(current, geMap.get(p));
 					}
 					geMap.put(n, current);
@@ -242,5 +241,7 @@ public class GatingAssignmentTest {
 		// Return a trivial branch condition
 		return nf.newBooleanConstantNode(source, true);	
 	}
+	
+	
 
 }
