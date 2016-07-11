@@ -14,6 +14,8 @@ import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.analysis.common.CallAnalyzer;
 import edu.udel.cis.vsl.abc.analysis.dataflow.ControlFlowAnalysis;
+import edu.udel.cis.vsl.abc.analysis.dataflow.DominatorAnalysis;
+import edu.udel.cis.vsl.abc.analysis.gsa.GatedSingleAssignment;
 import edu.udel.cis.vsl.abc.analysis.gsa.GatingExpression;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
@@ -61,17 +63,24 @@ public class GatingAssignmentTest {
 	private static FrontEnd fe = new FrontEnd(config);
 
 	private static ControlFlowAnalysis cfa;
+	private static DominatorAnalysis dom;
+	private static GatedSingleAssignment gsa;
 
 	private AST ast;
 
 	@Before
 	public void setUp() throws Exception {
 		cfa = ControlFlowAnalysis.getInstance();
+		dom = DominatorAnalysis.getInstance();
+		gsa = GatedSingleAssignment.getInstance();
+
 	}
 
 	@After
 	public void tearDown() throws Exception {
 		cfa.clear();
+		dom.clear();
+		gsa.clear();
 	}
 
 	private AST getAST(File file)
@@ -95,6 +104,20 @@ public class GatingAssignmentTest {
 		Map<ASTNode, GatingExpression> geMap = new HashMap<ASTNode, GatingExpression>();
 
 		for (Function f : CallAnalyzer.functions(ast)) {
+			dom.analyze(f);
+			gsa.analyze(f);
+			
+			System.out.println("Dominator Tree for "+f);
+			dom.printDominatorTree(f);
+			
+			System.out.println("Subtree roots in the dominator tree:");
+			for (ASTNode n1 : cfa.allNodes(f)) {
+				for (ASTNode n2 : cfa.allNodes(f)) {
+					System.out.println("Subtree root for "+n1+" below "+n2);
+					System.out.println("   -> "+gsa.subroot(n1,n2));
+				}
+			}
+			/*
 			for (ASTNode n : cfa.allNodes(f)) {
 				if (isBranch(n)) {
 					for (ASTNode s : cfa.successors(n)) {
@@ -107,6 +130,7 @@ public class GatingAssignmentTest {
 						}
 				}
 			}
+			
 			for (ASTNode n : cfa.allNodes(f)) {
 				if (isMerge(n)) {
 					// merge
@@ -125,6 +149,7 @@ public class GatingAssignmentTest {
 						}
 				}
 			}
+			*/
 		}
 		
 		System.out.println("Gating Expressions for AST:");

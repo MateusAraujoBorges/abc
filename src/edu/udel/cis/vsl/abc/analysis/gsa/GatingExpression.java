@@ -51,6 +51,10 @@ public class GatingExpression  {
 		}
 	}
 	
+	// Introduce a constructor for an arbitrary edge
+	//    if it is a branch, access the condition and add it
+	//    if not then create an unconditional expression
+	
 	/**
 	 * Create a conditional GatingExpression for a CFG branch edge.  The designated edge has an unconditional
 	 * GExpr associated with it and all other edges are marked as not taken.

@@ -63,7 +63,7 @@ public class GatedSingleAssignment  {
 		// Perform dominator analysis (if needed)
 		dom = DominatorAnalysis.getInstance();
 		dom.analyze(f);
-		
+		/*
 		// Computer a depth-first ordering on the dominator tree
 		List<ASTNode> rdfo = new ArrayList<ASTNode>();
 		Set<ASTNode> seen = new HashSet<ASTNode>();
@@ -88,8 +88,31 @@ public class GatedSingleAssignment  {
 			}
 			
 		}
+		*/
 		
 		
+	}
+	
+	/**
+	 * Compute the root of the largest sub-tree of the dominator tree
+	 * that contains in, but does not contain out.  Walk up the tree path
+	 * from in and stop when you reach a point that dominates out, then 
+	 * return the step just before that.
+	 * 
+	 * @param in the node contained in the sub-tree
+	 * @param out the node that is not contained in the sub-tree
+	 * @return the sub-tree root
+	 */
+	 public ASTNode subroot(ASTNode in, ASTNode out) {
+		ASTNode result;
+		Set<ASTNode> outDom = dom.dom(out);
+		ASTNode idom = in;
+		do {
+			result = idom;
+			idom = dom.idom(result);
+			if (idom == null) break;
+		} while (!outDom.contains(idom));
+		return result;
 	}
 	
 	/**
