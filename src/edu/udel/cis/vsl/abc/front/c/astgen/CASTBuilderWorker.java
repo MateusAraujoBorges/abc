@@ -332,7 +332,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		ExpressionNode procExpr = translateExpression(procExprTree, scope);
 		IdentifierNode identifierNode = translateIdentifier(identifierTree);
 
-		return nodeFactory.newRemoteExpressionNode(source, procExpr,
+		return nodeFactory.newRemoteOnExpressionNode(source, procExpr,
 				nodeFactory.newIdentifierExpressionNode(
 						newSource(identifierTree), identifierNode));
 	}

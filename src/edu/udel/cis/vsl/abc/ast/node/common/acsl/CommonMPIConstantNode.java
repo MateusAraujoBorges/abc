@@ -4,7 +4,6 @@ import java.io.PrintStream;
 import java.util.Arrays;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonMPIConstantNode extends CommonMPIContractExpressionNode
@@ -16,12 +15,15 @@ public class CommonMPIConstantNode extends CommonMPIContractExpressionNode
 
 	private String stringReresentation;
 
+	private String exprName;
+
 	public CommonMPIConstantNode(Source source, String name,
 			MPIConstantKind kind, ConstantKind constKind) {
-		super(source, Arrays.asList((ExpressionNode) null),
+		super(source, Arrays.asList(),
 				MPIContractExpressionKind.MPI_INTEGER_CONSTANT, name);
 		this.kind = kind;
 		this.constKind = constKind;
+		this.exprName = name;
 	}
 
 	@Override
@@ -31,8 +33,7 @@ public class CommonMPIConstantNode extends CommonMPIContractExpressionNode
 
 	@Override
 	public MPIContractConstantNode copy() {
-		return new CommonMPIConstantNode(this.getSource(), this
-				.getStringRepresentation().toString(), kind, constKind);
+		return new CommonMPIConstantNode(getSource(), exprName, kind, constKind);
 	}
 
 	@Override

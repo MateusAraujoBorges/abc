@@ -55,7 +55,8 @@ public interface ContractNode extends ASTNode {
 		INVARIANT,
 		/**
 		 * A "\mpi_collective" node introduces a block of contracts which should
-		 * satisfy mpi collective behaviors.
+		 * satisfy mpi collective behaviors. A node of this kind may be safely
+		 * cast to {@link MPICollectiveBlockNode}
 		 */
 		MPI_COLLECTIVE,
 		/**

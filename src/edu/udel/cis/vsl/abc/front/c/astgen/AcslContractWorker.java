@@ -123,10 +123,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
@@ -893,19 +891,13 @@ public class AcslContractWorker {
 	private ExpressionNode translateRemoteExpression(CommonTree tree,
 			Source source, SimpleScope scope) throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
-		CommonTree idTree = (CommonTree) tree.getChild(1);
-		CommonTree procTree = (CommonTree) tree.getChild(2);
-		ExpressionNode idArg, procArg;
+		CommonTree procTree = (CommonTree) tree.getChild(1);
+		CommonTree exprTree = (CommonTree) tree.getChild(2);
+		ExpressionNode exprArg, procArg;
 
-		idArg = translateExpression(idTree, newScope);
+		exprArg = translateExpression(exprTree, newScope);
 		procArg = translateExpression(procTree, newScope);
-		if (!idArg.expressionKind()
-				.equals(ExpressionKind.IDENTIFIER_EXPRESSION))
-			this.error(
-					"The first operand of a remote access operator must be an identifier: "
-							+ idArg, idTree);
-		return nodeFactory.newRemoteExpressionNode(source, procArg,
-				(IdentifierExpressionNode) idArg);
+		return nodeFactory.newRemoteOnExpressionNode(source, procArg, exprArg);
 	}
 
 	private SequenceNode<VariableDeclarationNode> translateBinders(
@@ -1421,7 +1413,6 @@ public class AcslContractWorker {
 			throws SyntaxException {
 		CommonTree expression = (CommonTree) expressionTree.getChild(0);
 		int kind = expression.getType();
-		int numArgs;
 		List<ExpressionNode> args = new LinkedList<>();
 		String exprName = expression.getText();
 		MPIContractExpressionKind mpiExprKind;
@@ -1430,38 +1421,47 @@ public class AcslContractWorker {
 		int numChildren = expression.getChildCount();
 
 		switch (kind) {
+		case AcslParser.MPI_AGREE:
+			mpiExprKind = MPIContractExpressionKind.MPI_AGREE;
+			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
+			break;
 		case AcslParser.MPI_EMPTY_IN:
-			numArgs = 1;
 			mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_IN;
 			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
 		case AcslParser.MPI_EMPTY_OUT:
-			numArgs = 1;
 			mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_OUT;
 			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
 		case AcslParser.MPI_EQUALS:
-			numArgs = 4;
 			mpiExprKind = MPIContractExpressionKind.MPI_EQUALS;
 			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
+		case AcslParser.MPI_EXTENT:
+			mpiExprKind = MPIContractExpressionKind.MPI_EXTENT;
+			initialType = typeFactory
+					.unsignedIntegerType(UnsignedIntKind.UNSIGNED);
+			break;
 		case AcslParser.MPI_REGION:
-			numArgs = 3;
 			mpiExprKind = MPIContractExpressionKind.MPI_REGION;
 			initialType = typeFactory.pointerType(typeFactory.voidType());
 			break;
-		case AcslParser.MPI_AGREE:
-			numArgs = 1;
-			mpiExprKind = MPIContractExpressionKind.MPI_AGREE;
+		case AcslParser.MPI_OFFSET:
+			mpiExprKind = MPIContractExpressionKind.MPI_OFFSET;
+			initialType = typeFactory.pointerType(typeFactory.voidType());
+			break;
+		case AcslParser.MPI_VALID:
+			mpiExprKind = MPIContractExpressionKind.MPI_VALID;
 			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 			break;
 		default:
 			throw error("Unknown MPI expression " + exprName, expressionTree);
 		}
-		assert numChildren == numArgs + 1;
 		for (int i = 1; i < numChildren; i++) {
-			args.add(this.translateExpression(
-					(CommonTree) expression.getChild(i), scope));
+			ExpressionNode child = translateExpression(
+					(CommonTree) expression.getChild(i), scope);
+
+			args.add(child);
 		}
 		result = nodeFactory.newMPIExpressionNode(source, args, mpiExprKind,
 				exprName);

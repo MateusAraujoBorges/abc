@@ -7,7 +7,7 @@ package edu.udel.cis.vsl.abc.ast.node.IF.expression;
  * @author siegel
  * 
  */
-public interface RemoteExpressionNode extends ExpressionNode {
+public interface RemoteOnExpressionNode extends ExpressionNode {
 
 	/**
 	 * Gets the expression which yields the process on which the foreign
@@ -26,11 +26,11 @@ public interface RemoteExpressionNode extends ExpressionNode {
 	void setProcessExpression(ExpressionNode arg);
 
 	/**
-	 * Gets the identifier node containing the name of the foreign variable.
+	 * Gets the expression node which represents the foreign expression.
 	 * 
-	 * @return the identifier for the name of the foreign variable
+	 * @return the foreign expression.
 	 */
-	IdentifierExpressionNode getIdentifierNode();
+	ExpressionNode getForeignExpressionNode();
 
 	/**
 	 * Sets the identifier node argument.
@@ -38,9 +38,9 @@ public interface RemoteExpressionNode extends ExpressionNode {
 	 * @param arg
 	 *            the identifier node argument
 	 */
-	void setIdentifierNode(IdentifierExpressionNode arg);
+	void setForeignExpressionNode(ExpressionNode arg);
 
 	@Override
-	RemoteExpressionNode copy();
+	RemoteOnExpressionNode copy();
 
 }

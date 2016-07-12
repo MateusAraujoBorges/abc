@@ -7,8 +7,8 @@ MPI_Comm comm = MPI_COMM_WORLD;
 int rank, nprocs, left, right;
 
 /*@ \mpi_collective(comm, P2P):
-  @   ensures  \mpi_empty_in(left) && \remote(nprocs, left) == \result;
-  @   ensures  \remote(nprocs, left) == \remote(nprocs, right);
+  @   ensures  \mpi_empty_in(left) && \on(left, nprocs) == \result;
+  @   ensures  \on(left, nprocs) == \on(right, nprocs);
   @*/
 int sendrecv() 
 {

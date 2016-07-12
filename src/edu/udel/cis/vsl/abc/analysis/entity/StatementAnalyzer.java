@@ -44,10 +44,12 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.JumpNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ReturnNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.RunNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.WhenNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.WithNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.DomainType;
@@ -393,6 +395,8 @@ public class StatementAnalyzer {
 		case PRAGMA:
 			entityAnalyzer.processPragma((PragmaNode) statement);
 			break;
+		case RUN:
+			processStatement(((RunNode) statement).getStatement());
 		case OMP:
 			processOmpNode((OmpNode) statement);
 			break;
@@ -412,6 +416,13 @@ public class StatementAnalyzer {
 			if (!guardType.isScalar())
 				throw error("Guard has non-scalar type " + guardType, guard);
 			processStatement(((WhenNode) statement).getBody());
+			break;
+		}
+		case WITH: {
+			WithNode withNode = (WithNode) statement;
+
+			processExpression(withNode.getStateReference());
+			processStatement(withNode.getStatementNode());
 			break;
 		}
 		case CHOOSE: {

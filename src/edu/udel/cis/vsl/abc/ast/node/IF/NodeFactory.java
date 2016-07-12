@@ -69,13 +69,14 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteOnExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ScopeOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StatementExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.UpdateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.WildcardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.LabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
@@ -103,9 +104,11 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.JumpNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ReturnNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.RunNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.WhenNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.WithNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.AtomicTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
@@ -932,14 +935,13 @@ public interface NodeFactory {
 	 *            source information for the entire remove expression, including
 	 *            both arguments
 	 * @param left
-	 *            the left argument, which is an expression of
-	 *            <code>$proc</code> type
+	 *            the left argument, which is an expression of integer type.
 	 * @param right
-	 *            the right argument, which is an identifier which is the name
-	 *            of a variable
+	 *            the right argument, which is a foreign expression that will
+	 *            evaluates on the process represented by the left expression.
 	 */
-	RemoteExpressionNode newRemoteExpressionNode(Source source,
-			ExpressionNode left, IdentifierExpressionNode right);
+	RemoteOnExpressionNode newRemoteOnExpressionNode(Source source,
+			ExpressionNode left, ExpressionNode right);
 
 	/**
 	 * Constructs a new CIVL-C <code>$scopeof</code> expression node. This is an
@@ -2502,6 +2504,45 @@ public interface NodeFactory {
 	ContractVerifyNode newContractVerifyNode(Source source,
 			ExpressionNode function, List<ExpressionNode> arguments,
 			SequenceNode<ExpressionNode> scopeList);
+
+	/**
+	 * Create a new {@link WithNode}
+	 * 
+	 * @param source
+	 *            The {@link Source} attached to the $with statement
+	 * @param stateRef
+	 *            The expression represents a reference to a collate state
+	 * @param statement
+	 *            The statement attached with the $with statement
+	 * @return A new {@link WithNode}
+	 */
+	WithNode newWithNode(Source source, ExpressionNode stateRef,
+			StatementNode statement, boolean isCallWithNode);
+
+	/**
+	 * Create a new {@link UpdateNode}
+	 * 
+	 * @param source
+	 *            The {@link Source} attached to the $update expression
+	 * @param collator
+	 *            The expression has the $collator type
+	 * @param call
+	 *            The {@link FunctionCallNode} attached with this expression.
+	 * @return A new {@link UpdateNode}
+	 */
+	UpdateNode newUpdateNode(Source source, ExpressionNode collator,
+			FunctionCallNode call);
+
+	/**
+	 * Create a new {@link RunNode}
+	 * 
+	 * @param source
+	 *            The {@link Source} attached to the $run statement
+	 * @param statement
+	 *            The statement attached with the $run statement
+	 * @return A new {@link RunNode}
+	 */
+	RunNode newRunNode(Source source, StatementNode statement);
 
 	/**
 	 * Creates a new "waitsfor" clause node. Such a node takes a set of

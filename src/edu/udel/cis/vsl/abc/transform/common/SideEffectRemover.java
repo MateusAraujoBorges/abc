@@ -44,7 +44,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteOnExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ScopeOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
@@ -1330,7 +1330,7 @@ public class SideEffectRemover extends BaseTransformer {
 	 * @param expression
 	 * @return
 	 */
-	private ExprTriple translateRemoteReference(RemoteExpressionNode expression) {
+	private ExprTriple translateRemoteReference(RemoteOnExpressionNode expression) {
 		return new ExprTriple(expression);
 	}
 
@@ -1824,7 +1824,7 @@ public class SideEffectRemover extends BaseTransformer {
 		case REGULAR_RANGE:
 			return translateRegularRange((RegularRangeNode) expression, isVoid);
 		case REMOTE_REFERENCE:
-			return translateRemoteReference((RemoteExpressionNode) expression);
+			return translateRemoteReference((RemoteOnExpressionNode) expression);
 		case SCOPEOF:
 			return translateScopeOf((ScopeOfNode) expression, isVoid);
 		case SIZEOF:

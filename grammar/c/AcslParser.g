@@ -81,6 +81,9 @@ tokens{
     MPI_EMPTY_OUT;
     MPI_EQUALS;
     MPI_EXPRESSION;
+    MPI_EXTENT;
+    MPI_OFFSET;
+    MPI_VALID;
     MPI_REGION;
     NULL_ACSL;
     NOTHING;
@@ -762,7 +765,7 @@ primaryExpression
  * identifier.
  */
 remoteExpression
-    : remote_key LPAREN a=IDENTIFIER COMMA b=shiftExpression RPAREN
+    : remote_key LPAREN a=shiftExpression COMMA b=term RPAREN
 	  -> ^(REMOTE_ACCESS remote_key  $a $b)
 	;
     
@@ -812,16 +815,22 @@ constant
 
 /* ACSL-MPI extensions Expressions and Constants  */
 mpi_expression
-    	: mpiemptyin_key LPAREN primaryExpression RPAREN
-      	  -> ^(MPI_EMPTY_IN mpiemptyin_key primaryExpression)
-   	| mpiemptyout_key LPAREN primaryExpression RPAREN
-      	  -> ^(MPI_EMPTY_OUT mpiemptyout_key primaryExpression)
-    	| mpiagree_key LPAREN a=variable_ident_base RPAREN /* seems variable_ident not ready yet */
+    	: mpiemptyin_key LPAREN term RPAREN
+      	  -> ^(MPI_EMPTY_IN mpiemptyin_key term)
+        | mpiemptyout_key LPAREN term RPAREN
+      	  -> ^(MPI_EMPTY_OUT mpiemptyout_key term)
+    	| mpiagree_key LPAREN a=term RPAREN 
       	  -> ^(MPI_AGREE mpiagree_key $a) 
-    	| mpiregion_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression RPAREN
+    	| mpiregion_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
       	  -> ^(MPI_REGION mpiregion_key $a $b $c)
-    	| mpiequals_key LPAREN a=primaryExpression COMMA b=primaryExpression COMMA c=primaryExpression COMMA d=primaryExpression RPAREN
+    	| mpiequals_key LPAREN a=term COMMA b=term COMMA c=term COMMA d=term RPAREN
       	  -> ^(MPI_EQUALS mpiequals_key $a $b $c $d)
+        | mpiextent_key LPAREN a=primaryExpression RPAREN
+          -> ^(MPI_EXTENT mpiextent_key $a)
+        | mpioffset_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
+          -> ^(MPI_OFFSET mpioffset_key $a $b $c)
+        | mpivalid_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
+          -> ^(MPI_VALID mpivalid_key $a $b $c)
     	;
 
 mpi_constant
@@ -1020,7 +1029,7 @@ reads_key
     ;
     
 remote_key
-    : {input.LT(1).getText().equals("\\remote")}? EXTENDED_IDENTIFIER
+    : {input.LT(1).getText().equals("\\on")}? EXTENDED_IDENTIFIER
 //    -> ^(REMOTE_ACCESS EXTENDED_IDENTIFIER)
     ;
 
@@ -1108,6 +1117,21 @@ mpiemptyout_key
 mpiequals_key
     : {input.LT(1).getText().equals("\\mpi_equals")}? EXTENDED_IDENTIFIER
 //    -> ^(MPI_EQUALS EXTENDED_IDENTIFIER)
+    ;
+
+mpiextent_key
+    : {input.LT(1).getText().equals("\\mpi_extent")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_EXTENT EXTENDED_IDENTIFIER)
+    ;
+
+mpioffset_key
+    : {input.LT(1).getText().equals("\\mpi_offset")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_OFFSET EXTENDED_IDENTIFIER)
+    ;
+
+mpivalid_key
+    : {input.LT(1).getText().equals("\\mpi_valid")}? EXTENDED_IDENTIFIER
+//    -> ^(MPI_VALID EXTENDED_IDENTIFIER)
     ;
 
 mpiregion_key

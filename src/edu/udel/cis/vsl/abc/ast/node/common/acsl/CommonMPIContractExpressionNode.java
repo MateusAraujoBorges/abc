@@ -1,7 +1,6 @@
 package edu.udel.cis.vsl.abc.ast.node.common.acsl;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -34,8 +33,10 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 	@Override
 	public ExpressionNode copy() {
 		List<ExpressionNode> argCopy = new LinkedList<>();
+		int numArgs = arguments.length;
 
-		argCopy.addAll(Arrays.asList(arguments));
+		for (int i = 0; i < numArgs; i++)
+			argCopy.add(duplicate(arguments[i]));
 		return new CommonMPIContractExpressionNode(this.getSource(), argCopy,
 				kind, exprName);
 	}
@@ -66,20 +67,29 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 			return numArgs;
 		else {
 			switch (kind) {
+			case MPI_AGREE:
+				numArgs = 1;
+				break;
 			case MPI_EMPTY_IN:
 				numArgs = 1;
 				break;
 			case MPI_EMPTY_OUT:
 				numArgs = 1;
 				break;
-			case MPI_AGREE:
+			case MPI_EQUALS:
+				numArgs = 4;
+				break;
+			case MPI_EXTENT:
 				numArgs = 1;
+				break;
+			case MPI_VALID:
+				numArgs = 3;
+				break;
+			case MPI_OFFSET:
+				numArgs = 3;
 				break;
 			case MPI_REGION:
 				numArgs = 3;
-				break;
-			case MPI_EQUALS:
-				numArgs = 4;
 				break;
 			default:
 				numArgs = -1;

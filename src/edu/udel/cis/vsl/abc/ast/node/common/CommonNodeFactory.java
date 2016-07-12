@@ -76,13 +76,14 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteOnExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ScopeOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StatementExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.UpdateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.WildcardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.LabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
@@ -113,9 +114,11 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode.LoopKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ReturnNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.RunNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.WhenNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.WithNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.AtomicTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
@@ -187,6 +190,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonSizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonSpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStatementExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonUpdateNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonWildcardNode;
 import edu.udel.cis.vsl.abc.ast.node.common.label.CommonOrdinaryLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.common.label.CommonSwitchLabelNode;
@@ -211,8 +215,10 @@ import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonLabeledStatementNode
 import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonLoopNode;
 import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonNullStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonReturnNode;
+import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonRunNode;
 import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonSwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonWhenNode;
+import edu.udel.cis.vsl.abc.ast.node.common.statement.CommonWithNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonAtomicTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonBasicTypeNode;
@@ -761,8 +767,8 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public RemoteExpressionNode newRemoteExpressionNode(Source source,
-			ExpressionNode left, IdentifierExpressionNode right) {
+	public RemoteOnExpressionNode newRemoteOnExpressionNode(Source source,
+			ExpressionNode left, ExpressionNode right) {
 		return new CommonRemoteExpressionNode(source, left, right);
 	}
 
@@ -1208,5 +1214,22 @@ public class CommonNodeFactory implements NodeFactory {
 						boundVariableDeclarationList), null));
 		return new CommonArrayLambdaNode(source, type, newSequenceNode(source,
 				"bound variable list", variableList), restriction, expression);
+	}
+
+	@Override
+	public UpdateNode newUpdateNode(Source source, ExpressionNode collator,
+			FunctionCallNode call) {
+		return new CommonUpdateNode(source, collator, call);
+	}
+
+	@Override
+	public WithNode newWithNode(Source source, ExpressionNode stateRef,
+			StatementNode statement, boolean isCallWithNode) {
+		return new CommonWithNode(source, stateRef, statement);
+	}
+
+	@Override
+	public RunNode newRunNode(Source source, StatementNode statement) {
+		return new CommonRunNode(source, statement);
 	}
 }

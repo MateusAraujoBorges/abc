@@ -171,10 +171,16 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 */
 		MPI_CONTRACT_EXPRESSION,
 		/**
-		 * An ACSL-CIVLC wildcard expression (<code>...</code>); can be cast to
+		 * An <code>$update($collator) f() </code> expression. It may be cast to
+		 * {@link UpdateNode}.
+		 */
+		UPDATE,
+		/**
+		 * An ACSL-CIVL-C wildcard expression (<code>...</code>); can be cast to
 		 * {@link WildcardNode}.
 		 */
 		WILDCARD,
+
 		/**
 		 * An ACSL nothing expression (<code></code>); can be cast to
 		 * {@link NothingNode}.

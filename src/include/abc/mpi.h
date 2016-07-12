@@ -38,7 +38,7 @@ typedef enum Operation MPI_Op;
 #ifdef __MPI_DATATYPE__
 #else
 #define __MPI_DATATYPE__
-typedef enum {
+typedef enum MPI_Datatype{
     MPI_CHAR,
     MPI_CHARACTER,
     MPI_SIGNED_CHAR,           

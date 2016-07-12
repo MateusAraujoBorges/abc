@@ -3,17 +3,15 @@ package edu.udel.cis.vsl.abc.ast.node.common.expression;
 import java.io.PrintStream;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.RemoteOnExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonRemoteExpressionNode extends CommonExpressionNode implements
-		RemoteExpressionNode {
+		RemoteOnExpressionNode {
 
 	public CommonRemoteExpressionNode(Source source,
-			ExpressionNode processExpression,
-			IdentifierExpressionNode identifierNode) {
-		super(source, processExpression, identifierNode);
+			ExpressionNode processExpression, ExpressionNode foreignNode) {
+		super(source, processExpression, foreignNode);
 
 	}
 
@@ -28,20 +26,20 @@ public class CommonRemoteExpressionNode extends CommonExpressionNode implements
 	}
 
 	@Override
-	public IdentifierExpressionNode getIdentifierNode() {
-		return (IdentifierExpressionNode) child(1);
+	public ExpressionNode getForeignExpressionNode() {
+		return (ExpressionNode) child(1);
 	}
 
 	@Override
 	protected void printBody(PrintStream out) {
-		out.print("RemoteExpressionNode");
+		out.print("RemoteOnExpressionNode");
 	}
 
 	@Override
-	public RemoteExpressionNode copy() {
+	public RemoteOnExpressionNode copy() {
 		return new CommonRemoteExpressionNode(getSource(),
 				duplicate(getProcessExpression()),
-				duplicate(getIdentifierNode()));
+				duplicate(getForeignExpressionNode()));
 	}
 
 	@Override
@@ -60,7 +58,7 @@ public class CommonRemoteExpressionNode extends CommonExpressionNode implements
 	}
 
 	@Override
-	public void setIdentifierNode(IdentifierExpressionNode arg) {
+	public void setForeignExpressionNode(ExpressionNode arg) {
 		setChild(1, arg);
 	}
 }

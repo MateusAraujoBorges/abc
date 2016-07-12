@@ -59,7 +59,7 @@ public class CommonProgram implements Program {
 		ast = transformer.transform(ast);
 		standardAnalyzer.clear(ast);
 
-		// debugging:
+		// // debugging:
 		// ast.prettyPrint(System.out, true);
 
 		standardAnalyzer.analyze(ast);
@@ -101,9 +101,9 @@ public class CommonProgram implements Program {
 
 	private boolean hasOmpPragmaInASTNode(ASTNode node) {
 		if (node.nodeKind() == NodeKind.OMP_NODE) {
-//			PragmaNode pragmaNode = (PragmaNode) node;
-//			if (pragmaNode.getPragmaIdentifier().name().equals("omp"))
-				return true;
+			// PragmaNode pragmaNode = (PragmaNode) node;
+			// if (pragmaNode.getPragmaIdentifier().name().equals("omp"))
+			return true;
 		} else {
 			for (ASTNode child : node.children()) {
 				if (child != null)

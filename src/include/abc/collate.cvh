@@ -1,0 +1,96 @@
+/* This header file contains datatypes and function prototypes for
+ * collations.
+ *
+ */
+#ifndef _COLLATE_
+#define _COLLATE_
+
+/************************** Datatypes: **************************/
+
+/* _gcollator: An invisible shared collation object;
+ * $gcollator: A handle to the shared collation object;
+ *
+ * 
+ * A global collation object sematically maintains a queue of collate
+ * states.
+ *
+ */
+typedef struct _gcollator * $gcollator;
+
+/* _collator: An invisible local collation handle to a shared
+ * _gcollator;
+ * $collator: A local handle to a _collator object;
+ *
+ * A local collation hanlde is an object hold by a process. It is used
+ * to access the global collation object through a set of
+ * interfaces. Sematically how does the handle access the global
+ * collation object is opaque from outside of the library.
+ */
+typedef struct _collator  * $collator;
+
+/* _gcollate_state: The object represents an element of the queue
+ * maintained by a _gcollator.
+ *
+ * $gcollate_state: A reference to the _gcollate_state;
+ *
+ */
+typedef struct _gcollate_state * $gcollate_state;
+
+/*
+ * _collate_state: A handle mainly wraps a $gcollate_state and some
+ * other meta information, e.g. place.
+ *
+ * Semantically, this is the only object for a process to access a
+ * collate state. The access is restircted by only using interfaces.
+ */
+typedef struct _collate_state * $collate_state;
+
+/********************* Function prototypes: *********************/
+/* Interface for creating a $gcollator: */
+$gcollator gcollator_create($scope scope, int nprocs);
+
+/* Interface for creating a $collator: */
+$collator   collator_create($gcollator gcollator, int place);
+
+/*
+ * Take a snapshot on the current state of the current process. The
+ * specification of the snap-shooting action requires that: 
+ *
+ * 1. For a group of participants, each participant can only
+ * snap-shoot once for one entry.
+ *
+ * 2. The implementation of a snap-shooting action must guarantee
+ * that: Let D be the set of all dyscopes referenced from the call
+ * stack of the calling process p, and let d be the least common
+ * ancestor of D. We call d the "process scope" of p. d had better not
+ * be in the current collated state s in c (the one that this snapshot
+ * is about to affect), else, ERROR. Now add d and its descendants to
+ * s, as well as the chain of ancestors from d up until the first
+ * dyscope already in s. Also add the call stack of p to s. In this
+ * way s is always a valid state.
+ */
+$collate_state $collate_snapshot($collator c);
+
+/* Collectively free a collate state. The last process will be
+ * responsible for dequeue the collate state at the head of the queue.
+ */
+$collate_state $collate_unsnapshot($collator c);
+
+/* Tests if a set of participants defined by a $range have all arrived
+ * the specific $collate_entry referenced by cp.
+ */
+/*@ pure;
+  @*/
+$system _Bool $collate_arrived($collate_state cp, ...);
+
+
+/* Equivalent to $arrived(cp, r') where r' represents the whole set of
+ * participants in the specific $collate_entry referenced by cp. 
+ */
+/*@ pure;
+  @*/
+$system _Bool $collate_complete($collate_state cp);
+
+#endif
+
+

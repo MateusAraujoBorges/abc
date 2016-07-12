@@ -5,6 +5,9 @@
 #include <comm.cvh>
 #include <concurrency.cvh>
 #include <bundle.cvh>
+#ifdef _MPI_CONTRACT
+#include <collate.cvh>
+#endif
 
 #define BCAST_TAG        9999
 #define REDUCE_TAG       9998
