@@ -586,9 +586,23 @@ public interface ASTNode {
 	 * Returns the pretty representation of this AST node (and its descendants)
 	 * in a form that should be similar to the actual programming language.
 	 * 
+	 * 
 	 * @return the pretty representation of this AST node (and its descendants)
 	 *         in a form that should be similar to the actual programming
 	 *         language.
 	 */
 	StringBuffer prettyRepresentation();
+
+	/**
+	 * Returns the pretty representation of this AST node (and its descendants)
+	 * in a form that should be similar to the actual programming language.
+	 * 
+	 * @param maxLength
+	 *            the maximal length of the string representation of this node;
+	 *            -1 if the length is unlimited
+	 * @return the pretty representation of this AST node (and its descendants)
+	 *         in a form that should be similar to the actual programming
+	 *         language.
+	 */
+	StringBuffer prettyRepresentation(int maxLength);
 }

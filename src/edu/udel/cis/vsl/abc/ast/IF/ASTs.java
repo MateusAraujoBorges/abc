@@ -40,7 +40,7 @@ public class ASTs {
 			TokenFactory tokenFactory, TypeFactory typeFactory) {
 		return new CommonASTFactory(nodeFactory, tokenFactory, typeFactory);
 	}
-	
+
 	/**
 	 * Prints an AST node in the form of the original programming language.
 	 * 
@@ -49,8 +49,12 @@ public class ASTs {
 	 * @param out
 	 *            the print stream to be used for printing
 	 */
-	public static void prettyPrint(ASTNode node, PrintStream out){
+	public static void prettyPrint(ASTNode node, PrintStream out) {
 		ASTPrettyPrinter.prettyPrint(node, out);
+	}
+
+	public static StringBuffer prettyRepresentation(ASTNode node, int maxLength) {
+		return ASTPrettyPrinter.prettyRepresentation(node, maxLength);
 	}
 
 }

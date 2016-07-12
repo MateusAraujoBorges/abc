@@ -1,9 +1,5 @@
 package edu.udel.cis.vsl.abc.ast.node.common;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -494,38 +490,11 @@ public abstract class CommonASTNode implements ASTNode {
 
 	@Override
 	public StringBuffer prettyRepresentation() {
-		// TODO there has to be a better way to do this that does
-		// not involve File I/O
-		StringBuffer result = new StringBuffer();
+		return ASTs.prettyRepresentation(this, -1);
+	}
 
-		try {
-			File temp = File.createTempFile("tmp" + System.currentTimeMillis(),
-					".data");
-			PrintStream tmpOut = new PrintStream(temp);
-			FileReader fileReader;
-			BufferedReader bufferReader;
-			String line;
-			boolean first = true;
-
-			ASTs.prettyPrint(this, tmpOut);
-			fileReader = new FileReader(temp);
-			bufferReader = new BufferedReader(fileReader);
-			line = bufferReader.readLine();
-			while (line != null) {
-				if (first)
-					first = false;
-				else
-					result.append("\n");
-				result.append(line);
-				line = bufferReader.readLine();
-			}
-			bufferReader.close();
-			fileReader.close();
-			tmpOut.close();
-			temp.delete();
-		} catch (IOException e) {
-			result.append(this.toString());
-		}
-		return result;
+	@Override
+	public StringBuffer prettyRepresentation(int maxLength) {
+		return ASTs.prettyRepresentation(this, maxLength);
 	}
 }
