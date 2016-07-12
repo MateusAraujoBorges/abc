@@ -221,6 +221,9 @@ public class CPreprocessor implements Preprocessor {
 							"Error in opening " + file + ": " + e.getMessage());
 				}
 			}
+			if (stream == null) {
+				throw new PreprocessorException("Could not find file " + file);
+			}
 			streamVector.add(stream);
 			formationVector.add(tokenFactory.newInclusion(sourceFile));
 		}

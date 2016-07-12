@@ -191,11 +191,6 @@ public class PrunerWorker {
 						break;
 				}
 			}
-
-			// TODO:
-
-			// are these dns guaranteed to occur in program order?
-
 			// special case: if you use at least one enumerator
 			// in the enumeration, you use the whole enumeration...
 			if (entity instanceof Enumerator) {

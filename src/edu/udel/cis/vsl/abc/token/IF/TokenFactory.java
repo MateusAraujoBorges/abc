@@ -30,9 +30,52 @@ public interface TokenFactory {
 
 	// Formations (records of history of token creation)...
 
+	/**
+	 * Returns a standard macro expansion formation object. This is a formation
+	 * that represents a token created through the process of macro expansion.
+	 * 
+	 * @param startToken
+	 *            the token within the macro application expression that led to
+	 *            the formation of the new token; this could be either the macro
+	 *            name itself or a token from one of the arguments
+	 * @param macro
+	 *            the {@link Macro} object given an abstraction represnetation
+	 *            of the macro
+	 * @param index
+	 *            the index of the replacement token (numbered from 0) in the
+	 *            macro replacement list that led to the final token
+	 * @return a new formation incorporating the specified values
+	 */
 	MacroExpansion newMacroExpansion(CivlcToken startToken, Macro macro,
 			int index);
 
+	/**
+	 * Formation of a string literal token through the use of the preprocessor
+	 * "#" operator during the application of a function-like macro.
+	 * 
+	 * @param macro
+	 *            the function-like macro being applied
+	 * @param index
+	 *            the index of the replacement token (numbered from 0) in the
+	 *            macro replacement list involved in the formation of the new
+	 *            token; this replacement token will necessarily be a parameter
+	 *            immediately following a "#" token
+	 * @param argument
+	 *            the sequence of non-whitespace tokens comprising the argument
+	 *            in the macro invocation
+	 * @return a new formation incorporating specified values
+	 */
+	Stringification newStringification(FunctionMacro macro, int index,
+			List<CivlcToken> argument);
+
+	/**
+	 * A formation of a token by either (1) concatenating 0 or more tokens using
+	 * the preprocessor "##" operator, or (2) concatenating 1 or more string
+	 * literal tokens immediately after preprocessing.
+	 * 
+	 * @param tokens
+	 *            list of tokens to concatenate; should not include whitespace
+	 */
 	Concatenation newConcatenation(List<CivlcToken> tokens);
 
 	/**

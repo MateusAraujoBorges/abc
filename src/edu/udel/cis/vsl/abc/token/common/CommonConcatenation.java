@@ -41,9 +41,4 @@ public class CommonConcatenation implements Concatenation {
 		return constituents.get(index);
 	}
 
-	// @Override
-	// public String fileShortName() {
-	// return constituents.get(0).getFileShortName();
-	// }
-
 }

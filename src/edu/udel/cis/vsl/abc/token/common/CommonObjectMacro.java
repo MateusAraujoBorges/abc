@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.token.common;
 
+import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 
 import edu.udel.cis.vsl.abc.token.IF.ObjectMacro;
@@ -18,17 +19,28 @@ public class CommonObjectMacro extends CommonMacro implements ObjectMacro {
 
 	@Override
 	public String toString() {
-		String result = "ObjectMacro[" + getName() + " =";
-		int numReplacementTokens = getNumReplacementTokens();
+		StringBuffer buf = new StringBuffer("ObjectMacro[" + getName() + "=");
+		int numReplacements = getNumReplacements();
 
-		for (int i = 0; i < numReplacementTokens; i++)
-			result += " " + getReplacementToken(i).getText();
-		result += "]";
-		return result;
+		for (int i = 0; i < numReplacements; i++) {
+			ReplacementUnit unit = getReplacementUnit(i);
+
+			buf.append(unit.token.getText());
+			for (Token t : unit.whitespace)
+				buf.append(t.getText());
+		}
+		buf.append("]");
+		return buf.toString();
 	}
 
 	@Override
 	public boolean equals(Object object) {
 		return object instanceof CommonObjectMacro && super.equals(object);
+	}
+
+	@Override
+	protected ReplacementUnit makeReplacement(int index, Token token,
+			Token[] whitespace) {
+		return new ReplacementUnit(index, token, whitespace);
 	}
 }

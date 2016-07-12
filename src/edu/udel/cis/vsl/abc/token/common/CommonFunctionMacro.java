@@ -13,7 +13,6 @@ import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
 public class CommonFunctionMacro extends CommonMacro implements FunctionMacro {
 
-	private int[] replacementFormalIndexes;
 
 	public CommonFunctionMacro(Tree definitionNode, SourceFile file) {
 		super(definitionNode, file);
@@ -22,26 +21,26 @@ public class CommonFunctionMacro extends CommonMacro implements FunctionMacro {
 
 	private void initialize() {
 		int numFormals = getNumFormals();
-		int numReplacementTokens = getNumReplacementTokens();
+		int numReplacements = getNumReplacements();
 		Map<String, Integer> nameMap = new HashMap<String, Integer>(numFormals);
 
 		for (int i = 0; i < numFormals; i++) {
 			nameMap.put(getFormal(i).getText(), i);
 		}
-		replacementFormalIndexes = new int[numReplacementTokens];
-		for (int j = 0; j < numReplacementTokens; j++) {
-			Token token = getReplacementToken(j);
+		for (int j = 0; j < numReplacements; j++) {
+			FunctionReplacementUnit unit = getReplacementUnit(j);
+			Token token = unit.token;
 
 			if (token.getType() == PreprocessorLexer.IDENTIFIER) {
 				String name = token.getText();
-				Integer formalIndex = nameMap.get(name);
+				Integer lookup = nameMap.get(name);
 
-				if (formalIndex != null) {
-					replacementFormalIndexes[j] = formalIndex;
+				if (lookup != null) {
+					unit.formalIndex = lookup;
 					continue;
 				}
 			}
-			replacementFormalIndexes[j] = -1;
+			unit.formalIndex = -1;
 		}
 	}
 
@@ -59,41 +58,33 @@ public class CommonFunctionMacro extends CommonMacro implements FunctionMacro {
 				.getToken();
 	}
 
-	/**
-	 * Given i, 0<=i<n, where n is the number of replacement tokens, let t be
-	 * the i-th replacement token. Returns -1 if t is not an identifier equal to
-	 * one of the formal parameter identifiers. Otherwise, returns the index of
-	 * that formal parameter. This is to faciliate substitution of actuals for
-	 * formals.
-	 * 
-	 * @param i
-	 *            integer in [0,numReplacementTokens)
-	 * @return -1 or index of matching formal parameter in [0,numFormals)
-	 */
-	public int getReplacementFormalIndex(int i) {
-		return replacementFormalIndexes[i];
-	}
-
 	@Override
 	public String toString() {
-		String result = "FunctionMacro[" + getName() + "(";
+		StringBuffer buf = new StringBuffer("FunctionMacro[" + getName() + "(");
 		int numFormals = getNumFormals();
-		int numReplacementTokens = getNumReplacementTokens();
+		int numReplacements = getNumReplacements();
 
 		for (int j = 0; j < numFormals; j++) {
 			if (j > 0)
-				result += ",";
-			result += getFormal(j).getText();
+				buf.append(',');
+			buf.append(getFormal(j).getText());
 		}
-		result += ") =";
-		for (int i = 0; i < numReplacementTokens; i++)
-			result += " " + getReplacementToken(i).getText();
-		result += "]";
-		return result;
+		buf.append(") =");
+		for (int i = 0; i < numReplacements; i++) {
+			ReplacementUnit unit = getReplacementUnit(i);
+
+			buf.append(unit.token.getText());
+			for (Token t : unit.whitespace)
+				buf.append(t.getText());
+		}
+		buf.append("]");
+		return buf.toString();
 	}
 
 	@Override
 	public boolean equals(Object object) {
+		if (this == object)
+			return true;
 		if (object instanceof CommonFunctionMacro) {
 			CommonFunctionMacro that = (CommonFunctionMacro) object;
 
@@ -116,6 +107,17 @@ public class CommonFunctionMacro extends CommonMacro implements FunctionMacro {
 			return true;
 		}
 		return false;
+	}
+
+	@Override
+	public FunctionReplacementUnit getReplacementUnit(int index) {
+		return (FunctionReplacementUnit) super.getReplacementUnit(index);
+	}
+
+	@Override
+	protected ReplacementUnit makeReplacement(int index, Token token,
+			Token[] whitespace) {
+		return new FunctionReplacementUnit(index, token, whitespace);
 	}
 
 }

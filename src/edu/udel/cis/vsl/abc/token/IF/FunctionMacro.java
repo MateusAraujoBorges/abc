@@ -14,6 +14,20 @@ import org.antlr.runtime.Token;
  */
 public interface FunctionMacro extends Macro {
 
+	class FunctionReplacementUnit extends ReplacementUnit {
+
+		public FunctionReplacementUnit(int index, Token token,
+				Token[] whitespace) {
+			super(index, token, whitespace);
+		}
+
+		/**
+		 * If the replacement token is an occurrence of a formal parameter, this
+		 * is the formal index; otherwise -1
+		 */
+		public int formalIndex;
+	}
+
 	/**
 	 * Returns the number of formal parameters
 	 * 
@@ -22,7 +36,7 @@ public interface FunctionMacro extends Macro {
 	int getNumFormals();
 
 	/**
-	 * Gets the index-th formal parmamter
+	 * Gets the index-th formal parameter
 	 * 
 	 * @param index
 	 *            an integer in the range [0,numFormals-1]
@@ -30,17 +44,6 @@ public interface FunctionMacro extends Macro {
 	 */
 	Token getFormal(int index);
 
-	/**
-	 * Given i, 0<=i<n, where n is the number of replacement tokens, let t be
-	 * the i-th replacement token. Returns -1 if t is not an identifier equal to
-	 * one of the formal parameter identifiers. Otherwise, returns the index of
-	 * that formal parameter. This is to faciliate substitution of actuals for
-	 * formals.
-	 * 
-	 * @param i
-	 *            integer in [0,numReplacementTokens)
-	 * @return -1 or index of matching formal parameter in [0,numFormals)
-	 */
-	int getReplacementFormalIndex(int i);
-
+	@Override
+	FunctionReplacementUnit getReplacementUnit(int index);
 }

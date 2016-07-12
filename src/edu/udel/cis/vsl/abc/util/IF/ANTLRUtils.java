@@ -10,6 +10,9 @@ import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.io.Reader;
 
+import org.antlr.runtime.ANTLRFileStream;
+import org.antlr.runtime.CharStream;
+import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
 import org.antlr.runtime.tree.CommonTree;
@@ -148,6 +151,33 @@ public class ANTLRUtils {
 				break;
 		}
 		out.flush();
+	}
+
+	public interface LexerFactory {
+		Lexer makeLexer(CharStream stream);
+	}
+
+	public static void lex(PrintStream out, LexerFactory lf, String filename)
+			throws IOException {
+		ANTLRFileStream stream = new ANTLRFileStream(filename);
+		Lexer lexer = lf.makeLexer(stream);
+
+		while (true) {
+			Token t = lexer.nextToken();
+
+			if (t == null)
+				break;
+			if (t.getType() == 0) {
+				out.println("TOKEN[0]");
+				out.flush();
+				break;
+			}
+			else
+				out.println(t);
+			out.flush();
+			if (t.getType() == Token.EOF)
+				break;
+		}
 	}
 
 }

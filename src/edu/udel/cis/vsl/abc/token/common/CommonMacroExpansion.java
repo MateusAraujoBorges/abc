@@ -1,7 +1,5 @@
 package edu.udel.cis.vsl.abc.token.common;
 
-import org.antlr.runtime.Token;
-
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Macro;
 import edu.udel.cis.vsl.abc.token.IF.MacroExpansion;
@@ -40,8 +38,8 @@ public class CommonMacroExpansion implements MacroExpansion {
 
 	@Override
 	public String toString() {
-		return "MacroExpansion[" + startToken.getText() + ", "
-				+ macro.getName() + ", " + index + "]";
+		return "MacroExpansion[" + startToken.getText() + ", " + macro.getName()
+				+ ", " + index + "]";
 	}
 
 	@Override
@@ -57,11 +55,6 @@ public class CommonMacroExpansion implements MacroExpansion {
 	@Override
 	public int getReplacementTokenIndex() {
 		return index;
-	}
-
-	@Override
-	public Token getReplacementToken() {
-		return macro.getReplacementToken(index);
 	}
 
 	@Override

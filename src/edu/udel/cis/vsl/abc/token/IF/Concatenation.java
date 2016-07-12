@@ -1,12 +1,24 @@
 package edu.udel.cis.vsl.abc.token.IF;
 
 /**
- * A concatenation represents the concatenation of a sequence of adjaced string
- * literals to form one large string literal. This takes place in translation
- * phase 7 (after preprocessing), as specified in the C11 Standard.
+ * <p>
+ * A {@link Concatenation} represents the concatenation of a sequence of tokens.
+ * </p>
+ * 
+ * <p>
+ * There are two contexts in which concatenations occur. The first is with he
+ * preprocessor '##' operator. When used in the replacement sequence (body) of a
+ * macro definition, this is a binary operator that concatenates the tokens to
+ * its left and right to form a new token.
+ * </p>
+ * 
+ * <p>
+ * The second is with adjacent string literals, which are concatenated to form
+ * one large string literal in translation phase 7 (after preprocessing), as
+ * specified in the C11 Standard.
+ * </p>
  * 
  * @author siegel
- * 
  */
 public interface Concatenation extends Formation {
 

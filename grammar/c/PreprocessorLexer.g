@@ -36,6 +36,9 @@ public void emitErrorMessage(String msg) { // don't try to recover!
 
 /* Preprocessor directives and pragmas */
 
+HASHHASH	:	'##' | '%:%:'	NotLineStart;
+
+
 fragment
 NotLineStart	:	{atLineStart = false;} ;
 
@@ -373,7 +376,6 @@ EQUALS		:	'=='		NotLineStart;
 GT		:	'>'		NotLineStart;
 GTE		:	'>='		NotLineStart;
 //HASH		:	'#' | '%:'	NotLineStart;
-HASHHASH	:	'##' | '%:%:'	NotLineStart;
 LCURLY		:	'{' | '<%'	NotLineStart;
 LEXCON		:	'<<<' 		NotLineStart;
 LPAREN		:	'('		NotLineStart;

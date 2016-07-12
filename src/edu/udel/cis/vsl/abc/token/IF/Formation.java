@@ -19,7 +19,7 @@ public interface Formation {
 	 * describes the token. For example, this method might returns something
 	 * like "formed by concatenating ...".
 	 * 
-	 * @return desription of formation as clause to be appended to description
+	 * @return description of formation as clause to be appended to description
 	 *         of token
 	 */
 	String suffix();

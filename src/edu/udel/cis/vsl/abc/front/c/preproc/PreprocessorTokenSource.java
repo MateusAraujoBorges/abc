@@ -589,18 +589,26 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	// Macro Expansion...
 
 	/**
-	 * Processes a macro invocation node. Continues walking the input tree to
-	 * find the macro arguments (if the macro is a function macro). Then expands
-	 * the macro using the macro's definition. The resulting token sequence is
-	 * added to the end of the outputBuffer and the position in the input
-	 * sequence is moved to the point just after the complete macro invocation.
+	 * <p>
+	 * Processes an object or function-like macro invocation node. Continues
+	 * walking the input tree to find the macro arguments (if the macro is a
+	 * function macro). Then expands the macro using the macro's definition. The
+	 * resulting token sequence is added to the end of the outputBuffer and the
+	 * position in the input sequence is moved to the point just after the
+	 * complete macro invocation.
+	 * </p>
 	 * 
+	 * <p>
 	 * This method is recursive: if any macro expansions occur within arguments,
 	 * they are also expanded, following the rules laid out in the C11
-	 * specification.
+	 * specification. See C11 6.10.3.
+	 * </p>
 	 * 
-	 * Implementation notes: calls findInvocationAguments(...) then calls
-	 * processInvocation(macro, arguments);
+	 * <p>
+	 * Implementation notes: for function-like macros: calls
+	 * {@link #findInvocationArguments(FunctionMacro, Tree)}, then calls
+	 * {@link #processInvocation(FunctionMacro, CivlcToken, CivlcToken[])}.
+	 * </p>
 	 * 
 	 * @param macro
 	 *            a Macro object
@@ -623,7 +631,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			incrementNextNode();
 		} else {
 			CivlcToken[] arguments = findInvocationArguments(
-					(FunctionMacro) macro, invocationNode);
+					(FunctionMacro) macro);
 
 			// note the call to findInvocationArguments updated
 			// position correctly.
@@ -634,16 +642,22 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	/**
+	 * <p>
 	 * Performs expansion of an object macro. Returns a list of tokens obtained
 	 * from the macro's replacement list.
+	 * </p>
 	 * 
+	 * <p>
 	 * The list of tokens returned consists entirely of newly created tokens
 	 * (i.e., tokens which did not exist upon entry to this method). They will
 	 * have correct include and expansion histories.
+	 * </p>
 	 * 
+	 * <p>
 	 * Following the C Standard, the list of replacement tokens are expanded a
 	 * second time, after marking all tokens corresponding to the given macro
 	 * identifier as "do not expand".
+	 * </p>
 	 * 
 	 * @param macro
 	 *            the object macro
@@ -662,35 +676,79 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	/**
+	 * <p>
 	 * Processes a function macro invocation, given the macro and the actual
 	 * arguments. Each actual argument is given as a null-terminated list of
 	 * tokens. This returns the list of tokens which is the result of expanding
 	 * the macros. This procedure is recursive: if any macro invocations occur
 	 * within the arguments, they are also expanded.
+	 * </p>
 	 * 
+	 * <p>
 	 * It is assumed that the input argument tokens will have the correct
 	 * expansion histories, i.e., for all expansions up to but not including the
 	 * current one.
+	 * </p>
 	 * 
+	 * <p>
 	 * The list of tokens returned consists entirely of newly created tokens
 	 * (i.e., tokens which did not exist upon entry to this method). They will
 	 * have correct include and expansion histories.
+	 * </p>
 	 * 
-	 * Implementation notes: for an invocation of function macro M: for each
-	 * argument: call expand(). That modifies the argument (which is a list).
-	 * Then invoke substitute, yielding a new List of CToken, B. Then mark all
-	 * occurrences of identifier M in B as "do not expand". Then expand B. This
-	 * is the recipe straight from the C11 Standard.
+	 * <p>
+	 * NOTE: in a function-like macro replacement list, each '#' must be
+	 * immediately followed by a parameter name, else error --- C11 6.10.3.2(1).
+	 * The '#' may also occur in an object-like macro replacement list, but has
+	 * no special meaning or restrictions.
+	 * </p>
+	 * 
+	 * <p>
+	 * NOTE: if "# A" occurs in the replacement sequence, where A is one of the
+	 * parameter names, then the actual argument corresponding to A is NOT
+	 * expanded. Instead, the exact actual argument is stringified, and the
+	 * resulting string token replaces the "# A". Stringification involves
+	 * escaping characters such as " and \. See C11 6.10.3.2.
+	 * </p>
+	 * 
+	 * <p>
+	 * NOTE: The "##" may be used in object and function-like macro replacement
+	 * lists. Also, "[a] ## preprocessing token shall not occur at the beginning
+	 * or at the end of a replacement list for either form of macro definition."
+	 * C11 6.10.3.3(1).
+	 * </p>
+	 * 
+	 * <p>
+	 * NOTE: if "A ##" or "## A" occurs, then A is replaced by the non-expanded
+	 * actual argument token list UNLESS actual is empty (no tokens), in which
+	 * case A is replaced by PLACEMARKER, a special symbol. After that and
+	 * before second expansion: each "X ## Y" --- if the ## is from the
+	 * replacement list and NOT from an argument --- is replaced by
+	 * concatenation of X and Y, where PLACEMARKER is the identity element for
+	 * concatenation. Then all PLACEMARKERs are removed. Hence before second
+	 * expansion all placemarkers and all of the original ## tokens should be
+	 * gone. ISN'T THIS THE SAME as saying: if actual argument is empty then
+	 * delete "A ##" or "## A" from the replacement list. What about
+	 * "B ## A ## C"? It becomes "B ## C".
+	 * </p>
+	 * 
+	 * 
+	 * Formations: concatenation, stringification. Both part of macro expansion.
+	 * 
+	 * After all of this, second expansion.
+	 * </p>
 	 * 
 	 * @param macro
+	 *            the function-like macro which is being invoked
 	 * @param arguments
+	 *            the actual arguments in the invocation of the macro
+	 * @return a pair consisting of the first and last elements of the linked
+	 *         list which is the new token sequence produced by the expansion
 	 * @throws PreprocessorException
 	 */
 	private Pair<CivlcToken, CivlcToken> processInvocation(FunctionMacro macro,
 			CivlcToken origin, CivlcToken[] arguments)
 					throws PreprocessorException {
-		for (int i = 0; i < arguments.length; i++)
-			arguments[i] = expandList(arguments[i]).left;
 		return performSecondExpansion(instantiate(macro, origin, arguments),
 				macro);
 	}
@@ -699,14 +757,17 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * In the second expansion of a macro, the result of the first expansion is
 	 * first scanned for instances of the macro being expanded. Any such
 	 * instances are marked to not be re-expanded, to prevent an infinite
-	 * recursion.
+	 * recursion. See C11 6.10.3.4(2): "If the name of the macro being replaced
+	 * is found during this scan of the replacement list (not including the rest
+	 * of the source file’s preprocessing tokens), it is not replaced."
 	 * 
 	 * @param tokenList
 	 *            a list of tokens to be expanded given as pair consisting of
 	 *            first and last elements
 	 * @param macro
 	 *            the macro being expanded
-	 * @return result of second expansion of tokenList
+	 * @return result of second expansion of tokenList (first and last elements
+	 *         of the linked list of tokens)
 	 * @throws PreprocessorException
 	 *             any improper macro invocations occur in the token list
 	 */
@@ -725,77 +786,17 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		return expandList(tokenList.left);
 	}
 
-	/**
-	 * Creates a new instance of the function macro's body, substituting actual
-	 * arguments for formal parameters.
-	 * 
-	 * The result is a linked list of CToken using the "next" field of CToken.
-	 * The elements of the Pair returned are the first and last element of the
-	 * list.
-	 * 
-	 * The arguments will not be modified and will not be re-used in the
-	 * returned result. I.e., each node in the result will be a fresh new
-	 * CToken.
-	 * 
-	 * The histories of the new tokens will all be set appropriately. The
-	 * history of a new token generated from a replacement token which was not a
-	 * formal parameter is obtained by appending a new expansion record (macro,
-	 * replacement-index) to the history of the origin. The history of a new
-	 * token generated from an argument token (which is substituted for a formal
-	 * parameter) is obtained by appending the new expansion record to the
-	 * history of the argument token.
-	 * 
-	 * The reason the arguments can't be re-used: an argument can be used more
-	 * than once since the formal parameter may occur more than once in the
-	 * macro body.
-	 * 
-	 * @param macro
-	 *            a function macro
-	 * @param origin
-	 *            the original CToken which is an identifier for the macro's
-	 *            name which led to its expansion
-	 * @param arguments
-	 *            array of length number of formal parameters for macro. Element
-	 *            in position i is the first element of a null-terminated list
-	 *            of the tokens comprising the i-th argument
-	 * @return first and last element in a new list which is the result of
-	 *         performing substitution of actual arguments for formal parameters
-	 *         in the macro body
-	 */
 	private Pair<CivlcToken, CivlcToken> instantiate(FunctionMacro macro,
-			CivlcToken origin, CivlcToken[] arguments) {
-		int numTokens = macro.getNumReplacementTokens();
-		CivlcToken first = null, previous = null, current = null;
+			CivlcToken origin, CivlcToken[] arguments)
+					throws PreprocessorException {
+		MacroExpander expander = new MacroExpander(this, macro,
+				origin, arguments);
+		Pair<CivlcToken, CivlcToken> result = expander.expand();
 
-		for (int i = 0; i < numTokens; i++) {
-			Token token = macro.getReplacementToken(i);
-			int formalIndex = macro.getReplacementFormalIndex(i);
-
-			if (formalIndex < 0) {
-				current = tokenFactory.newCivlcToken(token,
-						tokenFactory.newMacroExpansion(origin, macro, i));
-				if (previous != null)
-					previous.setNext(current);
-				if (first == null)
-					first = current;
-				previous = current;
-			} else { // splice in argument
-				CivlcToken argument = arguments[formalIndex];
-
-				while (argument != null) {
-					current = tokenFactory.newCivlcToken(argument,
-							tokenFactory.newMacroExpansion(argument, macro, i));
-					if (previous != null)
-						previous.setNext(current);
-					if (first == null)
-						first = current;
-					previous = current;
-					argument = argument.getNext();
-				}
-			}
-		}
-		return new Pair<>(first, current);
+		return result;
 	}
+
+	// TODO: object macros can also use the concatenator ## ...
 
 	/**
 	 * Creates a new instance of the object macro's body. Creates a sequence of
@@ -815,53 +816,56 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 *         CTokens obtained from the macro's body
 	 */
 	private Pair<CivlcToken, CivlcToken> instantiate(ObjectMacro macro,
-			CivlcToken origin) {
-		int numTokens = macro.getNumReplacementTokens();
-		CivlcToken first = null, previous = null, current = null;
+			CivlcToken origin) throws PreprocessorException {
+		MacroExpander expander = new MacroExpander(this, macro,
+				origin);
+		Pair<CivlcToken, CivlcToken> result = expander.expand();
 
-		for (int i = 0; i < numTokens; i++) {
-			Token token = macro.getReplacementToken(i);
-
-			current = tokenFactory.newCivlcToken(token,
-					tokenFactory.newMacroExpansion(origin, macro, i));
-			if (previous != null)
-				previous.setNext(current);
-			if (first == null)
-				first = current;
-			previous = current;
-		}
-		return new Pair<>(first, current);
+		return result;
 	}
 
 	/**
-	 * Expands all macro invocations in a list of CToken, modifying the list in
-	 * the process. Does not care about preprocessor directives, or anything
-	 * else other than macro invocations. Even if this method comes across a
-	 * directive, it does not treat the directive as a directive---it is treated
-	 * as just another token.
+	 * <p>
+	 * Expands all macro invocations in a null-terminated linked list of
+	 * {@link CivlcToken}, modifying the list in the process. Does not care
+	 * about preprocessor directives, or anything else other than macro
+	 * invocations. Even if this method comes across a directive, it does not
+	 * treat the directive as a directive---it is treated as just another token.
+	 * </p>
 	 * 
+	 * <p>
 	 * Exception: do not expand macros if they occur within a "defined"
 	 * operator!
+	 * </p>
 	 * 
-	 * Note that the token returned by this method MAY be the first token in the
-	 * given list. It also may NOT be the first token in the given list, because
-	 * that token was a macro invocation and was replaced.
+	 * <p>
+	 * Note that the left token in the pair returned by this method MAY be the
+	 * first token in the given list. It also may NOT be the first token in the
+	 * given list, because that token was a macro invocation and was replaced.
+	 * </p>
 	 * 
+	 * <p>
 	 * Implementation: iterate over the tokens looking for macro invocations.
 	 * When you find one, call processInvocation and insert its output into
 	 * list, in place of the the invocation.
 	 * 
+	 * <pre>
 	 * ... X X X M ( A0 A0 A1 A2 A2 A2 ) X X X ... ->
-	 * 
 	 * ... X X X R R R ... R X X X ...
+	 * </pre>
+	 * </p>
 	 * 
 	 * @param token
 	 *            the first element in a null-terminated list of tokens; may be
-	 *            null for empty list
-	 * @return first element in expanded list; may be null for empty list
+	 *            <code>null</code> for empty list
+	 * @return pair consisting of the first and last elements of the expanded
+	 *         list; the two components of this pair will be <code>null</node>
+	 *         if the expanded list is empty
 	 * @throws PreprocessorException
+	 *             if something goes wrong in a macro expansion (e.g., the wrong
+	 *             number of arguments)
 	 */
-	private Pair<CivlcToken, CivlcToken> expandList(CivlcToken first)
+	Pair<CivlcToken, CivlcToken> expandList(CivlcToken first)
 			throws PreprocessorException {
 		CivlcToken current = first, previous = null;
 
@@ -942,34 +946,45 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	/**
-	 * Given a function macro invocation node, parses input stream to find the
-	 * actual arguments in the macro invocation and creates new CTokens for the
-	 * tokens occurring in those arguments. Returns an array (whose length is
-	 * the number of inputs to the macro) in which element i is first element in
-	 * the list of CTokens for the tokens which comprise argument i.
+	 * <p>
+	 * When current position in preprocessor parse tree is at a macro
+	 * application node, this method will continue walking through the tree from
+	 * that point in order to find the macro invocation arguments. It creates
+	 * new {@link CivlcToken}s for the tokens occurring in those arguments.
+	 * Returns an array (whose length is the number of inputs to the macro) in
+	 * which element i is first element in the list of {@link CivlcToken}s for
+	 * the tokens which comprise argument i.
+	 * </p>
 	 * 
-	 * The new CTokens will have the correct include history. They will have the
+	 * <p>
+	 * The new tokens will have the correct include history. They will have the
 	 * "trivial" expansion history of length 0.
+	 * </p>
 	 * 
-	 * From C11 Sec. 6.10.3.11:
+	 * <p>
+	 * From C11 Sec. 6.10.3.11: "If there are sequences of preprocessing tokens
+	 * within the list of arguments that would otherwise act as preprocessing
+	 * directives, the behavior is undefined." This method will throw a
+	 * {@link PreprocessorException} if that occurs.
+	 * </p>
 	 * 
-	 * "If there are sequences of preprocessing tokens within the list of
-	 * arguments that would otherwise act as preprocessing directives, the
-	 * behavior is undefined."
-	 * 
-	 * This method will throw a PreprocessorException if this occurs.
-	 * 
+	 * <p>
 	 * Updates position to point just after closing right parenthesis.
+	 * </p>
 	 * 
-	 * Implementation notes: creates an Iterator of PreprocessorNode by
-	 * iterating over the Tree nodes starting from the node immediately
-	 * following the invocationNode in DFS order and creating new
-	 * PreprocessorNodes. Feeds this to method findInvocationArguments(Macro ,
-	 * Iterator<CToken> ).
-	 * 
+	 * <p>
+	 * Implementation notes: creates an {@link Iterator} of {@link CivlcToken}
+	 * by iterating over the {@link Tree} nodes starting from the node
+	 * immediately following the <code>invocationNode</code> in DFS order and
+	 * creating new tokens. Feeds this to method
+	 * {@link #findInvocationArguments(FunctionMacro, Iterator)}.
+	 * </p>
 	 * 
 	 * @param macro
+	 *            the function-like macro which is being applied
 	 * @param invocationNode
+	 *            the node in the preprocessor parse tree representing an
+	 *            invocation of the macro
 	 * @return array of length number of formal parameters of macro; i-th
 	 *         element of array is the first element of a list of tokens that
 	 *         comprise the i-th argument
@@ -977,8 +992,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 *             if a sequence of tokens that would otherwise act as
 	 *             preprocessing directives occurs in the argument list
 	 */
-	private CivlcToken[] findInvocationArguments(FunctionMacro macro,
-			Tree invocationNode) throws PreprocessorException {
+	private CivlcToken[] findInvocationArguments(FunctionMacro macro)
+			throws PreprocessorException {
 		Iterator<CivlcToken> iter;
 
 		incrementNextNode();
@@ -1009,6 +1024,27 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		return findInvocationArguments(macro, iter);
 	}
 
+	/**
+	 * Finds the invocation arguments from a sequence of tokens beginning just
+	 * after the macro name. The first token may be "(" or some white space
+	 * preceding the "(". This method will consume from the
+	 * <code>argumentIterator</code> stopping just after consuming the closing
+	 * ")" token. It will modify the tokens obtained from the iterator by
+	 * changing the next token field of the last token in an argument to
+	 * <code>null</code>.
+	 * 
+	 * @param macro
+	 *            the function-like macro that is being applied
+	 * @param argumentIterator
+	 *            iterator over the tokens that comprise the macro application
+	 *            arguments including the opening and closing parentheses
+	 * @return an array with one entry for each argument; the i-th entry is the
+	 *         first token in the i-th argument or <code>null</code> if the i-th
+	 *         entry is empty
+	 * @throws PreprocessorException
+	 *             if the number of arguments is not consistent with that
+	 *             specified by the macro definition
+	 */
 	private CivlcToken[] findInvocationArguments(FunctionMacro macro,
 			Iterator<CivlcToken> argumentIterator)
 					throws PreprocessorException {
@@ -1020,38 +1056,55 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	/**
-	 * Given an iterator of CTokens which comprise the arguments to a macro,
-	 * parses the list to separate the arguments.
+	 * <p>
+	 * Given an iterator of {@link CivlcToken}s which comprise the arguments to
+	 * a macro, parses the list to separate the arguments.
+	 * </p>
 	 * 
+	 * <p>
 	 * This method does NOT create any new tokens. It DOES modify the tokens
 	 * coming out of the iterator by setting their "next" fields appropriately.
 	 * [DOES THIS MESS WITH THE ITERATOR?] The "next" field in the last token
 	 * for each argument is set to null, in order to terminate the new list. The
 	 * commas separating arguments are spliced out of the list.
+	 * </p>
 	 * 
-	 * Note that any or all of the entries in the array returned may be null.
-	 * This is because a macro argument can be empty, as in "f()" or "f(1,,3)".
+	 * <p>
+	 * Note that any or all of the entries in the array returned may be
+	 * <code>null</code>. This is because a macro argument can be empty, as in
+	 * "f()" or "f(1,,3)".
+	 * </p>
 	 * 
+	 * <p>
 	 * The first token in the given argumentIterator had better be LPAREN (left
 	 * parenthesis). Otherwise this is not an invocation of a function macro.
 	 * The arguments finish when the matching RPAREN is reached.
+	 * </p>
 	 * 
+	 * <p>
 	 * It is guaranteed that this method will invoke next() on the
 	 * argumentIterator until it reaches the final ')' (unless that is not
 	 * possible for some reason, in which case an exception is thrown). The
 	 * method will not iterate beyond that point. In other words, after this
 	 * method returns, the "cursor" in the iterator will be at the point just
 	 * after the ')'.
+	 * </p>
 	 * 
+	 * <p>
 	 * Implementation notes: doing a little parsing here. Scan the tokens
 	 * dividing into the following classes: LPAREN, RPAREN, COMMA, and OTHER.
+	 * </p>
 	 * 
 	 * @param macro
+	 *            the function-like macro being applied
 	 * @param argumentIterator
+	 *            iterator over tokens comprising the actual arguments
 	 * @exception PreprocessorException
 	 *                if the number of actual arguments does not match the
 	 *                number of formals in the macro definition
-	 * @return
+	 * @return an array whose length is the number of arguments, in which
+	 *         element i points to the first token of the i-th actual argument,
+	 *         or is <code>null</code> if that actual argument is empty
 	 */
 	private CivlcToken[] findInvocationArgumentsWorker(FunctionMacro macro,
 			Iterator<CivlcToken> argumentIterator)

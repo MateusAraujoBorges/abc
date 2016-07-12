@@ -3,9 +3,12 @@ package edu.udel.cis.vsl.abc.preproc;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.HashMap;
 
+import org.antlr.runtime.CharStream;
+import org.antlr.runtime.Lexer;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
 import org.junit.Before;
@@ -17,15 +20,18 @@ import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
+import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorUtils;
 import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 import edu.udel.cis.vsl.abc.token.IF.Tokens;
+import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
+import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils.LexerFactory;
 
 public class PreprocessorTest {
 
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	private static PrintStream out = System.out;
 
@@ -41,6 +47,15 @@ public class PreprocessorTest {
 
 	private static File[] userIncludes = new File[] { dir1, dir11 };
 
+	private static LexerFactory lf = new LexerFactory() {
+
+		@Override
+		public Lexer makeLexer(CharStream stream) {
+			return new PreprocessorLexer(stream);
+		}
+
+	};
+
 	private CPreprocessor p;
 
 	@Before
@@ -50,6 +65,12 @@ public class PreprocessorTest {
 		FileIndexer indexer = tf.newFileIndexer();
 
 		p = new CPreprocessor(config, Language.C, indexer, tf);
+	}
+
+	private void lex(String rootName) throws IOException {
+		String filename = (new File(root, rootName + ".txt")).getAbsolutePath();
+
+		ANTLRUtils.lex(out, lf, filename);
 	}
 
 	private void readSource(TokenSource source) throws PreprocessorException {
@@ -82,29 +103,29 @@ public class PreprocessorTest {
 	 * @param actualSource
 	 * @param expectedSource
 	 */
-	private void compare(TokenSource actualSource, TokenSource expectedSource)
-			throws PreprocessorException {
-		try {
-			while (true) {
-				Token token1, token2;
-				int type1, type2;
+	private void compare(TokenSource actualSource, TokenSource expectedSource) {
+		while (true) {
+			Token token1, token2;
+			int type1, type2;
 
-				do {
-					token1 = actualSource.nextToken();
-					type1 = token1.getType();
-				} while (PreprocessorUtils.isWhiteSpace(token1));
-				do {
-					token2 = expectedSource.nextToken();
-					type2 = token2.getType();
-				} while (PreprocessorUtils.isWhiteSpace(token2));
-				assertEquals(type2, type1);
-				if (type1 == PreprocessorParser.EOF)
-					break;
-				assertEquals(token2.getText(), token1.getText());
-
+			do {
+				token1 = actualSource.nextToken();
+				type1 = token1.getType();
+			} while (PreprocessorUtils.isWhiteSpace(token1));
+			do {
+				token2 = expectedSource.nextToken();
+				type2 = token2.getType();
+			} while (PreprocessorUtils.isWhiteSpace(token2));
+			if (debug) {
+				out.println("actual: " + token1 + "     expected: " + token2);
+				out.flush();
 			}
-		} catch (PreprocessorRuntimeException e) {
-			throw new PreprocessorException(e.toString());
+
+			assertEquals(type2, type1);
+			if (type1 == PreprocessorParser.EOF)
+				break;
+			assertEquals(token2.getText(), token1.getText());
+
 		}
 	}
 
@@ -382,5 +403,20 @@ public class PreprocessorTest {
 	@Test
 	public void concat() throws PreprocessorException {
 		checkPair("concat");
+	}
+
+	/**
+	 * Checks use of ## in object macro.
+	 * 
+	 * @throws PreprocessorException
+	 */
+	@Test
+	public void concat2() throws PreprocessorException {
+		checkPair("concat2");
+	}
+
+	@Test
+	public void lex_test() throws IOException {
+		lex("concat2");
 	}
 }

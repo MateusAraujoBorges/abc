@@ -28,6 +28,7 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.StringLiteral;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
+import edu.udel.cis.vsl.abc.token.IF.Stringification;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
@@ -244,5 +245,12 @@ public class CommonTokenFactory implements TokenFactory {
 	@Override
 	public FileIndexer newFileIndexer() {
 		return new CommonFileIndexer();
+	}
+
+	@Override
+	public Stringification newStringification(FunctionMacro macro, int index,
+			List<CivlcToken> argument) {
+		return new CommonStringification(macro, index,
+				new ArrayList<>(argument));
 	}
 }

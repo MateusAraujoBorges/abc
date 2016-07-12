@@ -1,7 +1,5 @@
 package edu.udel.cis.vsl.abc.token.IF;
 
-import org.antlr.runtime.Token;
-
 /**
  * A MacroExpansion represents an instance of the expansion of a preprocessor
  * (object or function) macro, which replaces one token by a sequence of new
@@ -40,12 +38,13 @@ public interface MacroExpansion extends Formation {
 	 */
 	int getReplacementTokenIndex();
 
-	/**
-	 * Returns the replacement token that was substituted for the original start
-	 * token.
-	 * 
-	 * @return the replacement token
-	 */
-	Token getReplacementToken();
+	// /**
+	// * Returns the replacement token that was substituted for the original
+	// start
+	// * token.
+	// *
+	// * @return the replacement token
+	// */
+	// Token getReplacementToken();
 
 }
