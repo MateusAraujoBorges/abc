@@ -4,12 +4,12 @@
 
 #ifndef _ASSERT_
 #define _ASSERT_
+#include<civlc.cvh>
 
-/*@ pure;
-  @ depends_on \nothing;
-  @ executes_when \true;
-  @ */
-$system[asserts] void assert(_Bool expr);
+/*@ depends_on \nothing; */
+$atomic_f void assert(_Bool expr){
+  $assert(expr);
+}
 
 #define static_assert _Static_assert
 

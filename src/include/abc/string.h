@@ -18,6 +18,9 @@ void* memmove (void *dest, const void *src, size_t n);
 
 /* copies the value of c into each of the first 
    characters of the object pointed to by s */
+/*@ depends_on \access(s);
+  @ executes_when \true;
+  @*/
 $system void * memset(void *s, int c, size_t n);
 
 /* Compare N bytes of S1 and S2.  */
@@ -29,6 +32,9 @@ void* memchr (const void * s, int c, size_t n);
 /* copies the string pointed to by s2 (including the terminating null character) 
    into the array pointed to by s1. If copying takes place between objects that 
    overlap, the behavior is undefined. */
+/*@ depends_on \access(s1, s2);
+  @ executes_when \true;
+  @*/
 $system char *strcpy(char * restrict s1, const char * restrict s2);
 
 /* Copy no more than N characters of SRC to DEST.  */
@@ -41,6 +47,9 @@ char *strcat (char *dest, const char *src);
 char *strncat (char *dest, const char *src, size_t n);
 
 /* Compare S1 and S2 */
+/*@ depends_on \access(s1, s2);
+  @ executes_when \true;
+  @*/
 $system int strcmp(const char *s1, const char *s2);
 
 /* Compare N characters of S1 and S2 */
@@ -76,6 +85,9 @@ char * strstr (const char *s1, const char *s2);
 char * strtok (char *s, const char *delim);
 
 /* computes the length of the string pointed to by s. */
+/*@ depends_on \access(s);
+  @ executes_when \true;
+  @*/
 $system size_t strlen(const char *s);
 
 /* Return a string describing the meaning of the `errno' code in ERRNUM.  */

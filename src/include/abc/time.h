@@ -46,6 +46,9 @@ struct tm *gmtime(const time_t *timer);
 /*
 * The value of timer is broken up into the structure tm and expressed in the local time zone.
 */
+/*@ depends_on \access(timer);
+  @ executes_when \true;
+  @*/
 $system struct tm *localtime(const time_t *timer);
 
 /* Converts the structure pointed to by timeptr into a time_t value according to the local time zone.
@@ -56,6 +59,9 @@ time_t mktime(struct tm *timeptr);
 * Formats the time represented in the structure timeptr according 
 * to the formatting rules defined in format and stored into str.
 */
+/*@ depends_on \access(str, format, timeptr);
+  @ executes_when \true;
+  @*/
 $system size_t strftime(char *str, size_t maxsize, const char *format, const struct tm *timeptr);
 
 /*

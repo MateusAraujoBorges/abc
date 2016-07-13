@@ -58,17 +58,22 @@ typedef struct CIVL_filesystem *$filesystem;
 /* Converts a mode string to the enumerated type CIVL_File_mode.
  * An exception is thrown if the mode string is not one of those
  * specified in the C11 Standard. */
+/*@ depends_on \access(modeString);
+  @ executes_when \true;
+  @*/
 $system[stdio] CIVL_File_mode CIVL_File_stringToMode(char * modeString);//mode not string-literal
 
 /* Creates a new empty file system, returning a handle to it. */
 /*@ depends_on \nothing;
-  @ assigns \nothing;
-  @ reads \nothing;
+  @ executes_when \true;
   @*/
 $atomic_f $filesystem $filesystem_create($scope scope);
 
 /* Deallocates any data associated to the file system, and makes
  * the handle undefined */
+/*@ depends_on \access(fs);
+  @ executes_when \true;
+  @*/
 $system[stdio] void $filesystem_destroy($filesystem fs);
 
 /* Opens a file f, creates a new FILE F pointing into f, and returns
@@ -96,9 +101,15 @@ $system[stdio] void $filesystem_destroy($filesystem fs);
  *         in Standard par. 7
  *
  */
+/*@ depends_on \access(fs, filename);
+  @ executes_when \true;
+  @*/
 $system[stdio] FILE * $fopen($filesystem fs, const char * restrict filename,
 			CIVL_File_mode mode);
 
+/*@ depends_on \access(file);
+  @ executes_when \true;
+  @*/
 $system[stdio] int $textFileLength(char* file);
 
 /* This assumes there is some output variable of type
@@ -106,6 +117,9 @@ $system[stdio] int $textFileLength(char* file);
  * output array.  The parameter output should be a pointer
  * to element 0 of that array.
  */
+/*@ depends_on \access(fs, output);
+  @ executes_when \true;
+  @*/
 $system[stdio] void $filesystem_copy_output($filesystem fs, $file * output);
 
 #endif

@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.transform.common;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,7 +39,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant;
+import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
@@ -221,40 +225,25 @@ public class CompareCombiner implements Combiner {
 	 * @return
 	 */
 	private FunctionDeclarationNode assertEquals(Source specSource) {
-		IdentifierNode name = factory.newIdentifierNode(specSource,
-				ASSERT_EQUALS);
-		FunctionTypeNode funcType = factory
-				.newFunctionTypeNode(
-						specSource,
-						factory.newBasicTypeNode(specSource, BasicTypeKind.BOOL),
-						factory.newSequenceNode(
-								specSource,
-								"Formals",
-								Arrays.asList(
-										factory.newVariableDeclarationNode(
-												specSource,
-												factory.newIdentifierNode(
-														specSource, "first"),
-												factory.newPointerTypeNode(
-														specSource,
-														factory.newVoidTypeNode(specSource))),
-										factory.newVariableDeclarationNode(
-												specSource,
-												factory.newIdentifierNode(
-														specSource, "second"),
-												factory.newPointerTypeNode(
-														specSource,
-														factory.newVoidTypeNode(specSource)))))
+		try {
+			AST pointerLibAST = astFactory.getASTofLibrary(new File(
+					CPreprocessor.ABC_INCLUDE_PATH, "pointer.cvh"), Language.C);
+			SequenceNode<BlockItemNode> root = pointerLibAST.getRootNode();
 
-						, false);
+			pointerLibAST.release();
+			for (BlockItemNode item : root) {
+				if (item instanceof FunctionDeclarationNode) {
+					FunctionDeclarationNode function = (FunctionDeclarationNode) item;
 
-		funcType.setVariableArgs(true);
-
-		FunctionDeclarationNode function = factory.newFunctionDeclarationNode(
-				specSource, name, funcType, null);
-
-		function.setSystemFunctionSpecifier(true);
-		return function;
+					if (function.getName().equals(ASSERT_EQUALS)) {
+						function.remove();
+						return function;
+					}
+				}
+			}
+		} catch (ABCException e) {
+		}
+		return null;
 	}
 
 	/**

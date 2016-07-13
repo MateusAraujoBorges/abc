@@ -49,7 +49,13 @@ int remove(const char *filename);
 int rename(const char *old, const char *new);
 FILE *tmpfile(void);
 char *tmpnam(char *s);
+/*@ depends_on \access(stream);
+  @ executes_when \true;
+  @*/
 $system int fclose(FILE *stream);
+/*@ depends_on \access(stream);
+  @ executes_when \true;
+  @*/
 $system int fflush(FILE *stream);
 FILE *fopen(const char * restrict filename,
      const char * restrict mode);
@@ -61,16 +67,31 @@ void setbuf(FILE * restrict stream,
 int setvbuf(FILE * restrict stream,
      char * restrict buf,
      int mode, size_t size);
+/*@ depends_on \access(stream, format);
+  @ executes_when \true;
+  @*/
 $system int fprintf(FILE * restrict stream,
      const char * restrict format, ...);
+/*@ depends_on \access(stream, format);
+  @ executes_when \true;
+  @*/
 $system int fscanf(FILE * restrict stream,
      const char * restrict format, ...);
+/*@ depends_on \access(format);
+  @ executes_when \true;
+  @*/
 $system int printf(const char * restrict format, ...);
+/*@ depends_on \access(format);
+  @ executes_when \true;
+  @*/
 $system int scanf(const char * restrict format, ...);
 int snprintf(char * restrict s, size_t n,
      const char * restrict format, ...);
 int sprintf(char * restrict s,
      const char * restrict format, ...);
+/*@ depends_on \access(s, format);
+  @ executes_when \true;
+  @*/
 $system int sscanf(const char * restrict s,
      const char * restrict format, ...);
 int vfprintf(FILE * restrict stream,

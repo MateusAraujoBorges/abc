@@ -1,15 +1,22 @@
 package edu.udel.cis.vsl.abc.front.common.astgen;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.ASTBuilder;
 import edu.udel.cis.vsl.abc.front.IF.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.ParseTree;
 import edu.udel.cis.vsl.abc.front.IF.Parser;
 import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
+import edu.udel.cis.vsl.abc.main.ABCExecutor;
+import edu.udel.cis.vsl.abc.main.TranslationTask;
+import edu.udel.cis.vsl.abc.main.TranslationTask.TranslationStage;
+import edu.udel.cis.vsl.abc.main.UnitTask;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
@@ -72,12 +79,44 @@ public class LibraryASTFactory {
 	 * @throws SyntaxException
 	 *             if something goes wrong translating the parse tree to an AST
 	 */
-	public AST getASTofLibrary(String name)
-			throws PreprocessorException, ParseException, SyntaxException {
-		CivlcTokenSource tokenSource = preprocessor
-				.preprocessLibrary(EMPTY_MACRO_MAP, name);
+	public AST getASTofLibrary(String name) throws PreprocessorException,
+			ParseException, SyntaxException {
+		CivlcTokenSource tokenSource = preprocessor.preprocessLibrary(
+				EMPTY_MACRO_MAP, name);
 		ParseTree parseTree = parser.parse(tokenSource);
 
 		return astBuilder.getTranslationUnit(parseTree);
+	}
+
+	/**
+	 * Constructs the raw (unanalyzed) AST for the translation unit specified by
+	 * a standard library file name.
+	 * 
+	 * @param file
+	 *            the file of the system library file, including the path to the
+	 *            file but not including a directory; e.g.,
+	 *            "/include/abc/stdlib.h"
+	 * @param language
+	 *            the language of the library
+	 * @return the raw AST for the specified translation unit
+	 * @throws ABCException
+	 *             if something goes wrong while preprocessing, parsing and
+	 *             translating the library file
+	 */
+	public AST getASTofLibrary(File file, Language language)
+			throws ABCException {
+		UnitTask task = new UnitTask(new File[] { file });
+
+		task.setLanguage(language);
+
+		TranslationTask translation = new TranslationTask(
+				new UnitTask[] { task });
+
+		translation.setStage(TranslationStage.GENERATE_ASTS);
+
+		ABCExecutor executor = new ABCExecutor(translation);
+
+		executor.execute();
+		return executor.getAST(0);
 	}
 }

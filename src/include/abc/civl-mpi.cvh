@@ -114,10 +114,6 @@ typedef struct $mpi_gcomm $mpi_gcomm;
 /****************************** Helper Functions **********************************/
 int sizeofDatatype(MPI_Datatype);
 
-//$system[mpi] void $mpi_set_status($mpi_sys_status newStatus);
-
-//$system[mpi] $mpi_sys_status $mpi_get_status(void);
-
 /************************** MPI LIB Implementations *******************************/
 $abstract double $mpi_time(int i);
 
@@ -168,22 +164,37 @@ int $mpi_scatterv(const void*, const int[], const
 
 void* $mpi_pointer_add(void*, int, MPI_Datatype);
 
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
 $system[mpi] int $mpi_new_gcomm($scope, $mpi_gcomm);
 
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
 $system[mpi] $mpi_gcomm $mpi_get_gcomm($scope, int);
 
 int $mpi_comm_dup($scope, MPI_Comm, MPI_Comm *, char *);
 
 int $mpi_comm_free(MPI_Comm *, $mpi_state);
 
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
 $system[mpi] $scope $mpi_root_scope($comm);
 
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
 $system[mpi] $scope $mpi_proc_scope($comm);
 
 /* Assert that the basetype of the object pointed by 'buf' is sames as
    the basetype of the 'datatype'. Here a basetype of an MPI_Datatype
    means a indivisiable MPI_datatype, e.g. the basetype of MPI_2INT is
    MPI_INT.*/
+/*@ depends_on \access(buf);
+  @ executes_when \true;
+  @*/
 $system[mpi] void $mpi_check_buffer(void * buf, int count, MPI_Datatype datatype);
 
 /* Create a $bundle type object which contains a sequence of entries
@@ -226,28 +237,32 @@ _Bool $mpi_isRecvBufEmpty(int x);
    existing point-2-point snapshots as if an MPI send happens on
    them */
 /*@ depends_on \nothing;
- */
+  @ executes_when \true;
+  @*/
 $system[mpi] void $mpi_p2pSendShot(int commID, $message msg, int place);
 
 /* Take a snapshot for an MPI send operation. It will modify
    existing collective snapshots as if an MPI send happens on
    them */
 /*@ depends_on \nothing;
- */
+  @ executes_when \true;
+  @*/
 $system[mpi] void $mpi_colSendShot(int commID, $message msg, int place);
 
 /* Take a snapshot for an MPI receive operation. It will modify
    existing point-2-point snapshots as if an MPI receive happens on
    them */
 /*@ depends_on \nothing;
- */
+  @ executes_when \true;
+  @*/
 $system[mpi] void $mpi_p2pRecvShot(int commID, int source, int dest, int tag);
 
 /* Take a snapshot for an MPI receive operation. It will modify
    existing collective snapshots as if an MPI receive happens on
    them */
 /*@ depends_on \nothing;
- */
+  @ executes_when \true;
+  @*/
 $system[mpi] void $mpi_colRecvShot(int commID, int source, int dest, int tag);
 
 #endif

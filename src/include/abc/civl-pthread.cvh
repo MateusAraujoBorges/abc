@@ -38,15 +38,26 @@ $atomic_f $pthread_gpool_t $pthread_gpool_create($scope scope);
   @*/
 $atomic_f void $pthread_gpool_destroy($pthread_gpool_t gpool);
 
+/*@ depends_on \access(gpool, thread);
+  @ executes_when \true;
+  @*/
 $system[pthread] void $pthread_gpool_add($pthread_gpool_t gpool, pthread_t * thread);
 
 /* Gets the size of the global thread pool */
+/*@ depends_on \access(gpool);
+  @ executes_when \true;
+  @*/
 $system[pthread] int $pthread_gpool_size($pthread_gpool_t gpool);
 
 /* Gets the PID of the index'th thread in the pool */
+/*@ depends_on \access(gpool);
+  @ executes_when \true;
+  @*/
 $system[pthread] $proc $pthread_gpool_thread($pthread_gpool_t gpool, int index);
 
 /* Waits for all threads in the pool to terminate */
+/*@ depends_on \access(gpool);
+  @*/
 $system[pthread] void $pthread_gpool_join($pthread_gpool_t gpool);
 
 /* *************************** Functions of $pthread_pool ************************** */
@@ -55,15 +66,24 @@ $system[pthread] void $pthread_gpool_join($pthread_gpool_t gpool);
 /*@ depends_on \nothing;
   @ assigns gpool;
   @ reads \nothing;
+  @ executes_when \true;
   @*/
 $atomic_f $pthread_pool_t $pthread_pool_create($scope scope, $pthread_gpool_t gpool);
 
 /* Terminates this thread */
-/*@ depends_on \nothing; */
+/*@ depends_on \access(pool, value);
+  @ executes_when \true;
+  @*/
 $atomic_f void $pthread_pool_terminates($pthread_pool_t pool, void* value);
 
+/*@ depends_on \access(pool);
+  @ executes_when \true;
+  @*/
 $system[pthread] _Bool $pthread_pool_get_terminated($pthread_pool_t pool);
 
+/*@ depends_on \access(pool);
+  @ executes_when \true;
+  @*/
 $atomic_f _Bool $pthread_pool_is_terminated($pthread_pool_t pool, $proc pid);
 
 /* De-allocation a _pthread_gpool_t object */
@@ -73,6 +93,9 @@ $atomic_f _Bool $pthread_pool_is_terminated($pthread_pool_t pool, $proc pid);
   @*/
 $atomic_f void $pthread_pool_destroy($pthread_pool_t pool);
 
+/*@ depends_on \access(pool);
+  @ executes_when \true;
+  @*/
 $system[pthread] pthread_t $pthread_pool_thread($pthread_pool_t pool);
 
 /**
@@ -91,7 +114,9 @@ $system[pthread] pthread_t $pthread_pool_thread($pthread_pool_t pool);
   *            The length of the array of threads to be waited upon
   * @return Returns 0 upon successful completion
   */
-/*@ depends_on \nothing; */
-$atomic_f void $pthread_exit(void *value_ptr, $pthread_pool_t $pthread_pool);
+/*@ depends_on \access(value_ptr, pool);
+  @ executes_when \true;
+  @*/
+$atomic_f void $pthread_exit(void *value_ptr, $pthread_pool_t pool);
 
 #endif

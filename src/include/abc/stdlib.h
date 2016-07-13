@@ -73,21 +73,21 @@ unsigned long long int strtoull(
      const char * restrict nptr,
      char ** restrict endptr, int base);
 
-$system int rand(void);
+$atomic_f int rand(void);
 
-$system void srand(unsigned int seed);
+$atomic_f void srand(unsigned int seed);
 
-$system long int random(void);
+$atomic_f long int random(void);
 
-$system void srandom(unsigned int seed);
+$atomic_f void srandom(unsigned int seed);
 
 void *aligned_alloc(size_t alignment, size_t size);
 
 void *calloc(size_t nmemb, size_t size);
 
-$system void free(void *ptr);
+$atomic_f void free(void *ptr);
 
-$system void *malloc(size_t size);
+void *malloc(size_t size);
 
 void *realloc(void *ptr, size_t size);
 
@@ -99,7 +99,7 @@ int at_quick_exit(void (*func)(void));
 
 //_Noreturn void exit(int status);
 
-$system void exit(int status);
+$atomic_f void exit(int status);
 
 _Noreturn void _Exit(int status);
 

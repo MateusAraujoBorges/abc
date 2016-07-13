@@ -121,10 +121,7 @@ $atomic_f int $gcomm_destroy($gcomm gcomm, void * junkMsgs);
 /* Returns $true iff gcomm points to a valid object. */
 //_Bool $gcomm_defined($gcomm gcomm);
 
-/*@ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$system void $gcomm_dup($comm comm, $comm newcomm);
+$atomic_f void $gcomm_dup($comm comm, $comm newcomm);
 
 /* *************************** Functions of $comm ************************** */
 

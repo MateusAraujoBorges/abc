@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.ast.IF;
 
+import java.io.File;
 import java.util.Collection;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
@@ -8,6 +9,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
+import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.token.IF.Inclusion;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
@@ -96,4 +99,21 @@ public interface ASTFactory {
 	 * @return the type factory
 	 */
 	TypeFactory getTypeFactory();
+
+	/**
+	 * Constructs the raw (unanalyzed) AST for the translation unit specified by
+	 * a standard library file name.
+	 * 
+	 * @param file
+	 *            the file of the system library file, including the path to the
+	 *            file but not including a directory; e.g.,
+	 *            "/include/abc/stdlib.h"
+	 * @param language
+	 *            the language of the library
+	 * @return the raw AST for the specified translation unit
+	 * @throws ABCException
+	 *             if something goes wrong while preprocessing, parsing and
+	 *             translating the library file
+	 */
+	AST getASTofLibrary(File file, Language language) throws ABCException;
 }
