@@ -1331,6 +1331,7 @@ statement
     | chooseStatement -> ^(STATEMENT chooseStatement)
     | atomicStatement -> ^(STATEMENT atomicStatement)
     | datomicStatement -> ^(STATEMENT datomicStatement)
+    | runStatement -> ^(STATEMENT runStatement)
     ;
 
 statementWithScope
@@ -1569,6 +1570,17 @@ annotation
 annotationBody : (~ ANNOTATION_END)+ ;
 
 
+/* CIVL-C $run statement. This statement invokes an 
+ * asynchronous exeuction on the given statement.
+ * Syntax: $run stmt.
+ * 
+ * Root: RUN
+ * Child 0: statement
+ */
+runStatement
+    :   RUN statement
+        -> ^(RUN statement)
+    ;
 
 /* CIVL-C $when statement.  This is a guarded command.
  * Syntax: $when (expr) stmt, where expr is a boolean

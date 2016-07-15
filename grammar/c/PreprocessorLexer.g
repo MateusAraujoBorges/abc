@@ -167,6 +167,7 @@ RANGE		:	'$range';
 REAL		:	'$real';
 REQUIRES	:	'$requires';
 RESULT		:	'$result';
+RUN         :   '$run';
 RSLIST		:	'|>';  // LSLIST and RSLIST enclose a scope list
 SCOPEOF		:	'$scopeof';
 SELF		:	'$self';

@@ -195,6 +195,7 @@ public interface CivlcTokenConstant {
 	public static final int RESULT = CivlCParser.RESULT;
 	public static final int RETURN = CivlCParser.RETURN;
 	public static final int RPAREN = CivlCParser.RPAREN;
+	public static final int RUN = CivlCParser.RUN;
 	public static final int RSLIST = CivlCParser.RSLIST;
 	public static final int RSQUARE = CivlCParser.RSQUARE;
 	public static final int SCOPEOF = CivlCParser.SCOPEOF;
