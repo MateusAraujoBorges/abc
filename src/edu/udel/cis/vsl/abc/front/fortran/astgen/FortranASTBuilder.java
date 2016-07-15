@@ -11,18 +11,21 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 public class FortranASTBuilder implements ASTBuilder {
 
-	private Configuration configuration;
 	private ASTFactory astFactory;
 
+	private Configuration config;
+
 	public FortranASTBuilder(Configuration configuration, ASTFactory astFactory) {
-		this.configuration = configuration;
+		this.config = configuration;
 		this.astFactory = astFactory;
 	}
 
 	@Override
 	public AST getTranslationUnit(ParseTree tree) throws SyntaxException {
-		FortranASTBuilderWorker worker = new FortranASTBuilderWorker(
-				configuration, (FortranTree) tree, astFactory, "");
+		FortranTree fTree = (FortranTree) tree;
+		String filePath = "";
+		FortranASTBuilderWorker worker = new FortranASTBuilderWorker(config, fTree, astFactory, filePath);
+
 		return worker.generateAST();
 	}
 
@@ -33,7 +36,6 @@ public class FortranASTBuilder implements ASTBuilder {
 
 	@Override
 	public PragmaFactory getPragmaFactory() {
-		// TODO Auto-generated method stub
-		return null;
+		return null; // No progma for Fortran
 	}
 }

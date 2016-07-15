@@ -47,7 +47,7 @@ public class Front {
 		case CIVL_C:
 			return new CPreprocessor(config, language, indexer, tokenFactory);
 		case FORTRAN77:
-			return new FortranPreprocessor(config, tokenFactory);
+			return new FortranPreprocessor(config, language, indexer, tokenFactory);
 		default:
 			throw new ABCRuntimeException(
 					"ABC doesn't support preprocessing programs in " + language
