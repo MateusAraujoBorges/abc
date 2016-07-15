@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Stack;
+import java.util.TreeSet;
 
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
@@ -389,8 +390,27 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 						.getSourceName()), this.fileIndex.intValue()));
 	} // end constructor()
 
-	public void setIncludeDirs(ArrayList<String> includeDirs) {
-		this.includeDirs = includeDirs;
+	public void setIncludeDirs(File[] systemIncludePaths, File[] userIncludePaths, File[] sourceUnit) {
+		TreeSet<String> pathSet = new TreeSet<String>();
+		
+		for (File f : systemIncludePaths) {
+			String path = f.getParentFile().getAbsolutePath();
+			
+			pathSet.add(path);
+		}
+		for (File f : userIncludePaths) {
+			String path = f.getParentFile().getAbsolutePath();
+
+			pathSet.add(path);
+		}
+		for (File f : sourceUnit) {
+			String path = f.getParentFile().getAbsolutePath();
+
+			pathSet.add(path);
+		}
+		for (String s : pathSet) {
+			includeDirs.add(s);
+		}
 	}// end setIncludeDirs()
 
 	private File findFile(String fileName) {
