@@ -1,12 +1,16 @@
-//======================== assert.h ========================
-/*@ pure;
-  @ depends_on \nothing;
-  @ executes_when \true;
+//======================== civlc.cvh =======================
+/*@ depends_on \nothing;
+  @ executes_when $true;
   @*/
-$system[asserts] void assert(_Bool expr);
+$system[civlc] void $assert(_Bool expr, ...);
+//======================== assert.h ========================
+/*@ depends_on \nothing;
+  @*/
+$atomic_f void assert(_Bool expr) {
+  $assert(expr);
+}
 //================== abstractFunctions.cvl =================
 $abstract int f(int);
-int main()
-{
+int main() {
   assert($forall (int i | i > 0) f(i));
 }
