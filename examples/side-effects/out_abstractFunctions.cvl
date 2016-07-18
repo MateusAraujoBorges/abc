@@ -1,7 +1,7 @@
 //======================== assert.h ========================
 /*@ pure;
   @ depends_on \nothing;
-  @ executes_when $true;
+  @ executes_when \true;
   @*/
 $system[asserts] void assert(_Bool expr);
 //================== abstractFunctions.cvl =================

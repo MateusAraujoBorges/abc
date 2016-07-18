@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 import java.util.HashMap;
 
@@ -31,7 +32,7 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils.LexerFactory;
 
 public class PreprocessorTest {
 
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	private static PrintStream out = System.out;
 
@@ -69,8 +70,13 @@ public class PreprocessorTest {
 
 	private void lex(String rootName) throws IOException {
 		String filename = (new File(root, rootName + ".txt")).getAbsolutePath();
+		PrintStream lexOut = debug ? out : new PrintStream(new OutputStream() {
+			public void write(int b) {
+				// DO NOTHING
+			}
+		});
 
-		ANTLRUtils.lex(out, lf, filename);
+		ANTLRUtils.lex(lexOut, lf, filename);
 	}
 
 	private void readSource(TokenSource source) throws PreprocessorException {
@@ -114,17 +120,37 @@ public class PreprocessorTest {
 			} while (PreprocessorUtils.isWhiteSpace(token1));
 			do {
 				token2 = expectedSource.nextToken();
+				PreprocessorUtils.convertPreprocessorIdentifiers(token2);
 				type2 = token2.getType();
 			} while (PreprocessorUtils.isWhiteSpace(token2));
 			if (debug) {
 				out.println("actual: " + token1 + "     expected: " + token2);
 				out.flush();
 			}
+			if (type1 == PreprocessorParser.PPRAGMA) {
+				// expected should be two tokens: #, pragma
+				assertEquals(PreprocessorParser.HASH, type2);
+				do {
+					token2 = expectedSource.nextToken();
+					type2 = token2.getType();
+				} while (PreprocessorUtils.isWhiteSpace(token2));
+				if (debug) {
+					out.println("expected also: " + token2);
+					out.flush();
+				}
+				assertEquals(PreprocessorParser.PRAGMA, type2);
+			} else {
 
-			assertEquals(type2, type1);
-			if (type1 == PreprocessorParser.EOF)
-				break;
-			assertEquals(token2.getText(), token1.getText());
+				// the types are not necessarily equal because the preprocessing
+				// will change the types of tokens which are preprocessor
+				// keywords
+				// (e.g., "define") to IDENTIFIER.
+
+				assertEquals(type2, type1);
+				if (type1 == PreprocessorParser.EOF)
+					break;
+				assertEquals(token2.getText(), token1.getText());
+			}
 
 		}
 	}
@@ -417,6 +443,6 @@ public class PreprocessorTest {
 
 	@Test
 	public void lex_test() throws IOException {
-		lex("concat2");
+		lex("conditions2");
 	}
 }

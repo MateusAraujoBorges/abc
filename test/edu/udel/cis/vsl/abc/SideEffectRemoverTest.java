@@ -19,7 +19,7 @@ import edu.udel.cis.vsl.abc.program.IF.Program;
 
 public class SideEffectRemoverTest {
 
-	public static boolean debug = false;
+	public static boolean debug = true;
 
 	/**
 	 * Prune, remove side effects, and prune again. Second prune is necessary

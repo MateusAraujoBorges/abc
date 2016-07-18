@@ -41,7 +41,8 @@ public class PreprocessorExpressionAnalyzer {
 	 *            there is a macro named s which is defined. This is needed in
 	 *            order to evaluate subexpressions of the form "defined(X)".
 	 */
-	public PreprocessorExpressionAnalyzer(StringPredicate macroDefinedPredicate) {
+	public PreprocessorExpressionAnalyzer(
+			StringPredicate macroDefinedPredicate) {
 		this.macroDefinedPredicate = macroDefinedPredicate;
 	}
 
@@ -64,7 +65,6 @@ public class PreprocessorExpressionAnalyzer {
 		CharStream stream = new ANTLRStringStream(string);
 		PreprocessorLexer cppLexer = new PreprocessorLexer(stream);
 
-		cppLexer.inCondition = true;
 		PreprocessorUtils.printTokenSource(out, cppLexer);
 	}
 
@@ -107,9 +107,6 @@ public class PreprocessorExpressionAnalyzer {
 			throws PreprocessorExpressionException {
 		CharStream stream = new ANTLRStringStream(expressionString);
 		PreprocessorLexer cppLexer = new PreprocessorLexer(stream);
-
-		cppLexer.inCondition = true;
-
 		TokenSource source = PreprocessorUtils.filterWhiteSpace(cppLexer);
 		CommonTree result = parse(source);
 		int numErrors = cppLexer.getNumberOfSyntaxErrors();
@@ -140,9 +137,6 @@ public class PreprocessorExpressionAnalyzer {
 			String text = token.getText();
 
 			return PreprocessorUtils.convertStringToInt(text);
-		} else if (PreprocessorUtils.isIdentifier(token)) {
-			return 0;
-			// issue warning?
 		} else if (tree.getChildCount() == 1) {
 			CommonTree child = (CommonTree) tree.getChild(0);
 
@@ -189,6 +183,9 @@ public class PreprocessorExpressionAnalyzer {
 				return (value0 == evaluate(child1) ? 1 : 0);
 			else if (type == PreprocessorLexer.NEQ)
 				return (value0 != evaluate(child1) ? 1 : 0);
+		} else if (PreprocessorUtils.isIdentifier(token)) {
+			return 0;
+			// issue warning?
 		}
 		throw new PreprocessorExpressionException(
 				"Unknown expression in preprocessor: " + tree);

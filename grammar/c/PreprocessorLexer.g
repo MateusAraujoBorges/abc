@@ -11,7 +11,7 @@ lexer grammar PreprocessorLexer;
  * backslash followed by newline sequences have been removed.
  *
  * The grammar has been extended to include keywords for
- * the CIVL-C extension of C.
+ * the CIVL-C, ACSL, GNU, and CUDA extensions of C.
  */
 
 @header
@@ -21,59 +21,38 @@ package edu.udel.cis.vsl.abc.front.c.preproc;
 
 @members
 {
-
-public boolean inInclude = false; // are we inside a #include directive?
-public boolean inCondition = false; // are we inside a #if condition?
-public boolean atLineStart = true; // are we at start of line + possible WS?
-
 @Override
 public void emitErrorMessage(String msg) { // don't try to recover!
     throw new RuntimeException(msg);
 }
-
 }
 
 
 /* Preprocessor directives and pragmas */
 
-HASHHASH	:	'##' | '%:%:'	NotLineStart;
-
-
-fragment
-NotLineStart	:	{atLineStart = false;} ;
-
-PDEFINE		:	{atLineStart}?=>WS* '#' WS* 'define' NotLineStart;
-PINCLUDE	:	{atLineStart}?=>WS* '#' WS* 'include'
-			{inInclude = true; atLineStart=false;}
-		;
-PIFDEF		:	{atLineStart}?=>WS* '#' WS* 'ifdef' NotLineStart;
-PIFNDEF		:	{atLineStart}?=>WS* '#' WS* 'ifndef' NotLineStart;
-PIF		:	{atLineStart}?=>WS* '#' WS* 'if'
-			{inCondition = true; atLineStart = false;}
-		;
-PENDIF		:	{atLineStart}?=>WS* '#' WS* 'endif' NotLineStart;
-PELIF		:	{atLineStart}?=>WS* '#' WS* 'elif'
-			{inCondition = true; atLineStart = false;}
-		;
-PELSE		:	{atLineStart}?=>WS* '#' WS* 'else' NotLineStart;
-PRAGMA		:	{atLineStart}?=>WS* '#' WS* 'pragma' NotLineStart;
-PERROR		:	{atLineStart}?=>WS* '#' WS* 'error' NotLineStart;
-PUNDEF		:	{atLineStart}?=>WS* '#' WS* 'undef' NotLineStart;
-PLINE		:	{atLineStart}?=>WS* '#' WS* 'line' NotLineStart;
-//PBLANK		:	{atLineStart}?=>WS* '#' WS* NotLineStart;
-HASH		:	WS* '#' WS*;
-DEFINED		:	{inCondition}?=>'defined' NotLineStart;
 
 /****** White space ******/
 
-NEWLINE		:	NewLine;
-
-fragment
-NewLine		:	'\r'? '\n'
-			{inCondition=false; atLineStart=true;};
-
+NEWLINE		:	'\r'? '\n' ;
 WS		:	(' ' | '\t')+;
 
+
+/******* Preprocessor Keywords *********/
+
+// Note: these have to be turned into IDENTIFIERs
+// after preprocessing
+
+DEFINE		:	'define';
+DEFINED		:	'defined';
+ELIF		:	'elif';
+ENDIF		:	'endif';
+ERROR		:	'error';
+IFDEF		:	'ifdef';
+IFNDEF		:	'ifndef';
+INCLUDE		:	'include';
+LINE		:	'line';
+PRAGMA		:	'pragma';
+UNDEF		:	'undef';
 
 /****** C keywords, from C11 Sec. 6.4.1 ******/
 
@@ -123,7 +102,7 @@ COMPLEX		:	'_Complex';
 GENERIC		:	'_Generic';
 IMAGINARY	:	'_Imaginary';
 NORETURN	:	'_Noreturn';
-STATICASSERT:	'_Static_assert';
+STATICASSERT	:	'_Static_assert';
 THREADLOCAL	:	'_Thread_local';
 
 
@@ -147,15 +126,15 @@ DEPENDS     	:   	'$depends';
 DERIV		:	'$D';
 DOMAIN		:	'$domain';
 ENSURES		:	'$ensures';
-EQUIV_ACSL	:	'<==>'		NotLineStart;
+EQUIV_ACSL	:	'<==>'	;
 EXISTS		: 	'$exists';
-FALSE		:	'$false';
+//FALSE		:	'$false';
 FORALL		:	'$forall';
 FATOMIC     	:   	'$atomic_f';
 GUARD       	:   	'$guard';
 HERE		:	'$here';
-IMPLIES_ACSL	:	'==>'		NotLineStart; // can the NotLineStart be removed?
-IMPLIES		:	'=>'		NotLineStart; // can the NotLineStart be removed?
+IMPLIES_ACSL	:	'==>';
+IMPLIES		:	'=>';
 INPUT		:	'$input';
 INVARIANT	:	'$invariant';
 LAMBDA		:	'$lambda';
@@ -174,16 +153,16 @@ SELF		:	'$self';
 READS       	:   	'$reads';
 SPAWN		:	'$spawn';
 SYSTEM      	:   	'$system';
-TRUE		:	'$true';
+//TRUE		:	'$true';
 UNIFORM		:	'$uniform';
 WHEN		:	'$when';
-XOR_ACSL	:	'^^'		NotLineStart;
+XOR_ACSL	:	'^^'	;
 
 /* Cuda-C keywords */
 
-DEVICE  :   '__device__';
-GLOBAL	:	'__global__';
-SHARED	:	'__shared__';
+DEVICE  : '__device__';
+GLOBAL	: '__global__';
+SHARED	: '__shared__';
 
 /* GNU C keywords */
 TYPEOF  :   'typeof';
@@ -191,7 +170,7 @@ TYPEOF  :   'typeof';
 /****** Identifiers: C11 Sec. 6.4.2 ******/
 
 IDENTIFIER	:	IdentifierNonDigit
-			(IdentifierNonDigit | Digit)* NotLineStart
+			(IdentifierNonDigit | Digit)*
 		;
 		
 fragment
@@ -252,11 +231,11 @@ fragment
 LongLongSuffix	:	'll' | 'LL';
 
 fragment	
-OctalConstant	:	Zero OctalDigit* IntegerSuffix? NotLineStart;
+OctalConstant	:	Zero OctalDigit* IntegerSuffix? ;
 
 fragment
 HexadecimalConstant
-		:	HexPrefix HexadecimalDigit+ IntegerSuffix? NotLineStart;
+		:	HexPrefix HexadecimalDigit+ IntegerSuffix? ;
 
 fragment
 HexPrefix	:	Zero ('x' | 'X') ;
@@ -316,14 +295,13 @@ PP_NUMBER	:	'.'? Digit
 			| Digit
 			| ('e' | 'E' | 'p' | 'P') ('+' | '-')
 			)*
-			NotLineStart
 		;
 
 
 /****** Sec. 6.4.4.4: Character Constants ******/
 
 CHARACTER_CONSTANT
-		:	('L' | 'U' | 'u')? '\'' CChar+ '\'' NotLineStart;
+		:	('L' | 'U' | 'u')? '\'' CChar+ '\'' ;
 
 fragment
 CChar		:	~('\'' | '\\' | '\n') | EscapeSequence ;
@@ -349,7 +327,6 @@ HexEscape	:	'\\' 'x' HexadecimalDigit+ ;
 
 
 STRING_LITERAL  :	('u8' | 'u' | 'U' | 'L')? '"' SChar* '"'
-			NotLineStart
 		;
 
 fragment
@@ -357,65 +334,68 @@ SChar		:	~('"' | '\\' | '\n') | EscapeSequence ;
 
 /****** Punctuators: C11 Sec. 6.4.6 ******/
 
-ELLIPSIS	: 	'...' 		NotLineStart;
-DOTDOT		: 	'..' 		NotLineStart;
-DOT		:	'.' 		NotLineStart;
-AMPERSAND	:	'&'		NotLineStart;
-AND		:	'&&'		NotLineStart;
-ARROW		:	'->'		NotLineStart;
-ASSIGN		:	'='		NotLineStart;
-BITANDEQ	:	'&='		NotLineStart;
-BITOR		:	'|'		NotLineStart;
-BITOREQ		:	'|='		NotLineStart;
-BITXOR		:	'^'		NotLineStart;
-BITXOREQ	:	'^='		NotLineStart;
-COLON		:	':'		NotLineStart;
-COMMA		:	','		NotLineStart;
-DIV		:	'/'		NotLineStart;
-DIVEQ		:	'/='		NotLineStart;
-EQUALS		:	'=='		NotLineStart;
-GT		:	'>'		NotLineStart;
-GTE		:	'>='		NotLineStart;
-//HASH		:	'#' | '%:'	NotLineStart;
-LCURLY		:	'{' | '<%'	NotLineStart;
-LEXCON		:	'<<<' 		NotLineStart;
-LPAREN		:	'('		NotLineStart;
-LSQUARE		:	'[' | '<:'	NotLineStart;
-LT		:	'<'		NotLineStart;
-LTE		:	'<='		NotLineStart;
-MINUSMINUS	:	'--'		NotLineStart;
-MOD		:	'%'		NotLineStart;
-MODEQ		:	'%='		NotLineStart;
-NEQ		:	'!='		NotLineStart;
-NOT		:	'!'		NotLineStart;
-OR		:	'||'		NotLineStart;
-PLUS		:	'+'		NotLineStart;
-PLUSEQ		:	'+='		NotLineStart;
-PLUSPLUS	:	'++'		NotLineStart;
-QMARK		:	'?'		NotLineStart;
-RCURLY		:	'}' | '%>'	NotLineStart;
-REXCON		:	'>>>' 		NotLineStart;
-RPAREN		:	')'		NotLineStart;
-RSQUARE		:	']' | ':>'	NotLineStart;
-SEMI		:	';'		NotLineStart;
-SHIFTLEFT	:	'<<'		NotLineStart;
-SHIFTLEFTEQ	:	'<<='		NotLineStart;
-SHIFTRIGHT	:	'>>'		NotLineStart;
-SHIFTRIGHTEQ	:	'>>='		NotLineStart;
-STAR		:	'*'		NotLineStart;
-STAREQ		:	'*='		NotLineStart;
-SUB		:	'-'		NotLineStart;
-SUBEQ		:	'-='		NotLineStart;
-TILDE		:	'~'		NotLineStart;
+ELLIPSIS	: 	'...'	 	;
+DOTDOT		: 	'..' 		;
+DOT		:	'.' 		;
+AMPERSAND	:	'&'		;
+AND		:	'&&'		;
+ARROW		:	'->'		;
+ASSIGN		:	'='		;
+BITANDEQ	:	'&='		;
+BITOR		:	'|'		;
+BITOREQ		:	'|='		;
+BITXOR		:	'^'		;
+BITXOREQ	:	'^='		;
+COLON		:	':'		;
+COMMA		:	','		;
+DIV		:	'/'		;
+DIVEQ		:	'/='		;
+EQUALS		:	'=='		;
+GT		:	'>'		;
+GTE		:	'>='		;
+HASH		:	'#' | '%:'	;
+HASHHASH	:	'##' | '%:%:'	;
+LCURLY		:	'{' | '<%'	;
+LEXCON		:	'<<<' 		;
+LPAREN		:	'('		;
+LSQUARE		:	'[' | '<:'	;
+LT		:	'<'		;
+LTE		:	'<='		;
+MINUSMINUS	:	'--'		;
+MOD		:	'%'		;
+MODEQ		:	'%='		;
+NEQ		:	'!='		;
+NOT		:	'!'		;
+OR		:	'||'		;
+PLUS		:	'+'		;
+PLUSEQ		:	'+='		;
+PLUSPLUS	:	'++'		;
+QMARK		:	'?'		;
+RCURLY		:	'}' | '%>'	;
+REXCON		:	'>>>' 		;
+RPAREN		:	')'		;
+RSQUARE		:	']' | ':>'	;
+SEMI		:	';'		;
+SHIFTLEFT	:	'<<'		;
+SHIFTLEFTEQ	:	'<<='		;
+SHIFTRIGHT	:	'>>'		;
+SHIFTRIGHTEQ	:	'>>='		;
+STAR		:	'*'		;
+STAREQ		:	'*='		;
+SUB		:	'-'		;
+SUBEQ		:	'-='		;
+TILDE		:	'~'		;
 
 /****** Header Names: C11 Sec. 6.4.7 ******/
-	
+
+/*
 HEADER_NAME	:	{inInclude}?=>
 			( '"' (~('\n' | '"'))+ '"'
 			| '<' (~('\n' | '>'))+ '>'
 			)
-			{inInclude=false; atLineStart=false;}
+			{inInclude=false;}
 		;
+*/
 		
 
 /* ***** Comments: C11 Sec 6.4.9 ******/
@@ -450,12 +430,12 @@ ANNOTATION_END : '*/';
 
 /* Special keywords starting with backslash reserved for extensions
  * such as ACSL */
-EXTENDED_IDENTIFIER	:	'\\' IdentifierNonDigit
-			(IdentifierNonDigit | Digit)* NotLineStart
-		;
+EXTENDED_IDENTIFIER
+	:
+	'\\' IdentifierNonDigit (IdentifierNonDigit | Digit)* 
+	;
 
 
 /****** Other characters: C11 Sec. 6.4 ******/
 
-OTHER		: . NotLineStart;
-
+OTHER		: . ;

@@ -1,7 +1,7 @@
 parser grammar PreprocessorParser;
 
 /* Author: Stephen F. Siegel, University of Delaware
- * Last modified: June 1, 2012
+ * Last modified: July 15, 2016
  *
  * Grammar for C preprocessor.
  * This grammar describes a C source file before preprocessing.
@@ -13,15 +13,18 @@ parser grammar PreprocessorParser;
  * This grammar uses the PreprocessorLexer, which has already
  * formed the preprocessor tokens.
  *
- * CIVL-C keywords are also included and treated the same as C keywords.
+ * Extensions from other languages (beyond C11) are included.
  */
+
+// TODO: use things like this:
+// bar 	: ID{$ID.setText("HELLO");$ID.setType(0);} WS+ INT -> ID INT;
 
 options {
    tokenVocab=PreprocessorLexer;
    output=AST;
 }
 
-/* "imaginary" tokens */
+/* "imaginary" tokens that will be used in the tree */
 tokens {
 	FILE;         // root node
 	TEXT_BLOCK;   // a list of tokens
@@ -29,6 +32,9 @@ tokens {
 	EXPR;         // an expression used in a conditional (#if)
 	SEQUENCE;     // true branch of conditional directive
 	BODY;         // body of macro definition
+	PIF;          // preprocessor if: #if
+	PELSE;        // preprocessor else: #else
+	PPRAGMA;      // preprocessor pragma: #pragma
 }
 
 @header
@@ -42,186 +48,381 @@ public void emitErrorMessage(String msg) { // don't try to recover!
     throw new RuntimeException(msg);
 }
 }
-
-/**  The whole file consists of 1 block */
-file		:	block -> ^(FILE block)
-		;
-
-/** A block is a sequence of directives and text blocks.
- *  A block may be empty.
+		
+/* An item is either a preprocessor directive
+ * or a text block.  For compound directives,
+ * such as #ifdef ... #endif, all of the text
+ * between the opening if and the closing #endif
+ * is considered part of the directive.  
+ * A textblock is a maximal sequence of plain
+ * text lines.
  */
-block		:	(directive | textblock)* ;
+file		: whiteBlock? itemList EOF
+		  -> ^(FILE whiteBlock? itemList)
+		;
 
-/** These are the various kind of preprocessor directives
- * specified in the C11 standard.   Each one whose name ends in
- * "block" is a complete block, so the "ifblock", for example,
- * contains everything up to and including the final "#endif".  
- *
- * Yes, a "nondirective" is a kind of directive.  That is what
- * C11 says.
- *
+/*
+items		: directiveBlock*
+		  (textBlock directiveBlock+)*
+		  textBlock?
+		;
+*/
+
+/* starts with non-ws token # or something not # and ends just before
+ * non-ws token that does not start a directive block or text block. */
+itemList	: directiveBlock itemList
+		| textBlock ( directiveBlock itemList | )
+		|
+		;
+
+whiteBlock	: white+ -> ^(TEXT_BLOCK white+)
+		;
+
+textBlock	: textSegment+ -> ^(TEXT_BLOCK textSegment+)
+		;
+
+textSegment	: NEWLINE white*
+		| ~(HASH|WS|COMMENT|NEWLINE) (~NEWLINE)* NEWLINE white*
+		;
+
+directiveBlock	: directive whiteBlock?
+		;
+
+directive	: HASH! white!* directiveSuffix
+		;
+
+directiveSuffix	: macrodef
+		| macroundef
+		| includeline
+		| pragmaline
+		| errorline
+		| lineline
+		| ifdefblock
+		| ifblock
+		| ifndefblock
+		| nondirective
+		;
+
+/* A nondirective is any line starting with # that
+ * doesn't fall into one of the ordinary directive
+ * forms. */
+nondirective	: t+=not_directive t+=wpptoken* NEWLINE -> ^(HASH $t+)
+		| NEWLINE -> ^(HASH)
+		;
+
+/* A function-like or object-like macro definition. */
+macrodef	: DEFINE white+ i=identifier
+		  ( paramlist macrobody -> ^(DEFINE $i paramlist macrobody)
+		  | NEWLINE -> ^(DEFINE $i ^(BODY))
+		  | white macrobody -> ^(DEFINE $i macrobody)
+		  )
+		;
+
+macrobody	: white* 
+		  ( t+=pptoken (t+=wpptoken* t+=pptoken)? white* NEWLINE
+		    -> ^(BODY $t+)
+		  | NEWLINE -> ^(BODY)
+		  )
+		;
+
+paramlist	: LPAREN white* 
+		  ( RPAREN -> ^(PARAMLIST)
+		  | identifier (white* COMMA white* identifier)* white* RPAREN
+		    -> ^(PARAMLIST identifier+)
+		  )
+		;
+
+macroundef	: UNDEF white+ identifier white* NEWLINE
+		  -> ^(UNDEF identifier)
+		;
+
+includeline	: INCLUDE white* t+=pptoken (t+=wpptoken* t+=pptoken)?
+		  white* NEWLINE
+		  -> ^(INCLUDE $t+)
+		;
+
+pragmaline	: PRAGMA wpptoken* NEWLINE -> ^(PPRAGMA wpptoken* NEWLINE)
+		;
+
+errorline	: ERROR wpptoken* NEWLINE -> ^(ERROR wpptoken*)
+		;
+
+lineline	: LINE wpptoken* NEWLINE -> ^(LINE wpptoken*)
+		;
+
+/* #ifdef X ... #elif ... #elif ... #else ... #endif.
+ * Tree:
+ * (IFDEF identifier ^(SEQUENCE item*)), or
+ * (IFDEF identifier ^(SEQUENCE item*) elseblock)
  */
-directive	:	macrodef
-		|	macroundef
-		|	includeline
-		|	pragmaline
-		|	ifblock
-		|	ifdefblock
-		|	ifndefblock
-		|	errorline
-		|	lineline
-		|	nondirectiveline
+ifdefblock	: IFDEF white* i=identifier white* NEWLINE
+		  t=if_section f=if_suffix
+		  -> ^(IFDEF $i ^(SEQUENCE $t?) $f?)
 		;
 
-/** A textblock is a maximal sequence of text lines.  A
- * text line is any line that doesn't have a "#' as its first
- * non-whitespace character.   In the tree, the text block
- * just contains a sequence of all the tokens form all the lines
- * concatenated.  The white space tokens and newlines are included,
- * as are comments. */
-textblock	: 	(options {greedy=true;} : textline)+
-			 -> ^(TEXT_BLOCK textline+) ;
-
-textline	:	white* (nonPoundPpToken wpptoken*)? lineend ;
-
-white		:	WS | COMMENT ;
-
-wpptoken	:	pptoken | white ;
-
-lineend		:	NEWLINE ;
-
-macrodef	:	PDEFINE white+ i=identifier
-			( paramlist macrobody -> ^(PDEFINE $i paramlist macrobody)
-			| lineend -> ^(PDEFINE $i ^(BODY))
-			| white macrobody -> ^(PDEFINE $i macrobody)
-			)
+/* Exactly like above, except with #ifndef instead of #ifdef */
+ifndefblock	: IFNDEF white* i=identifier white* NEWLINE
+		  t=if_section f=if_suffix
+		  -> ^(IFNDEF $i ^(SEQUENCE $t?) $f?)
 		;
 
-macrobody	:	white* 
-			( t+=pptoken (t+=wpptoken* t+=pptoken)? white* lineend
-			  -> ^(BODY $t+)
-			| lineend
-			  -> ^(BODY)
-			)
+/* #if expr ... #elif ... #elif ... #else ... #endif.
+ * Very similar to #ifdef, but with an expression in place
+ * of an identifier. */
+ifblock		: IF white* e=expr white* NEWLINE
+		  t=if_section f=if_suffix
+		  -> ^(PIF $e ^(SEQUENCE $t?) $f?)	
 		;
 
-paramlist	:	LPAREN white* 
-			( RPAREN -> ^(PARAMLIST)
-			| identifier (white* COMMA white* identifier)* white* RPAREN
-			  -> ^(PARAMLIST identifier+)
-			)
+/* A section of a conditional directive.
+ * Begins just after the line containing
+ * one of #ifdef, #ifndef, #if, #elif,
+ * or #else.
+ * Ends with the HASH white*
+ * immediately preceding the first matching
+ * endif, elif, or else. 
+ */
+if_section	: whiteBlock? section_body
 		;
 
-macroundef	:	PUNDEF white+ identifier white* lineend
-			-> ^(PUNDEF identifier)
+/* Begins with first non-white token on a line inside a
+ * conditional section,
+ * ends with the HASH white* immediately preceding the
+ * endif, elif, or else closing that section.
+ * Tree is just flat
+ * list of TEXT_BLOCKs and directives.
+ */
+section_body	: textBlock? subsection
 		;
 
-includeline	:	PINCLUDE white* HEADER_NAME white* lineend
-			-> ^(PINCLUDE HEADER_NAME)
+/* Begins with a # at beginning of a line (after possible
+ * white space) inside a conditional directive body.
+ * Ends with the HASH white* immediately preceding
+ * the closing endif, elif, or else.  Tree is just
+ * flat list of TEXT_BLOCKs and directives.
+ */
+subsection	: HASH! white!*
+		  ( directiveSuffix whiteBlock? section_body)?
 		;
 
-ifblock		: 	PIF white* expr	lineend block elseblock? endifline
-			-> ^(PIF expr ^(SEQUENCE block?) elseblock?)		
+/* Begins with endif, elif, or else.   Ends with NEWLINE after
+ * closing #endif.
+ * Tree: one of
+ *   1. empty
+ *   2. (ELIF (ELIF expr (SEQUENCE items) elseblock?))
+ *   3. (ELSE items)
+ * respectively.  The reason for #2 is to make the tree
+ * for a #elif... look the same as what would be obtained from
+ * #else #if ....  The first ELIF
+ * should be interpreted as ELSE and the second as IF.
+ */
+if_suffix	: ENDIF white* NEWLINE
+ 		  -> 
+		| c=ELIF white* expr white* NEWLINE if_section if_suffix
+		  -> ^($c ^($c expr ^(SEQUENCE if_section?) if_suffix?))
+		| ELSE white* NEWLINE if_section ENDIF white* NEWLINE
+		  -> ^(PELSE if_section?)
 		;
 
-expr		:	ppdExpr (ppdExpr | white)* -> ^(EXPR ppdExpr+) ;
+/* A space, tab, or comment */
+white		: WS | COMMENT ;
 
-definedExpr	:	DEFINED WS!*
-			( identifier
-			| LPAREN! WS!* identifier WS!* RPAREN!
-			)
-		;
-			
-ppdExpr		:	pptoken | definedExpr ;
+/* A preprocessor token or white space token (but not NEWLINE). */
+wpptoken	: pptoken | white ;
 
-elseblock	:	simpleelseblock	| elifblock ;
+/* An expression that can be used with #if or #elif.
+ * This grammar will accept just about anything here. */
+expr		: ppdExpr (white* ppdExpr)* -> ^(EXPR ppdExpr+) ;
 
-simpleelseblock	:	PELSE white* lineend block -> ^(PELSE block?) ;
-
-elifblock	:	c=PELIF white* expr lineend block elseblock? 
-			->
-			^($c ^($c expr ^(SEQUENCE block?) elseblock?))
+definedExpr	: DEFINED WS!*
+		  ( identifier
+		  | LPAREN! WS!* identifier WS!* RPAREN!
+		  )
 		;
 
-ifdefblock	:	PIFDEF white* identifier white* lineend
-			block elseblock? endifline
-			-> ^(PIFDEF identifier ^(SEQUENCE block?) elseblock?)
+/* A preprocessor token or defined expressions.  These are the
+ * things that can occur in an #if or #elif directive: */	
+ppdExpr		: (DEFINED)=> definedExpr
+		| pptoken
 		;
 
-ifndefblock	:	PIFNDEF white* identifier white* lineend
-			block elseblock? endifline
-			-> ^(PIFNDEF identifier ^(SEQUENCE block) elseblock?)
-		;
-
-endifline	:	PENDIF white* lineend ;
-
-pragmaline	:	PRAGMA wpptoken* lineend -> ^(PRAGMA wpptoken* lineend)	;
-
-errorline	:	PERROR wpptoken* lineend -> ^(PERROR wpptoken*)	;
-
-lineline	:	PLINE wpptoken* lineend -> ^(PLINE wpptoken*) ;
-
-nondirectiveline
-		:	HASH wpptoken* lineend -> ^(HASH wpptoken*) ;
-
-/* A "preprocessor token" as defined in the C11 Standard. */
-pptoken		:	HEADER_NAME
-		|	identifier
+/* A "preprocessor token" as defined in the C11 Standard.
+ * This rule includes all of the extensions from the other
+ * languages too.  We got rid of header names because
+ * those are composed of smaller tokens in our lexer. */
+pptoken		:	identifier
 		|	pp_number
 		|	CHARACTER_CONSTANT
 		|	STRING_LITERAL
 		|	punctuator
-		|	INLINE_ANNOTATION_START
-		|	ANNOTATION_START
-		|	ANNOTATION_END
 		|	OTHER
 		;
 
-/* Any preprocessor token other than '#' */
-nonPoundPpToken	:	HEADER_NAME
-		|	identifier
-		|	pp_number
+/* Any token that is not a preprocessor keyword */
+not_directive	:	pp_number
 		|	CHARACTER_CONSTANT
 		|	STRING_LITERAL
-		|	nonPoundPunctuator
-		|	INLINE_ANNOTATION_START
-		|	ANNOTATION_START
-		|	ANNOTATION_END
+		|	punctuator
 		|	OTHER
+		|	IDENTIFIER
+		|	EXTENDED_IDENTIFIER
+		|	c_notpp_keyword
+		|	civl_keyword
+		|	cuda_keyword
+		|	gnuc_keyword
 		;
-		
-/* An "identifier" for the preprocessor is any C IDENTIFIER or C keyword: */
-/* Added for CIVL-C: any CIVL-C keyword */
-
-identifier	:	IDENTIFIER | c_keyword | gnuc_keyword | EXTENDED_IDENTIFIER;
-
-c_keyword	:	AUTO | ASSIGNS | BREAK | CASE | CHAR | CONST | CONTINUE | DEFAULT
-        	|   	DEPENDS | DO | DOUBLE | ELSE | ENUM | EXTERN | FLOAT | FOR | GOTO
-		|	GUARD | IF | INLINE | INT | LONG | REGISTER | RESTRICT | RETURN
-		|	SHORT | SIGNED | SIZEOF | SCOPEOF | STATIC | STRUCT | SWITCH | TYPEDEF
-		|	UNION | UNSIGNED | VOID | VOLATILE | WHILE | ALIGNAS | ALIGNOF
-		|	ATOMIC | BOOL | COMPLEX | GENERIC | IMAGINARY | NORETURN
-		|	STATICASSERT | THREADLOCAL
-        	|   	CHOOSE | COLLECTIVE
-		|	ENSURES | FALSE | INPUT | INVARIANT | LAMBDA
-		|	OUTPUT | READS | REQUIRES | RESULT | SELF | PROCNULL | HERE
-		|	SPAWN | TRUE | WHEN | RUN | CIVLATOMIC | CIVLATOM
-		|	ABSTRACT | BIG_O | CONTIN | DERIV | FORALL | EXISTS | UNIFORM  
-		|	REAL | CIVLFOR | PARFOR | DOMAIN | RANGE | SYSTEM 
-		| 	DEVICE | GLOBAL | SHARED
-        	|   	FATOMIC | CALLS | IMPLIES_ACSL | XOR_ACSL | EQUIV_ACSL
+	
+/* An "identifier" for the preprocessor is an IDENTIFIER
+ * or any of the reserved words from any of the languages
+ */
+identifier	:	IDENTIFIER
+		|	EXTENDED_IDENTIFIER
+		|	pp_notc_keyword
+		|	c_keyword
+		|	civl_keyword
+		|	cuda_keyword
+		|	gnuc_keyword
 		;
 
-gnuc_keyword : TYPEOF;
+/* C and preprocessor keywords: */
 
-punctuator	:	nonPoundPunctuator | HASH ;
+/* Words that are used in both C and the preprocessor */
+c_pp_keyword	:	IF
+		|	ELSE
+		;
+
+/* Words used in preprocessor but not in C */
+pp_notc_keyword	:	DEFINE
+		|	DEFINED
+		|	ELIF
+		|	ENDIF
+		|	ERROR
+		|	IFDEF
+		|	IFNDEF
+		|	INCLUDE
+		|	LINE
+		|	PRAGMA
+		|	UNDEF
+		;
+
+/* Words used in preprocessor */
+pp_keyword	:	pp_notc_keyword | c_pp_keyword
+		;
+
+/* C11 keywords: */
+c_keyword	:	c_pp_keyword | c_notpp_keyword
+		;
+
+/* Words used in C but not in preprocessor */
+c_notpp_keyword	:	ALIGNAS 
+		|	ALIGNOF
+		|	ASSIGNS 
+		|	ATOMIC
+		|	AUTO 
+		|	BOOL 
+		|	BREAK 
+		|	CASE 
+		|	CHAR 
+		|	COMPLEX 
+		|	CONST 
+		|	CONTINUE 
+		|	DEFAULT
+		|	DO 
+		|	DOUBLE 
+		|	ENUM 
+		|	EXTERN 
+		|	FLOAT 
+		|	FOR 
+		|	GENERIC 
+		|	GOTO
+		|	IMAGINARY 
+		|	INLINE 
+		|	INT 
+		|	LONG 
+		|	NORETURN
+		|	REGISTER 
+		|	RESTRICT 
+		|	RETURN
+		|	SHORT 
+		|	SIGNED 
+		|	SIZEOF 
+		|	STATIC 
+		|	STATICASSERT 
+		|	STRUCT 
+		|	SWITCH 
+		|	THREADLOCAL
+		|	TYPEDEF
+		|	UNION 
+		|	UNSIGNED 
+		|	VOID 
+		|	VOLATILE 
+		|	WHILE
+		;
+
+/* CIVL keywords, including ACSL keywords.  Keep alphabetized! */
+civl_keyword	:	ABSTRACT
+		|	BIG_O
+		|	CALLS
+		|	CHOOSE
+		|	CIVLATOM
+		|	CIVLATOMIC
+		|	CIVLFOR
+		|	COLLECTIVE
+		|	CONTIN
+		|	DEPENDS
+		|	DERIV
+		|	DOMAIN
+		|	ENSURES
+		|	EXISTS
+//		|	FALSE
+		|	FATOMIC
+		|	FORALL
+		|	GUARD
+		|	HERE
+		|	INPUT
+		|	INVARIANT
+		|	LAMBDA
+		|	OUTPUT
+		|	PARFOR
+		|	PROCNULL
+		|	RANGE
+		|	READS
+		|	REAL
+		|	REQUIRES
+		|	RESULT
+		|	SCOPEOF
+		|	SELF
+		|	SPAWN
+		|	SYSTEM 
+//		|	TRUE
+		|	UNIFORM  
+		|	WHEN
+		;
+
+/* CUDA-C keywords beyond those in C11: */
+cuda_keyword	:	DEVICE
+		|	GLOBAL
+		|	SHARED
+		;
+
+/* GNU extensions to C: */
+gnuc_keyword 	:	TYPEOF;
 
 /* a "pp_number" is any PP_NUMBER, INTEGER_CONSTANT, or FLOATING_CONSTANT */
-pp_number	:	INTEGER_CONSTANT | FLOATING_CONSTANT | PP_NUMBER ;
+pp_number	:	INTEGER_CONSTANT
+		|	FLOATING_CONSTANT
+		|	PP_NUMBER
+		;
+		
+/* The punctuators are the symbols which are not words.
+ * These are punctuators from all languages: */
+punctuator	:	c_punctuator
+		|	civl_punctuator
+		|	cuda_punctuator
+		;
 
-/* Any punctuator other than '#' */
-nonPoundPunctuator
-		:	AMPERSAND
+/* C punctuators:  */
+c_punctuator	:	AMPERSAND
 		|	AND
 		|	ARROW
 		|	ASSIGN
@@ -241,12 +442,10 @@ nonPoundPunctuator
 		|	EQUALS
 		|	GT
 		|	GTE
+		|	HASH
 		|	HASHHASH
-		|	IMPLIES
 		|	LCURLY
-		|	LEXCON
 		|	LPAREN
-		|	LSLIST
 		|	LSQUARE
 		|	LT
 		|	LTE
@@ -261,9 +460,7 @@ nonPoundPunctuator
 		|	PLUSPLUS
 		|	QMARK
 		|	RCURLY
-		|	REXCON
 		|	RPAREN
-		|	RSLIST
 		|	RSQUARE
 		|	SEMI
 		|	SHIFTLEFT
@@ -275,4 +472,19 @@ nonPoundPunctuator
 		|	SUB
 		|	SUBEQ
 		|	TILDE
+		;
+
+civl_punctuator	:	ANNOTATION_END
+		|	ANNOTATION_START
+		|	EQUIV_ACSL
+		|	IMPLIES
+		|	IMPLIES_ACSL
+		|	INLINE_ANNOTATION_START
+		|	LSLIST
+		|	RSLIST
+		|	XOR_ACSL
+		;
+
+cuda_punctuator	:	LEXCON
+		|	REXCON
 		;

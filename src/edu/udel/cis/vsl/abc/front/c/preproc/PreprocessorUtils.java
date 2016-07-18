@@ -1,5 +1,104 @@
 package edu.udel.cis.vsl.abc.front.c.preproc;
 
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ABSTRACT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ALIGNAS;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ALIGNOF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ASSIGNS;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ATOMIC;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.AUTO;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.BIG_O;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.BOOL;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.BREAK;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CALLS;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CASE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CHAR;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CHOOSE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CIVLATOM;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CIVLATOMIC;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CIVLFOR;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.COLLECTIVE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.COMPLEX;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CONST;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CONTIN;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CONTINUE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DEFAULT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DEFINE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DEFINED;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DEPENDS;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DERIV;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DEVICE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DO;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DOMAIN;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.DOUBLE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ELIF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ELSE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ENDIF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ENSURES;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ENUM;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.ERROR;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.EXISTS;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.EXTERN;
+//import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.FALSE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.FATOMIC;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.FLOAT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.FOR;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.FORALL;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.GENERIC;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.GLOBAL;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.GOTO;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.GUARD;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.HERE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.IDENTIFIER;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.IF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.IFDEF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.IFNDEF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.IMAGINARY;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.INCLUDE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.INLINE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.INPUT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.INT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.INVARIANT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.LAMBDA;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.LINE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.LONG;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.NORETURN;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.OUTPUT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.PARFOR;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.PRAGMA;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.PROCNULL;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.RANGE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.READS;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.REAL;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.REGISTER;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.REQUIRES;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.RESTRICT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.RESULT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.RETURN;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SCOPEOF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SELF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SHARED;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SHORT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SIGNED;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SIZEOF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SPAWN;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.STATIC;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.STATICASSERT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.STRUCT;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SWITCH;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.SYSTEM;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.THREADLOCAL;
+//import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.TRUE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.TYPEDEF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.TYPEOF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.UNDEF;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.UNIFORM;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.UNION;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.UNSIGNED;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.VOID;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.VOLATILE;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.WHEN;
+import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.WHILE;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,29 +122,23 @@ public class PreprocessorUtils {
 	private static boolean[] identifierPredicate = initIdentifierPredicate();
 
 	private static boolean[] initIdentifierPredicate() {
-		int[] identifierIndexes = new int[] { PreprocessorLexer.AUTO,
-				PreprocessorLexer.BREAK, PreprocessorLexer.CASE,
-				PreprocessorLexer.CHAR, PreprocessorLexer.CONST,
-				PreprocessorLexer.CONTINUE, PreprocessorLexer.DEFAULT,
-				PreprocessorLexer.DO, PreprocessorLexer.DOUBLE,
-				PreprocessorLexer.ELSE, PreprocessorLexer.ENUM,
-				PreprocessorLexer.EXTERN, PreprocessorLexer.FLOAT,
-				PreprocessorLexer.FOR, PreprocessorLexer.GOTO,
-				PreprocessorLexer.IF, PreprocessorLexer.INLINE,
-				PreprocessorLexer.INT, PreprocessorLexer.LONG,
-				PreprocessorLexer.REGISTER, PreprocessorLexer.RESTRICT,
-				PreprocessorLexer.RETURN, PreprocessorLexer.SHORT,
-				PreprocessorLexer.SIGNED, PreprocessorLexer.SIZEOF,
-				PreprocessorLexer.STATIC, PreprocessorLexer.STRUCT,
-				PreprocessorLexer.SWITCH, PreprocessorLexer.TYPEDEF,
-				PreprocessorLexer.UNION, PreprocessorLexer.UNSIGNED,
-				PreprocessorLexer.VOID, PreprocessorLexer.VOLATILE,
-				PreprocessorLexer.WHILE, PreprocessorLexer.ALIGNAS,
-				PreprocessorLexer.ALIGNOF, PreprocessorLexer.ATOMIC,
-				PreprocessorLexer.BOOL, PreprocessorLexer.COMPLEX,
-				PreprocessorLexer.GENERIC, PreprocessorLexer.IMAGINARY,
-				PreprocessorLexer.NORETURN, PreprocessorLexer.STATICASSERT,
-				PreprocessorLexer.THREADLOCAL };
+		int[] identifierIndexes = new int[] { ABSTRACT, ALIGNAS, ALIGNOF,
+				ASSIGNS, ATOMIC, AUTO, BIG_O, BOOL, BREAK, CALLS, CASE, CHAR,
+				CHOOSE, CIVLATOM, CIVLATOMIC, CIVLFOR, COLLECTIVE, COMPLEX,
+				CONST, CONTIN, CONTINUE, DEFAULT, DEFINE, DEFINED, DEPENDS,
+				DERIV, DEVICE, DO, DOMAIN, DOUBLE, ELIF, ELSE, ENDIF, ENSURES,
+				ENUM, ERROR, EXISTS, EXTERN, 
+				//FALSE,
+				FATOMIC, FLOAT, FOR, FORALL,
+				GENERIC, GLOBAL, GOTO, GUARD, HERE, IF, IFDEF, IFNDEF,
+				IMAGINARY, INCLUDE, INLINE, INPUT, INT, INVARIANT, LAMBDA, LINE,
+				LONG, NORETURN, OUTPUT, PARFOR, PRAGMA, PROCNULL, RANGE, READS,
+				REAL, REGISTER, REQUIRES, RESTRICT, RESULT, RETURN, SCOPEOF,
+				SELF, SHARED, SHORT, SIGNED, SIZEOF, SPAWN, STATIC,
+				STATICASSERT, STRUCT, SWITCH, SYSTEM, THREADLOCAL,
+				//TRUE,
+				TYPEDEF, TYPEOF, UNDEF, UNIFORM, UNION, UNSIGNED, VOID,
+				VOLATILE, WHEN, WHILE };
 		boolean[] result;
 		int length;
 		int min = identifierIndexes[0], max = identifierIndexes[0];
@@ -67,7 +160,7 @@ public class PreprocessorUtils {
 
 	/**
 	 * Is the token a preprocessor identifier. That would be any C identifier
-	 * (type IDENTIFIER) or any C keyword.
+	 * (type IDENTIFIER) or any keyword.
 	 * 
 	 * @param token
 	 *            any token
@@ -179,6 +272,34 @@ public class PreprocessorUtils {
 			throws PreprocessorExpressionException {
 		// TODO: fix
 		return new Double(text);
+	}
+
+	/**
+	 * If the token has type which is one of the preprocessor keywords (e.g.,
+	 * DEFINE, which is the type of the token "define"), it is changed to the
+	 * IDENTIFIER type. Otherwise, the token is unchanged.
+	 * 
+	 * @param token
+	 *            any preprocessing token (including whitespace)
+	 */
+	public static void convertPreprocessorIdentifiers(Token token) {
+		int tokenType = token.getType();
+
+		switch (tokenType) {
+		case DEFINE:
+		case DEFINED:
+		case ELIF:
+		case ENDIF:
+		case ERROR:
+		case IFDEF:
+		case IFNDEF:
+		case INCLUDE:
+		case LINE:
+		case PRAGMA:
+		case UNDEF:
+			token.setType(IDENTIFIER);
+		default:
+		}
 	}
 
 	/**

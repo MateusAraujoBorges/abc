@@ -415,35 +415,35 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			case PreprocessorParser.TEXT_BLOCK:
 				processTextBlock(node);
 				break;
-			case PreprocessorParser.PDEFINE:
+			case PreprocessorParser.DEFINE:
 				processMacroDefinition(node);
 				break;
-			case PreprocessorLexer.PERROR:
+			case PreprocessorParser.ERROR:
 				processError(node);
 				break;
-			case PreprocessorLexer.PELIF:
-			case PreprocessorLexer.PIF:
+			case PreprocessorParser.ELIF:
+			case PreprocessorParser.PIF:
 				processIf(node);
 				break;
-			case PreprocessorLexer.PIFDEF:
+			case PreprocessorParser.IFDEF:
 				processIfdef(node);
 				break;
-			case PreprocessorLexer.PIFNDEF:
+			case PreprocessorParser.IFNDEF:
 				processIfndef(node);
 				break;
-			case PreprocessorLexer.PINCLUDE:
+			case PreprocessorParser.INCLUDE:
 				processInclude(node);
 				break;
-			case PreprocessorLexer.PRAGMA:
+			case PreprocessorParser.PPRAGMA:
 				processPragma(node);
 				break;
-			case PreprocessorLexer.PUNDEF:
+			case PreprocessorParser.UNDEF:
 				processUndef(node);
 				break;
 			case PreprocessorParser.HASH:
 				processNondirective(node);
 				break;
-			case PreprocessorParser.PLINE:
+			case PreprocessorParser.LINE:
 				processLine(node);
 				break;
 			default:
@@ -789,8 +789,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	private Pair<CivlcToken, CivlcToken> instantiate(FunctionMacro macro,
 			CivlcToken origin, CivlcToken[] arguments)
 					throws PreprocessorException {
-		MacroExpander expander = new MacroExpander(this, macro,
-				origin, arguments);
+		MacroExpander expander = new MacroExpander(this, macro, origin,
+				arguments);
 		Pair<CivlcToken, CivlcToken> result = expander.expand();
 
 		return result;
@@ -817,8 +817,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private Pair<CivlcToken, CivlcToken> instantiate(ObjectMacro macro,
 			CivlcToken origin) throws PreprocessorException {
-		MacroExpander expander = new MacroExpander(this, macro,
-				origin);
+		MacroExpander expander = new MacroExpander(this, macro, origin);
 		Pair<CivlcToken, CivlcToken> result = expander.expand();
 
 		return result;
@@ -1430,19 +1429,26 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 *             Preprocessor grammar
 	 */
 	private void processInclude(Tree includeNode) throws PreprocessorException {
+		String fullName = "";
+		int numChildren = includeNode.getChildCount();
 		Token filenameToken = ((CommonTree) includeNode.getChild(0)).getToken();
-		String fullName = filenameToken.getText();
+
+		for (int i = 0; i < numChildren; i++) {
+			fullName += includeNode.getChild(i).getText();
+		}
+
 		int numChars = fullName.length();
 		String name;
 		boolean system;
-		int firstChar, lastChar;
 
 		if (numChars < 3)
 			throw new PreprocessorException(
 					"Improper file name in #include: " + fullName,
 					filenameToken);
-		firstChar = fullName.charAt(0);
-		lastChar = fullName.charAt(numChars - 1);
+
+		int firstChar = fullName.charAt(0),
+				lastChar = fullName.charAt(numChars - 1);
+
 		if (firstChar == '<') {
 			if (lastChar != '>')
 				throw new PreprocessorException(
@@ -1633,9 +1639,9 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			int type = token.getType();
 
 			return type == PreprocessorParser.PIF
-					|| type == PreprocessorParser.PIFDEF
-					|| type == PreprocessorParser.PIFNDEF
-					|| type == PreprocessorParser.PELIF;
+					|| type == PreprocessorParser.IFDEF
+					|| type == PreprocessorParser.IFNDEF
+					|| type == PreprocessorParser.ELIF;
 		}
 	}
 
@@ -1944,15 +1950,21 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	/**
-	 * Creates a new CToken from the give Tree node and adds the token to the
-	 * end of the output list.
+	 * Creates a new {@link CivlcToken} from the given {@link Tree} node and
+	 * adds the token to the end of the output list. Tokens for preprocessor
+	 * keywords (e.g., "define") have their types changed to IDENTIFIER.
 	 * 
 	 * @param node
-	 *            a CommonTree node
+	 *            a {@link CommonTree} node
 	 * @throws PreprocessorException
+	 *             if something goes wrong concatenating strings when the token
+	 *             is shifted to output buffer
 	 */
 	private void shiftToOutput(Tree node) throws PreprocessorException {
 		Token token = ((CommonTree) node).getToken();
+
+		PreprocessorUtils.convertPreprocessorIdentifiers(token);
+
 		CivlcToken output = tokenFactory.newCivlcToken(token,
 				getIncludeHistory());
 

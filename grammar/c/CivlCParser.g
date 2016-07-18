@@ -84,8 +84,8 @@ tokens
 	QUANTIFIED;		  // quantified expression
 	SCALAR_INITIALIZER;       // initializer for scalar variable
 	SPECIFIER_QUALIFIER_LIST; // list of type specifiers and qualifiers
-    STATEMENT;                // a statement
-    STATEMENT_EXPRESSION;     // a statement expression (GNU C extension)
+    	STATEMENT;                // a statement
+    	STATEMENT_EXPRESSION;     // a statement expression (GNU C extension)
 	STRUCT_DECLARATION;       // a field declaration
 	STRUCT_DECLARATION_LIST;  // list of field declarations
 	STRUCT_DECLARATOR;        // a struct/union declarator
@@ -94,8 +94,8 @@ tokens
 	TRANSLATION_UNIT;         // final result of translation
 	TYPE;                     // symbol indicating "type"
 	TYPEDEF_NAME;             // use of typedef name
-    TYPEOF_EXPRESSION;
-    TYPEOF_TYPE;
+   	 TYPEOF_EXPRESSION;
+    	TYPEOF_TYPE;
 	TYPE_NAME;                // type specification without identifier
 	TYPE_QUALIFIER_LIST;      // list of type qualifiers
 }
@@ -177,7 +177,9 @@ constant
 	| INTEGER_CONSTANT
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
-	| SELF | PROCNULL | TRUE | FALSE | RESULT
+	| SELF | PROCNULL
+	// TRUE | FALSE | 
+	| RESULT
 	| HERE | ELLIPSIS
 	;
 
@@ -1326,7 +1328,6 @@ statement
     | selectionStatement -> ^(STATEMENT selectionStatement)
     | iterationStatement -> ^(STATEMENT iterationStatement)
     | jumpStatement -> ^(STATEMENT jumpStatement)
-//    | pragma -> ^(STATEMENT pragma)
     | whenStatement -> ^(STATEMENT whenStatement)
     | chooseStatement -> ^(STATEMENT chooseStatement)
     | atomicStatement -> ^(STATEMENT atomicStatement)
@@ -1537,10 +1538,10 @@ jumpStatement
  * child 2: NEWLINE (character which ends the pragma)
  */
 pragma
-    : PRAGMA IDENTIFIER NEWLINE
-        -> ^(PRAGMA IDENTIFIER ^(TOKEN_LIST) NEWLINE)
-    | PRAGMA IDENTIFIER inlineList NEWLINE
-        -> ^(PRAGMA IDENTIFIER ^(TOKEN_LIST inlineList) NEWLINE)
+    : PPRAGMA IDENTIFIER NEWLINE
+        -> ^(PPRAGMA IDENTIFIER ^(TOKEN_LIST) NEWLINE)
+    | PPRAGMA IDENTIFIER inlineList NEWLINE
+        -> ^(PPRAGMA IDENTIFIER ^(TOKEN_LIST inlineList) NEWLINE)
 	;
 
 /* inlineList : nonempty list of tokens not including NEWLINE */
@@ -1724,17 +1725,14 @@ scope DeclarationScope;
  * is not a block item, but in CIVL-C it is.
  */
 blockItem
-	:
-	  (declarator contract
-	   	  declarationList_opt LCURLY)=>
+	:(declarator contract declarationList_opt LCURLY)=>
 	  functionDefinition
-    | (declarationSpecifiers declarator contract
-	   	  declarationList_opt LCURLY)=>
+	| (declarationSpecifiers declarator contract declarationList_opt LCURLY)=>
 	  functionDefinition
-	| declaration	
+	| declaration
 	| pragma
 	| annotation
-    | statement
+	| statement
 	;
 
 /* 6.9

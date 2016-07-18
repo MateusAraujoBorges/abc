@@ -21,7 +21,7 @@ public class PruneTest {
 
 	public final static PrintStream out = System.out;
 
-	public final static boolean debug = false;
+	public final static boolean debug = true;
 
 	private File root = new File("examples/prune");
 
