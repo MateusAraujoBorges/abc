@@ -56,7 +56,7 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
  * The tokens produced are instances of {@link CivlcToken}.
  * </p>
  * 
- * TODO: deal with '#' and '##' and #line.
+ * TODO: deal with #line.
  * 
  * TODO: deal with variadic macros.
  * 
