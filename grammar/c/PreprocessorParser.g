@@ -390,8 +390,10 @@ civl_keyword	:	ABSTRACT
 		|	REAL
 		|	REQUIRES
 		|	RESULT
+        |   RUN
 		|	SCOPEOF
 		|	SELF
+        |   STATE_NULL
 		|	SPAWN
 		|	SYSTEM 
 //		|	TRUE

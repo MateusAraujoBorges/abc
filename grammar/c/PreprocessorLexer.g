@@ -146,11 +146,11 @@ RANGE		:	'$range';
 REAL		:	'$real';
 REQUIRES	:	'$requires';
 RESULT		:	'$result';
-RUN         :   '$run';
 RSLIST		:	'|>';  // LSLIST and RSLIST enclose a scope list
+RUN         :   '$run';
 SCOPEOF		:	'$scopeof';
-STATENULL  :   '$state_null';
 SELF		:	'$self';
+STATENULL  :   '$state_null';
 READS       	:   	'$reads';
 SPAWN		:	'$spawn';
 SYSTEM      	:   	'$system';
