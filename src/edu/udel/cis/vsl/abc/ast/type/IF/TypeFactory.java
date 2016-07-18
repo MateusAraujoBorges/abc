@@ -289,8 +289,7 @@ public interface TypeFactory {
 	 *            the expression which defines the extent (length) of the array
 	 * @return a complete array type as specified
 	 */
-	ArrayType variableLengthArrayType(ObjectType elementType,
-			ExpressionNode variableSize);
+	ArrayType variableLengthArrayType(ObjectType elementType, ExpressionNode variableSize);
 
 	/**
 	 * Returns a new incomplete structure or union type with the given tag. The
@@ -309,8 +308,7 @@ public interface TypeFactory {
 	 *            may be null for an anonymous structure or union
 	 * @return a new, incomplete StructureOrUnion type
 	 */
-	StructureOrUnionType structureOrUnionType(Object key, boolean isStruct,
-			String tag);
+	StructureOrUnionType structureOrUnionType(Object key, boolean isStruct, String tag);
 
 	/**
 	 * Creates a new field entity. These correspond to the field declarations in
@@ -324,8 +322,7 @@ public interface TypeFactory {
 	 *            the optional bit width parameter
 	 * @return the new field
 	 */
-	Field newField(FieldDeclarationNode declaration, ObjectType type,
-			Value bitWidth);
+	Field newField(FieldDeclarationNode declaration, ObjectType type, Value bitWidth);
 
 	/**
 	 * Returns an enumeration type with the given tag and key. The type can be
@@ -354,8 +351,7 @@ public interface TypeFactory {
 	 *            the constant integer value associated to the enumerator
 	 * @return the new enumerator entity
 	 */
-	Enumerator newEnumerator(EnumeratorDeclarationNode declaration,
-			EnumerationType enumeration, Value value);
+	Enumerator newEnumerator(EnumeratorDeclarationNode declaration, EnumerationType enumeration, Value value);
 
 	/**
 	 * Returns a qualified type based on the given unqualified type. At least
@@ -375,10 +371,8 @@ public interface TypeFactory {
 	 *            should the resulting type be "_output" qualified?
 	 * @return qualified version of given unqualified type
 	 */
-	QualifiedObjectType qualifiedType(UnqualifiedObjectType baseType,
-			boolean constQualified, boolean volatileQualified,
-			boolean restrictQualified, boolean inputQualified,
-			boolean outputQualified);
+	QualifiedObjectType qualifiedType(UnqualifiedObjectType baseType, boolean constQualified, boolean volatileQualified,
+			boolean restrictQualified, boolean inputQualified, boolean outputQualified);
 
 	/**
 	 * A more general algorithm for qualifying a type: for each true-valued
@@ -403,9 +397,8 @@ public interface TypeFactory {
 	 * @return the correct object type properly qualified, possibly the original
 	 *         type as given.
 	 */
-	ObjectType qualify(ObjectType startType, boolean constQualified,
-			boolean volatileQualified, boolean restrictQualified,
-			boolean inputQualified, boolean outputQualified);
+	ObjectType qualify(ObjectType startType, boolean constQualified, boolean volatileQualified,
+			boolean restrictQualified, boolean inputQualified, boolean outputQualified);
 
 	/**
 	 * <p>
@@ -460,8 +453,7 @@ public interface TypeFactory {
 	 * @return a function type as specified in which the types of the parameters
 	 *         is known
 	 */
-	FunctionType functionType(ObjectType returnType,
-			boolean fromIdentifierList, Iterable<ObjectType> parameterTypes,
+	FunctionType functionType(ObjectType returnType, boolean fromIdentifierList, Iterable<ObjectType> parameterTypes,
 			boolean hasVariableArgs);
 
 	/**
@@ -551,8 +543,7 @@ public interface TypeFactory {
 	 *            an integer type
 	 * @return an integer type with the semantics described above
 	 */
-	IntegerType rangeChoice(BigInteger value, IntegerType type1,
-			IntegerType type2);
+	IntegerType rangeChoice(BigInteger value, IntegerType type1, IntegerType type2);
 
 	/**
 	 * Returns an IntegerType T with the following semantics: if the value falls
@@ -668,6 +659,9 @@ public interface TypeFactory {
 	/** Returns the scope type */
 	ObjectType scopeType();
 
+	/** Returns the state type */
+	ObjectType stateType();
+
 	/**
 	 * Returns the CIVL-C range type, denoted <code>$range</code>, which
 	 * represents a sequence of integers.
@@ -724,9 +718,8 @@ public interface TypeFactory {
 	 * the other operand is converted, without change of type domain, to a type
 	 * whose corresponding real type is float.</li>
 	 * 
-	 * <li>
-	 * Otherwise, the integer promotions are performed on both operands. Then
-	 * the following rules are applied to the promoted operands:
+	 * <li>Otherwise, the integer promotions are performed on both operands.
+	 * Then the following rules are applied to the promoted operands:
 	 * 
 	 * <ul>
 	 * 
@@ -761,8 +754,7 @@ public interface TypeFactory {
 	 * @return the type of the result of the "usual arithmetic conversion"
 	 *         applied to the two types
 	 */
-	ArithmeticType usualArithmeticConversion(ArithmeticType type1,
-			ArithmeticType type2);
+	ArithmeticType usualArithmeticConversion(ArithmeticType type1, ArithmeticType type2);
 
 	/**
 	 * Adds qualifiers and atomic designation as needed to the given type.
@@ -780,10 +772,8 @@ public interface TypeFactory {
 	 *            add restrict qualification to type if not already present?
 	 * @return type with given qualifications added (none are removed)
 	 */
-	ObjectType qualify(ObjectType startType, boolean atomic,
-			boolean constQualified, boolean volatileQualified,
-			boolean restrictQualified, boolean inputQualified,
-			boolean outputQualified);
+	ObjectType qualify(ObjectType startType, boolean atomic, boolean constQualified, boolean volatileQualified,
+			boolean restrictQualified, boolean inputQualified, boolean outputQualified);
 
 	/**
 	 * Is the given type an array-of-char type?

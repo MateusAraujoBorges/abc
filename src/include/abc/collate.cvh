@@ -37,20 +37,20 @@ typedef struct _collator  * $collator;
 typedef struct _gcollate_state * $gcollate_state;
 
 /*
- * _collate_state: A handle mainly wraps a $gcollate_state and some
+ * $collate_state: A handle mainly wraps a $gcollate_state and some
  * other meta information, e.g. place.
  *
  * Semantically, this is the only object for a process to access a
  * collate state. The access is restircted by only using interfaces.
  */
-typedef struct _collate_state * $collate_state;
+typedef struct _collate_state $collate_state;
 
 /********************* Function prototypes: *********************/
 /* Interface for creating a $gcollator: */
 $gcollator gcollator_create($scope scope, int nprocs);
 
 /* Interface for creating a $collator: */
-$collator   collator_create($gcollator gcollator, int place);
+$collator   collator_create($gcollator gcollator, $scope scope, int place);
 
 /*
  * Take a snapshot on the current state of the current process. The
@@ -69,10 +69,13 @@ $collator   collator_create($gcollator gcollator, int place);
  * dyscope already in s. Also add the call stack of p to s. In this
  * way s is always a valid state.
  */
-$collate_state $collate_snapshot($collator c);
+$collate_state $collate_snapshot($collator c, $scope scope);
 
 /* Collectively free a collate state. The last process will be
  * responsible for dequeue the collate state at the head of the queue.
+ * 
+ * If there is no arrived collate state by the process, it should
+ * report an error.
  */
 $collate_state $collate_unsnapshot($collator c);
 
@@ -81,7 +84,7 @@ $collate_state $collate_unsnapshot($collator c);
  */
 /*@ pure;
   @*/
-$system _Bool $collate_arrived($collate_state cp, ...);
+_Bool $collate_arrived($collate_state cp, $range range);
 
 
 /* Equivalent to $arrived(cp, r') where r' represents the whole set of
@@ -89,7 +92,7 @@ $system _Bool $collate_arrived($collate_state cp, ...);
  */
 /*@ pure;
   @*/
-$system _Bool $collate_complete($collate_state cp);
+_Bool $collate_complete($collate_state cp);
 
 #endif
 

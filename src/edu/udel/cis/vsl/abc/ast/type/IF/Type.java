@@ -152,6 +152,10 @@ public interface Type {
 		 */
 		SCOPE,
 		/**
+		 * The CIVL-C state type, represented by <code>$state</code>
+		 */
+		STATE,
+		/**
 		 * A structure or union type; an instance of
 		 * {@link StructureOrUnionType}
 		 */
@@ -238,8 +242,8 @@ public interface Type {
 	 * expression and the element type has a known constant size, the array type
 	 * is not a variable length array type; otherwise, the array type is a
 	 * variable length array type. (Variable length arrays are a conditional
-	 * feature that implementations need not support; see 6.10.8.3.)
-	 * </blockquote>
+	 * feature that implementations need not support; see
+	 * 6.10.8.3.) </blockquote>
 	 * 
 	 * @return true iff this type is a VM type
 	 */

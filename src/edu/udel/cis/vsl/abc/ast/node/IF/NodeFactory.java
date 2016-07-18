@@ -189,8 +189,7 @@ public interface NodeFactory {
 	 * @return a new attribute key which can be used to assign attribute values
 	 *         to nodes
 	 */
-	AttributeKey newAttribute(String attributeName,
-			Class<? extends Object> attributeClass);
+	AttributeKey newAttribute(String attributeName, Class<? extends Object> attributeClass);
 
 	/**
 	 * Creates a new sequence node, i.e., a node which has some finite ordered
@@ -205,8 +204,7 @@ public interface NodeFactory {
 	 *            sequence node
 	 * @return the new sequence node with the children set
 	 */
-	<T extends ASTNode> SequenceNode<T> newSequenceNode(Source source,
-			String name, List<T> nodes);
+	<T extends ASTNode> SequenceNode<T> newSequenceNode(Source source, String name, List<T> nodes);
 
 	/**
 	 * Creates a new ordered pair node, i.e., a node with exactly two children
@@ -218,8 +216,7 @@ public interface NodeFactory {
 	 *            the second child node
 	 * @return the new pair node with the children set
 	 */
-	<S extends ASTNode, T extends ASTNode> PairNode<S, T> newPairNode(
-			Source source, S node1, T node2);
+	<S extends ASTNode, T extends ASTNode> PairNode<S, T> newPairNode(Source source, S node1, T node2);
 
 	// Identifiers...
 
@@ -268,8 +265,7 @@ public interface NodeFactory {
 	 * @param enumerators
 	 * @return the new enumeration type node
 	 */
-	EnumerationTypeNode newEnumerationTypeNode(Source source,
-			IdentifierNode tag,
+	EnumerationTypeNode newEnumerationTypeNode(Source source, IdentifierNode tag,
 			SequenceNode<EnumeratorDeclarationNode> enumerators);
 
 	/**
@@ -284,8 +280,7 @@ public interface NodeFactory {
 	 *            the array length or "extent"
 	 * @return the new array type node
 	 */
-	ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType,
-			ExpressionNode extent);
+	ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType, ExpressionNode extent);
 
 	/**
 	 * Constructs and returns a new array type node.
@@ -302,8 +297,8 @@ public interface NodeFactory {
 	 *            the array starting index
 	 * @return the new array type node
 	 */
-	ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType,
-			ExpressionNode extent, ExpressionNode startIndex);
+	ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType, ExpressionNode extent,
+			ExpressionNode startIndex);
 
 	/**
 	 * Constructs and returns a new atomic type node.
@@ -344,8 +339,7 @@ public interface NodeFactory {
 	 *            the sequence of field declarations; may be <code>null</code>
 	 * @return the new structure or union type node
 	 */
-	StructureOrUnionTypeNode newStructOrUnionTypeNode(Source source,
-			boolean isStruct, IdentifierNode tag,
+	StructureOrUnionTypeNode newStructOrUnionTypeNode(Source source, boolean isStruct, IdentifierNode tag,
 			SequenceNode<FieldDeclarationNode> structDeclList);
 
 	/**
@@ -368,8 +362,7 @@ public interface NodeFactory {
 	 * @return the function type node
 	 */
 	FunctionTypeNode newFunctionTypeNode(Source source, TypeNode returnType,
-			SequenceNode<VariableDeclarationNode> formals,
-			boolean hasIdentifierList);
+			SequenceNode<VariableDeclarationNode> formals, boolean hasIdentifierList);
 
 	/**
 	 * Returns a new scope type node ("<code>$scope</code>"). This is a CIVL-C
@@ -393,8 +386,7 @@ public interface NodeFactory {
 	 * @return the new typedef name node wrapping the given identifier node
 	 */
 	// TODO get rid of scopeList
-	TypedefNameNode newTypedefNameNode(IdentifierNode name,
-			SequenceNode<ExpressionNode> scopeList);
+	TypedefNameNode newTypedefNameNode(IdentifierNode name, SequenceNode<ExpressionNode> scopeList);
 
 	/**
 	 * Returns a new instance of range type node; this is the CIVL-C type
@@ -482,8 +474,7 @@ public interface NodeFactory {
 	 *            the execution character represented by the character constant
 	 * @return the new character constant node
 	 */
-	CharacterConstantNode newCharacterConstantNode(Source source,
-			String representation, ExecutionCharacter character);
+	CharacterConstantNode newCharacterConstantNode(Source source, String representation, ExecutionCharacter character);
 
 	/**
 	 * Constructs a new string literal node. A string literal occurs in the
@@ -500,8 +491,7 @@ public interface NodeFactory {
 	 *            representation
 	 * @return the new string literal node
 	 */
-	StringLiteralNode newStringLiteralNode(Source source,
-			String representation, StringLiteral literal);
+	StringLiteralNode newStringLiteralNode(Source source, String representation, StringLiteral literal);
 
 	/**
 	 * Constructs a new integer constant node. An integer constant is an
@@ -521,8 +511,7 @@ public interface NodeFactory {
 	 *             if the representation does not conform to the format
 	 *             specified in the C11 Standard
 	 */
-	IntegerConstantNode newIntegerConstantNode(Source source,
-			String representation) throws SyntaxException;
+	IntegerConstantNode newIntegerConstantNode(Source source, String representation) throws SyntaxException;
 
 	/**
 	 * Constructs a new floating constant node. A floating constant is an
@@ -542,8 +531,7 @@ public interface NodeFactory {
 	 *             if the representation does not conform to the format
 	 *             specified in the C11 Standard
 	 */
-	FloatingConstantNode newFloatingConstantNode(Source source,
-			String representation) throws SyntaxException;
+	FloatingConstantNode newFloatingConstantNode(Source source, String representation) throws SyntaxException;
 
 	/**
 	 * Constructs a new enumeration constant node. This represents an occurrence
@@ -604,8 +592,8 @@ public interface NodeFactory {
 	 *            literal
 	 * @return the new compound literal node
 	 */
-	CompoundLiteralNode newCompoundLiteralNode(Source source,
-			TypeNode typeNode, CompoundInitializerNode initializerList);
+	CompoundLiteralNode newCompoundLiteralNode(Source source, TypeNode typeNode,
+			CompoundInitializerNode initializerList);
 
 	/**
 	 * Constructs a new node representing a CIVL-C boolean constant, "
@@ -643,6 +631,17 @@ public interface NodeFactory {
 	ExpressionNode newProcnullNode(Source source);
 
 	/**
+	 * Constructs a new node representing an occurrence of the CIVL-C
+	 * "null state" constant, written <code>$state_null</code>
+	 * 
+	 * @param source
+	 *            source information for the occurrence of the constant
+	 *            <code>$state_null</code>
+	 * @return the new expression node representing the constant
+	 */
+	ExpressionNode newStatenullNode(Source source);
+
+	/**
 	 * Constructs a new node representing an occurrence of the CIVL-C expression
 	 * "<code>$result</code>", used in function constracts to represent the
 	 * result returned by the function.
@@ -668,8 +667,7 @@ public interface NodeFactory {
 	 *            the identifier node being wrapped
 	 * @return the new identifier expression node
 	 */
-	IdentifierExpressionNode newIdentifierExpressionNode(Source source,
-			IdentifierNode identifier);
+	IdentifierExpressionNode newIdentifierExpressionNode(Source source, IdentifierNode identifier);
 
 	/**
 	 * Constructs a new "align-of" node. This represents an occurrence of the
@@ -722,8 +720,7 @@ public interface NodeFactory {
 	 * @return the new function call node
 	 */
 	// TODO get rid of scopeList
-	FunctionCallNode newFunctionCallNode(Source source,
-			ExpressionNode function, List<ExpressionNode> arguments,
+	FunctionCallNode newFunctionCallNode(Source source, ExpressionNode function, List<ExpressionNode> arguments,
 			SequenceNode<ExpressionNode> scopeList);
 
 	/**
@@ -752,10 +749,8 @@ public interface NodeFactory {
 	 * @return the new function call node
 	 */
 	// TODO get rid of scopeList
-	FunctionCallNode newFunctionCallNode(Source source,
-			ExpressionNode function, List<ExpressionNode> contextArguments,
-			List<ExpressionNode> arguments,
-			SequenceNode<ExpressionNode> scopeList);
+	FunctionCallNode newFunctionCallNode(Source source, ExpressionNode function, List<ExpressionNode> contextArguments,
+			List<ExpressionNode> arguments, SequenceNode<ExpressionNode> scopeList);
 
 	/**
 	 * Constructs a new node for a "dot" expression, used in C for structure or
@@ -771,8 +766,7 @@ public interface NodeFactory {
 	 *            union
 	 * @return the new dot expression node
 	 */
-	DotNode newDotNode(Source source, ExpressionNode structure,
-			IdentifierNode fieldName);
+	DotNode newDotNode(Source source, ExpressionNode structure, IdentifierNode fieldName);
 
 	/**
 	 * Constructs a new node for an "arrow" expression, used in C for structure
@@ -790,8 +784,7 @@ public interface NodeFactory {
 	 *            union
 	 * @return the new arrow expression node
 	 */
-	ArrowNode newArrowNode(Source source, ExpressionNode structurePointer,
-			IdentifierNode fieldName);
+	ArrowNode newArrowNode(Source source, ExpressionNode structurePointer, IdentifierNode fieldName);
 
 	/**
 	 * <p>
@@ -820,8 +813,7 @@ public interface NodeFactory {
 	 *            operator
 	 * @return the new operator expression node
 	 */
-	OperatorNode newOperatorNode(Source source, Operator operator,
-			List<ExpressionNode> arguments);
+	OperatorNode newOperatorNode(Source source, Operator operator, List<ExpressionNode> arguments);
 
 	/**
 	 * Convenience method for constructing new unary operator node; equivalent
@@ -837,8 +829,7 @@ public interface NodeFactory {
 	 *            the sole argument to the operator
 	 * @return the new operator expression node
 	 */
-	OperatorNode newOperatorNode(Source source, Operator operator,
-			ExpressionNode argument);
+	OperatorNode newOperatorNode(Source source, Operator operator, ExpressionNode argument);
 
 	/**
 	 * Convenience method for constructing new binary operator node; equivalent
@@ -856,8 +847,7 @@ public interface NodeFactory {
 	 *            the second argument to the binary operator
 	 * @return the new operator expression node
 	 */
-	OperatorNode newOperatorNode(Source source, Operator operator,
-			ExpressionNode arg0, ExpressionNode arg1);
+	OperatorNode newOperatorNode(Source source, Operator operator, ExpressionNode arg0, ExpressionNode arg1);
 
 	/**
 	 * Convenience method for constructing new ternary operator node; equivalent
@@ -878,8 +868,8 @@ public interface NodeFactory {
 	 *            the third argument to the ternary operator
 	 * @return the new operator expression node
 	 */
-	OperatorNode newOperatorNode(Source source, Operator operator,
-			ExpressionNode arg0, ExpressionNode arg1, ExpressionNode arg2);
+	OperatorNode newOperatorNode(Source source, Operator operator, ExpressionNode arg0, ExpressionNode arg1,
+			ExpressionNode arg2);
 
 	/**
 	 * Constrcts a new <code>sizeof</code> expression. This takes one argument,
@@ -940,8 +930,7 @@ public interface NodeFactory {
 	 *            the right argument, which is a foreign expression that will
 	 *            evaluates on the process represented by the left expression.
 	 */
-	RemoteOnExpressionNode newRemoteOnExpressionNode(Source source,
-			ExpressionNode left, ExpressionNode right);
+	RemoteOnExpressionNode newRemoteOnExpressionNode(Source source, ExpressionNode left, ExpressionNode right);
 
 	/**
 	 * Constructs a new CIVL-C <code>$scopeof</code> expression node. This is an
@@ -957,8 +946,7 @@ public interface NodeFactory {
 	 *            the variable argument
 	 * @return the new <code>$scopeof</code> expression
 	 */
-	ScopeOfNode newScopeOfNode(Source source,
-			IdentifierExpressionNode variableExpression);
+	ScopeOfNode newScopeOfNode(Source source, IdentifierExpressionNode variableExpression);
 
 	/**
 	 * Constructs a new quantified expression.
@@ -980,31 +968,7 @@ public interface NodeFactory {
 	 *            The quantified expression.
 	 * @return The new quantified expression with the given children.
 	 */
-	QuantifiedExpressionNode newQuantifiedExpressionNode(
-			Source source,
-			Quantifier quantifier,
-			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
-			ExpressionNode restriction, ExpressionNode expression);
-
-	/**
-	 * Constructs a new array lambda expression.
-	 * 
-	 * @param source
-	 *            The source code information for the entire expression
-	 * @param type
-	 *            the type of this array lambda
-	 * @param boundVariableDeclarationList
-	 *            The list of bound variable declarations.
-	 * @param restriction
-	 *            A boolean-valued expression that holds true when the
-	 *            quantified variables is in the domain
-	 * @param expression
-	 *            The body-expression
-	 * @return The new array lambda expression with the given children.
-	 */
-	ArrayLambdaNode newArrayLambdaNode(
-			Source source,
-			TypeNode type,
+	QuantifiedExpressionNode newQuantifiedExpressionNode(Source source, Quantifier quantifier,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
 			ExpressionNode restriction, ExpressionNode expression);
 
@@ -1025,8 +989,28 @@ public interface NodeFactory {
 	 * @return The new array lambda expression with the given children.
 	 */
 	ArrayLambdaNode newArrayLambdaNode(Source source, TypeNode type,
-			List<VariableDeclarationNode> boundVariableDeclarationList,
+			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
 			ExpressionNode restriction, ExpressionNode expression);
+
+	/**
+	 * Constructs a new array lambda expression.
+	 * 
+	 * @param source
+	 *            The source code information for the entire expression
+	 * @param type
+	 *            the type of this array lambda
+	 * @param boundVariableDeclarationList
+	 *            The list of bound variable declarations.
+	 * @param restriction
+	 *            A boolean-valued expression that holds true when the
+	 *            quantified variables is in the domain
+	 * @param expression
+	 *            The body-expression
+	 * @return The new array lambda expression with the given children.
+	 */
+	ArrayLambdaNode newArrayLambdaNode(Source source, TypeNode type,
+			List<VariableDeclarationNode> boundVariableDeclarationList, ExpressionNode restriction,
+			ExpressionNode expression);
 
 	/**
 	 * 
@@ -1066,9 +1050,7 @@ public interface NodeFactory {
 	 *            The arguments to the uninterpreted function evaluation.
 	 * @return The new derivative expression with the given children.
 	 */
-	DerivativeExpressionNode newDerivativeExpressionNode(
-			Source source,
-			ExpressionNode function,
+	DerivativeExpressionNode newDerivativeExpressionNode(Source source, ExpressionNode function,
 			SequenceNode<PairNode<IdentifierExpressionNode, IntegerConstantNode>> partials,
 			SequenceNode<ExpressionNode> arguments);
 
@@ -1098,8 +1080,7 @@ public interface NodeFactory {
 	 *            the upper bound of the range (inclusive)
 	 * @return the new range expression
 	 */
-	RegularRangeNode newRegularRangeNode(Source source, ExpressionNode low,
-			ExpressionNode high);
+	RegularRangeNode newRegularRangeNode(Source source, ExpressionNode low, ExpressionNode high);
 
 	/**
 	 * <p>
@@ -1134,8 +1115,7 @@ public interface NodeFactory {
 	 *            two consecutive elements in the range
 	 * @return the new range expression
 	 */
-	RegularRangeNode newRegularRangeNode(Source source, ExpressionNode low,
-			ExpressionNode high, ExpressionNode step);
+	RegularRangeNode newRegularRangeNode(Source source, ExpressionNode low, ExpressionNode high, ExpressionNode step);
 
 	// Declarations...
 
@@ -1151,8 +1131,7 @@ public interface NodeFactory {
 	 *            the node corresponding to the type in the declaration
 	 * @return the new variable declaration node with the given chidren
 	 */
-	VariableDeclarationNode newVariableDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type);
+	VariableDeclarationNode newVariableDeclarationNode(Source source, IdentifierNode name, TypeNode type);
 
 	/**
 	 * Creates a new declaration for an "object" variable with an initializer.
@@ -1165,8 +1144,8 @@ public interface NodeFactory {
 	 *            optional initializer (for variables only) or null
 	 * @return a new declaration for an "ordinary identifier"
 	 */
-	VariableDeclarationNode newVariableDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type, InitializerNode initializer);
+	VariableDeclarationNode newVariableDeclarationNode(Source source, IdentifierNode name, TypeNode type,
+			InitializerNode initializer);
 
 	/**
 	 * Creates a new function declaration with no body (so it is not a function
@@ -1182,8 +1161,7 @@ public interface NodeFactory {
 	 *            sequence of contract elements or <code>null</code>
 	 * @return the new function declaration node formed from given children
 	 */
-	FunctionDeclarationNode newFunctionDeclarationNode(Source source,
-			IdentifierNode name, FunctionTypeNode type,
+	FunctionDeclarationNode newFunctionDeclarationNode(Source source, IdentifierNode name, FunctionTypeNode type,
 			SequenceNode<ContractNode> contract);
 
 	/**
@@ -1201,8 +1179,7 @@ public interface NodeFactory {
 	 *            absent, use <code>null</code>
 	 * @return the new enumerator declaration
 	 */
-	EnumeratorDeclarationNode newEnumeratorDeclarationNode(Source source,
-			IdentifierNode name, ExpressionNode value);
+	EnumeratorDeclarationNode newEnumeratorDeclarationNode(Source source, IdentifierNode name, ExpressionNode value);
 
 	/**
 	 * Consructs a new field declaration node. A field declaration occurs inside
@@ -1221,8 +1198,7 @@ public interface NodeFactory {
 	 *      for the more general method which also permits a "bit width"
 	 *      argument, an optional C construct
 	 */
-	FieldDeclarationNode newFieldDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type);
+	FieldDeclarationNode newFieldDeclarationNode(Source source, IdentifierNode name, TypeNode type);
 
 	/**
 	 * Consructs a new field declaration node which also includes a "bit width"
@@ -1241,8 +1217,8 @@ public interface NodeFactory {
 	 *            number of bits in the field
 	 * @return the new field declaration node
 	 */
-	FieldDeclarationNode newFieldDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type, ExpressionNode bitFieldWidth);
+	FieldDeclarationNode newFieldDeclarationNode(Source source, IdentifierNode name, TypeNode type,
+			ExpressionNode bitFieldWidth);
 
 	/**
 	 * <p>
@@ -1280,8 +1256,7 @@ public interface NodeFactory {
 	 *            the statement that follows the label and colon
 	 * @return the new label declaration node
 	 */
-	OrdinaryLabelNode newStandardLabelDeclarationNode(Source source,
-			IdentifierNode name, StatementNode statement);
+	OrdinaryLabelNode newStandardLabelDeclarationNode(Source source, IdentifierNode name, StatementNode statement);
 
 	/**
 	 * Constructs a new case-labeled declaration node. This node represents a C
@@ -1300,8 +1275,8 @@ public interface NodeFactory {
 	 *            <strong>not</strong> made a child of this node
 	 * @return the new case-labeled declaration node
 	 */
-	SwitchLabelNode newCaseLabelDeclarationNode(Source source,
-			ExpressionNode constantExpression, StatementNode statement);
+	SwitchLabelNode newCaseLabelDeclarationNode(Source source, ExpressionNode constantExpression,
+			StatementNode statement);
 
 	/**
 	 * Constructs a new node representing the occurence of a
@@ -1315,8 +1290,7 @@ public interface NodeFactory {
 	 *            <strong>not</strong> made a child of the new switch label node
 	 * @return the new switch label node
 	 */
-	SwitchLabelNode newDefaultLabelDeclarationNode(Source source,
-			StatementNode statement);
+	SwitchLabelNode newDefaultLabelDeclarationNode(Source source, StatementNode statement);
 
 	/**
 	 * Constructs a new <code>typedef</code> declaration node. If the typedef
@@ -1332,8 +1306,7 @@ public interface NodeFactory {
 	 *            parameterized)
 	 * @return a new typedef declaration node
 	 */
-	TypedefDeclarationNode newTypedefDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type);
+	TypedefDeclarationNode newTypedefDeclarationNode(Source source, IdentifierNode name, TypeNode type);
 
 	/**
 	 * <p>
@@ -1373,8 +1346,7 @@ public interface NodeFactory {
 	 *            the sequence of designators
 	 * @return the new designation node
 	 */
-	DesignationNode newDesignationNode(Source source,
-			List<DesignatorNode> designators);
+	DesignationNode newDesignationNode(Source source, List<DesignatorNode> designators);
 
 	/**
 	 * Constructs a new field designator node. A field designator is a
@@ -1388,8 +1360,7 @@ public interface NodeFactory {
 	 *            the identifier which is the name of the field
 	 * @return the new field designator node
 	 */
-	FieldDesignatorNode newFieldDesignatorNode(Source source,
-			IdentifierNode name);
+	FieldDesignatorNode newFieldDesignatorNode(Source source, IdentifierNode name);
 
 	/**
 	 * Constructs a new array designator node. An array designator is a
@@ -1404,8 +1375,7 @@ public interface NodeFactory {
 	 *            the integer expression specifying an index into the array
 	 * @return the new array designator node
 	 */
-	ArrayDesignatorNode newArrayDesignatorNode(Source source,
-			ExpressionNode index);
+	ArrayDesignatorNode newArrayDesignatorNode(Source source, ExpressionNode index);
 
 	// Statements...
 
@@ -1422,8 +1392,7 @@ public interface NodeFactory {
 	 *            the list of block items comprising the compound statement
 	 * @return the new compound statement node
 	 */
-	CompoundStatementNode newCompoundStatementNode(Source source,
-			List<BlockItemNode> items);
+	CompoundStatementNode newCompoundStatementNode(Source source, List<BlockItemNode> items);
 
 	/**
 	 * Constructs a new expression statement node. This is a statement which
@@ -1467,10 +1436,8 @@ public interface NodeFactory {
 	 *            loop invariant: may be <code>null</code>
 	 * @return the new <code>for</code> loop node
 	 */
-	ForLoopNode newForLoopNode(Source source,
-			ForLoopInitializerNode initializer, ExpressionNode condition,
-			ExpressionNode incrementer, StatementNode body,
-			SequenceNode<ContractNode> contracts);
+	ForLoopNode newForLoopNode(Source source, ForLoopInitializerNode initializer, ExpressionNode condition,
+			ExpressionNode incrementer, StatementNode body, SequenceNode<ContractNode> contracts);
 
 	/**
 	 * Construcs a new declaration list node, which is comprised of a sequence
@@ -1485,8 +1452,7 @@ public interface NodeFactory {
 	 *            list of variable declarations
 	 * @return the new declaration list node
 	 */
-	DeclarationListNode newForLoopInitializerNode(Source source,
-			List<VariableDeclarationNode> declarations);
+	DeclarationListNode newForLoopInitializerNode(Source source, List<VariableDeclarationNode> declarations);
 
 	/**
 	 * Constructs a new node representing a <code>while</code> loop. This is
@@ -1506,8 +1472,8 @@ public interface NodeFactory {
 	 *            <code>null</code>
 	 * @return the new <code>while</code> loop node
 	 */
-	LoopNode newWhileLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, SequenceNode<ContractNode> contracts);
+	LoopNode newWhileLoopNode(Source source, ExpressionNode condition, StatementNode body,
+			SequenceNode<ContractNode> contracts);
 
 	/**
 	 * Constructs a new node representing a <code>do...while</code> loop. This
@@ -1531,8 +1497,8 @@ public interface NodeFactory {
 	 *            associated to this node; may be <code>null</code>
 	 * @return the new <code>do</code> loop node
 	 */
-	LoopNode newDoLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, SequenceNode<ContractNode> contracts);
+	LoopNode newDoLoopNode(Source source, ExpressionNode condition, StatementNode body,
+			SequenceNode<ContractNode> contracts);
 
 	/**
 	 * Constructs a new node representing a <code>goto</code> statement.
@@ -1560,8 +1526,7 @@ public interface NodeFactory {
 	 *            the body of the <code>if</code> statement
 	 * @return the new <code>if</code> statement node formed from given children
 	 */
-	IfNode newIfNode(Source source, ExpressionNode condition,
-			StatementNode trueBranch);
+	IfNode newIfNode(Source source, ExpressionNode condition, StatementNode trueBranch);
 
 	/**
 	 * Creates a new <code>if</code> statement node. False branch may be null if
@@ -1578,8 +1543,7 @@ public interface NodeFactory {
 	 *            the statement for the "false" branch
 	 * @return the new <code>if</code> statement node
 	 */
-	IfNode newIfNode(Source source, ExpressionNode condition,
-			StatementNode trueBranch, StatementNode falseBranch);
+	IfNode newIfNode(Source source, ExpressionNode condition, StatementNode trueBranch, StatementNode falseBranch);
 
 	/**
 	 * Creates a new node representing the C <code>continue</code> statement,
@@ -1632,8 +1596,7 @@ public interface NodeFactory {
 	 * @see #newCaseLabelDeclarationNode(Source, ExpressionNode, StatementNode)
 	 * @see #newDefaultLabelDeclarationNode(Source, StatementNode)
 	 */
-	LabeledStatementNode newLabeledStatementNode(Source source,
-			LabelNode label, StatementNode statement);
+	LabeledStatementNode newLabeledStatementNode(Source source, LabelNode label, StatementNode statement);
 
 	/**
 	 * Constructs a new node representing a C <code>switch</code> statement. The
@@ -1652,8 +1615,7 @@ public interface NodeFactory {
 	 *            the body of the <code>switch</code> statement
 	 * @return the new <code>switch</code> statement node
 	 */
-	SwitchNode newSwitchNode(Source source, ExpressionNode condition,
-			StatementNode body);
+	SwitchNode newSwitchNode(Source source, ExpressionNode condition, StatementNode body);
 
 	/**
 	 * Creates a new instance of the CIVL <code>$for</code> or
@@ -1677,8 +1639,7 @@ public interface NodeFactory {
 	 *            optional loop contracts node
 	 * @return the new node
 	 */
-	CivlForNode newCivlForNode(Source source, boolean isParallel,
-			DeclarationListNode variables, ExpressionNode domain,
+	CivlForNode newCivlForNode(Source source, boolean isParallel, DeclarationListNode variables, ExpressionNode domain,
 			StatementNode body, SequenceNode<ContractNode> loopContract);
 
 	/**
@@ -1758,8 +1719,7 @@ public interface NodeFactory {
 	 *            <code>$choose</code> statement
 	 * @return the new <code>$choose</code> statement node
 	 */
-	ChooseStatementNode newChooseStatementNode(Source source,
-			List<StatementNode> statements);
+	ChooseStatementNode newChooseStatementNode(Source source, List<StatementNode> statements);
 
 	// misc. nodes ...
 
@@ -1783,8 +1743,7 @@ public interface NodeFactory {
 	 *            the message to be printed if the assertion is violated
 	 * @return the new static assertion node
 	 */
-	StaticAssertionNode newStaticAssertionNode(Source source,
-			ExpressionNode expression, StringLiteralNode message);
+	StaticAssertionNode newStaticAssertionNode(Source source, ExpressionNode expression, StringLiteralNode message);
 
 	/**
 	 * Constructs a new pragma node, representing a C <code>#pragma</code>
@@ -1815,8 +1774,8 @@ public interface NodeFactory {
 	 *            the newlinen token at the end of the pragma
 	 * @return the new pragma node
 	 */
-	PragmaNode newPragmaNode(Source source, IdentifierNode identifier,
-			CivlcTokenSequence producer, CivlcToken newlineToken);
+	PragmaNode newPragmaNode(Source source, IdentifierNode identifier, CivlcTokenSequence producer,
+			CivlcToken newlineToken);
 
 	/**
 	 * Constructs a new node representing a CIVL-C <code>$requires</code>
@@ -1859,8 +1818,7 @@ public interface NodeFactory {
 	 *            dependency
 	 * @return the new <code>$depends</code> clause node
 	 */
-	DependsNode newDependsNode(Source source, ExpressionNode condition,
-			SequenceNode<DependsEventNode> eventList);
+	DependsNode newDependsNode(Source source, ExpressionNode condition, SequenceNode<DependsEventNode> eventList);
 
 	/**
 	 * Constructs a new node representing a CIVL-C <code>$guard</code> contract
@@ -1887,8 +1845,7 @@ public interface NodeFactory {
 	 *            associated with the <code>assigns</code> clause
 	 * @return the new <code>assigns</code> clause node
 	 */
-	AssignsOrReadsNode newAssignsNode(Source source,
-			SequenceNode<ExpressionNode> expressionList);
+	AssignsOrReadsNode newAssignsNode(Source source, SequenceNode<ExpressionNode> expressionList);
 
 	/**
 	 * Constructs a new node representing an ACSL <code>reads</code> contract
@@ -1902,8 +1859,7 @@ public interface NodeFactory {
 	 *            associated with the <code>reads</code> clause
 	 * @return the new <code>reads</code> clause node
 	 */
-	AssignsOrReadsNode newReadsNode(Source source,
-			SequenceNode<ExpressionNode> expressionList);
+	AssignsOrReadsNode newReadsNode(Source source, SequenceNode<ExpressionNode> expressionList);
 
 	// external definitions...
 
@@ -1925,8 +1881,7 @@ public interface NodeFactory {
 	 *            the function body
 	 * @return the new function definition node
 	 */
-	FunctionDefinitionNode newFunctionDefinitionNode(Source source,
-			IdentifierNode name, FunctionTypeNode type,
+	FunctionDefinitionNode newFunctionDefinitionNode(Source source, IdentifierNode name, FunctionTypeNode type,
 			SequenceNode<ContractNode> contract, CompoundStatementNode body);
 
 	/**
@@ -1953,9 +1908,8 @@ public interface NodeFactory {
 	 *            real valued functions of real variables only
 	 * @return An abstract function definition with the specified properties.
 	 */
-	AbstractFunctionDefinitionNode newAbstractFunctionDefinitionNode(
-			Source source, IdentifierNode name, FunctionTypeNode type,
-			SequenceNode<ContractNode> contract, int continuity);
+	AbstractFunctionDefinitionNode newAbstractFunctionDefinitionNode(Source source, IdentifierNode name,
+			FunctionTypeNode type, SequenceNode<ContractNode> contract, int continuity);
 
 	/**
 	 * Creates a new node representing an entire translation unit. The children
@@ -1970,8 +1924,7 @@ public interface NodeFactory {
 	 *            the translation unit
 	 * @return the new translation unit node
 	 */
-	SequenceNode<BlockItemNode> newTranslationUnitNode(Source source,
-			List<BlockItemNode> definitions);
+	SequenceNode<BlockItemNode> newTranslationUnitNode(Source source, List<BlockItemNode> definitions);
 
 	/**
 	 * Creates a new node representing an entire program. The children of this
@@ -1986,8 +1939,7 @@ public interface NodeFactory {
 	 *            the translation units, perhaps after some modifications
 	 * @return the new program node
 	 */
-	SequenceNode<BlockItemNode> newProgramNode(Source source,
-			List<BlockItemNode> definitions);
+	SequenceNode<BlockItemNode> newProgramNode(Source source, List<BlockItemNode> definitions);
 
 	/**
 	 * Returns the value factory associated to this node factory. The value
@@ -2012,8 +1964,7 @@ public interface NodeFactory {
 	 *            The body statement node of the atomic node
 	 * @return The new atomic statement node
 	 */
-	AtomicNode newAtomicStatementNode(Source statementSource,
-			boolean deterministic, StatementNode body);
+	AtomicNode newAtomicStatementNode(Source statementSource, boolean deterministic, StatementNode body);
 
 	/**
 	 * Creates a new constant expression node representing <code>$here</code>.
@@ -2121,8 +2072,7 @@ public interface NodeFactory {
 	 *            The statement node of the critical construct.
 	 * @return The new OpenMP critical node created.
 	 */
-	OmpSyncNode newOmpCriticalNode(Source source, IdentifierNode name,
-			StatementNode statement);
+	OmpSyncNode newOmpCriticalNode(Source source, IdentifierNode name, StatementNode statement);
 
 	/**
 	 * Creates a new OpenMP barrier node, representing
@@ -2149,8 +2099,7 @@ public interface NodeFactory {
 	 *            The list of variables of the flush operation.
 	 * @return The new OpenMP flush node created.
 	 */
-	OmpSyncNode newOmpFlushNode(Source source,
-			SequenceNode<IdentifierExpressionNode> variables);
+	OmpSyncNode newOmpFlushNode(Source source, SequenceNode<IdentifierExpressionNode> variables);
 
 	/**
 	 * Creates a new OpenMP ordered node, representing
@@ -2227,8 +2176,7 @@ public interface NodeFactory {
 	 *            The list of variables declared by the clause.
 	 * @return The new OpenMP threadprivate node created.
 	 */
-	OmpDeclarativeNode newOmpThreadprivateNode(Source source,
-			SequenceNode<IdentifierExpressionNode> variables);
+	OmpDeclarativeNode newOmpThreadprivateNode(Source source, SequenceNode<IdentifierExpressionNode> variables);
 
 	/**
 	 * Creates a new OpenMP reduction node with a standard operator.
@@ -2241,8 +2189,8 @@ public interface NodeFactory {
 	 *            The variables of the reduction clause.
 	 * @return The new OpenMP reduction node.
 	 */
-	OmpSymbolReductionNode newOmpSymbolReductionNode(Source source,
-			Operator operator, SequenceNode<IdentifierExpressionNode> variables);
+	OmpSymbolReductionNode newOmpSymbolReductionNode(Source source, Operator operator,
+			SequenceNode<IdentifierExpressionNode> variables);
 
 	/**
 	 * Creates a new OpenMP reduction node with an identifier operator (i.e.,
@@ -2256,8 +2204,7 @@ public interface NodeFactory {
 	 *            The variables of the reduction clause.
 	 * @return The new OpenMP reduction node.
 	 */
-	OmpFunctionReductionNode newOmpFunctionReductionNode(Source source,
-			IdentifierExpressionNode function,
+	OmpFunctionReductionNode newOmpFunctionReductionNode(Source source, IdentifierExpressionNode function,
 			SequenceNode<IdentifierExpressionNode> variables);
 
 	/**
@@ -2277,8 +2224,7 @@ public interface NodeFactory {
 	 *            SECTION or SINGLE.
 	 * @return The new OpenMP worksharing node.
 	 */
-	OmpWorksharingNode newWorksharingNode(Source source,
-			OmpWorksharingNodeKind kind);
+	OmpWorksharingNode newWorksharingNode(Source source, OmpWorksharingNodeKind kind);
 
 	/**
 	 * gets the configuration associated with this translation task.
@@ -2305,8 +2251,7 @@ public interface NodeFactory {
 	 *            expression at end
 	 * @return the new statement expression node (GNU C extension)
 	 */
-	StatementExpressionNode newStatementExpressionNode(Source source,
-			CompoundStatementNode statement);
+	StatementExpressionNode newStatementExpressionNode(Source source, CompoundStatementNode statement);
 
 	/**
 	 * creates a new typeof node (GNU C extension)
@@ -2339,8 +2284,8 @@ public interface NodeFactory {
 	 * @param right
 	 * @return
 	 */
-	CompositeEventNode newOperatorEventNode(Source source, EventOperator op,
-			DependsEventNode left, DependsEventNode right);
+	CompositeEventNode newOperatorEventNode(Source source, EventOperator op, DependsEventNode left,
+			DependsEventNode right);
 
 	/**
 	 * creates a <code>\nothing</code> node which represents an empty set of
@@ -2359,8 +2304,7 @@ public interface NodeFactory {
 	 * @param body
 	 * @return
 	 */
-	BehaviorNode newBehaviorNode(Source source, IdentifierNode name,
-			SequenceNode<ContractNode> body);
+	BehaviorNode newBehaviorNode(Source source, IdentifierNode name, SequenceNode<ContractNode> body);
 
 	/**
 	 * creates a completeness clause node, which could be <code>complete</code>
@@ -2373,8 +2317,7 @@ public interface NodeFactory {
 	 * @param idList
 	 * @return
 	 */
-	CompletenessNode newCompletenessNode(Source source, boolean isComplete,
-			SequenceNode<IdentifierNode> idList);
+	CompletenessNode newCompletenessNode(Source source, boolean isComplete, SequenceNode<IdentifierNode> idList);
 
 	/**
 	 * Creates a new <code>assumes</code> clause node
@@ -2392,8 +2335,7 @@ public interface NodeFactory {
 	 * @param expression
 	 * @return
 	 */
-	InvariantNode newInvariantNode(Source source, boolean isLoopInvariant,
-			ExpressionNode expression);
+	InvariantNode newInvariantNode(Source source, boolean isLoopInvariant, ExpressionNode expression);
 
 	/**
 	 * Creates a new <code>\noact</code> event node
@@ -2419,8 +2361,7 @@ public interface NodeFactory {
 	 * @param args
 	 * @return
 	 */
-	CallEventNode newCallEventNode(Source source,
-			IdentifierExpressionNode function, SequenceNode<ExpressionNode> args);
+	CallEventNode newCallEventNode(Source source, IdentifierExpressionNode function, SequenceNode<ExpressionNode> args);
 
 	/**
 	 * Creates a new MPI Collective block node
@@ -2434,8 +2375,7 @@ public interface NodeFactory {
 	 *            The body of the MPI collective block
 	 * @return
 	 */
-	MPICollectiveBlockNode newMPICollectiveBlockNode(Source source,
-			ExpressionNode mpiComm, MPICollectiveKind kind,
+	MPICollectiveBlockNode newMPICollectiveBlockNode(Source source, ExpressionNode mpiComm, MPICollectiveKind kind,
 			SequenceNode<ContractNode> body);
 
 	/**
@@ -2450,8 +2390,7 @@ public interface NodeFactory {
 	 *            The {@link ConstantKind} of this constant
 	 * @return
 	 */
-	MPIContractConstantNode newMPIConstantNode(Source source,
-			String stringRepresetation, MPIConstantKind kind,
+	MPIContractConstantNode newMPIConstantNode(Source source, String stringRepresetation, MPIConstantKind kind,
 			ConstantKind constKind);
 
 	/**
@@ -2466,9 +2405,8 @@ public interface NodeFactory {
 	 *            The String of the name of the MPI expression
 	 * @return
 	 */
-	MPIContractExpressionNode newMPIExpressionNode(Source source,
-			List<ExpressionNode> arguments, MPIContractExpressionKind kind,
-			String exprName);
+	MPIContractExpressionNode newMPIExpressionNode(Source source, List<ExpressionNode> arguments,
+			MPIContractExpressionKind kind, String exprName);
 
 	/**
 	 * Returns a reference to a {@link TypeFactory}
@@ -2497,12 +2435,10 @@ public interface NodeFactory {
 	 *            could be null
 	 * @return
 	 */
-	MemorySetNode newMemorySetNode(Source source, ExpressionNode term,
-			SequenceNode<VariableDeclarationNode> binders,
+	MemorySetNode newMemorySetNode(Source source, ExpressionNode term, SequenceNode<VariableDeclarationNode> binders,
 			ExpressionNode predicate);
 
-	ContractVerifyNode newContractVerifyNode(Source source,
-			ExpressionNode function, List<ExpressionNode> arguments,
+	ContractVerifyNode newContractVerifyNode(Source source, ExpressionNode function, List<ExpressionNode> arguments,
 			SequenceNode<ExpressionNode> scopeList);
 
 	/**
@@ -2516,8 +2452,7 @@ public interface NodeFactory {
 	 *            The statement attached with the $with statement
 	 * @return A new {@link WithNode}
 	 */
-	WithNode newWithNode(Source source, ExpressionNode stateRef,
-			StatementNode statement, boolean isCallWithNode);
+	WithNode newWithNode(Source source, ExpressionNode stateRef, StatementNode statement, boolean isCallWithNode);
 
 	/**
 	 * Create a new {@link UpdateNode}
@@ -2530,8 +2465,7 @@ public interface NodeFactory {
 	 *            The {@link FunctionCallNode} attached with this expression.
 	 * @return A new {@link UpdateNode}
 	 */
-	UpdateNode newUpdateNode(Source source, ExpressionNode collator,
-			FunctionCallNode call);
+	UpdateNode newUpdateNode(Source source, ExpressionNode collator, FunctionCallNode call);
 
 	/**
 	 * Create a new {@link RunNode}
@@ -2552,6 +2486,5 @@ public interface NodeFactory {
 	 * @param arguments
 	 * @return
 	 */
-	WaitsforNode newWaitsforNode(Source source,
-			SequenceNode<ExpressionNode> arguments);
+	WaitsforNode newWaitsforNode(Source source, SequenceNode<ExpressionNode> arguments);
 }

@@ -149,6 +149,7 @@ RESULT		:	'$result';
 RUN         :   '$run';
 RSLIST		:	'|>';  // LSLIST and RSLIST enclose a scope list
 SCOPEOF		:	'$scopeof';
+STATENULL  :   '$state_null';
 SELF		:	'$self';
 READS       	:   	'$reads';
 SPAWN		:	'$spawn';

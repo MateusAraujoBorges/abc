@@ -189,6 +189,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonSelfNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonSizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonSpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStatementExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStatenullNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStringLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonUpdateNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonWildcardNode;
@@ -269,14 +270,11 @@ public class CommonNodeFactory implements NodeFactory {
 
 	private Configuration configuration;
 
-	public CommonNodeFactory(Configuration configuration,
-			TypeFactory typeFactory, ValueFactory valueFactory) {
-		this.literalInterpreter = new LiteralInterpreter(typeFactory,
-				valueFactory);
+	public CommonNodeFactory(Configuration configuration, TypeFactory typeFactory, ValueFactory valueFactory) {
+		this.literalInterpreter = new LiteralInterpreter(typeFactory, valueFactory);
 		this.typeFactory = typeFactory;
 		this.valueFactory = valueFactory;
-		this.booleanType = typeFactory
-				.unsignedIntegerType(UnsignedIntKind.BOOL);
+		this.booleanType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
 		this.processType = typeFactory.processType();
 		this.scopeType = typeFactory.scopeType();
 		this.configuration = configuration;
@@ -288,24 +286,20 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public AttributeKey newAttribute(String attributeName,
-			Class<? extends Object> attributeClass) {
-		AttributeKey key = new CommonAttributeKey(attributeCount,
-				attributeName, attributeClass);
+	public AttributeKey newAttribute(String attributeName, Class<? extends Object> attributeClass) {
+		AttributeKey key = new CommonAttributeKey(attributeCount, attributeName, attributeClass);
 
 		attributeCount++;
 		return key;
 	}
 
 	@Override
-	public <T extends ASTNode> SequenceNode<T> newSequenceNode(Source source,
-			String name, List<T> nodes) {
+	public <T extends ASTNode> SequenceNode<T> newSequenceNode(Source source, String name, List<T> nodes) {
 		return new CommonSequenceNode<T>(source, name, nodes);
 	}
 
 	@Override
-	public <S extends ASTNode, T extends ASTNode> PairNode<S, T> newPairNode(
-			Source source, S node1, T node2) {
+	public <S extends ASTNode, T extends ASTNode> PairNode<S, T> newPairNode(Source source, S node1, T node2) {
 		return new CommonPairNode<S, T>(source, node1, node2);
 	}
 
@@ -325,15 +319,13 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public EnumerationTypeNode newEnumerationTypeNode(Source source,
-			IdentifierNode tag,
+	public EnumerationTypeNode newEnumerationTypeNode(Source source, IdentifierNode tag,
 			SequenceNode<EnumeratorDeclarationNode> enumerators) {
 		return new CommonEnumerationTypeNode(source, tag, enumerators);
 	}
 
 	@Override
-	public ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType,
-			ExpressionNode extent) {
+	public ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType, ExpressionNode extent) {
 		return new CommonArrayTypeNode(source, elementType, extent);
 	}
 
@@ -343,25 +335,20 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public PointerTypeNode newPointerTypeNode(Source source,
-			TypeNode referencedType) {
+	public PointerTypeNode newPointerTypeNode(Source source, TypeNode referencedType) {
 		return new CommonPointerTypeNode(source, referencedType);
 	}
 
 	@Override
-	public StructureOrUnionTypeNode newStructOrUnionTypeNode(Source source,
-			boolean isStruct, IdentifierNode tag,
+	public StructureOrUnionTypeNode newStructOrUnionTypeNode(Source source, boolean isStruct, IdentifierNode tag,
 			SequenceNode<FieldDeclarationNode> structDeclList) {
-		return new CommonStructureOrUnionTypeNode(source, isStruct, tag,
-				structDeclList);
+		return new CommonStructureOrUnionTypeNode(source, isStruct, tag, structDeclList);
 	}
 
 	@Override
-	public FunctionTypeNode newFunctionTypeNode(Source source,
-			TypeNode returnType, SequenceNode<VariableDeclarationNode> formals,
-			boolean hasIdentifierList) {
-		return new CommonFunctionTypeNode(source, returnType, formals,
-				hasIdentifierList);
+	public FunctionTypeNode newFunctionTypeNode(Source source, TypeNode returnType,
+			SequenceNode<VariableDeclarationNode> formals, boolean hasIdentifierList) {
+		return new CommonFunctionTypeNode(source, returnType, formals, hasIdentifierList);
 	}
 
 	@Override
@@ -380,60 +367,53 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public DomainTypeNode newDomainTypeNode(Source source,
-			ExpressionNode dimension) {
+	public DomainTypeNode newDomainTypeNode(Source source, ExpressionNode dimension) {
 		return new CommonDomainTypeNode(source, dimension);
 	}
 
 	@Override
-	public TypedefNameNode newTypedefNameNode(IdentifierNode name,
-			SequenceNode<ExpressionNode> scopeList) {
+	public TypedefNameNode newTypedefNameNode(IdentifierNode name, SequenceNode<ExpressionNode> scopeList) {
 		return new CommonTypedefNameNode(name.getSource(), name, scopeList);
 	}
 
 	@Override
-	public CharacterConstantNode newCharacterConstantNode(Source source,
-			String representation, ExecutionCharacter character) {
+	public CharacterConstantNode newCharacterConstantNode(Source source, String representation,
+			ExecutionCharacter character) {
 		CharacterValue constant = valueFactory.characterValue(character);
 
 		return new CommonCharacterConstantNode(source, representation, constant);
 	}
 
 	@Override
-	public StringLiteralNode newStringLiteralNode(Source source,
-			String representation, StringLiteral literal) {
+	public StringLiteralNode newStringLiteralNode(Source source, String representation, StringLiteral literal) {
 		StringValue stringValue = valueFactory.stringValue(literal);
 
 		return new CommonStringLiteralNode(source, representation, stringValue);
 	}
 
 	@Override
-	public IntegerConstantNode newIntegerConstantNode(Source source,
-			String representation) throws SyntaxException {
+	public IntegerConstantNode newIntegerConstantNode(Source source, String representation) throws SyntaxException {
 		return literalInterpreter.integerConstant(source, representation);
 	}
 
 	@Override
-	public FloatingConstantNode newFloatingConstantNode(Source source,
-			String representation) throws SyntaxException {
+	public FloatingConstantNode newFloatingConstantNode(Source source, String representation) throws SyntaxException {
 		return literalInterpreter.floatingConstant(source, representation);
 	}
 
 	@Override
-	public EnumerationConstantNode newEnumerationConstantNode(
-			IdentifierNode name) {
+	public EnumerationConstantNode newEnumerationConstantNode(IdentifierNode name) {
 		return new CommonEnumerationConstantNode(name.getSource(), name);
 	}
 
 	@Override
-	public CompoundLiteralNode newCompoundLiteralNode(Source source,
-			TypeNode typeNode, CompoundInitializerNode initializerList) {
+	public CompoundLiteralNode newCompoundLiteralNode(Source source, TypeNode typeNode,
+			CompoundInitializerNode initializerList) {
 		return new CommonCompoundLiteralNode(source, typeNode, initializerList);
 	}
 
 	@Override
-	public IdentifierExpressionNode newIdentifierExpressionNode(Source source,
-			IdentifierNode identifier) {
+	public IdentifierExpressionNode newIdentifierExpressionNode(Source source, IdentifierNode identifier) {
 		return new CommonIdentifierExpressionNode(source, identifier);
 	}
 
@@ -443,51 +423,42 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public CastNode newCastNode(Source source, TypeNode type,
-			ExpressionNode argument) {
+	public CastNode newCastNode(Source source, TypeNode type, ExpressionNode argument) {
 		return new CommonCastNode(source, type, argument);
 	}
 
 	@Override
-	public FunctionCallNode newFunctionCallNode(Source source,
-			ExpressionNode function, List<ExpressionNode> arguments,
+	public FunctionCallNode newFunctionCallNode(Source source, ExpressionNode function, List<ExpressionNode> arguments,
 			SequenceNode<ExpressionNode> scopeList) {
-		SequenceNode<ExpressionNode> argumentSequenceNode = newSequenceNode(
-				source, "ActualParameterList", arguments);
+		SequenceNode<ExpressionNode> argumentSequenceNode = newSequenceNode(source, "ActualParameterList", arguments);
 
-		return new CommonFunctionCallNode(source, function, null,
-				argumentSequenceNode, scopeList);
+		return new CommonFunctionCallNode(source, function, null, argumentSequenceNode, scopeList);
 	}
 
 	@Override
-	public FunctionCallNode newFunctionCallNode(Source source,
-			ExpressionNode function, List<ExpressionNode> contextArguments,
-			List<ExpressionNode> arguments,
+	public FunctionCallNode newFunctionCallNode(Source source, ExpressionNode function,
+			List<ExpressionNode> contextArguments, List<ExpressionNode> arguments,
 			SequenceNode<ExpressionNode> scopeList) {
-		SequenceNode<ExpressionNode> contextArgumentSequenceNode = newSequenceNode(
-				source, "ActualContextParameterList", contextArguments);
-		SequenceNode<ExpressionNode> argumentSequenceNode = newSequenceNode(
-				source, "ActualParameterList", arguments);
+		SequenceNode<ExpressionNode> contextArgumentSequenceNode = newSequenceNode(source, "ActualContextParameterList",
+				contextArguments);
+		SequenceNode<ExpressionNode> argumentSequenceNode = newSequenceNode(source, "ActualParameterList", arguments);
 
-		return new CommonFunctionCallNode(source, function,
-				contextArgumentSequenceNode, argumentSequenceNode, scopeList);
+		return new CommonFunctionCallNode(source, function, contextArgumentSequenceNode, argumentSequenceNode,
+				scopeList);
 	}
 
 	@Override
-	public DotNode newDotNode(Source source, ExpressionNode structure,
-			IdentifierNode fieldName) {
+	public DotNode newDotNode(Source source, ExpressionNode structure, IdentifierNode fieldName) {
 		return new CommonDotNode(source, structure, fieldName);
 	}
 
 	@Override
-	public ArrowNode newArrowNode(Source source,
-			ExpressionNode structurePointer, IdentifierNode fieldName) {
+	public ArrowNode newArrowNode(Source source, ExpressionNode structurePointer, IdentifierNode fieldName) {
 		return new CommonArrowNode(source, structurePointer, fieldName);
 	}
 
 	@Override
-	public OperatorNode newOperatorNode(Source source, Operator operator,
-			List<ExpressionNode> arguments) {
+	public OperatorNode newOperatorNode(Source source, Operator operator, List<ExpressionNode> arguments) {
 		return new CommonOperatorNode(source, operator, arguments);
 	}
 
@@ -502,66 +473,59 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public VariableDeclarationNode newVariableDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type) {
+	public VariableDeclarationNode newVariableDeclarationNode(Source source, IdentifierNode name, TypeNode type) {
 		return new CommonVariableDeclarationNode(source, name, type);
 	}
 
 	@Override
-	public VariableDeclarationNode newVariableDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type, InitializerNode initializer) {
-		return new CommonVariableDeclarationNode(source, name, type,
-				initializer);
+	public VariableDeclarationNode newVariableDeclarationNode(Source source, IdentifierNode name, TypeNode type,
+			InitializerNode initializer) {
+		return new CommonVariableDeclarationNode(source, name, type, initializer);
 	}
 
 	@Override
-	public FunctionDeclarationNode newFunctionDeclarationNode(Source source,
-			IdentifierNode name, FunctionTypeNode type,
+	public FunctionDeclarationNode newFunctionDeclarationNode(Source source, IdentifierNode name, FunctionTypeNode type,
 			SequenceNode<ContractNode> contract) {
 		return new CommonFunctionDeclarationNode(source, name, type, contract);
 	}
 
 	@Override
-	public EnumeratorDeclarationNode newEnumeratorDeclarationNode(
-			Source source, IdentifierNode name, ExpressionNode value) {
+	public EnumeratorDeclarationNode newEnumeratorDeclarationNode(Source source, IdentifierNode name,
+			ExpressionNode value) {
 		return new CommonEnumeratorDeclarationNode(source, name, value);
 	}
 
 	@Override
-	public FieldDeclarationNode newFieldDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type) {
+	public FieldDeclarationNode newFieldDeclarationNode(Source source, IdentifierNode name, TypeNode type) {
 		return new CommonFieldDeclarationNode(source, name, type);
 	}
 
 	@Override
-	public FieldDeclarationNode newFieldDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type, ExpressionNode bitFieldWidth) {
+	public FieldDeclarationNode newFieldDeclarationNode(Source source, IdentifierNode name, TypeNode type,
+			ExpressionNode bitFieldWidth) {
 		return new CommonFieldDeclarationNode(source, name, type, bitFieldWidth);
 	}
 
 	@Override
-	public OrdinaryLabelNode newStandardLabelDeclarationNode(Source source,
-			IdentifierNode name, StatementNode statement) {
-		CommonOrdinaryLabelNode label = new CommonOrdinaryLabelNode(source,
-				name);
-
-		label.setStatement(statement);
-		return label;
-	}
-
-	@Override
-	public SwitchLabelNode newCaseLabelDeclarationNode(Source source,
-			ExpressionNode constantExpression, StatementNode statement) {
-		CommonSwitchLabelNode label = new CommonSwitchLabelNode(source,
-				constantExpression);
-
-		label.setStatement(statement);
-		return label;
-	}
-
-	@Override
-	public SwitchLabelNode newDefaultLabelDeclarationNode(Source source,
+	public OrdinaryLabelNode newStandardLabelDeclarationNode(Source source, IdentifierNode name,
 			StatementNode statement) {
+		CommonOrdinaryLabelNode label = new CommonOrdinaryLabelNode(source, name);
+
+		label.setStatement(statement);
+		return label;
+	}
+
+	@Override
+	public SwitchLabelNode newCaseLabelDeclarationNode(Source source, ExpressionNode constantExpression,
+			StatementNode statement) {
+		CommonSwitchLabelNode label = new CommonSwitchLabelNode(source, constantExpression);
+
+		label.setStatement(statement);
+		return label;
+	}
+
+	@Override
+	public SwitchLabelNode newDefaultLabelDeclarationNode(Source source, StatementNode statement) {
 		CommonSwitchLabelNode label = new CommonSwitchLabelNode(source);
 
 		label.setStatement(statement);
@@ -569,8 +533,7 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public TypedefDeclarationNode newTypedefDeclarationNode(Source source,
-			IdentifierNode name, TypeNode type) {
+	public TypedefDeclarationNode newTypedefDeclarationNode(Source source, IdentifierNode name, TypeNode type) {
 		return new CommonTypedefDeclarationNode(source, name, type);
 	}
 
@@ -581,34 +544,28 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public DesignationNode newDesignationNode(Source source,
-			List<DesignatorNode> designators) {
+	public DesignationNode newDesignationNode(Source source, List<DesignatorNode> designators) {
 		return new CommonDesignationNode(source, designators);
 	}
 
 	@Override
-	public FieldDesignatorNode newFieldDesignatorNode(Source source,
-			IdentifierNode name) {
+	public FieldDesignatorNode newFieldDesignatorNode(Source source, IdentifierNode name) {
 		return new CommonFieldDesignatorNode(source, name);
 	}
 
 	@Override
-	public ArrayDesignatorNode newArrayDesignatorNode(Source source,
-			ExpressionNode index) {
+	public ArrayDesignatorNode newArrayDesignatorNode(Source source, ExpressionNode index) {
 		return new CommonArrayDesignatorNode(source, index);
 	}
 
 	@Override
-	public CompoundStatementNode newCompoundStatementNode(Source source,
-			List<BlockItemNode> items) {
+	public CompoundStatementNode newCompoundStatementNode(Source source, List<BlockItemNode> items) {
 		return new CommonCompoundStatementNode(source, items);
 	}
 
 	@Override
-	public ExpressionStatementNode newExpressionStatementNode(
-			ExpressionNode expression) {
-		return new CommonExpressionStatementNode(expression.getSource(),
-				expression);
+	public ExpressionStatementNode newExpressionStatementNode(ExpressionNode expression) {
+		return new CommonExpressionStatementNode(expression.getSource(), expression);
 	}
 
 	@Override
@@ -617,32 +574,26 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public ForLoopNode newForLoopNode(Source source,
-			ForLoopInitializerNode initializer, ExpressionNode condition,
-			ExpressionNode incrementer, StatementNode body,
-			SequenceNode<ContractNode> contracts) {
-		return new CommonForLoopNode(source, condition, body, initializer,
-				incrementer, contracts);
+	public ForLoopNode newForLoopNode(Source source, ForLoopInitializerNode initializer, ExpressionNode condition,
+			ExpressionNode incrementer, StatementNode body, SequenceNode<ContractNode> contracts) {
+		return new CommonForLoopNode(source, condition, body, initializer, incrementer, contracts);
 	}
 
 	@Override
-	public DeclarationListNode newForLoopInitializerNode(Source source,
-			List<VariableDeclarationNode> declarations) {
+	public DeclarationListNode newForLoopInitializerNode(Source source, List<VariableDeclarationNode> declarations) {
 		return new CommonDeclarationListNode(source, declarations);
 	}
 
 	@Override
-	public LoopNode newWhileLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, SequenceNode<ContractNode> contracts) {
-		return new CommonLoopNode(source, LoopKind.WHILE, condition, body,
-				contracts);
+	public LoopNode newWhileLoopNode(Source source, ExpressionNode condition, StatementNode body,
+			SequenceNode<ContractNode> contracts) {
+		return new CommonLoopNode(source, LoopKind.WHILE, condition, body, contracts);
 	}
 
 	@Override
-	public LoopNode newDoLoopNode(Source source, ExpressionNode condition,
-			StatementNode body, SequenceNode<ContractNode> contracts) {
-		return new CommonLoopNode(source, LoopKind.DO_WHILE, condition, body,
-				contracts);
+	public LoopNode newDoLoopNode(Source source, ExpressionNode condition, StatementNode body,
+			SequenceNode<ContractNode> contracts) {
+		return new CommonLoopNode(source, LoopKind.DO_WHILE, condition, body, contracts);
 	}
 
 	@Override
@@ -651,14 +602,13 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public IfNode newIfNode(Source source, ExpressionNode condition,
-			StatementNode trueBranch) {
+	public IfNode newIfNode(Source source, ExpressionNode condition, StatementNode trueBranch) {
 		return new CommonIfNode(source, condition, trueBranch);
 	}
 
 	@Override
-	public IfNode newIfNode(Source source, ExpressionNode condition,
-			StatementNode trueBranch, StatementNode falseBranch) {
+	public IfNode newIfNode(Source source, ExpressionNode condition, StatementNode trueBranch,
+			StatementNode falseBranch) {
 		return new CommonIfNode(source, condition, trueBranch, falseBranch);
 	}
 
@@ -678,72 +628,60 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public LabeledStatementNode newLabeledStatementNode(Source source,
-			LabelNode label, StatementNode statement) {
+	public LabeledStatementNode newLabeledStatementNode(Source source, LabelNode label, StatementNode statement) {
 		return new CommonLabeledStatementNode(source, label, statement);
 	}
 
 	@Override
-	public SwitchNode newSwitchNode(Source source, ExpressionNode condition,
-			StatementNode body) {
-		CommonSwitchNode switchNode = new CommonSwitchNode(source, condition,
-				body);
+	public SwitchNode newSwitchNode(Source source, ExpressionNode condition, StatementNode body) {
+		CommonSwitchNode switchNode = new CommonSwitchNode(source, condition, body);
 
 		return switchNode;
 	}
 
 	@Override
-	public CivlForNode newCivlForNode(Source source, boolean isParallel,
-			DeclarationListNode variables, ExpressionNode domain,
-			StatementNode body, SequenceNode<ContractNode> loopContracts) {
-		return new CommonCivlForNode(source, isParallel, variables, domain,
-				body, loopContracts);
+	public CivlForNode newCivlForNode(Source source, boolean isParallel, DeclarationListNode variables,
+			ExpressionNode domain, StatementNode body, SequenceNode<ContractNode> loopContracts) {
+		return new CommonCivlForNode(source, isParallel, variables, domain, body, loopContracts);
 	}
 
 	@Override
-	public StaticAssertionNode newStaticAssertionNode(Source source,
-			ExpressionNode expression, StringLiteralNode message) {
+	public StaticAssertionNode newStaticAssertionNode(Source source, ExpressionNode expression,
+			StringLiteralNode message) {
 		return new CommonStaticAssertionNode(source, expression, message);
 	}
 
 	@Override
-	public PragmaNode newPragmaNode(Source source, IdentifierNode identifier,
-			CivlcTokenSequence producer, CivlcToken newlineToken) {
+	public PragmaNode newPragmaNode(Source source, IdentifierNode identifier, CivlcTokenSequence producer,
+			CivlcToken newlineToken) {
 		newlineToken.setType(CivlCParser.EOF);
 		return new CommonPragmaNode(source, identifier, producer, newlineToken);
 	}
 
 	@Override
-	public FunctionDefinitionNode newFunctionDefinitionNode(Source source,
-			IdentifierNode name, FunctionTypeNode type,
+	public FunctionDefinitionNode newFunctionDefinitionNode(Source source, IdentifierNode name, FunctionTypeNode type,
 			SequenceNode<ContractNode> contract, CompoundStatementNode body) {
-		return new CommonFunctionDefinitionNode(source, name, type, contract,
-				body);
+		return new CommonFunctionDefinitionNode(source, name, type, contract, body);
 	}
 
 	@Override
-	public AbstractFunctionDefinitionNode newAbstractFunctionDefinitionNode(
-			Source source, IdentifierNode name, FunctionTypeNode type,
-			SequenceNode<ContractNode> contract, int continuity) {
-		return new CommonAbstractFunctionDefinitionNode(source, name, type,
-				contract, continuity);
+	public AbstractFunctionDefinitionNode newAbstractFunctionDefinitionNode(Source source, IdentifierNode name,
+			FunctionTypeNode type, SequenceNode<ContractNode> contract, int continuity) {
+		return new CommonAbstractFunctionDefinitionNode(source, name, type, contract, continuity);
 	}
 
 	@Override
-	public SequenceNode<BlockItemNode> newTranslationUnitNode(Source source,
-			List<BlockItemNode> definitions) {
+	public SequenceNode<BlockItemNode> newTranslationUnitNode(Source source, List<BlockItemNode> definitions) {
 		return newSequenceNode(source, "TranslationUnit", definitions);
 	}
 
 	@Override
-	public SequenceNode<BlockItemNode> newProgramNode(Source source,
-			List<BlockItemNode> definitions) {
+	public SequenceNode<BlockItemNode> newProgramNode(Source source, List<BlockItemNode> definitions) {
 		return newSequenceNode(source, "Program", definitions);
 	}
 
 	@Override
-	public Value getConstantValue(ExpressionNode expression)
-			throws SyntaxException {
+	public Value getConstantValue(ExpressionNode expression) throws SyntaxException {
 		CommonExpressionNode commonNode = (CommonExpressionNode) expression;
 
 		if (commonNode.constantComputed()) {
@@ -767,14 +705,12 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public RemoteOnExpressionNode newRemoteOnExpressionNode(Source source,
-			ExpressionNode left, ExpressionNode right) {
+	public RemoteOnExpressionNode newRemoteOnExpressionNode(Source source, ExpressionNode left, ExpressionNode right) {
 		return new CommonRemoteExpressionNode(source, left, right);
 	}
 
 	@Override
-	public ScopeOfNode newScopeOfNode(Source source,
-			IdentifierExpressionNode variableExpression) {
+	public ScopeOfNode newScopeOfNode(Source source, IdentifierExpressionNode variableExpression) {
 		return new CommonScopeOfNode(source, variableExpression);
 	}
 
@@ -791,14 +727,12 @@ public class CommonNodeFactory implements NodeFactory {
 	// }
 
 	@Override
-	public WhenNode newWhenNode(Source source, ExpressionNode guard,
-			StatementNode body) {
+	public WhenNode newWhenNode(Source source, ExpressionNode guard, StatementNode body) {
 		return new CommonWhenNode(source, guard, body);
 	}
 
 	@Override
-	public ChooseStatementNode newChooseStatementNode(Source source,
-			List<StatementNode> statements) {
+	public ChooseStatementNode newChooseStatementNode(Source source, List<StatementNode> statements) {
 		return new CommonChooseStatementNode(source, statements);
 	}
 
@@ -827,8 +761,7 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public ExpressionNode newHereNode(Source source) {
-		ExpressionNode result = new CommonHereOrRootNode(source, "$here",
-				scopeType);
+		ExpressionNode result = new CommonHereOrRootNode(source, "$here", scopeType);
 
 		result.setInitialType(scopeType);
 		return result;
@@ -836,8 +769,7 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public ExpressionNode newRootNode(Source source) {
-		ExpressionNode result = new CommonHereOrRootNode(source, "$root",
-				scopeType);
+		ExpressionNode result = new CommonHereOrRootNode(source, "$root", scopeType);
 
 		result.setInitialType(scopeType);
 		return result;
@@ -859,13 +791,10 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public DerivativeExpressionNode newDerivativeExpressionNode(
-			Source source,
-			ExpressionNode function,
+	public DerivativeExpressionNode newDerivativeExpressionNode(Source source, ExpressionNode function,
 			SequenceNode<PairNode<IdentifierExpressionNode, IntegerConstantNode>> partials,
 			SequenceNode<ExpressionNode> arguments) {
-		return new CommonDerivativeExpressionNode(source, function, partials,
-				arguments);
+		return new CommonDerivativeExpressionNode(source, function, partials, arguments);
 	}
 
 	@Override
@@ -874,8 +803,7 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public AtomicNode newAtomicStatementNode(Source statementSource,
-			boolean deterministic, StatementNode body) {
+	public AtomicNode newAtomicStatementNode(Source statementSource, boolean deterministic, StatementNode body) {
 		return new CommonAtomicNode(statementSource, deterministic, body);
 	}
 
@@ -887,11 +815,18 @@ public class CommonNodeFactory implements NodeFactory {
 		return result;
 	}
 
+	@Override
+	public ExpressionNode newStatenullNode(Source source) {
+		ExpressionNode result = new CommonStatenullNode(source, typeFactory.stateType());
+
+		result.setInitialType(typeFactory.stateType());
+		return result;
+	}
+
 	/* *************************** OpenMP Section ************************** */
 
 	@Override
-	public OmpParallelNode newOmpParallelNode(Source source,
-			StatementNode statement) {
+	public OmpParallelNode newOmpParallelNode(Source source, StatementNode statement) {
 		return new CommonOmpParallelNode(source, statement);
 	}
 
@@ -907,8 +842,7 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public OmpSyncNode newOmpAtomicNode(Source source, StatementNode statement) {
-		return new CommonOmpSyncNode(source, OmpSyncNodeKind.OMPATOMIC,
-				statement);
+		return new CommonOmpSyncNode(source, OmpSyncNodeKind.OMPATOMIC, statement);
 	}
 
 	@Override
@@ -917,46 +851,37 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public OmpWorksharingNode newOmpSectionsNode(Source source,
-			StatementNode statement) {
-		return new CommonOmpWorkshareNode(source,
-				OmpWorksharingNodeKind.SECTIONS, statement);
+	public OmpWorksharingNode newOmpSectionsNode(Source source, StatementNode statement) {
+		return new CommonOmpWorkshareNode(source, OmpWorksharingNodeKind.SECTIONS, statement);
 	}
 
 	@Override
-	public OmpWorksharingNode newOmpSectionNode(Source source,
-			StatementNode statement) {
-		return new CommonOmpWorkshareNode(source,
-				OmpWorksharingNodeKind.SECTION, statement);
+	public OmpWorksharingNode newOmpSectionNode(Source source, StatementNode statement) {
+		return new CommonOmpWorkshareNode(source, OmpWorksharingNodeKind.SECTION, statement);
 	}
 
 	@Override
-	public OmpDeclarativeNode newOmpThreadprivateNode(Source source,
-			SequenceNode<IdentifierExpressionNode> variables) {
+	public OmpDeclarativeNode newOmpThreadprivateNode(Source source, SequenceNode<IdentifierExpressionNode> variables) {
 		return new CommonOmpDeclarativeNode(source, variables);
 	}
 
 	@Override
-	public OmpSymbolReductionNode newOmpSymbolReductionNode(Source source,
-			Operator operator, SequenceNode<IdentifierExpressionNode> variables) {
+	public OmpSymbolReductionNode newOmpSymbolReductionNode(Source source, Operator operator,
+			SequenceNode<IdentifierExpressionNode> variables) {
 		return new CommonOmpSymbolReductionNode(source, operator, variables);
 	}
 
 	@Override
-	public OmpSyncNode newOmpCriticalNode(Source source, IdentifierNode name,
-			StatementNode statement) {
-		OmpSyncNode criticalNode = new CommonOmpSyncNode(source,
-				OmpSyncNodeKind.CRITICAL, statement);
+	public OmpSyncNode newOmpCriticalNode(Source source, IdentifierNode name, StatementNode statement) {
+		OmpSyncNode criticalNode = new CommonOmpSyncNode(source, OmpSyncNodeKind.CRITICAL, statement);
 
 		criticalNode.setCriticalName(name);
 		return criticalNode;
 	}
 
 	@Override
-	public OmpSyncNode newOmpFlushNode(Source source,
-			SequenceNode<IdentifierExpressionNode> variables) {
-		OmpSyncNode flushNode = new CommonOmpSyncNode(source,
-				OmpSyncNodeKind.FLUSH, null);
+	public OmpSyncNode newOmpFlushNode(Source source, SequenceNode<IdentifierExpressionNode> variables) {
+		OmpSyncNode flushNode = new CommonOmpSyncNode(source, OmpSyncNodeKind.FLUSH, null);
 
 		flushNode.setFlushedList(variables);
 		return flushNode;
@@ -968,55 +893,46 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public OmpWorksharingNode newOmpSingleNode(Source source,
-			StatementNode statement) {
-		return new CommonOmpWorkshareNode(source,
-				OmpWorksharingNodeKind.SINGLE, statement);
+	public OmpWorksharingNode newOmpSingleNode(Source source, StatementNode statement) {
+		return new CommonOmpWorkshareNode(source, OmpWorksharingNodeKind.SINGLE, statement);
 	}
 
 	@Override
-	public OmpFunctionReductionNode newOmpFunctionReductionNode(Source source,
-			IdentifierExpressionNode function,
+	public OmpFunctionReductionNode newOmpFunctionReductionNode(Source source, IdentifierExpressionNode function,
 			SequenceNode<IdentifierExpressionNode> variables) {
 		return new CommonOmpFunctionReductionNode(source, function, variables);
 	}
 
 	@Override
-	public OmpWorksharingNode newWorksharingNode(Source source,
-			OmpWorksharingNodeKind kind) {
+	public OmpWorksharingNode newWorksharingNode(Source source, OmpWorksharingNodeKind kind) {
 		return new CommonOmpWorkshareNode(source, kind, null);
 	}
 
 	@Override
-	public RegularRangeNode newRegularRangeNode(Source source,
-			ExpressionNode low, ExpressionNode high) {
+	public RegularRangeNode newRegularRangeNode(Source source, ExpressionNode low, ExpressionNode high) {
 		return new CommonRegularRangeNode(source, low, high);
 	}
 
 	@Override
-	public RegularRangeNode newRegularRangeNode(Source source,
-			ExpressionNode low, ExpressionNode high, ExpressionNode step) {
+	public RegularRangeNode newRegularRangeNode(Source source, ExpressionNode low, ExpressionNode high,
+			ExpressionNode step) {
 		return new CommonRegularRangeNode(source, low, high, step);
 	}
 
 	@Override
-	public OperatorNode newOperatorNode(Source source, Operator operator,
-			ExpressionNode argument) {
+	public OperatorNode newOperatorNode(Source source, Operator operator, ExpressionNode argument) {
 		return new CommonOperatorNode(source, operator, Arrays.asList(argument));
 	}
 
 	@Override
-	public OperatorNode newOperatorNode(Source source, Operator operator,
-			ExpressionNode arg0, ExpressionNode arg1) {
-		return new CommonOperatorNode(source, operator, Arrays.asList(arg0,
-				arg1));
+	public OperatorNode newOperatorNode(Source source, Operator operator, ExpressionNode arg0, ExpressionNode arg1) {
+		return new CommonOperatorNode(source, operator, Arrays.asList(arg0, arg1));
 	}
 
 	@Override
-	public OperatorNode newOperatorNode(Source source, Operator operator,
-			ExpressionNode arg0, ExpressionNode arg1, ExpressionNode arg2) {
-		return new CommonOperatorNode(source, operator, Arrays.asList(arg0,
-				arg1, arg2));
+	public OperatorNode newOperatorNode(Source source, Operator operator, ExpressionNode arg0, ExpressionNode arg1,
+			ExpressionNode arg2) {
+		return new CommonOperatorNode(source, operator, Arrays.asList(arg0, arg1, arg2));
 	}
 
 	@Override
@@ -1031,14 +947,12 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public AssignsOrReadsNode newAssignsNode(Source source,
-			SequenceNode<ExpressionNode> expressionList) {
+	public AssignsOrReadsNode newAssignsNode(Source source, SequenceNode<ExpressionNode> expressionList) {
 		return new CommonAssignsOrReadsNode(source, true, expressionList);
 	}
 
 	@Override
-	public AssignsOrReadsNode newReadsNode(Source source,
-			SequenceNode<ExpressionNode> expressionList) {
+	public AssignsOrReadsNode newReadsNode(Source source, SequenceNode<ExpressionNode> expressionList) {
 		return new CommonAssignsOrReadsNode(source, false, expressionList);
 	}
 
@@ -1053,8 +967,7 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public StatementExpressionNode newStatementExpressionNode(Source source,
-			CompoundStatementNode statement) {
+	public StatementExpressionNode newStatementExpressionNode(Source source, CompoundStatementNode statement) {
 		return new CommonStatementExpressionNode(source, statement);
 	}
 
@@ -1064,14 +977,14 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public MemoryEventNode newMemoryEventNode(Source source,
-			MemoryEventNodeKind kind, SequenceNode<ExpressionNode> memoryList) {
+	public MemoryEventNode newMemoryEventNode(Source source, MemoryEventNodeKind kind,
+			SequenceNode<ExpressionNode> memoryList) {
 		return new CommonMemoryEventNode(source, kind, memoryList);
 	}
 
 	@Override
-	public CompositeEventNode newOperatorEventNode(Source source,
-			EventOperator op, DependsEventNode left, DependsEventNode right) {
+	public CompositeEventNode newOperatorEventNode(Source source, EventOperator op, DependsEventNode left,
+			DependsEventNode right) {
 		return new CommonCompositeEventNode(source, op, left, right);
 	}
 
@@ -1081,14 +994,13 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public BehaviorNode newBehaviorNode(Source source, IdentifierNode name,
-			SequenceNode<ContractNode> body) {
+	public BehaviorNode newBehaviorNode(Source source, IdentifierNode name, SequenceNode<ContractNode> body) {
 		return new CommonBehaviorNode(source, name, body);
 	}
 
 	@Override
-	public CompletenessNode newCompletenessNode(Source source,
-			boolean isComplete, SequenceNode<IdentifierNode> idList) {
+	public CompletenessNode newCompletenessNode(Source source, boolean isComplete,
+			SequenceNode<IdentifierNode> idList) {
 		return new CommonCompletenessNode(source, isComplete, idList);
 	}
 
@@ -1108,32 +1020,27 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public CallEventNode newCallEventNode(Source source,
-			IdentifierExpressionNode function, SequenceNode<ExpressionNode> args) {
+	public CallEventNode newCallEventNode(Source source, IdentifierExpressionNode function,
+			SequenceNode<ExpressionNode> args) {
 		return new CommonCallEventNode(source, function, args);
 	}
 
 	@Override
-	public MPICollectiveBlockNode newMPICollectiveBlockNode(Source source,
-			ExpressionNode mpiComm, MPICollectiveKind kind,
-			SequenceNode<ContractNode> body) {
+	public MPICollectiveBlockNode newMPICollectiveBlockNode(Source source, ExpressionNode mpiComm,
+			MPICollectiveKind kind, SequenceNode<ContractNode> body) {
 		return new CommonMPICollectiveBlockNode(source, mpiComm, kind, body);
 	}
 
 	@Override
-	public MPIContractConstantNode newMPIConstantNode(Source source,
-			String stringRepresentation, MPIConstantKind kind,
+	public MPIContractConstantNode newMPIConstantNode(Source source, String stringRepresentation, MPIConstantKind kind,
 			ConstantKind constKind) {
-		return new CommonMPIConstantNode(source, stringRepresentation, kind,
-				constKind);
+		return new CommonMPIConstantNode(source, stringRepresentation, kind, constKind);
 	}
 
 	@Override
-	public MPIContractExpressionNode newMPIExpressionNode(Source source,
-			List<ExpressionNode> arguments, MPIContractExpressionKind kind,
-			String exprName) {
-		return new CommonMPIContractExpressionNode(source, arguments, kind,
-				exprName);
+	public MPIContractExpressionNode newMPIExpressionNode(Source source, List<ExpressionNode> arguments,
+			MPIContractExpressionKind kind, String exprName) {
+		return new CommonMPIContractExpressionNode(source, arguments, kind, exprName);
 	}
 
 	@Override
@@ -1142,8 +1049,7 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public InvariantNode newInvariantNode(Source source,
-			boolean isLoopInvariant, ExpressionNode expression) {
+	public InvariantNode newInvariantNode(Source source, boolean isLoopInvariant, ExpressionNode expression) {
 		return new CommonInvariantNode(source, isLoopInvariant, expression);
 	}
 
@@ -1154,77 +1060,64 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public MemorySetNode newMemorySetNode(Source source, ExpressionNode term,
-			SequenceNode<VariableDeclarationNode> binders,
-			ExpressionNode predicate) {
+			SequenceNode<VariableDeclarationNode> binders, ExpressionNode predicate) {
 		return new CommonMemorySetNode(source, term, binders, predicate);
 	}
 
 	@Override
-	public ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType,
-			ExpressionNode extent, ExpressionNode startIndex) {
+	public ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType, ExpressionNode extent,
+			ExpressionNode startIndex) {
 		return new CommonArrayTypeNode(source, elementType, extent, startIndex);
 	}
 
 	@Override
-	public ContractVerifyNode newContractVerifyNode(Source source,
-			ExpressionNode function, List<ExpressionNode> arguments,
-			SequenceNode<ExpressionNode> scopeList) {
-		SequenceNode<ExpressionNode> argumentSequenceNode = newSequenceNode(
-				source, "ActualParameterList", arguments);
+	public ContractVerifyNode newContractVerifyNode(Source source, ExpressionNode function,
+			List<ExpressionNode> arguments, SequenceNode<ExpressionNode> scopeList) {
+		SequenceNode<ExpressionNode> argumentSequenceNode = newSequenceNode(source, "ActualParameterList", arguments);
 
-		return new CommonContractVerifyNode(source, function, null,
-				argumentSequenceNode, scopeList);
+		return new CommonContractVerifyNode(source, function, null, argumentSequenceNode, scopeList);
 	}
 
 	@Override
-	public WaitsforNode newWaitsforNode(Source source,
-			SequenceNode<ExpressionNode> arguments) {
+	public WaitsforNode newWaitsforNode(Source source, SequenceNode<ExpressionNode> arguments) {
 		return new CommonWaitsforNode(source, arguments);
 	}
 
 	@Override
-	public QuantifiedExpressionNode newQuantifiedExpressionNode(
-			Source source,
-			Quantifier quantifier,
+	public QuantifiedExpressionNode newQuantifiedExpressionNode(Source source, Quantifier quantifier,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
 			ExpressionNode restriction, ExpressionNode expression) {
-		return new CommonQuantifiedExpressionNode(source, quantifier,
-				boundVariableDeclarationList, restriction, expression);
-	}
-
-	@Override
-	public ArrayLambdaNode newArrayLambdaNode(
-			Source source,
-			TypeNode type,
-			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
-			ExpressionNode restriction, ExpressionNode expression) {
-		return new CommonArrayLambdaNode(source, type,
-				boundVariableDeclarationList, restriction, expression);
+		return new CommonQuantifiedExpressionNode(source, quantifier, boundVariableDeclarationList, restriction,
+				expression);
 	}
 
 	@Override
 	public ArrayLambdaNode newArrayLambdaNode(Source source, TypeNode type,
-			List<VariableDeclarationNode> boundVariableDeclarationList,
+			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
 			ExpressionNode restriction, ExpressionNode expression) {
-		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList = new LinkedList<>();
-
-		variableList.add(newPairNode(
-				source,
-				newSequenceNode(source, "bound variable sub-list",
-						boundVariableDeclarationList), null));
-		return new CommonArrayLambdaNode(source, type, newSequenceNode(source,
-				"bound variable list", variableList), restriction, expression);
+		return new CommonArrayLambdaNode(source, type, boundVariableDeclarationList, restriction, expression);
 	}
 
 	@Override
-	public UpdateNode newUpdateNode(Source source, ExpressionNode collator,
-			FunctionCallNode call) {
+	public ArrayLambdaNode newArrayLambdaNode(Source source, TypeNode type,
+			List<VariableDeclarationNode> boundVariableDeclarationList, ExpressionNode restriction,
+			ExpressionNode expression) {
+		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList = new LinkedList<>();
+
+		variableList.add(newPairNode(source,
+				newSequenceNode(source, "bound variable sub-list", boundVariableDeclarationList), null));
+		return new CommonArrayLambdaNode(source, type, newSequenceNode(source, "bound variable list", variableList),
+				restriction, expression);
+	}
+
+	@Override
+	public UpdateNode newUpdateNode(Source source, ExpressionNode collator, FunctionCallNode call) {
 		return new CommonUpdateNode(source, collator, call);
 	}
 
 	@Override
-	public WithNode newWithNode(Source source, ExpressionNode stateRef,
-			StatementNode statement, boolean isCallWithNode) {
+	public WithNode newWithNode(Source source, ExpressionNode stateRef, StatementNode statement,
+			boolean isCallWithNode) {
 		return new CommonWithNode(source, stateRef, statement);
 	}
 

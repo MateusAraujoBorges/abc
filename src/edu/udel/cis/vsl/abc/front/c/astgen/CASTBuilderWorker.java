@@ -147,16 +147,15 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 *            the CTokenSource used to produce the ANTLR tree
 	 * 
 	 */
-	public CASTBuilderWorker(Configuration config, CParseTree parseTree,
-			ASTFactory astFactory, PragmaFactory pragmaFactory) {
+	public CASTBuilderWorker(Configuration config, CParseTree parseTree, ASTFactory astFactory,
+			PragmaFactory pragmaFactory) {
 		this.parseTree = parseTree;
 		this.nodeFactory = astFactory.getNodeFactory();
 		this.tokenFactory = astFactory.getTokenFactory();
 		this.rootTree = parseTree.getRoot();
 		this.pragmaFactory = pragmaFactory;
 		this.config = config;
-		acslHandler = new AcslContractHandler(this.nodeFactory,
-				this.tokenFactory);
+		acslHandler = new AcslContractHandler(this.nodeFactory, this.tokenFactory);
 	}
 
 	/* ************************* Private Methods ************************** */
@@ -175,18 +174,15 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		return parseTree.source(tree);
 	}
 
-	private SpecifierAnalysis newSpecifierAnalysis(CommonTree specifiers)
-			throws SyntaxException {
+	private SpecifierAnalysis newSpecifierAnalysis(CommonTree specifiers) throws SyntaxException {
 		return new SpecifierAnalysis(specifiers, parseTree, this.config);
 	}
 
-	private boolean isFunction(TypeNode type, SimpleScope scope)
-			throws SyntaxException {
+	private boolean isFunction(TypeNode type, SimpleScope scope) throws SyntaxException {
 		return isFunction(type, scope, new HashSet<String>());
 	}
 
-	private boolean isFunction(TypeNode type, SimpleScope scope,
-			Set<String> seenNames) throws SyntaxException {
+	private boolean isFunction(TypeNode type, SimpleScope scope, Set<String> seenNames) throws SyntaxException {
 		TypeNodeKind kind = type.kind();
 
 		switch (kind) {
@@ -288,24 +284,21 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	// Translation of Expressions...
 
-	private IntegerConstantNode translateIntegerConstant(Source source,
-			CommonTree integerConstant) throws SyntaxException {
-		return nodeFactory.newIntegerConstantNode(source,
-				integerConstant.getText());
+	private IntegerConstantNode translateIntegerConstant(Source source, CommonTree integerConstant)
+			throws SyntaxException {
+		return nodeFactory.newIntegerConstantNode(source, integerConstant.getText());
 	}
 
-	private FloatingConstantNode translateFloatingConstant(Source source,
-			CommonTree floatingConstant) throws SyntaxException {
-		return nodeFactory.newFloatingConstantNode(source,
-				floatingConstant.getText());
+	private FloatingConstantNode translateFloatingConstant(Source source, CommonTree floatingConstant)
+			throws SyntaxException {
+		return nodeFactory.newFloatingConstantNode(source, floatingConstant.getText());
 	}
 
-	private CharacterConstantNode translateCharacterConstant(Source source,
-			CommonTree characterConstant) throws SyntaxException {
+	private CharacterConstantNode translateCharacterConstant(Source source, CommonTree characterConstant)
+			throws SyntaxException {
 		CharacterToken token = (CharacterToken) characterConstant.getToken();
 
-		return nodeFactory.newCharacterConstantNode(source,
-				characterConstant.getText(), token.getExecutionCharacter());
+		return nodeFactory.newCharacterConstantNode(source, characterConstant.getText(), token.getExecutionCharacter());
 	}
 
 	// removed from grammar, using macros instead:
@@ -317,54 +310,44 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	// return nodeFactory.newBooleanConstantNode(source, false);
 	// }
 
-	private StringLiteralNode translateStringLiteral(Source source,
-			CommonTree stringLiteral) throws SyntaxException {
+	private StringLiteralNode translateStringLiteral(Source source, CommonTree stringLiteral) throws SyntaxException {
 		StringToken token = (StringToken) stringLiteral.getToken();
 
-		return nodeFactory.newStringLiteralNode(source, stringLiteral.getText(),
-				token.getStringLiteral());
+		return nodeFactory.newStringLiteralNode(source, stringLiteral.getText(), token.getStringLiteral());
 	}
 
-	private ExpressionNode translateAt(Source source, CommonTree expressionTree,
-			SimpleScope scope) throws SyntaxException {
+	private ExpressionNode translateAt(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree procExprTree = (CommonTree) expressionTree.getChild(0);
 		CommonTree identifierTree = (CommonTree) expressionTree.getChild(1);
 		ExpressionNode procExpr = translateExpression(procExprTree, scope);
 		IdentifierNode identifierNode = translateIdentifier(identifierTree);
 
 		return nodeFactory.newRemoteOnExpressionNode(source, procExpr,
-				nodeFactory.newIdentifierExpressionNode(
-						newSource(identifierTree), identifierNode));
+				nodeFactory.newIdentifierExpressionNode(newSource(identifierTree), identifierNode));
 	}
 
-	private ExpressionNode translateRegularRange(Source source,
-			CommonTree expressionTree, SimpleScope scope)
-					throws SyntaxException {
+	private ExpressionNode translateRegularRange(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
 		{// regular range expression lo..hi or lo..hi#step
-			ExpressionNode loNode = translateExpression(
-					(CommonTree) expressionTree.getChild(0), scope);
-			ExpressionNode hiNode = translateExpression(
-					(CommonTree) expressionTree.getChild(1), scope);
+			ExpressionNode loNode = translateExpression((CommonTree) expressionTree.getChild(0), scope);
+			ExpressionNode hiNode = translateExpression((CommonTree) expressionTree.getChild(1), scope);
 			if (expressionTree.getChildCount() > 2) {
 				CommonTree stepTree = (CommonTree) expressionTree.getChild(2);
 
 				if (stepTree != null && stepTree.getType() != ABSENT) {
-					ExpressionNode stepNode = translateExpression(stepTree,
-							scope);
+					ExpressionNode stepNode = translateExpression(stepTree, scope);
 
-					return nodeFactory.newRegularRangeNode(source, loNode,
-							hiNode, stepNode);
+					return nodeFactory.newRegularRangeNode(source, loNode, hiNode, stepNode);
 				}
 			}
 			return nodeFactory.newRegularRangeNode(source, loNode, hiNode);
 		}
 	}
 
-	private ExpressionNode translateScopeOf(Source source,
-			CommonTree expressionTree, SimpleScope scope)
-					throws SyntaxException {
-		ExpressionNode expression = this.translateExpression(
-				(CommonTree) expressionTree.getChild(0), scope);
+	private ExpressionNode translateScopeOf(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
+		ExpressionNode expression = this.translateExpression((CommonTree) expressionTree.getChild(0), scope);
 
 		return nodeFactory.newScopeOfNode(source, expression);
 	}
@@ -382,8 +365,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return A DerivativeExpressionNode corresponding to the ANTLR tree.
 	 * @throws SyntaxException
 	 */
-	private DerivativeExpressionNode translateDeriv(Source source,
-			CommonTree derivTree, SimpleScope scope) throws SyntaxException {
+	private DerivativeExpressionNode translateDeriv(Source source, CommonTree derivTree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree functionTree = (CommonTree) derivTree.getChild(0);
 		CommonTree partialListTree = (CommonTree) derivTree.getChild(1);
 		CommonTree argumentListTree = (CommonTree) derivTree.getChild(2);
@@ -397,29 +380,23 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		arguments = new LinkedList<ExpressionNode>();
 		for (int i = 0; i < numPartials; i++) {
 			CommonTree partialTree = (CommonTree) partialListTree.getChild(i);
-			ExpressionNode partialIdentifier = translateExpression(
-					(CommonTree) partialTree.getChild(0), scope);
-			ExpressionNode partialDegree = translateExpression(
-					(CommonTree) partialTree.getChild(1), scope);
+			ExpressionNode partialIdentifier = translateExpression((CommonTree) partialTree.getChild(0), scope);
+			ExpressionNode partialDegree = translateExpression((CommonTree) partialTree.getChild(1), scope);
 
 			assert partialIdentifier instanceof IdentifierExpressionNode;
 			assert partialDegree instanceof IntegerConstantNode;
-			partials.add(nodeFactory.newPairNode(newSource(partialTree),
-					(IdentifierExpressionNode) partialIdentifier,
+			partials.add(nodeFactory.newPairNode(newSource(partialTree), (IdentifierExpressionNode) partialIdentifier,
 					(IntegerConstantNode) partialDegree));
 		}
 		for (int i = 0; i < numArgs; i++) {
 			CommonTree argumentTree = (CommonTree) argumentListTree.getChild(i);
-			ExpressionNode argumentNode = translateExpression(argumentTree,
-					scope);
+			ExpressionNode argumentNode = translateExpression(argumentTree, scope);
 
 			arguments.add(argumentNode);
 		}
 		return nodeFactory.newDerivativeExpressionNode(source, function,
-				nodeFactory.newSequenceNode(newSource(partialListTree),
-						"partials", partials),
-				nodeFactory.newSequenceNode(newSource(argumentListTree),
-						"arguments", arguments));
+				nodeFactory.newSequenceNode(newSource(partialListTree), "partials", partials),
+				nodeFactory.newSequenceNode(newSource(argumentListTree), "arguments", arguments));
 	}
 
 	/**
@@ -430,8 +407,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return a FunctionCallNode corresponding to the ANTLR tree
 	 * @throws SyntaxException
 	 */
-	private FunctionCallNode translateCall(Source source, CommonTree callTree,
-			SimpleScope scope) throws SyntaxException {
+	private FunctionCallNode translateCall(Source source, CommonTree callTree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree functionTree = (CommonTree) callTree.getChild(1);
 		CommonTree contextArgumentListTree = (CommonTree) callTree.getChild(2);
 		CommonTree argumentListTree = (CommonTree) callTree.getChild(3);
@@ -445,23 +422,19 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		// .getChild(4));
 
 		for (int i = 0; i < numContextArgs; i++) {
-			CommonTree argumentTree = (CommonTree) contextArgumentListTree
-					.getChild(i);
-			ExpressionNode contextArgumentNode = translateExpression(
-					argumentTree, scope);
+			CommonTree argumentTree = (CommonTree) contextArgumentListTree.getChild(i);
+			ExpressionNode contextArgumentNode = translateExpression(argumentTree, scope);
 
 			contextArgumentList.add(contextArgumentNode);
 		}
 
 		for (int i = 0; i < numArgs; i++) {
 			CommonTree argumentTree = (CommonTree) argumentListTree.getChild(i);
-			ExpressionNode argumentNode = translateExpression(argumentTree,
-					scope);
+			ExpressionNode argumentNode = translateExpression(argumentTree, scope);
 
 			argumentList.add(argumentNode);
 		}
-		return nodeFactory.newFunctionCallNode(source, functionNode,
-				contextArgumentList, argumentList, null);
+		return nodeFactory.newFunctionCallNode(source, functionNode, contextArgumentList, argumentList, null);
 	}
 
 	/**
@@ -470,18 +443,15 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private CompoundLiteralNode translateCompoundLiteral(Source source,
-			CommonTree compoundLiteralTree, SimpleScope scope)
-					throws SyntaxException {
+	private CompoundLiteralNode translateCompoundLiteral(Source source, CommonTree compoundLiteralTree,
+			SimpleScope scope) throws SyntaxException {
 		// tree has form:
 		// ^(COMPOUND_LITERAL LPAREN typeName initializerList RCURLY)
-		TypeNode typeNode = translateTypeName(
-				(CommonTree) compoundLiteralTree.getChild(1), scope);
+		TypeNode typeNode = translateTypeName((CommonTree) compoundLiteralTree.getChild(1), scope);
 		CompoundInitializerNode initializerList = (CompoundInitializerNode) translateInitializer(
 				(CommonTree) compoundLiteralTree.getChild(2), scope);
 
-		return nodeFactory.newCompoundLiteralNode(source, typeNode,
-				initializerList);
+		return nodeFactory.newCompoundLiteralNode(source, typeNode, initializerList);
 	}
 
 	/**
@@ -490,9 +460,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private ExpressionNode translateDotOrArrow(Source source,
-			CommonTree expressionTree, SimpleScope scope)
-					throws SyntaxException {
+	private ExpressionNode translateDotOrArrow(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
 		int kind = expressionTree.getType();
 		CommonTree argumentNode = (CommonTree) expressionTree.getChild(0);
 		CommonTree fieldNode = (CommonTree) expressionTree.getChild(1);
@@ -511,9 +480,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private OperatorNode translateOperatorExpression(Source source,
-			CommonTree expressionTree, SimpleScope scope)
-					throws SyntaxException {
+	private OperatorNode translateOperatorExpression(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree operatorTree = (CommonTree) expressionTree.getChild(0);
 		int operatorKind = operatorTree.getType();
 		CommonTree argumentList = (CommonTree) expressionTree.getChild(1);
@@ -522,8 +490,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		Operator operator;
 
 		for (int i = 0; i < numArgs; i++) {
-			ExpressionNode argument = translateExpression(
-					(CommonTree) argumentList.getChild(i), scope);
+			ExpressionNode argument = translateExpression((CommonTree) argumentList.getChild(i), scope);
 
 			arguments.add(argument);
 		}
@@ -663,8 +630,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private SizeofNode translateSizeOf(Source source, CommonTree expressionTree,
-			SimpleScope scope) throws SyntaxException {
+	private SizeofNode translateSizeOf(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
 		int kind = expressionTree.getChild(0).getType();
 		CommonTree child = (CommonTree) expressionTree.getChild(1);
 		SizeableNode sizeable;
@@ -687,19 +654,15 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private StatementExpressionNode translateStatementExpression(Source source,
-			CommonTree expressionTree, SimpleScope scope)
-					throws SyntaxException {
-		CompoundStatementNode statement = this.translateCompoundStatement(
-				(CommonTree) expressionTree.getChild(1), scope);
-		BlockItemNode last = statement
-				.getSequenceChild(statement.numChildren() - 1);
+	private StatementExpressionNode translateStatementExpression(Source source, CommonTree expressionTree,
+			SimpleScope scope) throws SyntaxException {
+		CompoundStatementNode statement = this.translateCompoundStatement((CommonTree) expressionTree.getChild(1),
+				scope);
+		BlockItemNode last = statement.getSequenceChild(statement.numChildren() - 1);
 
 		if (!(last instanceof ExpressionStatementNode)) {
-			this.error(
-					"the last element of the compound statement for a "
-							+ "statement expression should only be an expression",
-					expressionTree);
+			this.error("the last element of the compound statement for a "
+					+ "statement expression should only be an expression", expressionTree);
 		}
 		return this.nodeFactory.newStatementExpressionNode(source, statement);
 	}
@@ -712,9 +675,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return an ExpressionNode
 	 * @throws SyntaxException
 	 */
-	private ExpressionNode translateExpression(Source source,
-			CommonTree expressionTree, SimpleScope scope)
-					throws SyntaxException {
+	private ExpressionNode translateExpression(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
 		int kind = expressionTree.getType();
 
 		switch (kind) {
@@ -723,24 +685,19 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		case FLOATING_CONSTANT:
 			return translateFloatingConstant(source, expressionTree);
 		case ENUMERATION_CONSTANT:
-			return nodeFactory.newEnumerationConstantNode(translateIdentifier(
-					(CommonTree) expressionTree.getChild(0)));
+			return nodeFactory.newEnumerationConstantNode(translateIdentifier((CommonTree) expressionTree.getChild(0)));
 		case CHARACTER_CONSTANT:
 			return translateCharacterConstant(source, expressionTree);
 		case STRING_LITERAL:
 			return translateStringLiteral(source, expressionTree);
 		case IDENTIFIER:
-			return nodeFactory.newIdentifierExpressionNode(source,
-					translateIdentifier(expressionTree));
+			return nodeFactory.newIdentifierExpressionNode(source, translateIdentifier(expressionTree));
 		case LAMBDA:
-			return translateArrayLambdaExpression(source, expressionTree,
-					scope);
+			return translateArrayLambdaExpression(source, expressionTree, scope);
 		case PARENTHESIZED_EXPRESSION:
-			return translateExpression(source,
-					(CommonTree) expressionTree.getChild(1), scope);
+			return translateExpression(source, (CommonTree) expressionTree.getChild(1), scope);
 		case GENERIC: // TODO: genericSelection
-			throw new UnsupportedOperationException(
-					"Generic selections not yet implemented");
+			throw new UnsupportedOperationException("Generic selections not yet implemented");
 		case CALL:
 			return translateCall(source, expressionTree, scope);
 		case DOT:
@@ -755,23 +712,21 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		case SCOPEOF:
 			return translateScopeOf(source, expressionTree, scope);
 		case ALIGNOF:
-			return nodeFactory.newAlignOfNode(source, translateTypeName(
-					(CommonTree) expressionTree.getChild(0), scope));
+			return nodeFactory.newAlignOfNode(source,
+					translateTypeName((CommonTree) expressionTree.getChild(0), scope));
 		case CAST:
-			return nodeFactory.newCastNode(source,
-					translateTypeName((CommonTree) expressionTree.getChild(0),
-							scope),
-					translateExpression((CommonTree) expressionTree.getChild(1),
-							scope));
+			return nodeFactory.newCastNode(source, translateTypeName((CommonTree) expressionTree.getChild(0), scope),
+					translateExpression((CommonTree) expressionTree.getChild(1), scope));
 		case SELF:
 			return nodeFactory.newSelfNode(source);
 		case PROCNULL:
 			return nodeFactory.newProcnullNode(source);
+		case STATENULL:
+			return nodeFactory.newStatenullNode(source);
 		case HERE:
 			return nodeFactory.newHereNode(source);
 		case SPAWN:
-			return nodeFactory.newSpawnNode(source,
-					translateCall(source, expressionTree, scope));
+			return nodeFactory.newSpawnNode(source, translateCall(source, expressionTree, scope));
 		// case TRUE:
 		// return translateTrue(source);
 		// case FALSE:
@@ -787,8 +742,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		// case EXISTS:
 		// return translateExists(source, expressionTree, scope);
 		case QUANTIFIED:
-			return translateQuantifiedExpressionNew(source, expressionTree,
-					scope);
+			return translateQuantifiedExpressionNew(source, expressionTree, scope);
 		case DERIVATIVE_EXPRESSION:
 			return translateDeriv(source, expressionTree, scope);
 		case DOTDOT:
@@ -796,8 +750,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		case ELLIPSIS:
 			return translateWildcard(source, expressionTree, scope);
 		case CALLS:
-			return nodeFactory.newCallsNode(source,
-					translateCall(source, expressionTree, scope));
+			return nodeFactory.newCallsNode(source, translateCall(source, expressionTree, scope));
 		case STATEMENT_EXPRESSION:
 			return translateStatementExpression(source, expressionTree, scope);
 		default:
@@ -807,69 +760,56 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	// Translation of Declarations and Types...
 
-	private ArrayLambdaNode translateArrayLambdaExpression(Source source,
-			CommonTree arrayLambdaTree, SimpleScope scope)
-					throws SyntaxException {
+	private ArrayLambdaNode translateArrayLambdaExpression(Source source, CommonTree arrayLambdaTree, SimpleScope scope)
+			throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree typeTree = (CommonTree) arrayLambdaTree.getChild(0);
-		CommonTree boundVariableDeclListTree = (CommonTree) arrayLambdaTree
-				.getChild(1);
+		CommonTree boundVariableDeclListTree = (CommonTree) arrayLambdaTree.getChild(1);
 		CommonTree bodyTree = (CommonTree) arrayLambdaTree.getChild(2);
 		CommonTree restrictionTree = (CommonTree) arrayLambdaTree.getChild(3);
 		TypeNode type = this.translateTypeName(typeTree, scope);
 		SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclListNode = this
-				.translateBoundVariableDeclarationList(source,
-						boundVariableDeclListTree, newScope);
+				.translateBoundVariableDeclarationList(source, boundVariableDeclListTree, newScope);
 		ExpressionNode restriction = null, expression;
 
 		if (restrictionTree != null)
 			restriction = this.translateExpression(restrictionTree, newScope);
 		expression = this.translateExpression(bodyTree, newScope);
-		return nodeFactory.newArrayLambdaNode(source, type,
-				boundVariableDeclListNode, restriction, expression);
+		return nodeFactory.newArrayLambdaNode(source, type, boundVariableDeclListNode, restriction, expression);
 	}
 
 	private SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> translateBoundVariableDeclarationList(
-			Source source, CommonTree boundVariableDeclListTree,
-			SimpleScope scope) throws SyntaxException {
+			Source source, CommonTree boundVariableDeclListTree, SimpleScope scope) throws SyntaxException {
 		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationLists = new LinkedList<>();
 
 		for (Object varObj : boundVariableDeclListTree.getChildren()) {
 			boundVariableDeclarationLists
-					.add(this.translateBoundVariableDeclarationSubList(source,
-							(CommonTree) varObj, scope));
+					.add(this.translateBoundVariableDeclarationSubList(source, (CommonTree) varObj, scope));
 		}
-		return nodeFactory.newSequenceNode(source,
-				"bound variable declaration sub-list",
+		return nodeFactory.newSequenceNode(source, "bound variable declaration sub-list",
 				boundVariableDeclarationLists);
 	}
 
-	private QuantifiedExpressionNode translateQuantifiedExpressionNew(
-			Source source, CommonTree quantifiedTree, SimpleScope scope)
-					throws SyntaxException {
+	private QuantifiedExpressionNode translateQuantifiedExpressionNew(Source source, CommonTree quantifiedTree,
+			SimpleScope scope) throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree quantifierTree = (CommonTree) quantifiedTree.getChild(0);
-		CommonTree boundVariableDeclListTree = (CommonTree) quantifiedTree
-				.getChild(1);
+		CommonTree boundVariableDeclListTree = (CommonTree) quantifiedTree.getChild(1);
 		CommonTree restrictionTree = (CommonTree) quantifiedTree.getChild(3);
 		CommonTree bodyTree = (CommonTree) quantifiedTree.getChild(2);
 		Quantifier quantifier = translateQuantifier(quantifierTree);
 		ExpressionNode restrict = null, body;
 		SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclListNode = this
-				.translateBoundVariableDeclarationList(source,
-						boundVariableDeclListTree, newScope);
+				.translateBoundVariableDeclarationList(source, boundVariableDeclListTree, newScope);
 
 		if (restrictionTree != null)
-			restrict = this.translateExpression(source, restrictionTree,
-					newScope);
+			restrict = this.translateExpression(source, restrictionTree, newScope);
 		body = this.translateExpression(bodyTree, newScope);
-		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
-				boundVariableDeclListNode, restrict, body);
+		return nodeFactory.newQuantifiedExpressionNode(source, quantifier, boundVariableDeclListNode, restrict, body);
 	}
 
 	private PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> translateBoundVariableDeclarationSubList(
-			Source source, CommonTree boundVariableListTree, SimpleScope scope)
-					throws SyntaxException {
+			Source source, CommonTree boundVariableListTree, SimpleScope scope) throws SyntaxException {
 		CommonTree typeTree = (CommonTree) boundVariableListTree.getChild(0);
 		CommonTree namesTree = (CommonTree) boundVariableListTree.getChild(1);
 		CommonTree domainTree = (CommonTree) boundVariableListTree.getChild(2);
@@ -879,21 +819,17 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		TypeNode type = translateTypeName(typeTree, scope);
 
 		for (Object varObj : namesTree.getChildren()) {
-			IdentifierNode variableName = this
-					.translateIdentifier((CommonTree) varObj);
+			IdentifierNode variableName = this.translateIdentifier((CommonTree) varObj);
 
-			variableList.add(this.nodeFactory.newVariableDeclarationNode(source,
-					variableName, type.copy()));
+			variableList.add(this.nodeFactory.newVariableDeclarationNode(source, variableName, type.copy()));
 		}
-		variablesNode = this.nodeFactory.newSequenceNode(source,
-				"bound variable declarations", variableList);
+		variablesNode = this.nodeFactory.newSequenceNode(source, "bound variable declarations", variableList);
 		if (domainTree != null)
 			domainNode = this.translateExpression(domainTree, scope);
 		return this.nodeFactory.newPairNode(source, variablesNode, domainNode);
 	}
 
-	private Quantifier translateQuantifier(CommonTree quantifierTree)
-			throws SyntaxException {
+	private Quantifier translateQuantifier(CommonTree quantifierTree) throws SyntaxException {
 		switch (quantifierTree.getType()) {
 		case FORALL:
 			return Quantifier.FORALL;
@@ -906,9 +842,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		}
 	}
 
-	private ExpressionNode translateWildcard(Source source,
-			CommonTree expressionTree, SimpleScope scope)
-					throws SyntaxException {
+	private ExpressionNode translateWildcard(Source source, CommonTree expressionTree, SimpleScope scope)
+			throws SyntaxException {
 		return nodeFactory.newWildcardNode(source);
 	}
 
@@ -958,14 +893,11 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @throws SyntaxException
 	 *             if the declaration does not conform to the C11 Standard
 	 */
-	private List<BlockItemNode> translateDeclaration(CommonTree declarationTree,
-			SimpleScope scope) throws SyntaxException {
-		CommonTree declarationSpecifiers = (CommonTree) declarationTree
-				.getChild(0);
-		CommonTree initDeclaratorList = (CommonTree) declarationTree
-				.getChild(1);
-		SpecifierAnalysis analysis = newSpecifierAnalysis(
-				declarationSpecifiers);
+	private List<BlockItemNode> translateDeclaration(CommonTree declarationTree, SimpleScope scope)
+			throws SyntaxException {
+		CommonTree declarationSpecifiers = (CommonTree) declarationTree.getChild(0);
+		CommonTree initDeclaratorList = (CommonTree) declarationTree.getChild(1);
+		SpecifierAnalysis analysis = newSpecifierAnalysis(declarationSpecifiers);
 		int numDeclarators = initDeclaratorList.getChildCount();
 		ArrayList<BlockItemNode> definitionList = new ArrayList<BlockItemNode>();
 		Source source = newSource(declarationTree);
@@ -982,8 +914,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 			// error if $input or $output occur here:
 			if (analysis.inputQualifier || analysis.outputQualifier)
-				throw error("Use of $input or $output without variable",
-						declarationTree);
+				throw error("Use of $input or $output without variable", declarationTree);
 			baseType = newSpecifierType(analysis, scope);
 			if (baseType instanceof EnumerationTypeNode)
 				definition = (EnumerationTypeNode) baseType;
@@ -995,13 +926,10 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			return definitionList;
 		}
 		for (int i = 0; i < numDeclarators; i++) {
-			CommonTree initDeclarator = (CommonTree) initDeclaratorList
-					.getChild(i);
+			CommonTree initDeclarator = (CommonTree) initDeclaratorList.getChild(i);
 			CommonTree declaratorTree = (CommonTree) initDeclarator.getChild(0);
-			CommonTree initializerTree = (CommonTree) initDeclarator
-					.getChild(1);
-			InitializerNode initializer = translateInitializer(initializerTree,
-					scope);
+			CommonTree initializerTree = (CommonTree) initDeclarator.getChild(1);
+			InitializerNode initializer = translateInitializer(initializerTree, scope);
 
 			// TODO: the following won't work if the struct or union
 			// is anonymous. Need to give it a temp name.
@@ -1013,8 +941,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 			TypeNode baseType = i == 0 ? newSpecifierType(analysis, scope)
 					: makeIncomplete(newSpecifierType(analysis, scope));
-			DeclaratorData data = processDeclarator(declaratorTree, baseType,
-					scope);
+			DeclaratorData data = processDeclarator(declaratorTree, baseType, scope);
 			BlockItemNode definition;
 
 			// special handling of $input and $output qualifiers required
@@ -1028,11 +955,9 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				TypeNode typeNode = data.type;
 				String name;
 
-				definition = nodeFactory.newTypedefDeclarationNode(source,
-						data.identifier, typeNode);
+				definition = nodeFactory.newTypedefDeclarationNode(source, data.identifier, typeNode);
 				if (data.identifier == null)
-					throw error("Missing identifier in typedef",
-							declaratorTree);
+					throw error("Missing identifier in typedef", declaratorTree);
 				name = data.identifier.name();
 				scope.putMapping(name, data.type);
 			} else if (isFunction(data.type, scope)) {
@@ -1040,22 +965,19 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				FunctionDeclarationNode declaration;
 
 				if (analysis.abstractSpecifier) {
-					declaration = nodeFactory.newAbstractFunctionDefinitionNode(
-							source, data.identifier, typeNode, getContract(),
-							analysis.continuity);
+					declaration = nodeFactory.newAbstractFunctionDefinitionNode(source, data.identifier, typeNode,
+							getContract(), analysis.continuity);
 				} else {
-					declaration = nodeFactory.newFunctionDeclarationNode(source,
-							data.identifier, typeNode, getContract());
+					declaration = nodeFactory.newFunctionDeclarationNode(source, data.identifier, typeNode,
+							getContract());
 				}
 				if (debug)
-					System.out.println(
-							"processing function " + data.identifier.name());
+					System.out.println("processing function " + data.identifier.name());
 				// declaration.setContract(getContract());
 				setFunctionSpecifiers(declaration, analysis);
 				setStorageSpecifiers(declaration, analysis, scope);
 				if (initializer != null)
-					throw error("Initializer used in function declaration",
-							initializerTree);
+					throw error("Initializer used in function declaration", initializerTree);
 				checkAlignmentSpecifiers(declaration, analysis);
 				definition = declaration;
 			} else {
@@ -1065,8 +987,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					data.type.setInputQualified(true);
 				if (analysis.outputQualifier)
 					data.type.setOutputQualified(true);
-				declaration = nodeFactory.newVariableDeclarationNode(source,
-						data.identifier, data.type);
+				declaration = nodeFactory.newVariableDeclarationNode(source, data.identifier, data.type);
 				if (initializer != null)
 					declaration.setInitializer(initializer);
 				setStorageSpecifiers(declaration, analysis, scope);
@@ -1092,32 +1013,27 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private TypeNode newSpecifierType(SpecifierAnalysis analysis,
-			SimpleScope scope) throws SyntaxException {
+	private TypeNode newSpecifierType(SpecifierAnalysis analysis, SimpleScope scope) throws SyntaxException {
 		TypeNode result;
 
 		switch (analysis.typeNameKind) {
 		case VOID:
-			result = nodeFactory
-					.newVoidTypeNode(newSource(analysis.typeSpecifierNode));
+			result = nodeFactory.newVoidTypeNode(newSource(analysis.typeSpecifierNode));
 			break;
 		case BASIC: {
 			Source source;
 
 			if (analysis.specifierListNode.getChildCount() == 0)
-				source = this.tokenFactory.newSource(tokenFactory.newCivlcToken(
-						IDENTIFIER, analysis.basicTypeKind.toString(),
-						tokenFactory.newSystemFormation("system")));
+				source = this.tokenFactory.newSource(tokenFactory.newCivlcToken(IDENTIFIER,
+						analysis.basicTypeKind.toString(), tokenFactory.newSystemFormation("system")));
 			else
 				source = newSource(analysis.specifierListNode);
-			result = nodeFactory.newBasicTypeNode(source,
-					analysis.basicTypeKind);
+			result = nodeFactory.newBasicTypeNode(source, analysis.basicTypeKind);
 			break;
 		}
 		case TYPEDEF_NAME: {
 			CommonTree typedefNameTree = (CommonTree) analysis.typeSpecifierNode;
-			CommonTree identifierTree = (CommonTree) typedefNameTree
-					.getChild(0);
+			CommonTree identifierTree = (CommonTree) typedefNameTree.getChild(0);
 			// CommonTree scopeListTree = (CommonTree)
 			// typedefNameTree.getChild(1);
 			IdentifierNode identifierNode = translateIdentifier(identifierTree);
@@ -1135,14 +1051,11 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				result = this.translateTypeName(operandTree, scope);
 			} else {
 				Source source;
-				ExpressionNode expression = this
-						.translateExpression(operandTree, scope);
+				ExpressionNode expression = this.translateExpression(operandTree, scope);
 
 				if (analysis.specifierListNode.getChildCount() == 0)
-					source = this.tokenFactory
-							.newSource(tokenFactory.newCivlcToken(IDENTIFIER,
-									analysis.basicTypeKind.toString(),
-									tokenFactory.newSystemFormation("system")));
+					source = this.tokenFactory.newSource(tokenFactory.newCivlcToken(IDENTIFIER,
+							analysis.basicTypeKind.toString(), tokenFactory.newSystemFormation("system")));
 				else
 					source = newSource(analysis.specifierListNode);
 				result = this.nodeFactory.newTypeofNode(source, expression);
@@ -1150,12 +1063,10 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			break;
 		}
 		case STRUCTURE_OR_UNION:
-			result = translateStructOrUnionType(analysis.typeSpecifierNode,
-					scope);
+			result = translateStructOrUnionType(analysis.typeSpecifierNode, scope);
 			break;
 		case ENUMERATION:
-			result = translateEnumerationType(analysis.typeSpecifierNode,
-					scope);
+			result = translateEnumerationType(analysis.typeSpecifierNode, scope);
 			break;
 		case ATOMIC:
 			result = translateAtomicType(analysis.typeSpecifierNode, scope);
@@ -1168,11 +1079,9 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				CommonTree child = (CommonTree) node.getChild(0);
 
 				if (child.getToken().getType() != ABSENT) {
-					ExpressionNode dimensionNode = translateExpression(child,
-							scope);
+					ExpressionNode dimensionNode = translateExpression(child, scope);
 
-					result = nodeFactory.newDomainTypeNode(source,
-							dimensionNode);
+					result = nodeFactory.newDomainTypeNode(source, dimensionNode);
 					break;
 				}
 			}
@@ -1180,8 +1089,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			break;
 		}
 		case RANGE:
-			result = nodeFactory
-					.newRangeTypeNode(newSource(analysis.typeSpecifierNode));
+			result = nodeFactory.newRangeTypeNode(newSource(analysis.typeSpecifierNode));
 			break;
 		default:
 			throw new RuntimeException("Should not happen.");
@@ -1204,8 +1112,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private StructureOrUnionTypeNode translateStructOrUnionType(
-			CommonTree structTree, SimpleScope scope) throws SyntaxException {
+	private StructureOrUnionTypeNode translateStructOrUnionType(CommonTree structTree, SimpleScope scope)
+			throws SyntaxException {
 		Source wholeSource = newSource(structTree);
 		int kind = structTree.getType();
 		boolean isStruct = kind == STRUCT;
@@ -1216,8 +1124,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 		if (tagTree.getType() == ABSENT) {
 			tag = nodeFactory.newIdentifierNode(wholeSource,
-					"$anon_" + (isStruct ? "struct" : "union") + "_"
-							+ anonymousTagCount);
+					"$anon_" + (isStruct ? "struct" : "union") + "_" + anonymousTagCount);
 			anonymousTagCount++;
 		} else {
 			tag = translateIdentifier(tagTree);
@@ -1232,14 +1139,11 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 				for (int i = 0; i < numFields; i++) {
 					CommonTree declTree = (CommonTree) declListTree.getChild(i);
-					List<FieldDeclarationNode> fieldDeclarations = translateFieldDeclaration(
-							declTree, scope);
+					List<FieldDeclarationNode> fieldDeclarations = translateFieldDeclaration(declTree, scope);
 
 					fieldDecls.addAll(fieldDeclarations);
 				}
-				structDeclList = nodeFactory.newSequenceNode(
-						newSource(declListTree), "FieldDeclarations",
-						fieldDecls);
+				structDeclList = nodeFactory.newSequenceNode(newSource(declListTree), "FieldDeclarations", fieldDecls);
 			} else {
 				if (this.config != null && this.config.getSVCOMP()) {
 					structDeclList = null;
@@ -1248,23 +1152,18 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				}
 			}
 		}
-		return nodeFactory.newStructOrUnionTypeNode(wholeSource, isStruct, tag,
-				structDeclList);
+		return nodeFactory.newStructOrUnionTypeNode(wholeSource, isStruct, tag, structDeclList);
 	}
 
-	private List<FieldDeclarationNode> translateFieldDeclaration(
-			CommonTree declarationTree, SimpleScope scope)
-					throws SyntaxException {
-		CommonTree declarationSpecifiers = (CommonTree) declarationTree
-				.getChild(0); // may
-								// be
-								// ABSENT
-		CommonTree structDeclaratorList = (CommonTree) declarationTree
-				.getChild(1); // may
-								// be
-								// ABSENT
-		SpecifierAnalysis analysis = newSpecifierAnalysis(
-				declarationSpecifiers);
+	private List<FieldDeclarationNode> translateFieldDeclaration(CommonTree declarationTree, SimpleScope scope)
+			throws SyntaxException {
+		CommonTree declarationSpecifiers = (CommonTree) declarationTree.getChild(0); // may
+																						// be
+																						// ABSENT
+		CommonTree structDeclaratorList = (CommonTree) declarationTree.getChild(1); // may
+																					// be
+																					// ABSENT
+		SpecifierAnalysis analysis = newSpecifierAnalysis(declarationSpecifiers);
 		int numDeclarators = structDeclaratorList.getChildCount();
 		List<FieldDeclarationNode> result = new LinkedList<FieldDeclarationNode>();
 		Source source = newSource(declarationTree);
@@ -1273,34 +1172,27 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			// this can happen if the specifier is an anonymous struct or union
 			TypeNode baseType = newSpecifierType(analysis, scope);
 
-			result.add(nodeFactory.newFieldDeclarationNode(source, null,
-					baseType, null));
+			result.add(nodeFactory.newFieldDeclarationNode(source, null, baseType, null));
 		} else {
 			for (int i = 0; i < numDeclarators; i++) {
 				TypeNode baseType = i == 0 ? newSpecifierType(analysis, scope)
 						: makeIncomplete(newSpecifierType(analysis, scope));
-				CommonTree structDeclarator = (CommonTree) structDeclaratorList
-						.getChild(i);
-				CommonTree declaratorTree = (CommonTree) structDeclarator
-						.getChild(0); // could
-										// be
-										// ABSENT
-				CommonTree bitFieldTree = (CommonTree) structDeclarator
-						.getChild(1); // could
-										// be
-										// ABSENT
-				ExpressionNode bitFieldWidth = translateExpression(bitFieldTree,
-						scope);
-				DeclaratorData data = processDeclarator(declaratorTree,
-						baseType, scope);
+				CommonTree structDeclarator = (CommonTree) structDeclaratorList.getChild(i);
+				CommonTree declaratorTree = (CommonTree) structDeclarator.getChild(0); // could
+																						// be
+																						// ABSENT
+				CommonTree bitFieldTree = (CommonTree) structDeclarator.getChild(1); // could
+																						// be
+																						// ABSENT
+				ExpressionNode bitFieldWidth = translateExpression(bitFieldTree, scope);
+				DeclaratorData data = processDeclarator(declaratorTree, baseType, scope);
 				FieldDeclarationNode declaration;
 
 				if (bitFieldWidth == null)
-					declaration = nodeFactory.newFieldDeclarationNode(source,
-							data.identifier, data.type);
+					declaration = nodeFactory.newFieldDeclarationNode(source, data.identifier, data.type);
 				else
-					declaration = nodeFactory.newFieldDeclarationNode(source,
-							data.identifier, data.type, bitFieldWidth);
+					declaration = nodeFactory.newFieldDeclarationNode(source, data.identifier, data.type,
+							bitFieldWidth);
 
 				result.add(declaration);
 			}
@@ -1314,21 +1206,18 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private EnumerationTypeNode translateEnumerationType(
-			CommonTree enumerationTree, SimpleScope scope)
-					throws SyntaxException {
+	private EnumerationTypeNode translateEnumerationType(CommonTree enumerationTree, SimpleScope scope)
+			throws SyntaxException {
 		Source wholeSource = newSource(enumerationTree);
 		// tagTree may be ABSENT:
 		CommonTree tagTree = (CommonTree) enumerationTree.getChild(0);
 		// enumeratorListTree may be ABSENT:
-		CommonTree enumeratorListTree = (CommonTree) enumerationTree
-				.getChild(1);
+		CommonTree enumeratorListTree = (CommonTree) enumerationTree.getChild(1);
 		IdentifierNode tag;
 		SequenceNode<EnumeratorDeclarationNode> enumerators;
 
 		if (tagTree.getType() == ABSENT) {
-			tag = nodeFactory.newIdentifierNode(wholeSource,
-					"$anon_enum_" + anonymousTagCount);
+			tag = nodeFactory.newIdentifierNode(wholeSource, "$anon_enum_" + anonymousTagCount);
 			anonymousTagCount++;
 		} else {
 			tag = translateIdentifier(tagTree);
@@ -1340,29 +1229,20 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			List<EnumeratorDeclarationNode> enumeratorList = new LinkedList<EnumeratorDeclarationNode>();
 
 			for (int i = 0; i < numEnumerators; i++) {
-				CommonTree enumeratorTree = (CommonTree) enumeratorListTree
-						.getChild(i);
-				CommonTree enumeratorNameTree = (CommonTree) enumeratorTree
-						.getChild(0);
-				IdentifierNode enumeratorName = translateIdentifier(
-						enumeratorNameTree);
-				CommonTree constantTree = (CommonTree) enumeratorTree
-						.getChild(1);
-				ExpressionNode constant = translateExpression(constantTree,
-						scope);
-				EnumeratorDeclarationNode decl = nodeFactory
-						.newEnumeratorDeclarationNode(newSource(enumeratorTree),
-								enumeratorName, constant);
+				CommonTree enumeratorTree = (CommonTree) enumeratorListTree.getChild(i);
+				CommonTree enumeratorNameTree = (CommonTree) enumeratorTree.getChild(0);
+				IdentifierNode enumeratorName = translateIdentifier(enumeratorNameTree);
+				CommonTree constantTree = (CommonTree) enumeratorTree.getChild(1);
+				ExpressionNode constant = translateExpression(constantTree, scope);
+				EnumeratorDeclarationNode decl = nodeFactory.newEnumeratorDeclarationNode(newSource(enumeratorTree),
+						enumeratorName, constant);
 
 				scope.addEnumerationConstant(enumeratorName.name());
 				enumeratorList.add(decl);
 			}
-			enumerators = nodeFactory.newSequenceNode(
-					newSource(enumeratorListTree), "EnumeratorList",
-					enumeratorList);
+			enumerators = nodeFactory.newSequenceNode(newSource(enumeratorListTree), "EnumeratorList", enumeratorList);
 		}
-		return nodeFactory.newEnumerationTypeNode(wholeSource, tag,
-				enumerators);
+		return nodeFactory.newEnumerationTypeNode(wholeSource, tag, enumerators);
 	}
 
 	/**
@@ -1371,10 +1251,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private AtomicTypeNode translateAtomicType(CommonTree atomicTree,
-			SimpleScope scope) throws SyntaxException {
-		TypeNode type = translateTypeName((CommonTree) atomicTree.getChild(0),
-				scope);
+	private AtomicTypeNode translateAtomicType(CommonTree atomicTree, SimpleScope scope) throws SyntaxException {
+		TypeNode type = translateTypeName((CommonTree) atomicTree.getChild(0), scope);
 
 		return nodeFactory.newAtomicTypeNode(newSource(atomicTree), type);
 	}
@@ -1384,8 +1262,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @param declaration
 	 * @param analysis
 	 */
-	private void setFunctionSpecifiers(FunctionDeclarationNode declaration,
-			SpecifierAnalysis analysis) {
+	private void setFunctionSpecifiers(FunctionDeclarationNode declaration, SpecifierAnalysis analysis) {
 		if (analysis.inlineSpecifier)
 			declaration.setInlineFunctionSpecifier(true);
 		if (analysis.noreturnSpecifier)
@@ -1403,14 +1280,12 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		}
 	}
 
-	private void checkFunctionSpecifiers(VariableDeclarationNode declaration,
-			SpecifierAnalysis analysis) throws SyntaxException {
+	private void checkFunctionSpecifiers(VariableDeclarationNode declaration, SpecifierAnalysis analysis)
+			throws SyntaxException {
 		if (analysis.inlineSpecifier)
-			throw error("Use of inline specifier in object delcaration",
-					declaration);
+			throw error("Use of inline specifier in object delcaration", declaration);
 		if (analysis.noreturnSpecifier)
-			throw error("Use of _Noreturn specifier in object delcaration",
-					declaration);
+			throw error("Use of _Noreturn specifier in object delcaration", declaration);
 	}
 
 	/**
@@ -1419,38 +1294,31 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @param analysis
 	 * @throws SyntaxException
 	 */
-	private void setAlignmentSpecifiers(VariableDeclarationNode declaration,
-			SpecifierAnalysis analysis, SimpleScope scope)
-					throws SyntaxException {
+	private void setAlignmentSpecifiers(VariableDeclarationNode declaration, SpecifierAnalysis analysis,
+			SimpleScope scope) throws SyntaxException {
 		if (!analysis.alignmentTypeNodes.isEmpty()) {
 			List<TypeNode> typeAlignmentSpecifiers = new ArrayList<TypeNode>();
 
 			for (CommonTree node : analysis.alignmentTypeNodes)
 				typeAlignmentSpecifiers.add(translateTypeName(node, scope));
-			declaration.setTypeAlignmentSpecifiers(nodeFactory.newSequenceNode(
-					newSource(analysis.specifierListNode),
+			declaration.setTypeAlignmentSpecifiers(nodeFactory.newSequenceNode(newSource(analysis.specifierListNode),
 					"TypeAlignmentSpecifiers", typeAlignmentSpecifiers));
 		}
 		if (!analysis.alignmentExpressionNodes.isEmpty()) {
 			List<ExpressionNode> constantAlignmentSpecifiers = new ArrayList<ExpressionNode>();
 
 			for (CommonTree node : analysis.alignmentExpressionNodes)
-				constantAlignmentSpecifiers
-						.add(translateExpression(node, scope));
+				constantAlignmentSpecifiers.add(translateExpression(node, scope));
 
-			declaration.setConstantAlignmentSpecifiers(nodeFactory
-					.newSequenceNode(newSource(analysis.specifierListNode),
-							"ConstantAlignmentSpecifiers",
-							constantAlignmentSpecifiers));
+			declaration.setConstantAlignmentSpecifiers(nodeFactory.newSequenceNode(
+					newSource(analysis.specifierListNode), "ConstantAlignmentSpecifiers", constantAlignmentSpecifiers));
 		}
 	}
 
-	private void checkAlignmentSpecifiers(FunctionDeclarationNode declaration,
-			SpecifierAnalysis analysis) throws SyntaxException {
-		if (!analysis.alignmentTypeNodes.isEmpty()
-				|| !analysis.alignmentExpressionNodes.isEmpty())
-			throw error("Use of alignment specifiers in function declaration",
-					declaration);
+	private void checkAlignmentSpecifiers(FunctionDeclarationNode declaration, SpecifierAnalysis analysis)
+			throws SyntaxException {
+		if (!analysis.alignmentTypeNodes.isEmpty() || !analysis.alignmentExpressionNodes.isEmpty())
+			throw error("Use of alignment specifiers in function declaration", declaration);
 	}
 
 	/**
@@ -1458,8 +1326,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @param declaration
 	 * @param analysis
 	 */
-	private void setStorageSpecifiers(VariableDeclarationNode declaration,
-			SpecifierAnalysis analysis, SimpleScope scope) {
+	private void setStorageSpecifiers(VariableDeclarationNode declaration, SpecifierAnalysis analysis,
+			SimpleScope scope) {
 
 		if (analysis.externCount > 0)
 			declaration.setExternStorage(true);
@@ -1475,28 +1343,21 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			declaration.setSharedStorage(true);
 	}
 
-	private void setStorageSpecifiers(FunctionDeclarationNode declaration,
-			SpecifierAnalysis analysis, SimpleScope scope)
-					throws SyntaxException {
+	private void setStorageSpecifiers(FunctionDeclarationNode declaration, SpecifierAnalysis analysis,
+			SimpleScope scope) throws SyntaxException {
 
 		if (analysis.externCount > 0)
 			declaration.setExternStorage(true);
 		if (analysis.staticCount > 0)
 			declaration.setStaticStorage(true);
 		if (analysis.threadLocalCount > 0)
-			throw new SyntaxException(
-					"Use of _Thread_local in function declaration",
-					declaration.getSource());
+			throw new SyntaxException("Use of _Thread_local in function declaration", declaration.getSource());
 		if (analysis.autoCount > 0)
-			throw new SyntaxException("Use of auto in function declaration",
-					declaration.getSource());
+			throw new SyntaxException("Use of auto in function declaration", declaration.getSource());
 		if (analysis.registerCount > 0)
-			throw new SyntaxException("Use of register in function declaration",
-					declaration.getSource());
+			throw new SyntaxException("Use of register in function declaration", declaration.getSource());
 		if (analysis.sharedCount > 0)
-			throw new SyntaxException(
-					"Use of __shared__ in function declaration",
-					declaration.getSource());
+			throw new SyntaxException("Use of __shared__ in function declaration", declaration.getSource());
 	}
 
 	/**
@@ -1517,8 +1378,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * 
 	 * @throws SyntaxException
 	 */
-	private DeclaratorData processDeclarator(CommonTree declarator,
-			TypeNode type, SimpleScope scope) throws SyntaxException {
+	private DeclaratorData processDeclarator(CommonTree declarator, TypeNode type, SimpleScope scope)
+			throws SyntaxException {
 		if (declarator.getType() == ABSENT) {
 			return new DeclaratorData(type, null);
 		} else {
@@ -1542,8 +1403,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return new DeclaratorData with derived type and identifier
 	 * @throws SyntaxException
 	 */
-	private DeclaratorData processDirectDeclarator(CommonTree directDeclarator,
-			TypeNode type, SimpleScope scope) throws SyntaxException {
+	private DeclaratorData processDirectDeclarator(CommonTree directDeclarator, TypeNode type, SimpleScope scope)
+			throws SyntaxException {
 		if (directDeclarator.getType() == ABSENT) {
 			return new DeclaratorData(type, null);
 		} else {
@@ -1553,8 +1414,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			// need to peel off right-most suffix first. Example:
 			// T prefix [](); : (array of function returning T) prefix;
 			for (int i = numChildren - 1; i >= 1; i--)
-				type = translateDeclaratorSuffix(
-						(CommonTree) directDeclarator.getChild(i), type, scope);
+				type = translateDeclaratorSuffix((CommonTree) directDeclarator.getChild(i), type, scope);
 			switch (prefix.getType()) {
 			case IDENTIFIER:
 				return new DeclaratorData(type, translateIdentifier(prefix));
@@ -1564,8 +1424,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			case ABSENT:
 				return new DeclaratorData(type, null);
 			default:
-				throw error("Unexpected node for direct declarator prefix",
-						prefix);
+				throw error("Unexpected node for direct declarator prefix", prefix);
 			}
 		}
 	}
@@ -1576,29 +1435,23 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private InitializerNode translateInitializer(CommonTree initializerTree,
-			SimpleScope scope) throws SyntaxException {
+	private InitializerNode translateInitializer(CommonTree initializerTree, SimpleScope scope) throws SyntaxException {
 		int kind = initializerTree.getType();
 
 		if (kind == ABSENT)
 			return null;
 		if (kind == SCALAR_INITIALIZER) {
-			return translateExpression((CommonTree) initializerTree.getChild(0),
-					scope);
+			return translateExpression((CommonTree) initializerTree.getChild(0), scope);
 		}
 		if (kind == INITIALIZER_LIST) {
 			int numInits = initializerTree.getChildCount();
 			List<PairNode<DesignationNode, InitializerNode>> initList = new LinkedList<PairNode<DesignationNode, InitializerNode>>();
 
 			for (int i = 0; i < numInits; i++) {
-				CommonTree designatedInitializer = (CommonTree) initializerTree
-						.getChild(i);
-				CommonTree designation = (CommonTree) designatedInitializer
-						.getChild(0);
-				CommonTree initializer = (CommonTree) designatedInitializer
-						.getChild(1);
-				InitializerNode initializerNode = translateInitializer(
-						initializer, scope);
+				CommonTree designatedInitializer = (CommonTree) initializerTree.getChild(i);
+				CommonTree designation = (CommonTree) designatedInitializer.getChild(0);
+				CommonTree initializer = (CommonTree) designatedInitializer.getChild(1);
+				InitializerNode initializerNode = translateInitializer(initializer, scope);
 				DesignationNode designationNode;
 
 				if (designation.getType() == ABSENT) {
@@ -1608,37 +1461,29 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					List<DesignatorNode> designators = new LinkedList<DesignatorNode>();
 
 					for (int j = 0; j < numDesignators; j++) {
-						CommonTree designator = (CommonTree) designation
-								.getChild(j);
-						CommonTree designatorChild = (CommonTree) designator
-								.getChild(0);
+						CommonTree designator = (CommonTree) designation.getChild(j);
+						CommonTree designatorChild = (CommonTree) designator.getChild(0);
 						int designatorKind = designator.getType();
 						DesignatorNode designatorNode;
 						Source designatorSource = newSource(designator);
 
 						if (designatorKind == ARRAY_ELEMENT_DESIGNATOR) {
-							designatorNode = nodeFactory.newArrayDesignatorNode(
-									designatorSource, translateExpression(
-											designatorChild, scope));
+							designatorNode = nodeFactory.newArrayDesignatorNode(designatorSource,
+									translateExpression(designatorChild, scope));
 						} else if (designatorKind == FIELD_DESIGNATOR) {
-							designatorNode = nodeFactory.newFieldDesignatorNode(
-									designatorSource,
+							designatorNode = nodeFactory.newFieldDesignatorNode(designatorSource,
 									translateIdentifier(designatorChild));
 						} else {
-							throw error("Unknown kind of designator",
-									designator);
+							throw error("Unknown kind of designator", designator);
 						}
 						designators.add(designatorNode);
 					}
-					designationNode = nodeFactory.newDesignationNode(
-							newSource(designation), designators);
+					designationNode = nodeFactory.newDesignationNode(newSource(designation), designators);
 				}
-				initList.add(nodeFactory.newPairNode(
-						newSource(designatedInitializer), designationNode,
-						initializerNode));
+				initList.add(
+						nodeFactory.newPairNode(newSource(designatedInitializer), designationNode, initializerNode));
 			}
-			return nodeFactory.newCompoundInitializerNode(
-					newSource(initializerTree), initList);
+			return nodeFactory.newCompoundInitializerNode(newSource(initializerTree), initList);
 		} else {
 			throw error("Unrecognized kind of initializer", initializerTree);
 		}
@@ -1657,8 +1502,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @throws SyntaxException
 	 *             if an unknown kind of type qualifier appears
 	 */
-	private TypeNode translatePointers(CommonTree pointerTree, TypeNode type,
-			SimpleScope scope) throws SyntaxException {
+	private TypeNode translatePointers(CommonTree pointerTree, TypeNode type, SimpleScope scope)
+			throws SyntaxException {
 		int numChildren = pointerTree.getChildCount();
 		Source source = type.getSource();
 
@@ -1685,8 +1530,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @throws SyntaxException
 	 *             if the kind of suffix is not function or array
 	 */
-	private TypeNode translateDeclaratorSuffix(CommonTree suffix,
-			TypeNode baseType, SimpleScope scope) throws SyntaxException {
+	private TypeNode translateDeclaratorSuffix(CommonTree suffix, TypeNode baseType, SimpleScope scope)
+			throws SyntaxException {
 		int kind = suffix.getType();
 
 		if (kind == ARRAY_SUFFIX)
@@ -1709,8 +1554,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @throws SyntaxException
 	 *             if a child of the qualifierList is not a type qualifier
 	 */
-	private void applyQualifiers(CommonTree qualifierList, TypeNode type)
-			throws SyntaxException {
+	private void applyQualifiers(CommonTree qualifierList, TypeNode type) throws SyntaxException {
 		int numQualifiers = qualifierList.getChildCount();
 
 		for (int i = 0; i < numQualifiers; i++) {
@@ -1735,8 +1579,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		}
 	}
 
-	private void applyArrayQualifiers(CommonTree qualifierList,
-			ArrayTypeNode type) throws SyntaxException {
+	private void applyArrayQualifiers(CommonTree qualifierList, ArrayTypeNode type) throws SyntaxException {
 		int numQualifiers = qualifierList.getChildCount();
 
 		for (int i = 0; i < numQualifiers; i++) {
@@ -1768,8 +1611,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private ArrayTypeNode translateArraySuffix(CommonTree suffix,
-			TypeNode baseType, SimpleScope scope) throws SyntaxException {
+	private ArrayTypeNode translateArraySuffix(CommonTree suffix, TypeNode baseType, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree staticNode = (CommonTree) suffix.getChild(1);
 		CommonTree qualifiers = (CommonTree) suffix.getChild(2);
 		CommonTree extentNode = (CommonTree) suffix.getChild(3);
@@ -1777,8 +1620,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		boolean unspecifiedVariableLength = false;
 		ExpressionNode extent = null;
 		ArrayTypeNode result;
-		Source source = tokenFactory.join(baseType.getSource(),
-				newSource(suffix));
+		Source source = tokenFactory.join(baseType.getSource(), newSource(suffix));
 
 		switch (extentNodeType) {
 		case ABSENT:
@@ -1805,13 +1647,12 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private FunctionTypeNode translateFunctionSuffix(CommonTree suffix,
-			TypeNode baseType, SimpleScope scope) throws SyntaxException {
+	private FunctionTypeNode translateFunctionSuffix(CommonTree suffix, TypeNode baseType, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree child = (CommonTree) suffix.getChild(1);
 		int childKind = child.getType();
 		FunctionTypeNode result;
-		Source source = tokenFactory.join(baseType.getSource(),
-				newSource(suffix));
+		Source source = tokenFactory.join(baseType.getSource(), newSource(suffix));
 
 		if (!scope.isFunctionScope()) {
 			// this is not a function definition.
@@ -1822,35 +1663,26 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			CommonTree parameterListNode = (CommonTree) child.getChild(0);
 			CommonTree ellipsisNode = (CommonTree) child.getChild(1);
 			int numParameters = parameterListNode.getChildCount();
-			List<VariableDeclarationNode> parameterDeclarations = new ArrayList<VariableDeclarationNode>(
-					numParameters);
+			List<VariableDeclarationNode> parameterDeclarations = new ArrayList<VariableDeclarationNode>(numParameters);
 
 			for (int i = 0; i < numParameters; i++) {
-				CommonTree parameterDeclarationNode = (CommonTree) parameterListNode
-						.getChild(i);
-				Source parameterDeclarationSource = newSource(
-						parameterDeclarationNode);
-				CommonTree specifiers = (CommonTree) parameterDeclarationNode
-						.getChild(0);
+				CommonTree parameterDeclarationNode = (CommonTree) parameterListNode.getChild(i);
+				Source parameterDeclarationSource = newSource(parameterDeclarationNode);
+				CommonTree specifiers = (CommonTree) parameterDeclarationNode.getChild(0);
 				SpecifierAnalysis analysis = newSpecifierAnalysis(specifiers);
 				TypeNode parameterBaseType = newSpecifierType(analysis, scope);
-				CommonTree declarator = (CommonTree) parameterDeclarationNode
-						.getChild(1);
+				CommonTree declarator = (CommonTree) parameterDeclarationNode.getChild(1);
 				int declaratorKind = declarator.getType();
 				VariableDeclarationNode declaration;
 				// TODO: do adjustments here?
 
 				if (declaratorKind == ABSENT) {
-					declaration = nodeFactory.newVariableDeclarationNode(
-							parameterDeclarationSource, null,
+					declaration = nodeFactory.newVariableDeclarationNode(parameterDeclarationSource, null,
 							parameterBaseType);
-				} else if (declaratorKind == DECLARATOR
-						|| declaratorKind == ABSTRACT_DECLARATOR) {
-					DeclaratorData data = processDeclarator(declarator,
-							parameterBaseType, scope);
+				} else if (declaratorKind == DECLARATOR || declaratorKind == ABSTRACT_DECLARATOR) {
+					DeclaratorData data = processDeclarator(declarator, parameterBaseType, scope);
 
-					declaration = nodeFactory.newVariableDeclarationNode(
-							parameterDeclarationSource, data.identifier,
+					declaration = nodeFactory.newVariableDeclarationNode(parameterDeclarationSource, data.identifier,
 							data.type);
 				} else {
 					throw error("Unknown kind of declarator", declarator);
@@ -1863,32 +1695,25 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				setStorageSpecifiers(declaration, analysis, scope);
 				parameterDeclarations.add(declaration);
 			}
-			result = nodeFactory.newFunctionTypeNode(source, baseType,
-					nodeFactory.newSequenceNode(newSource(parameterListNode),
-							"FormalParameterList", parameterDeclarations),
-					false);
+			result = nodeFactory.newFunctionTypeNode(source, baseType, nodeFactory.newSequenceNode(
+					newSource(parameterListNode), "FormalParameterList", parameterDeclarations), false);
 			if (ellipsisNode.getType() == ELLIPSIS)
 				result.setVariableArgs(true);
 		} else if (childKind == IDENTIFIER_LIST || childKind == ABSENT) {
 			int numParameters = child.getChildCount();
-			List<VariableDeclarationNode> parameterDeclarations = new ArrayList<VariableDeclarationNode>(
-					numParameters);
+			List<VariableDeclarationNode> parameterDeclarations = new ArrayList<VariableDeclarationNode>(numParameters);
 
 			for (int i = 0; i < numParameters; i++) {
 				CommonTree identifierNode = (CommonTree) child.getChild(i);
 				IdentifierNode identifier = translateIdentifier(identifierNode);
 				Source identifierSource = newSource(identifierNode);
-				VariableDeclarationNode declaration = nodeFactory
-						.newVariableDeclarationNode(identifierSource,
-								identifier, null);
+				VariableDeclarationNode declaration = nodeFactory.newVariableDeclarationNode(identifierSource,
+						identifier, null);
 
 				parameterDeclarations.add(declaration);
 			}
-			result = nodeFactory
-					.newFunctionTypeNode(source, baseType,
-							nodeFactory.newSequenceNode(source,
-									"IdentifierList", parameterDeclarations),
-					true);
+			result = nodeFactory.newFunctionTypeNode(source, baseType,
+					nodeFactory.newSequenceNode(source, "IdentifierList", parameterDeclarations), true);
 		} else {
 			throw error("Unexpected kind of function suffix", child);
 		}
@@ -1901,98 +1726,73 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private TypeNode translateTypeName(CommonTree typeNameTree,
-			SimpleScope scope) throws SyntaxException {
+	private TypeNode translateTypeName(CommonTree typeNameTree, SimpleScope scope) throws SyntaxException {
 		CommonTree specifiers = (CommonTree) typeNameTree.getChild(0);
 		CommonTree abstractDeclarator = (CommonTree) typeNameTree.getChild(1);
 		SpecifierAnalysis analysis = newSpecifierAnalysis(specifiers);
 		TypeNode baseType = newSpecifierType(analysis, scope);
-		DeclaratorData data = processDeclarator(abstractDeclarator, baseType,
-				scope);
+		DeclaratorData data = processDeclarator(abstractDeclarator, baseType, scope);
 
 		return data.type;
 	}
 
 	// Translation of Statements...
 
-	private LabeledStatementNode translateIdentifierLabeledStatement(
-			CommonTree statementTree, SimpleScope scope)
-					throws SyntaxException {
+	private LabeledStatementNode translateIdentifierLabeledStatement(CommonTree statementTree, SimpleScope scope)
+			throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		IdentifierNode labelName = translateIdentifier(
-				(CommonTree) statementTree.getChild(0));
-		StatementNode statement = translateStatement(
-				(CommonTree) statementTree.getChild(1), scope);
-		OrdinaryLabelNode labelDecl = nodeFactory
-				.newStandardLabelDeclarationNode(labelName.getSource(),
-						labelName, statement);
-
-		return nodeFactory.newLabeledStatementNode(statementSource, labelDecl,
+		IdentifierNode labelName = translateIdentifier((CommonTree) statementTree.getChild(0));
+		StatementNode statement = translateStatement((CommonTree) statementTree.getChild(1), scope);
+		OrdinaryLabelNode labelDecl = nodeFactory.newStandardLabelDeclarationNode(labelName.getSource(), labelName,
 				statement);
+
+		return nodeFactory.newLabeledStatementNode(statementSource, labelDecl, statement);
 	}
 
-	private LabeledStatementNode translateCaseLabeledStatement(
-			CommonTree statementTree, SimpleScope scope)
-					throws SyntaxException {
+	private LabeledStatementNode translateCaseLabeledStatement(CommonTree statementTree, SimpleScope scope)
+			throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		CivlcToken caseToken = (CivlcToken) ((CommonTree) statementTree
-				.getChild(0)).getToken();
+		CivlcToken caseToken = (CivlcToken) ((CommonTree) statementTree.getChild(0)).getToken();
 		CommonTree expression = (CommonTree) statementTree.getChild(1);
 		ExpressionNode expressionNode = translateExpression(expression, scope);
-		StatementNode statement = translateStatement(
-				(CommonTree) statementTree.getChild(2), scope);
+		StatementNode statement = translateStatement((CommonTree) statementTree.getChild(2), scope);
 		Source expressionSource = newSource(expression);
 		Source labelSource = tokenFactory.join(expressionSource, caseToken);
-		SwitchLabelNode labelDecl = nodeFactory.newCaseLabelDeclarationNode(
-				labelSource, expressionNode, statement);
+		SwitchLabelNode labelDecl = nodeFactory.newCaseLabelDeclarationNode(labelSource, expressionNode, statement);
 
-		return nodeFactory.newLabeledStatementNode(statementSource, labelDecl,
-				statement);
+		return nodeFactory.newLabeledStatementNode(statementSource, labelDecl, statement);
 	}
 
-	private LabeledStatementNode translateDefaultLabeledStatement(
-			CommonTree statementTree, SimpleScope scope)
-					throws SyntaxException {
+	private LabeledStatementNode translateDefaultLabeledStatement(CommonTree statementTree, SimpleScope scope)
+			throws SyntaxException {
 		Source statementSource = newSource(statementTree);
-		CivlcToken defaultToken = (CivlcToken) ((CommonTree) statementTree
-				.getChild(0)).getToken();
+		CivlcToken defaultToken = (CivlcToken) ((CommonTree) statementTree.getChild(0)).getToken();
 		Source labelSource = tokenFactory.newSource(defaultToken);
-		StatementNode statement = translateStatement(
-				(CommonTree) statementTree.getChild(1), scope);
-		SwitchLabelNode labelDecl = nodeFactory
-				.newDefaultLabelDeclarationNode(labelSource, statement);
+		StatementNode statement = translateStatement((CommonTree) statementTree.getChild(1), scope);
+		SwitchLabelNode labelDecl = nodeFactory.newDefaultLabelDeclarationNode(labelSource, statement);
 
-		return nodeFactory.newLabeledStatementNode(statementSource, labelDecl,
-				statement);
+		return nodeFactory.newLabeledStatementNode(statementSource, labelDecl, statement);
 	}
 
-	private StatementNode translateAtom(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
-		StatementNode datomicBody = translateStatement(
-				(CommonTree) statementTree.getChild(0), new SimpleScope(scope));
+	private StatementNode translateAtom(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
+		StatementNode datomicBody = translateStatement((CommonTree) statementTree.getChild(0), new SimpleScope(scope));
 
-		return nodeFactory.newAtomicStatementNode(newSource(statementTree),
-				true, datomicBody);
+		return nodeFactory.newAtomicStatementNode(newSource(statementTree), true, datomicBody);
 	}
 
-	private StatementNode translateAtomic(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
-		StatementNode body = translateStatement(
-				(CommonTree) statementTree.getChild(0), new SimpleScope(scope));
+	private StatementNode translateAtomic(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
+		StatementNode body = translateStatement((CommonTree) statementTree.getChild(0), new SimpleScope(scope));
 
-		return nodeFactory.newAtomicStatementNode(newSource(statementTree),
-				false, body);
+		return nodeFactory.newAtomicStatementNode(newSource(statementTree), false, body);
 	}
 
 	private StatementNode translateGoto(CommonTree statementTree) {
 		Source statementSource = newSource(statementTree);
 
-		return nodeFactory.newGotoNode(statementSource,
-				translateIdentifier((CommonTree) statementTree.getChild(0)));
+		return nodeFactory.newGotoNode(statementSource, translateIdentifier((CommonTree) statementTree.getChild(0)));
 	}
 
-	private CivlForNode translateCivlFor(CommonTree tree, SimpleScope scope)
-			throws SyntaxException {
+	private CivlForNode translateCivlFor(CommonTree tree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(tree);
 		SimpleScope loopScope = getNewScope(scope);
 		CommonTree typeNameTree = (CommonTree) tree.getChild(0);
@@ -2010,26 +1810,21 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			List<VariableDeclarationNode> declList = new LinkedList<>();
 
 			for (int i = 0; i < numVars; i++) {
-				CommonTree identifierTree = (CommonTree) identifierListTree
-						.getChild(i);
-				IdentifierNode identifierNode = translateIdentifier(
-						identifierTree);
+				CommonTree identifierTree = (CommonTree) identifierListTree.getChild(i);
+				IdentifierNode identifierNode = translateIdentifier(identifierTree);
 				TypeNode typeNode = translateTypeName(typeNameTree, loopScope);
-				VariableDeclarationNode declNode = nodeFactory
-						.newVariableDeclarationNode(identifierNode.getSource(),
-								identifierNode, typeNode);
+				VariableDeclarationNode declNode = nodeFactory.newVariableDeclarationNode(identifierNode.getSource(),
+						identifierNode, typeNode);
 
 				declList.add(declNode);
 			}
-			declListNode = nodeFactory.newForLoopInitializerNode(
-					newSource(identifierListTree), declList);
+			declListNode = nodeFactory.newForLoopInitializerNode(newSource(identifierListTree), declList);
 		} else
 			throw error("Missing int typename in declaration.\n"
 					+ "Both $for and $parfor require loop variables to be declared with integer type, as in:\n"
 					+ "$for (int i1, i2, ... : domain) ...", tree);
-		result = nodeFactory.newCivlForNode(statementSource,
-				tree.getType() == PARFOR, declListNode, domainNode, bodyNode,
-				getContract());
+		result = nodeFactory.newCivlForNode(statementSource, tree.getType() == PARFOR, declListNode, domainNode,
+				bodyNode, getContract());
 		return result;
 	}
 
@@ -2054,16 +1849,14 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		}
 	}
 
-	private StatementNode translateFor(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
+	private StatementNode translateFor(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		SimpleScope loopScope = getNewScope(scope);
 		CommonTree initializerTree = (CommonTree) statementTree.getChild(0);
 		ForLoopInitializerNode initializerNode;
 
 		if (initializerTree.getType() == DECLARATION) {
-			List<BlockItemNode> definitions = translateDeclaration(
-					initializerTree, loopScope);
+			List<BlockItemNode> definitions = translateDeclaration(initializerTree, loopScope);
 			List<VariableDeclarationNode> declarations = new LinkedList<VariableDeclarationNode>();
 
 			for (BlockItemNode definition : definitions) {
@@ -2074,86 +1867,63 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 							initializerTree);
 				declarations.add((VariableDeclarationNode) definition);
 			}
-			initializerNode = nodeFactory
-					.newForLoopInitializerNode(statementSource, declarations);
+			initializerNode = nodeFactory.newForLoopInitializerNode(statementSource, declarations);
 		} else {
 			initializerNode = translateExpression(initializerTree, loopScope);
 		}
 		return nodeFactory.newForLoopNode(statementSource, initializerNode,
-				translateExpression((CommonTree) statementTree.getChild(1),
-						loopScope),
-				translateExpression((CommonTree) statementTree.getChild(2),
-						loopScope),
-				translateStatement((CommonTree) statementTree.getChild(3),
-						new SimpleScope(loopScope)),
-				getContract());
+				translateExpression((CommonTree) statementTree.getChild(1), loopScope),
+				translateExpression((CommonTree) statementTree.getChild(2), loopScope),
+				translateStatement((CommonTree) statementTree.getChild(3), new SimpleScope(loopScope)), getContract());
 	}
 
-	private StatementNode translateDo(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
+	private StatementNode translateDo(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		SimpleScope loopScope = getNewScope(scope);
 
 		return nodeFactory.newDoLoopNode(statementSource,
-				translateExpression((CommonTree) statementTree.getChild(1),
-						loopScope),
-				translateStatement((CommonTree) statementTree.getChild(0),
-						new SimpleScope(loopScope)),
-				getContract());
+				translateExpression((CommonTree) statementTree.getChild(1), loopScope),
+				translateStatement((CommonTree) statementTree.getChild(0), new SimpleScope(loopScope)), getContract());
 	}
 
-	private StatementNode translateWhile(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
+	private StatementNode translateWhile(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		SimpleScope loopScope = getNewScope(scope);
 
 		return nodeFactory.newWhileLoopNode(statementSource,
-				translateExpression((CommonTree) statementTree.getChild(0),
-						loopScope),
-				translateStatement((CommonTree) statementTree.getChild(1),
-						new SimpleScope(loopScope)),
-				getContract());
+				translateExpression((CommonTree) statementTree.getChild(0), loopScope),
+				translateStatement((CommonTree) statementTree.getChild(1), new SimpleScope(loopScope)), getContract());
 	}
 
-	private StatementNode translateSwitch(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
+	private StatementNode translateSwitch(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		CommonTree expressionTree = (CommonTree) statementTree.getChild(0);
 		CommonTree bodyTree = (CommonTree) statementTree.getChild(1);
 		SimpleScope switchScope = new SimpleScope(scope);
 		SimpleScope bodyScope = new SimpleScope(switchScope);
-		ExpressionNode expressionNode = translateExpression(expressionTree,
-				switchScope);
+		ExpressionNode expressionNode = translateExpression(expressionTree, switchScope);
 		StatementNode statementNode = translateStatement(bodyTree, bodyScope);
-		SwitchNode switchNode = nodeFactory.newSwitchNode(statementSource,
-				expressionNode, statementNode);
+		SwitchNode switchNode = nodeFactory.newSwitchNode(statementSource, expressionNode, statementNode);
 
 		return switchNode;
 	}
 
-	private StatementNode translateIf(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
+	private StatementNode translateIf(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		SimpleScope ifScope = new SimpleScope(scope);
-		ExpressionNode condition = translateExpression(
-				(CommonTree) statementTree.getChild(0), ifScope);
-		StatementNode trueBranch = translateStatement(
-				(CommonTree) statementTree.getChild(1),
-				new SimpleScope(ifScope));
-		StatementNode falseBranch = translateStatement(
-				(CommonTree) statementTree.getChild(2),
+		ExpressionNode condition = translateExpression((CommonTree) statementTree.getChild(0), ifScope);
+		StatementNode trueBranch = translateStatement((CommonTree) statementTree.getChild(1), new SimpleScope(ifScope));
+		StatementNode falseBranch = translateStatement((CommonTree) statementTree.getChild(2),
 				new SimpleScope(ifScope));
 
 		if (falseBranch == null)
-			return nodeFactory.newIfNode(statementSource, condition,
-					trueBranch);
+			return nodeFactory.newIfNode(statementSource, condition, trueBranch);
 		else
-			return nodeFactory.newIfNode(statementSource, condition, trueBranch,
-					falseBranch);
+			return nodeFactory.newIfNode(statementSource, condition, trueBranch, falseBranch);
 	}
 
-	private StatementNode translateExpressionStatement(CommonTree statementTree,
-			SimpleScope scope) throws SyntaxException {
+	private StatementNode translateExpressionStatement(CommonTree statementTree, SimpleScope scope)
+			throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		CommonTree expression = (CommonTree) statementTree.getChild(0);
 		ExpressionNode expressionNode = translateExpression(expression, scope);
@@ -2165,8 +1935,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	}
 
 	@SuppressWarnings("unused")
-	private ExpressionNode getInvariant(CommonTree invariantTree,
-			SimpleScope scope) throws SyntaxException {
+	private ExpressionNode getInvariant(CommonTree invariantTree, SimpleScope scope) throws SyntaxException {
 		if (invariantTree == null)
 			return null;
 		if (invariantTree.getType() == ABSENT)
@@ -2188,8 +1957,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		return result;
 	}
 
-	private ASTNode translatePragma(CommonTree pragmaTree, SimpleScope scope)
-			throws SyntaxException {
+	private ASTNode translatePragma(CommonTree pragmaTree, SimpleScope scope) throws SyntaxException {
 		Source source = newSource(pragmaTree);
 		CommonTree identifierTree = (CommonTree) pragmaTree.getChild(0);
 		IdentifierNode identifier = translateIdentifier(identifierTree);
@@ -2197,10 +1965,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		CommonTree bodyTree = (CommonTree) pragmaTree.getChild(1);
 		CommonTree newlineTree = (CommonTree) pragmaTree.getChild(2);
 		CivlcToken newlineToken = (CivlcToken) newlineTree.getToken();
-		CivlcTokenSequence producer = parseTree
-				.getTokenSourceProducer(bodyTree);
-		PragmaNode pragmaNode = nodeFactory.newPragmaNode(source, identifier,
-				producer, newlineToken);
+		CivlcTokenSequence producer = parseTree.getTokenSourceProducer(bodyTree);
+		PragmaNode pragmaNode = nodeFactory.newPragmaNode(source, identifier, producer, newlineToken);
 		PragmaHandler handler = getPragmaHandler(code);
 		ASTNode result = null;
 
@@ -2219,9 +1985,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private CompoundStatementNode translateCompoundStatement(
-			CommonTree compoundStatementTree, SimpleScope scope)
-					throws SyntaxException {
+	private CompoundStatementNode translateCompoundStatement(CommonTree compoundStatementTree, SimpleScope scope)
+			throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		Source source = newSource(compoundStatementTree);
 		CommonTree blockItems = (CommonTree) compoundStatementTree.getChild(1);
@@ -2232,13 +1997,10 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		scopeAndContracts.push(new Pair<>(null, null));
 		for (int i = 0; i < numChildren; i++) {
 			CommonTree childTree = (CommonTree) blockItems.getChild(i);
-			List<BlockItemNode> newBlockItems = this
-					.translateBlockItemNode(childTree, newScope, false);
+			List<BlockItemNode> newBlockItems = this.translateBlockItemNode(childTree, newScope, false);
 
-			if (newBlockItems.size() == 1 && newBlockItems.get(0)
-					.blockItemKind() == BlockItemKind.STATEMENT) {
-				StatementNode statementNode = (StatementNode) newBlockItems
-						.get(0);
+			if (newBlockItems.size() == 1 && newBlockItems.get(0).blockItemKind() == BlockItemKind.STATEMENT) {
+				StatementNode statementNode = (StatementNode) newBlockItems.get(0);
 
 				if (ompStatementNode != null) {
 					ompStatementNode.setStatementNode(statementNode);
@@ -2272,33 +2034,28 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 						int collapse = ompForNode.collapse();
 
 						if (collapse == 1) {
-							StatementNode forStatement = (StatementNode) items
-									.get(i + 1);
+							StatementNode forStatement = (StatementNode) items.get(i + 1);
 
 							items.set(i + 1, null);
 							ompForNode.setStatementNode(forStatement);
 						} else {
-							List<BlockItemNode> forList = new ArrayList<>(
-									collapse);
+							List<BlockItemNode> forList = new ArrayList<>(collapse);
 							CompoundStatementNode compoundStatement;
 
 							source = items.get(i + 1).getSource();
 
 							for (int k = 1; k <= collapse; k++) {
-								StatementNode forStatement = (StatementNode) items
-										.get(i + k);
+								StatementNode forStatement = (StatementNode) items.get(i + k);
 
 								items.set(i + k, null);
 								forList.add(forStatement);
 							}
-							compoundStatement = nodeFactory
-									.newCompoundStatementNode(source, forList);
+							compoundStatement = nodeFactory.newCompoundStatementNode(source, forList);
 							ompForNode.setStatementNode(compoundStatement);
 						}
 						items.set(i, ompForNode);
 					} else {
-						StatementNode statementNode = (StatementNode) items
-								.get(i + 1);
+						StatementNode statementNode = (StatementNode) items.get(i + 1);
 
 						items.set(i + 1, null);
 						ompStmt.setStatementNode(statementNode);
@@ -2319,21 +2076,18 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		return nodeFactory.newCompoundStatementNode(source, items);
 	}
 
-	private ChooseStatementNode translateChooseStatement(
-			CommonTree chooseStatementTree, SimpleScope scope)
-					throws SyntaxException {
+	private ChooseStatementNode translateChooseStatement(CommonTree chooseStatementTree, SimpleScope scope)
+			throws SyntaxException {
 		int numChildren = chooseStatementTree.getChildCount();
 		List<StatementNode> statements = new LinkedList<StatementNode>();
 
 		for (int i = 0; i < numChildren; i++) {
-			CommonTree statementTree = (CommonTree) chooseStatementTree
-					.getChild(i);
+			CommonTree statementTree = (CommonTree) chooseStatementTree.getChild(i);
 			StatementNode statement = translateStatement(statementTree, scope);
 
 			statements.add(statement);
 		}
-		return nodeFactory.newChooseStatementNode(
-				newSource(chooseStatementTree), statements);
+		return nodeFactory.newChooseStatementNode(newSource(chooseStatementTree), statements);
 	}
 
 	/**
@@ -2342,8 +2096,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private StatementNode translateStatement(CommonTree tree, SimpleScope scope)
-			throws SyntaxException {
+	private StatementNode translateStatement(CommonTree tree, SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
 
 		if (kind == ABSENT)
@@ -2367,8 +2120,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		case PARFOR:
 			return translateCivlFor(statementTree, scope);
 		case COMPOUND_STATEMENT: {
-			CompoundStatementNode compound = translateCompoundStatement(
-					statementTree, scope);
+			CompoundStatementNode compound = translateCompoundStatement(statementTree, scope);
 
 			return compound;
 		}
@@ -2394,25 +2146,20 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			if (newNode instanceof StatementNode)
 				return (StatementNode) newNode;
 			else
-				throw error("This pragma cannot be used as a statement",
-						newNode);
+				throw error("This pragma cannot be used as a statement", newNode);
 		}
 		case RETURN:
 			return nodeFactory.newReturnNode(newSource(statementTree),
-					translateExpression((CommonTree) statementTree.getChild(0),
-							scope));
+					translateExpression((CommonTree) statementTree.getChild(0), scope));
 		case RUN:
 			return nodeFactory.newRunNode(newSource(statementTree),
-					translateStatement((CommonTree) statementTree.getChild(0),
-							scope));
+					translateStatement((CommonTree) statementTree.getChild(0), scope));
 		case SWITCH:
 			return translateSwitch(statementTree, scope);
 		case WHEN:
 			return nodeFactory.newWhenNode(newSource(statementTree),
-					translateExpression((CommonTree) statementTree.getChild(0),
-							scope),
-					translateStatement((CommonTree) statementTree.getChild(1),
-							scope));
+					translateExpression((CommonTree) statementTree.getChild(0), scope),
+					translateStatement((CommonTree) statementTree.getChild(1), scope));
 		case WHILE:
 			return translateWhile(statementTree, scope);
 		default:
@@ -2428,17 +2175,14 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private StaticAssertionNode translateStaticAssertion(
-			CommonTree staticAssertTree, SimpleScope scope)
-					throws SyntaxException {
+	private StaticAssertionNode translateStaticAssertion(CommonTree staticAssertTree, SimpleScope scope)
+			throws SyntaxException {
 		CommonTree stringLiteral = (CommonTree) staticAssertTree.getChild(1);
 		Source stringLiteralSource = newSource(stringLiteral);
 
 		return nodeFactory.newStaticAssertionNode(newSource(staticAssertTree),
-				translateExpression((CommonTree) staticAssertTree.getChild(0),
-						scope),
-				translateStringLiteral(stringLiteralSource,
-						(CommonTree) staticAssertTree.getChild(1)));
+				translateExpression((CommonTree) staticAssertTree.getChild(0), scope),
+				translateStringLiteral(stringLiteralSource, (CommonTree) staticAssertTree.getChild(1)));
 	}
 
 	/**
@@ -2447,19 +2191,16 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private FunctionDefinitionNode translateFunctionDefinition(
-			CommonTree functionDefinitionTree, SimpleScope scope)
-					throws SyntaxException {
+	private FunctionDefinitionNode translateFunctionDefinition(CommonTree functionDefinitionTree, SimpleScope scope)
+			throws SyntaxException {
 		// two different ways of declaring parameters:
 		// (1) parameter-type list and no declarations
 		// (2) identifier list and declarations
 		SimpleScope newScope = getNewScope(scope);
 		CommonTree specifiers = (CommonTree) functionDefinitionTree.getChild(0);
 		CommonTree declarator = (CommonTree) functionDefinitionTree.getChild(1);
-		CommonTree declarationList = (CommonTree) functionDefinitionTree
-				.getChild(2);
-		CommonTree compoundStatementTree = (CommonTree) functionDefinitionTree
-				.getChild(3);
+		CommonTree declarationList = (CommonTree) functionDefinitionTree.getChild(2);
+		CommonTree compoundStatementTree = (CommonTree) functionDefinitionTree.getChild(3);
 		// CommonTree contractTree = (CommonTree) functionDefinitionTree
 		// .getChild(4);
 		// CommonTree scopeListTree = (CommonTree) functionDefinitionTree
@@ -2475,47 +2216,36 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		FunctionDefinitionNode result;
 
 		if (functionType.hasIdentifierList()) {
-			SequenceNode<VariableDeclarationNode> formalSequenceNode = functionType
-					.getParameters();
+			SequenceNode<VariableDeclarationNode> formalSequenceNode = functionType.getParameters();
 			int numFormals = formalSequenceNode.numChildren();
 			int numDeclarations = declarationList.getChildCount();
 
 			if (numFormals == 0) {
 				if (numDeclarations != 0)
-					throw error(
-							"Function with empty identifier list has parameter declarations",
-							declarationList);
+					throw error("Function with empty identifier list has parameter declarations", declarationList);
 			} else {
 				SequenceNode<VariableDeclarationNode> newFormalSequenceNode;
 				List<VariableDeclarationNode> newFormalList = new LinkedList<VariableDeclarationNode>();
 				Map<String, VariableDeclarationNode> declMap = new HashMap<String, VariableDeclarationNode>();
 
 				for (int i = 0; i < numDeclarations; i++) {
-					CommonTree declarationTree = (CommonTree) declarationList
-							.getChild(i);
-					List<BlockItemNode> declNodes = translateDeclaration(
-							declarationTree, newScope);
+					CommonTree declarationTree = (CommonTree) declarationList.getChild(i);
+					List<BlockItemNode> declNodes = translateDeclaration(declarationTree, newScope);
 
 					for (BlockItemNode definition : declNodes) {
 						String parameterName;
 						VariableDeclarationNode oldDeclaration;
 
 						if (!(definition instanceof VariableDeclarationNode))
-							throw error("Illegal parameter declaration",
-									declarationTree);
-						parameterName = ((VariableDeclarationNode) definition)
-								.getIdentifier().name();
+							throw error("Illegal parameter declaration", declarationTree);
+						parameterName = ((VariableDeclarationNode) definition).getIdentifier().name();
 						if (parameterName == null)
-							throw error("Illegal parameter declaration",
-									declarationTree);
+							throw error("Illegal parameter declaration", declarationTree);
 						oldDeclaration = declMap.get(parameterName);
 						if (oldDeclaration != null)
-							throw error(
-									"Re-declaration of parameter. Old declaration was at "
-											+ oldDeclaration,
+							throw error("Re-declaration of parameter. Old declaration was at " + oldDeclaration,
 									declarationTree);
-						declMap.put(parameterName,
-								(VariableDeclarationNode) definition);
+						declMap.put(parameterName, (VariableDeclarationNode) definition);
 					}
 				}
 				for (VariableDeclarationNode formal : formalSequenceNode) {
@@ -2523,23 +2253,17 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					VariableDeclarationNode newDeclaration;
 
 					if (parameterName == null)
-						throw error(
-								"Formal parameter declaration missing name: "
-										+ formal,
-								declarator);
+						throw error("Formal parameter declaration missing name: " + formal, declarator);
 					newDeclaration = declMap.get(parameterName);
 					if (newDeclaration == null)
-						throw error("Missing declaration for parameter "
-								+ parameterName, declarationList);
+						throw error("Missing declaration for parameter " + parameterName, declarationList);
 					newFormalList.add(newDeclaration);
 					declMap.remove(parameterName);
 				}
 				if (!declMap.isEmpty())
-					throw error(
-							"Function contains declarations for variables that are not parameters",
+					throw error("Function contains declarations for variables that are not parameters",
 							declarationList);
-				newFormalSequenceNode = nodeFactory.newSequenceNode(
-						newSource(declarationList),
+				newFormalSequenceNode = nodeFactory.newSequenceNode(newSource(declarationList),
 						"FormalParameterDeclarations", newFormalList);
 				functionType.setParameters(newFormalSequenceNode);
 			}
@@ -2549,8 +2273,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		// newSource(functionDefinitionTree), data.identifier,
 		// (FunctionTypeNode) data.type,
 		// getContract(contractTree, newScope), body);
-		result = nodeFactory.newFunctionDefinitionNode(
-				newSource(functionDefinitionTree), data.identifier,
+		result = nodeFactory.newFunctionDefinitionNode(newSource(functionDefinitionTree), data.identifier,
 				(FunctionTypeNode) data.type, getContract(), body);
 		// TODO: Should function specifiers actually be set here? I added this
 		// call because otherwise specifiers are not added to function
@@ -2560,8 +2283,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	}
 
 	@SuppressWarnings("unused")
-	private SequenceNode<ContractNode> getContract(CommonTree contractTree,
-			SimpleScope scope) throws SyntaxException {
+	private SequenceNode<ContractNode> getContract(CommonTree contractTree, SimpleScope scope) throws SyntaxException {
 		SequenceNode<ContractNode> contract;
 
 		if (contractTree == null)
@@ -2579,14 +2301,12 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					contract = null;
 				} else {
 					for (int i = 0; i < numItems; i++) {
-						CommonTree itemTree = (CommonTree) contractTree
-								.getChild(i);
+						CommonTree itemTree = (CommonTree) contractTree.getChild(i);
 						int itemKind = itemTree.getType();
 						ContractNode contractNode;
 						Source source = newSource(itemTree);
 
-						if (itemKind == ASSIGNS || itemKind == READS
-								|| itemKind == DEPENDS) {
+						if (itemKind == ASSIGNS || itemKind == READS || itemKind == DEPENDS) {
 							List<ExpressionNode> argumentList = new ArrayList<>();
 							int expressionCount = itemTree.getChildCount();
 							// CommonTree conditionTree = null;
@@ -2611,10 +2331,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 								int numArgs = listTree.getChildCount();
 
 								for (int j = 0; j < numArgs; j++) {
-									CommonTree argumentTree = (CommonTree) listTree
-											.getChild(j);
-									ExpressionNode argumentNode = translateExpression(
-											argumentTree, scope);
+									CommonTree argumentTree = (CommonTree) listTree.getChild(j);
+									ExpressionNode argumentNode = translateExpression(argumentTree, scope);
 
 									argumentList.add(argumentNode);
 								}
@@ -2629,41 +2347,31 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 									contractNode = null;// nodeFactory.newReadsNode(
 								// source, condition, list);
 								else
-									contractNode = nodeFactory
-											.newDependsNode(source, null, null);
+									contractNode = nodeFactory.newDependsNode(source, null, null);
 							} else {
-								throw new SyntaxException(
-										"Invalid arguments for $assigns/$reads clause",
-										source);
+								throw new SyntaxException("Invalid arguments for $assigns/$reads clause", source);
 							}
 						} else {
-							CommonTree exprTree = (CommonTree) itemTree
-									.getChild(0);
-							ExpressionNode expr = translateExpression(exprTree,
-									scope);
+							CommonTree exprTree = (CommonTree) itemTree.getChild(0);
+							ExpressionNode expr = translateExpression(exprTree, scope);
 
 							switch (itemKind) {
 							case ENSURES:
-								contractNode = nodeFactory
-										.newEnsuresNode(source, expr);
+								contractNode = nodeFactory.newEnsuresNode(source, expr);
 								break;
 							case REQUIRES:
-								contractNode = nodeFactory
-										.newRequiresNode(source, expr);
+								contractNode = nodeFactory.newRequiresNode(source, expr);
 								break;
 							case GUARD:
-								contractNode = nodeFactory.newGuardNode(source,
-										expr);
+								contractNode = nodeFactory.newGuardNode(source, expr);
 								break;
 							default:
-								throw error("Unknown kind of contract item: "
-										+ itemTree, itemTree);
+								throw error("Unknown kind of contract item: " + itemTree, itemTree);
 							}
 						}
 						items.add(contractNode);
 					}
-					contract = nodeFactory.newSequenceNode(
-							newSource(contractTree), "Contract", items);
+					contract = nodeFactory.newSequenceNode(newSource(contractTree), "Contract", items);
 				}
 			}
 		}
@@ -2677,8 +2385,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private SequenceNode<BlockItemNode> translateTranslationUnit(
-			CommonTree translationUnit) throws SyntaxException {
+	private SequenceNode<BlockItemNode> translateTranslationUnit(CommonTree translationUnit) throws SyntaxException {
 		int numChildren = translationUnit.getChildCount();
 		ArrayList<BlockItemNode> definitions = new ArrayList<BlockItemNode>();
 		SimpleScope scope = new SimpleScope(null);
@@ -2689,14 +2396,12 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			int numTokens = ts.getNumTokens();
 
 			if (numTokens > 0) {
-				CivlcToken first = ts.getToken(0),
-						last = ts.getToken(numTokens - 1);
+				CivlcToken first = ts.getToken(0), last = ts.getToken(numTokens - 1);
 				Source source = tokenFactory.newSource(first, last);
 
 				throw new SyntaxException(msg, source);
 			} else {
-				throw new SyntaxException(ts.getSourceName() + ": " + msg,
-						null);
+				throw new SyntaxException(ts.getSourceName() + ": " + msg, null);
 			}
 		}
 		scopeAndContracts.push(new Pair<>(null, null));
@@ -2704,8 +2409,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			// TODO need to know what's the language and decide whether the
 			// external definition node type needs to be checked, because C
 			// doesn't allow statement in the file scope
-			definitions.addAll(this.translateBlockItemNode(
-					(CommonTree) translationUnit.getChild(i), scope, false));
+			definitions.addAll(this.translateBlockItemNode((CommonTree) translationUnit.getChild(i), scope, false));
 		}
 		scopeAndContracts.pop();
 		// TODO: maybe find a better way to handle this (e.g. only when Cuda
@@ -2713,8 +2417,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		// Cuda programs
 		for (BlockItemNode defNode : definitions) {
 			if (defNode instanceof FunctionDeclarationNode) {
-				if (((FunctionDeclarationNode) defNode)
-						.hasGlobalFunctionSpecifier()) {
+				if (((FunctionDeclarationNode) defNode).hasGlobalFunctionSpecifier()) {
 					// assume that the presence of __global__ means that
 					// this is a Cuda program -> act as if cuda.cvh header
 					// file has been included. other ways to check include
@@ -2726,8 +2429,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				}
 			}
 		}
-		return nodeFactory.newTranslationUnitNode(newSource(translationUnit),
-				definitions);
+		return nodeFactory.newTranslationUnitNode(newSource(translationUnit), definitions);
 	}
 
 	/**
@@ -2738,16 +2440,14 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private List<BlockItemNode> translateBlockItemNode(CommonTree blockItemTree,
-			SimpleScope scope, boolean checkCExternalDefs)
-					throws SyntaxException {
+	private List<BlockItemNode> translateBlockItemNode(CommonTree blockItemTree, SimpleScope scope,
+			boolean checkCExternalDefs) throws SyntaxException {
 		int kind = blockItemTree.getType();
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
 
 		switch (kind) {
 		case DECLARATION:
-			for (BlockItemNode declaration : translateDeclaration(blockItemTree,
-					scope))
+			for (BlockItemNode declaration : translateDeclaration(blockItemTree, scope))
 				items.add(declaration);
 			clearScopeAndContract();
 			break;
@@ -2756,16 +2456,13 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			clearScopeAndContract();
 			break;
 		case PPRAGMA:
-			items.add(
-					(BlockItemNode) this.translatePragma(blockItemTree, scope));
+			items.add((BlockItemNode) this.translatePragma(blockItemTree, scope));
 			break;
 		case STATEMENT:
 			if (checkCExternalDefs) {
-				throw new SyntaxException(
-						"statement is not allowed in file scope", null);
+				throw new SyntaxException("statement is not allowed in file scope", null);
 			}
-			items.add((BlockItemNode) this.translateStatement(blockItemTree,
-					scope));
+			items.add((BlockItemNode) this.translateStatement(blockItemTree, scope));
 			clearScopeAndContract();
 			break;
 		case STATICASSERT:
@@ -2775,25 +2472,21 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			translateAnnotation(blockItemTree, scope);
 			break;
 		default:
-			throw new ABCUnsupportedException(
-					"translating block item node of " + kind + " kind");
+			throw new ABCUnsupportedException("translating block item node of " + kind + " kind");
 		}
 		return items;
 	}
 
 	/* ********************* ASTBuilderWorker Methods ********************* */
 
-	private void translateAnnotation(CommonTree annotationTree,
-			SimpleScope scope) throws SyntaxException {
+	private void translateAnnotation(CommonTree annotationTree, SimpleScope scope) throws SyntaxException {
 		CommonTree bodyTree = (CommonTree) annotationTree.getChild(1);
-		CivlcTokenSource tokenSource = parseTree
-				.getTokenSourceProducer(bodyTree).newSource();
+		CivlcTokenSource tokenSource = parseTree.getTokenSourceProducer(bodyTree).newSource();
 		Source source = this.newSource(annotationTree);
 		SimpleScope newScope = new SimpleScope(scope);
 
 		this.scopeAndContracts.peek().left = newScope;
-		this.scopeAndContracts.peek().right = acslHandler
-				.translateAcslAnnotation(source, tokenSource, newScope);
+		this.scopeAndContracts.peek().right = acslHandler.translateAcslAnnotation(source, tokenSource, newScope);
 	}
 
 	/**
@@ -2812,19 +2505,16 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	}
 
 	@Override
-	public ExpressionNode translateExpression(CommonTree expressionTree,
-			SimpleScope scope) throws SyntaxException {
+	public ExpressionNode translateExpression(CommonTree expressionTree, SimpleScope scope) throws SyntaxException {
 		int kind = expressionTree.getType();
 
 		if (kind == ABSENT)
 			return null;
-		return translateExpression(newSource(expressionTree), expressionTree,
-				scope);
+		return translateExpression(newSource(expressionTree), expressionTree, scope);
 	}
 
 	@Override
-	public List<BlockItemNode> translateBlockItem(CommonTree blockItemTree,
-			SimpleScope scope) throws SyntaxException {
+	public List<BlockItemNode> translateBlockItem(CommonTree blockItemTree, SimpleScope scope) throws SyntaxException {
 		return translateBlockItemNode(blockItemTree, scope, false);
 	}
 }

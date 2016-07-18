@@ -12,25 +12,25 @@ import edu.udel.cis.vsl.abc.ast.value.IF.Value;
  */
 public interface ConstantNode extends ExpressionNode {
 
-	public enum ConstantKind{
-		CHAR,
-		ENUM,
-		FLOAT,
-		HERE_OR_ROOT,
-		INT,
-		PROCNULL,
+	public enum ConstantKind {
+		CHAR, ENUM, FLOAT, HERE_OR_ROOT, INT, PROCNULL,
 		/**
 		 * A use of the CIVL-C built-in variable <code>$self</code> of type
 		 * <code>$proc</code>. It represents the process which is evaluating the
 		 * expression containing <code>$self</code>. A node of this kind may be
 		 * safely cast to {@link SelfNode}.
 		 */
-		SELF, 
-		STRING
+		SELF,
+		/**
+		 * A use of the CIVL-C built-in constant <code>$state_null</code> of
+		 * type <code>$state</code>. A node if this kind may be safely cast to
+		 * {@link StatenullNode}
+		 */
+		STATE_NULL, STRING
 	}
-	
+
 	ConstantKind constantKind();
-	
+
 	/**
 	 * Returns the representation of the constant exactly as it occurred in the
 	 * source code.
