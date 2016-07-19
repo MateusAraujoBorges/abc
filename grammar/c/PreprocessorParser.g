@@ -428,7 +428,6 @@ c_punctuator	:	AMPERSAND
 		|	AND
 		|	ARROW
 		|	ASSIGN
-		|	AT
 		|	BITANDEQ
 		|	BITOR
 		|	BITOREQ
@@ -478,6 +477,7 @@ c_punctuator	:	AMPERSAND
 
 civl_punctuator	:	ANNOTATION_END
 		|	ANNOTATION_START
+		|	AT
 		|	EQUIV_ACSL
 		|	IMPLIES
 		|	IMPLIES_ACSL

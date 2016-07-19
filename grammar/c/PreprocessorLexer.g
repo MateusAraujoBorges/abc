@@ -27,149 +27,190 @@ public void emitErrorMessage(String msg) { // don't try to recover!
 }
 }
 
-
-/* Preprocessor directives and pragmas */
-
-
 /****** White space ******/
+NEWLINE		:	'\r'? '\n'	;
+WS		:	(' ' | '\t')+	;
 
-NEWLINE		:	'\r'? '\n' ;
-WS		:	(' ' | '\t')+;
+/* Words that are used in both C and the preprocessor */
+IF		:	'if'		;
+ELSE		:	'else'		;
 
-
-/******* Preprocessor Keywords *********/
-
-// Note: these have to be turned into IDENTIFIERs
-// after preprocessing
-
-DEFINE		:	'define';
-DEFINED		:	'defined';
-ELIF		:	'elif';
-ENDIF		:	'endif';
-ERROR		:	'error';
-IFDEF		:	'ifdef';
-IFNDEF		:	'ifndef';
-INCLUDE		:	'include';
-LINE		:	'line';
-PRAGMA		:	'pragma';
-UNDEF		:	'undef';
+/* Words used in preprocessor but not in C */
+DEFINE		:	'define'	;
+DEFINED		:	'defined'	;
+ELIF		:	'elif'		;
+ENDIF		:	'endif'		;
+ERROR		:	'error'		;
+IFDEF		:	'ifdef'		;
+IFNDEF		:	'ifndef'	;
+INCLUDE		:	'include'	;
+LINE		:	'line'		;
+PRAGMA		:	'pragma'	;
+UNDEF		:	'undef'		;
 
 /****** C keywords, from C11 Sec. 6.4.1 ******/
-
-// These are listed in the order in which they are listed
-// in the C11 Standard.
-// Do NOT put CIVL-C keywords here.  They go below!
-
-AUTO		:	'auto';
-BREAK		:	'break';
-CASE		:	'case';
-CHAR		:	'char';
-CONST		:	'const';
-CONTINUE	:	'continue';
-DEFAULT		:	'default';
-DO		:	'do';
-DOUBLE		:	'double';
-ELSE		:	'else';
-ENUM		:	'enum';
-EXTERN		:	'extern';
-FLOAT		:	'float';
-FOR		:	'for';
-GOTO		:	'goto';
-IF		:	'if';
-INLINE		:	'inline';
-INT		:	'int';
-LONG		:	'long';
-REGISTER	:	'register';
-RESTRICT	:	'restrict';
-RETURN		:	'return';
-SHORT		:	'short';
-SIGNED		:	'signed';
-SIZEOF		:	'sizeof';
-STATIC		:	'static';
-STRUCT		:	'struct';
-SWITCH		:	'switch';
-TYPEDEF		:	'typedef';
-UNION		:	'union';
-UNSIGNED	:	'unsigned';
-VOID		:	'void';
-VOLATILE	:	'volatile';
-WHILE		:	'while';
-ALIGNAS		:	'_Alignas';
-ALIGNOF		:	'_Alignof';
-ATOMIC		:	'_Atomic';
-BOOL		:	'_Bool';
-COMPLEX		:	'_Complex';
-GENERIC		:	'_Generic';
-IMAGINARY	:	'_Imaginary';
-NORETURN	:	'_Noreturn';
+AUTO		:	'auto'		;
+BREAK		:	'break'		;
+CASE		:	'case'		;
+CHAR		:	'char'		;
+CONST		:	'const'		;
+CONTINUE	:	'continue'	;
+DEFAULT		:	'default'	;
+DO		:	'do'		;
+DOUBLE		:	'double'	;
+ENUM		:	'enum'		;
+EXTERN		:	'extern'	;
+FLOAT		:	'float'		;
+FOR		:	'for'		;
+GOTO		:	'goto'		;
+INLINE		:	'inline'	;
+INT		:	'int'		;
+LONG		:	'long'		;
+REGISTER	:	'register'	;
+RESTRICT	:	'restrict'	;
+RETURN		:	'return'	;
+SHORT		:	'short'		;
+SIGNED		:	'signed'	;
+SIZEOF		:	'sizeof'	;
+STATIC		:	'static'	;
+STRUCT		:	'struct'	;
+SWITCH		:	'switch'	;
+TYPEDEF		:	'typedef'	;
+UNION		:	'union'		;
+UNSIGNED	:	'unsigned'	;
+VOID		:	'void'		;
+VOLATILE	:	'volatile'	;
+WHILE		:	'while'		;
+ALIGNAS		:	'_Alignas'	;
+ALIGNOF		:	'_Alignof'	;
+ATOMIC		:	'_Atomic'	;
+BOOL		:	'_Bool'		;
+COMPLEX		:	'_Complex'	;
+GENERIC		:	'_Generic'	;
+IMAGINARY	:	'_Imaginary'	;
+NORETURN	:	'_Noreturn'	;
 STATICASSERT	:	'_Static_assert';
-THREADLOCAL	:	'_Thread_local';
+THREADLOCAL	:	'_Thread_local'	;
 
-
-/* Additional keywords and symbols used in CIVL-C */
-
+/* CIVL-C and ACSL keywords */
 // Keep these in alphabetical order by token name.  Respect the formatting!
-// Be sure to add these to PreprocessorParser.g too, under c_keyword.
-
-ABSTRACT	:	'$abstract';
-ASSIGNS     	:   	'$assigns';
-AT		:	'@';
-BIG_O		:	'$O';
-CALLS       	:   	'$calls';
-CHOOSE		:	'$choose';
-CIVLATOMIC	:	'$atomic';
-CIVLATOM	:	'$atom';
-CIVLFOR		:	'$for';
-COLLECTIVE	:	'$collective';
-CONTIN		:	'$contin';
-DEPENDS     	:   	'$depends';
-DERIV		:	'$D';
-DOMAIN		:	'$domain';
-ENSURES		:	'$ensures';
-EQUIV_ACSL	:	'<==>'	;
-EXISTS		: 	'$exists';
-//FALSE		:	'$false';
-FORALL		:	'$forall';
-FATOMIC     	:   	'$atomic_f';
-GUARD       	:   	'$guard';
-HERE		:	'$here';
-IMPLIES_ACSL	:	'==>';
-IMPLIES		:	'=>';
-INPUT		:	'$input';
-INVARIANT	:	'$invariant';
-LAMBDA		:	'$lambda';
-LSLIST		:	'<|';  // LSLIST and RSLIST enclose a scope list
-OUTPUT		:	'$output';
-PARFOR		:	'$parfor';
-PROCNULL	:	'$proc_null';
-RANGE		:	'$range';
-REAL		:	'$real';
-REQUIRES	:	'$requires';
-RESULT		:	'$result';
-RSLIST		:	'|>';  // LSLIST and RSLIST enclose a scope list
-RUN         :   '$run';
-SCOPEOF		:	'$scopeof';
-SELF		:	'$self';
-STATENULL  :   '$state_null';
-READS       	:   	'$reads';
-SPAWN		:	'$spawn';
-SYSTEM      	:   	'$system';
-//TRUE		:	'$true';
-UNIFORM		:	'$uniform';
-WHEN		:	'$when';
-XOR_ACSL	:	'^^'	;
+// Be sure to add these to PreprocessorParser.g too.
+ABSTRACT	:	'$abstract'	;
+ASSIGNS     	:   	'$assigns'	;
+BIG_O		:	'$O'		;
+CALLS       	:   	'$calls'	;
+CHOOSE		:	'$choose'	;
+CIVLATOMIC	:	'$atomic'	;
+CIVLATOM	:	'$atom'		;
+CIVLFOR		:	'$for'		;
+COLLECTIVE	:	'$collective'	;
+CONTIN		:	'$contin'	;
+DEPENDS     	:   	'$depends'	;
+DERIV		:	'$D'		;
+DOMAIN		:	'$domain'	;
+ENSURES		:	'$ensures'	;
+EXISTS		: 	'$exists'	;
+FORALL		:	'$forall'	;
+FATOMIC     	:   	'$atomic_f'	;
+GUARD       	:   	'$guard'	;
+HERE		:	'$here'		;
+INPUT		:	'$input'	;
+INVARIANT	:	'$invariant'	;
+LAMBDA		:	'$lambda'	;
+OUTPUT		:	'$output'	;
+PARFOR		:	'$parfor'	;
+PROCNULL	:	'$proc_null'	;
+RANGE		:	'$range'	;
+REAL		:	'$real'		;
+REQUIRES	:	'$requires'	;
+RESULT		:	'$result'	;
+RUN        	:	'$run'		;
+SCOPEOF		:	'$scopeof'	;
+SELF		:	'$self'		;
+STATENULL  	:	'$state_null'	;
+READS       	:   	'$reads'	;
+SPAWN		:	'$spawn'	;
+SYSTEM      	:   	'$system'	;
+UNIFORM		:	'$uniform'	;
+WHEN		:	'$when'		;
 
 /* Cuda-C keywords */
+DEVICE		:	'__device__'	;
+GLOBAL		:	'__global__'	;
+SHARED		:	'__shared__'	;
 
-DEVICE  : '__device__';
-GLOBAL	: '__global__';
-SHARED	: '__shared__';
+/* GNU-C keywords */
+TYPEOF  	:	'typeof'	;
 
-/* GNU C keywords */
-TYPEOF  :   'typeof';
+/****** Punctuators: C11 Sec. 6.4.6 ******/
+ELLIPSIS	: 	'...'	 	;
+DOTDOT		: 	'..' 		;
+DOT		:	'.' 		;
+AMPERSAND	:	'&'		;
+AND		:	'&&'		;
+ARROW		:	'->'		;
+ASSIGN		:	'='		;
+BITANDEQ	:	'&='		;
+BITOR		:	'|'		;
+BITOREQ		:	'|='		;
+BITXOR		:	'^'		;
+BITXOREQ	:	'^='		;
+COLON		:	':'		;
+COMMA		:	','		;
+DIV		:	'/'		;
+DIVEQ		:	'/='		;
+EQUALS		:	'=='		;
+GT		:	'>'		;
+GTE		:	'>='		;
+HASH		:	'#' | '%:'	;
+HASHHASH	:	'##' | '%:%:'	;
+LCURLY		:	'{' | '<%'	;
+LPAREN		:	'('		;
+LSQUARE		:	'[' | '<:'	;
+LT		:	'<'		;
+LTE		:	'<='		;
+MINUSMINUS	:	'--'		;
+MOD		:	'%'		;
+MODEQ		:	'%='		;
+NEQ		:	'!='		;
+NOT		:	'!'		;
+OR		:	'||'		;
+PLUS		:	'+'		;
+PLUSEQ		:	'+='		;
+PLUSPLUS	:	'++'		;
+QMARK		:	'?'		;
+RCURLY		:	'}' | '%>'	;
+RPAREN		:	')'		;
+RSQUARE		:	']' | ':>'	;
+SEMI		:	';'		;
+SHIFTLEFT	:	'<<'		;
+SHIFTLEFTEQ	:	'<<='		;
+SHIFTRIGHT	:	'>>'		;
+SHIFTRIGHTEQ	:	'>>='		;
+STAR		:	'*'		;
+STAREQ		:	'*='		;
+SUB		:	'-'		;
+SUBEQ		:	'-='		;
+TILDE		:	'~'		;
+
+/* CIVL-C and ACSL Punctuators */
+ANNOTATION_START	:	'/*@'	;
+ANNOTATION_END		:	'*/'	;
+AT			:	'@'	;
+EQUIV_ACSL		:	'<==>'	;
+IMPLIES			:	'=>'	;
+IMPLIES_ACSL		:	'==>'	;
+INLINE_ANNOTATION_START :	'//@'	;
+// LSLIST and RSLIST enclose a scope list
+LSLIST			:	'<|'	;
+RSLIST			:	'|>'	;
+XOR_ACSL		:	'^^'	;
+
+/* CUDA Punctuators */
+LEXCON			:	'<<<'	;
+REXCON			:	'>>>'	;
 
 /****** Identifiers: C11 Sec. 6.4.2 ******/
-
 IDENTIFIER	:	IdentifierNonDigit
 			(IdentifierNonDigit | Digit)*
 		;
@@ -204,7 +245,6 @@ HexadecimalDigit
 		:	'0'..'9' | 'a'..'f' | 'A'..'F' ;
 
 /****** Sec. 6.4.4.1: Integer constants ******/
-
 INTEGER_CONSTANT
 		:	DecimalConstant IntegerSuffix?
 		|	OctalConstant IntegerSuffix?
@@ -223,13 +263,13 @@ IntegerSuffix	:	UnsignedSuffix LongSuffix?
 		;
 
 fragment
-UnsignedSuffix	:	'u' | 'U';
+UnsignedSuffix	:	'u' | 'U'	;
 
 fragment
-LongSuffix	:	'l' | 'L';
+LongSuffix	:	'l' | 'L'	;
 
 fragment
-LongLongSuffix	:	'll' | 'LL';
+LongLongSuffix	:	'll' | 'LL'	;
 
 fragment	
 OctalConstant	:	Zero OctalDigit* IntegerSuffix? ;
@@ -333,77 +373,9 @@ STRING_LITERAL  :	('u8' | 'u' | 'U' | 'L')? '"' SChar* '"'
 fragment
 SChar		:	~('"' | '\\' | '\n') | EscapeSequence ;
 
-/****** Punctuators: C11 Sec. 6.4.6 ******/
 
-ELLIPSIS	: 	'...'	 	;
-DOTDOT		: 	'..' 		;
-DOT		:	'.' 		;
-AMPERSAND	:	'&'		;
-AND		:	'&&'		;
-ARROW		:	'->'		;
-ASSIGN		:	'='		;
-BITANDEQ	:	'&='		;
-BITOR		:	'|'		;
-BITOREQ		:	'|='		;
-BITXOR		:	'^'		;
-BITXOREQ	:	'^='		;
-COLON		:	':'		;
-COMMA		:	','		;
-DIV		:	'/'		;
-DIVEQ		:	'/='		;
-EQUALS		:	'=='		;
-GT		:	'>'		;
-GTE		:	'>='		;
-HASH		:	'#' | '%:'	;
-HASHHASH	:	'##' | '%:%:'	;
-LCURLY		:	'{' | '<%'	;
-LEXCON		:	'<<<' 		;
-LPAREN		:	'('		;
-LSQUARE		:	'[' | '<:'	;
-LT		:	'<'		;
-LTE		:	'<='		;
-MINUSMINUS	:	'--'		;
-MOD		:	'%'		;
-MODEQ		:	'%='		;
-NEQ		:	'!='		;
-NOT		:	'!'		;
-OR		:	'||'		;
-PLUS		:	'+'		;
-PLUSEQ		:	'+='		;
-PLUSPLUS	:	'++'		;
-QMARK		:	'?'		;
-RCURLY		:	'}' | '%>'	;
-REXCON		:	'>>>' 		;
-RPAREN		:	')'		;
-RSQUARE		:	']' | ':>'	;
-SEMI		:	';'		;
-SHIFTLEFT	:	'<<'		;
-SHIFTLEFTEQ	:	'<<='		;
-SHIFTRIGHT	:	'>>'		;
-SHIFTRIGHTEQ	:	'>>='		;
-STAR		:	'*'		;
-STAREQ		:	'*='		;
-SUB		:	'-'		;
-SUBEQ		:	'-='		;
-TILDE		:	'~'		;
-
-/****** Header Names: C11 Sec. 6.4.7 ******/
-
-/*
-HEADER_NAME	:	{inInclude}?=>
-			( '"' (~('\n' | '"'))+ '"'
-			| '<' (~('\n' | '>'))+ '>'
-			)
-			{inInclude=false;}
-		;
-*/
-		
 
 /* ***** Comments: C11 Sec 6.4.9 ******/
-
-// and Annotations...
-
-INLINE_ANNOTATION_START : '//@';
 
 // the following is not quite perfect because in the case of the \n or \r
 // immediately following the // it counts that white space as part of the
@@ -425,10 +397,6 @@ BLOCK_COMMENT : '/*'
               
 COMMENT : INLINE_COMMENT | BLOCK_COMMENT ;
 
-ANNOTATION_START : '/*@';
-
-ANNOTATION_END : '*/';
-
 /* Special keywords starting with backslash reserved for extensions
  * such as ACSL */
 EXTENDED_IDENTIFIER
@@ -436,7 +404,5 @@ EXTENDED_IDENTIFIER
 	'\\' IdentifierNonDigit (IdentifierNonDigit | Digit)* 
 	;
 
-
 /****** Other characters: C11 Sec. 6.4 ******/
-
 OTHER		: . ;
