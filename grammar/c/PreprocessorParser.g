@@ -169,9 +169,10 @@ ifndefblock	: IFNDEF white* i=identifier white* NEWLINE
 /* #if expr ... #elif ... #elif ... #else ... #endif.
  * Very similar to #ifdef, but with an expression in place
  * of an identifier. */
-ifblock		: IF white* e=expr white* NEWLINE
+ifblock		: IF{$IF.setType(PIF);}
+		  white* e=expr white* NEWLINE
 		  t=if_section f=if_suffix
-		  -> ^(PIF $e ^(SEQUENCE $t?) $f?)	
+		  -> ^(IF $e ^(SEQUENCE $t?) $f?)	
 		;
 
 /* A section of a conditional directive.
@@ -220,8 +221,9 @@ if_suffix	: ENDIF white* NEWLINE
  		  -> 
 		| c=ELIF white* expr white* NEWLINE if_section if_suffix
 		  -> ^($c ^($c expr ^(SEQUENCE if_section?) if_suffix?))
-		| ELSE white* NEWLINE if_section ENDIF white* NEWLINE
-		  -> ^(PELSE if_section?)
+		| ELSE{$ELSE.setType(PELSE);}
+		  white* NEWLINE if_section ENDIF white* NEWLINE
+		  -> ^(ELSE if_section?)
 		;
 
 /* A space, tab, or comment */
@@ -374,7 +376,6 @@ civl_keyword	:	ABSTRACT
 		|	DOMAIN
 		|	ENSURES
 		|	EXISTS
-//		|	FALSE
 		|	FATOMIC
 		|	FORALL
 		|	GUARD
@@ -390,13 +391,12 @@ civl_keyword	:	ABSTRACT
 		|	REAL
 		|	REQUIRES
 		|	RESULT
-        |   RUN
+		|	RUN
 		|	SCOPEOF
 		|	SELF
-        |   STATE_NULL
+		|	STATE_NULL
 		|	SPAWN
 		|	SYSTEM 
-//		|	TRUE
 		|	UNIFORM  
 		|	WHEN
 		;
@@ -408,7 +408,7 @@ cuda_keyword	:	DEVICE
 		;
 
 /* GNU extensions to C: */
-gnuc_keyword 	:	TYPEOF;
+gnuc_keyword 	:	TYPEOF		;
 
 /* a "pp_number" is any PP_NUMBER, INTEGER_CONSTANT, or FLOATING_CONSTANT */
 pp_number	:	INTEGER_CONSTANT

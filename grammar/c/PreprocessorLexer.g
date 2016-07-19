@@ -127,7 +127,7 @@ RESULT		:	'$result'	;
 RUN        	:	'$run'		;
 SCOPEOF		:	'$scopeof'	;
 SELF		:	'$self'		;
-STATENULL  	:	'$state_null'	;
+STATE_NULL  	:	'$state_null'	;
 READS       	:   	'$reads'	;
 SPAWN		:	'$spawn'	;
 SYSTEM      	:   	'$system'	;
