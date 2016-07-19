@@ -141,8 +141,8 @@ public class MacroExpander {
 	 *            null-terminated linked list of tokens. Element i may be null,
 	 *            indicating an empty argument.
 	 */
-	public MacroExpander(PreprocessorTokenSource ts,
-			FunctionMacro macro, CivlcToken origin, CivlcToken[] arguments) {
+	public MacroExpander(PreprocessorTokenSource ts, FunctionMacro macro,
+			CivlcToken origin, CivlcToken[] arguments) {
 		this.ts = ts;
 		this.tokenFactory = ts.getTokenFactory();
 		this.macro = macro;
@@ -373,14 +373,17 @@ public class MacroExpander {
 		String concatString = concatBuffer.toString();
 		CharStream charStream = new ANTLRStringStream(concatString);
 		PreprocessorLexer lexer = new PreprocessorLexer(charStream);
+		Token newToken = null;
 
 		try {
-			Token newToken = lexer.nextToken();
-
-			if (newToken != null)
-				return tokenFactory.newCivlcToken(newToken, formation);
-			// TODO: check also nothing left over in buffer
+			newToken = lexer.nextToken();
 		} catch (Exception e) {
+		}
+		if (newToken != null) {
+			Token nextToken = lexer.nextToken();
+
+			if (nextToken != null && nextToken.getType() == Token.EOF)
+				return tokenFactory.newCivlcToken(newToken, formation);
 		}
 		throw new PreprocessorException(
 				"Result of # concatenation not token: " + concatString,

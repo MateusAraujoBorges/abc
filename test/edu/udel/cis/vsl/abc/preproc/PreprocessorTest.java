@@ -32,7 +32,7 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils.LexerFactory;
 
 public class PreprocessorTest {
 
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	private static PrintStream out = System.out;
 
@@ -439,6 +439,58 @@ public class PreprocessorTest {
 	@Test
 	public void concat2() throws PreprocessorException {
 		checkPair("concat2");
+	}
+
+	/**
+	 * Checks use of ## in function macro.
+	 * 
+	 * @throws PreprocessorException
+	 */
+	@Test
+	public void concat3() throws PreprocessorException {
+		checkPair("concat3");
+	}
+
+	/**
+	 * Checks use of ## in function macro.
+	 * 
+	 * @throws PreprocessorException
+	 */
+	@Test
+	public void concat4() throws PreprocessorException {
+		checkPair("concat4");
+	}
+
+	/**
+	 * Checks use of ## in function macro: checks that exception is thrown if
+	 * result of concatenation is not a token.
+	 * 
+	 * @throws PreprocessorException
+	 */
+	@Test(expected = PreprocessorRuntimeException.class)
+	public void concat5() throws PreprocessorException {
+		checkPair("concat5");
+	}
+
+	/**
+	 * Checks use of ## in function macro --- that second expansion occurs after
+	 * concatenation.
+	 * 
+	 * @throws PreprocessorException
+	 */
+	@Test
+	public void concat6() throws PreprocessorException {
+		checkPair("concat6");
+	}
+
+	@Test
+	public void stringification1() throws PreprocessorException {
+		checkPair("stringification1");
+	}
+	
+	@Test
+	public void stringification2() throws PreprocessorException {
+		checkPair("stringification2");
 	}
 
 	@Test

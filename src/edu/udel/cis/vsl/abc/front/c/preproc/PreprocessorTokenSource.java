@@ -2048,7 +2048,10 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * </p>
 	 * 
 	 * @exception PreprocessorRuntimeException
-	 *                if anything goes wrong in trying to find the next token
+	 *                if anything goes wrong in trying to find the next token.
+	 *                Note that this method cannot throw a
+	 *                {@link PreprocessorException} because the interface that
+	 *                it implements does not specify any exception being thrown
 	 */
 	@Override
 	public CivlcToken nextToken() {
