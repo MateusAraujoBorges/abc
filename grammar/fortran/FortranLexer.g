@@ -385,6 +385,7 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 		this.oldStreams = new Stack<FortranStream>();
 		this.oldFileIndexes = new Stack<Integer>();
 		// TODO: idx
+		this.includeDirs = new ArrayList<String>();
 		this.inclusionFormation = tokenFactory
 				.newInclusion(new SourceFile(new File(this.input
 						.getSourceName()), this.fileIndex.intValue()));
