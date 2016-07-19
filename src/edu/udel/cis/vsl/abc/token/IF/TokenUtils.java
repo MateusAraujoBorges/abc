@@ -70,16 +70,19 @@ public class TokenUtils {
 				return "<unknown file>";
 			else {
 				String filename = stream.getSourceName();
-				int separatorIndex = filename.lastIndexOf(File.pathSeparatorChar);
+				int separatorIndex = filename
+						.lastIndexOf(File.pathSeparatorChar);
 
-				if (separatorIndex >= 0 && separatorIndex < filename.length() - 1)
+				if (separatorIndex >= 0
+						&& separatorIndex < filename.length() - 1)
 					filename = filename.substring(separatorIndex + 1);
 				return filename;
 			}
 		}
 	}
 
-	public static String summarizeRangeLocation(CivlcToken first, CivlcToken last, boolean abbreviated) {
+	public static String summarizeRangeLocation(CivlcToken first,
+			CivlcToken last, boolean abbreviated) {
 		String result;
 		String filename1 = getShortFilename(first, abbreviated);
 		String filename2 = getShortFilename(last, abbreviated);
@@ -96,7 +99,8 @@ public class TokenUtils {
 			if (pos3 == 0) {
 				line2 = line3 - 1;
 				if (line2 == last.getLine()) {
-					pos2 = last.getCharPositionInLine() + last.getText().length();
+					pos2 = last.getCharPositionInLine()
+							+ last.getText().length();
 				} else {
 					pos2 = -1;
 				}
@@ -106,7 +110,10 @@ public class TokenUtils {
 			}
 		} else {
 			line2 = last.getLine();
-			pos2 = last.getCharPositionInLine() + last.getText().length();
+			if (last.getType() == Token.EOF)
+				pos2 = 0;
+			else
+				pos2 = last.getCharPositionInLine() + last.getText().length();
 		}
 		if (pos2 >= 0) {
 			endPosition = line2 + "." + pos2;
@@ -125,21 +132,25 @@ public class TokenUtils {
 				else
 					result = filename1 + ":" + line1 + "." + pos1 + "-" + pos2;
 			} else {
-				result = filename1 + ":" + line1 + "." + pos1 + "-" + endPosition;
+				result = filename1 + ":" + line1 + "." + pos1 + "-"
+						+ endPosition;
 			}
 		} else {
-			result = filename1 + ":" + line1 + "." + pos1 + "-" + filename2 + ":" + endPosition;
+			result = filename1 + ":" + line1 + "." + pos1 + "-" + filename2
+					+ ":" + endPosition;
 		}
 		return result;
 	}
 
-	public static String summarizeRange(CivlcToken first, CivlcToken last, boolean abbreviated) {
+	public static String summarizeRange(CivlcToken first, CivlcToken last,
+			boolean abbreviated) {
 		String result = summarizeRangeLocation(first, last, abbreviated);
 		String excerpt = "";
 		int tokenCount = 0;
 		CivlcToken token = first;
 
-		while (token != null && token != last && tokenCount < summaryBound - 1) {
+		while (token != null && token != last
+				&& tokenCount < summaryBound - 1) {
 			excerpt += token.getText();
 			token = token.getNext();
 			tokenCount++;
@@ -160,7 +171,8 @@ public class TokenUtils {
 		return result;
 	}
 
-	public static String contentOfRange(CivlcToken first, CivlcToken last, boolean abbreviated) {
+	public static String contentOfRange(CivlcToken first, CivlcToken last,
+			boolean abbreviated) {
 		String result = summarizeRangeLocation(first, last, abbreviated);
 		String excerpt = "";
 		// int tokenCount = 0;

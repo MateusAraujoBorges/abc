@@ -115,21 +115,12 @@ public class CommonCivlcToken extends CommonToken implements CivlcToken {
 	 */
 	@Override
 	public String toString() {
-		if (this.getType() == Token.EOF)
-			return "EOF";
-		// TODO make a special handling for special token "Program"
-		else {
-			// String result = TokenUtils.quotedText(this) + " in "
-			// + TokenUtils.location(this, false);
-			String result = TokenUtils
-					.summarizeRangeLocation(this, this, false)
-					+ " "
-					+ TokenUtils.quotedText(this);
+		String result = TokenUtils.summarizeRangeLocation(this, this, false)
+				+ " " + TokenUtils.quotedText(this);
 
-			if (formation != null)
-				result += formation.suffix();
-			return result;
-		}
+		if (formation != null)
+			result += formation.suffix();
+		return result;
 	}
 
 	/**
@@ -196,7 +187,7 @@ public class CommonCivlcToken extends CommonToken implements CivlcToken {
 		return formation;
 	}
 
-	/* Methods for Frotran parser */
+	/* Methods for Fortran parser */
 	@Override
 	public String getWhiteText() {
 		return whiteText;

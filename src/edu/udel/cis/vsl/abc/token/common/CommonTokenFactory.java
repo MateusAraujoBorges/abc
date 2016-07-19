@@ -59,9 +59,14 @@ public class CommonTokenFactory implements TokenFactory {
 
 	@Override
 	public CivlcToken newCivlcToken(CharStream input, int type, int channel,
-			int start, int stop, Formation formation) {
-		return new CommonCivlcToken(input, type, channel, start, stop,
-				formation);
+			int start, int stop, Formation formation, int line,
+			int charPositionInLine) {
+		CivlcToken result = new CommonCivlcToken(input, type, channel, start,
+				stop, formation);
+
+		result.setLine(line);
+		result.setCharPositionInLine(charPositionInLine);
+		return result;
 	}
 
 	@Override

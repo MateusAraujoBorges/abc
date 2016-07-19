@@ -82,7 +82,8 @@ public interface TokenFactory {
 	 * Inclusion record for original source file.
 	 * 
 	 * @param file
-	 *            the file which was included
+	 *            the file which was included, which should be the original
+	 *            source file (the root of the inclusion tree)
 	 * @return a new inclusion record
 	 */
 	Inclusion newInclusion(SourceFile file);
@@ -113,8 +114,38 @@ public interface TokenFactory {
 
 	CivlcToken newCivlcToken(int type, String text, Formation formation);
 
+	/**
+	 * 
+	 * @param input
+	 *            the character stream from which this token was formed
+	 * @param type
+	 *            the type of the new token, which is a unique integer ID
+	 *            assigned to each category of token by the lexer, e.g.,
+	 *            IDENTIFIER
+	 * @param channel
+	 *            all tokens go to the parser (unless skip() is called in that
+	 *            rule) on a particular "channel". The parser tunes to a
+	 *            particular channel so that whitespace etc... can go to the
+	 *            parser on a "hidden" channel.
+	 * @param start
+	 *            the char position into the input buffer where this token
+	 *            starts
+	 * @param stop
+	 *            the char position into the input buffer where this token stops
+	 * @param formation
+	 *            the object specifying the complete history on how this token
+	 *            came to exist
+	 * @param line
+	 *            the line number on which the token occurs
+	 * @param charPositionInLine
+	 *            the index of the first character of the token in the line in
+	 *            which it occurs. Indexes start at 0 for first character in
+	 *            line.
+	 * @return a new instance of {@link CivlcToken} with fields as specified
+	 *         above
+	 */
 	CivlcToken newCivlcToken(CharStream input, int type, int channel, int start,
-			int stop, Formation formation);
+			int stop, Formation formation, int line, int charPositionInLine);
 
 	// Characters and Strings...
 

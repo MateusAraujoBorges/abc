@@ -58,7 +58,7 @@ public void emitErrorMessage(String msg) { // don't try to recover!
  * text lines.
  */
 file		: whiteBlock? itemList EOF
-		  -> ^(FILE whiteBlock? itemList)
+		  -> ^(FILE whiteBlock? itemList EOF)
 		;
 
 /*

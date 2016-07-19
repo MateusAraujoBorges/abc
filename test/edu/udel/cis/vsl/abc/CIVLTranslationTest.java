@@ -39,6 +39,7 @@ public class CIVLTranslationTest {
 
 	};
 
+	@SuppressWarnings("unused")
 	private void lex(String name) throws IOException {
 		String filename = (new File(root, name)).getAbsolutePath();
 		PrintStream lexOut = debug ? out : new PrintStream(new OutputStream() {
@@ -175,7 +176,7 @@ public class CIVLTranslationTest {
 		check("lambda");
 	}
 
-	@Test
+	@Test(expected = SyntaxException.class)
 	public void lex_test() throws ABCException {
 		checkFile("text.c");
 	}

@@ -352,8 +352,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 			Tree tree = (Tree) fileReturn.getTree();
 
-			// TODO: why can't ANTLR do this:
-			addEofNodeToTree(tree, name);
 			sourceStack.push(new PreprocessorSourceFileInfo(formation, tree));
 			incrementNextNode(); // skip root "FILE" node
 		} catch (RecognitionException e) {
@@ -362,15 +360,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		} catch (RuntimeException e) {
 			throw new PreprocessorException(e.getMessage());
 		}
-	}
-
-	private void addEofNodeToTree(Tree tree, String filename) {
-		Formation eofFormation = tokenFactory.newSystemFormation("EOF");
-		CivlcToken eofToken = tokenFactory.newCivlcToken(Token.EOF,
-				"EndOfFile<" + filename + ">", eofFormation);
-		CommonTree eofNode = new CommonTree(eofToken);
-
-		tree.addChild(eofNode);
 	}
 
 	// Implementation of methods from CTokenSource...
@@ -537,30 +526,30 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		if (index > 0) {
 			CivlcToken leftToken = tokenFactory.newCivlcToken(stream,
 					PreprocessorLexer.INTEGER_CONSTANT, chan, startIndex,
-					startIndex + index - 1, formation);
+					startIndex + index - 1, formation, line, pos);
 
-			leftToken.setText(text.substring(0, index));
-			leftToken.setLine(line);
-			leftToken.setCharPositionInLine(pos);
+			// should not be necessary since the text is obtained from the
+			// stream by default, using the start and stop indexes:
+			// leftToken.setText(text.substring(0, index));
 			addOutput(leftToken);
 		}
 
 		CivlcToken dotdot = tokenFactory.newCivlcToken(stream,
 				PreprocessorLexer.DOTDOT, chan, startIndex + index,
-				startIndex + index + 1, formation);
+				startIndex + index + 1, formation, line, pos + index);
 
-		dotdot.setText("..");
-		dotdot.setLine(line);
-		dotdot.setCharPositionInLine(pos + index);
+		// should not be necessary:
+		// dotdot.setText("..");
 		addOutput(dotdot);
 		if (index < length) {
 			CivlcToken rightToken = tokenFactory.newCivlcToken(stream,
 					PreprocessorLexer.INTEGER_CONSTANT, chan,
-					startIndex + index + 2, stopIndex, formation);
+					startIndex + index + 2, stopIndex, formation, line,
+					pos + index + 2);
 
-			rightToken.setText(text.substring(index + 2, length));
-			rightToken.setCharPositionInLine(pos + index + 2);
-			rightToken.setLine(line);
+			// rightToken.setText(text.substring(index + 2, length));
+			// rightToken.setCharPositionInLine(pos + index + 2);
+			// rightToken.setLine(line);
 			addOutput(rightToken);
 		}
 		incrementNextNode();
@@ -1429,14 +1418,17 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 *             Preprocessor grammar
 	 */
 	private void processInclude(Tree includeNode) throws PreprocessorException {
-		String fullName = "";
 		int numChildren = includeNode.getChildCount();
-		Token filenameToken = ((CommonTree) includeNode.getChild(0)).getToken();
-
-		for (int i = 0; i < numChildren; i++) {
-			fullName += includeNode.getChild(i).getText();
-		}
-
+		CommonToken firstToken = (CommonToken) ((CommonTree) includeNode
+				.getChild(0)).getToken();
+		CommonToken lastToken = (CommonToken) ((CommonTree) includeNode
+				.getChild(numChildren - 1)).getToken();
+		CivlcToken filenameToken = tokenFactory.newCivlcToken(
+				firstToken.getInputStream(), PreprocessorLexer.STRING_LITERAL,
+				firstToken.getChannel(), firstToken.getStartIndex(),
+				lastToken.getStopIndex(), getIncludeHistory(),
+				firstToken.getLine(), firstToken.getCharPositionInLine());
+		String fullName = filenameToken.getText();
 		int numChars = fullName.length();
 		String name;
 		boolean system;
@@ -1486,8 +1478,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 		sourceFiles.add(sourceFile);
 		pushStream(pair.right,
-				tokenFactory.newInclusion(sourceFile, tokenFactory
-						.newCivlcToken(filenameToken, getIncludeHistory())));
+				tokenFactory.newInclusion(sourceFile, filenameToken));
 	}
 
 	/**

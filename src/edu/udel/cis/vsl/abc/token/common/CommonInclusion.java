@@ -33,7 +33,8 @@ public class CommonInclusion implements Inclusion {
 	@Override
 	public String suffix() {
 		if (includeToken != null)
-			return " included from " + includeToken;
+			return " included from " + includeToken.getSourceFile().getName()
+					+ ":" + includeToken.getLine();
 		else
 			return "";
 	}

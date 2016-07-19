@@ -33,7 +33,7 @@ public class CommonMacroExpansion implements MacroExpansion {
 
 	@Override
 	public String suffix() {
-		return " from " + startToken.toString();
+		return " expanded from " + startToken.toString();
 	}
 
 	@Override
