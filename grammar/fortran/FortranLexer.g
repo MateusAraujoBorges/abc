@@ -75,7 +75,7 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 			stop = start; // for now
 		}
 		this.inclusionFormation = tokenFactory.newInclusion(new SourceFile(new File(this.input.getSourceName()), this.fileIndex.intValue()));
-		CivlcToken t = tokenFactory.newCivlcToken(input, state.type, state.channel, start, stop, inclusionFormation);
+		CivlcToken t = tokenFactory.newCivlcToken(input, state.type, state.channel, start, stop, inclusionFormation, this.input.getLine(), this.input.getCharPositionInLine());
 		t.setLine(state.tokenStartLine);
 		t.setText(state.text);
 		t.setCharPositionInLine(state.tokenStartCharPositionInLine);
@@ -301,7 +301,7 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 							.intValue()));
 			eofToken = tokenFactory.newCivlcToken(this.input, T_EOF,
 					Token.DEFAULT_CHANNEL, this.input.index(),
-					this.input.index() + 1, inclusionFormation);
+					this.input.index() + 1, inclusionFormation, this.input.getLine(), this.input.getCharPositionInLine());
 
 			if (this.oldStreams != null && this.oldStreams.empty() == false) {
 
