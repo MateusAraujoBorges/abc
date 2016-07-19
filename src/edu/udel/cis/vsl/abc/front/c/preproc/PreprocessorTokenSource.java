@@ -619,13 +619,13 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			result = processInvocation((ObjectMacro) macro, cToken);
 			incrementNextNode();
 		} else {
-			CivlcToken[] arguments = findInvocationArguments(
+			Iterator<CivlcToken> argumentIter = getArgumentIterator(
 					(FunctionMacro) macro);
 
 			// note the call to findInvocationArguments updated
 			// position correctly.
 			result = processInvocation((FunctionMacro) macro, cToken,
-					arguments);
+					argumentIter);
 		}
 		addOutputList(result);
 	}
@@ -736,9 +736,9 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * @throws PreprocessorException
 	 */
 	private Pair<CivlcToken, CivlcToken> processInvocation(FunctionMacro macro,
-			CivlcToken origin, CivlcToken[] arguments)
+			CivlcToken origin, Iterator<CivlcToken> argumentIter)
 					throws PreprocessorException {
-		return performSecondExpansion(instantiate(macro, origin, arguments),
+		return performSecondExpansion(instantiate(macro, origin, argumentIter),
 				macro);
 	}
 
@@ -776,16 +776,14 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	private Pair<CivlcToken, CivlcToken> instantiate(FunctionMacro macro,
-			CivlcToken origin, CivlcToken[] arguments)
+			CivlcToken origin, Iterator<CivlcToken> argumentIter)
 					throws PreprocessorException {
 		MacroExpander expander = new MacroExpander(this, macro, origin,
-				arguments);
+				argumentIter);
 		Pair<CivlcToken, CivlcToken> result = expander.expand();
 
 		return result;
 	}
-
-	// TODO: object macros can also use the concatenator ## ...
 
 	/**
 	 * Creates a new instance of the object macro's body. Creates a sequence of
@@ -904,11 +902,11 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			} else {
 				Iterator<CivlcToken> iter = new CTokenIterator(
 						current.getNext());
-				CivlcToken[] arguments = findInvocationArguments(
-						(FunctionMacro) macro, iter);
+				// CivlcToken[] arguments = findInvocationArguments(
+				// (FunctionMacro) macro, iter);
 
 				replacements = processInvocation((FunctionMacro) macro, current,
-						arguments);
+						iter);
 				// move current to the token just after the closing ')'
 				// of the invocation, or null if the ')' was the last token:
 				if (iter.hasNext())
@@ -980,7 +978,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 *             if a sequence of tokens that would otherwise act as
 	 *             preprocessing directives occurs in the argument list
 	 */
-	private CivlcToken[] findInvocationArguments(FunctionMacro macro)
+	private Iterator<CivlcToken> getArgumentIterator(FunctionMacro macro)
 			throws PreprocessorException {
 		Iterator<CivlcToken> iter;
 
@@ -1009,171 +1007,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 				throw new UnsupportedOperationException();
 			}
 		};
-		return findInvocationArguments(macro, iter);
-	}
-
-	/**
-	 * Finds the invocation arguments from a sequence of tokens beginning just
-	 * after the macro name. The first token may be "(" or some white space
-	 * preceding the "(". This method will consume from the
-	 * <code>argumentIterator</code> stopping just after consuming the closing
-	 * ")" token. It will modify the tokens obtained from the iterator by
-	 * changing the next token field of the last token in an argument to
-	 * <code>null</code>.
-	 * 
-	 * @param macro
-	 *            the function-like macro that is being applied
-	 * @param argumentIterator
-	 *            iterator over the tokens that comprise the macro application
-	 *            arguments including the opening and closing parentheses
-	 * @return an array with one entry for each argument; the i-th entry is the
-	 *         first token in the i-th argument or <code>null</code> if the i-th
-	 *         entry is empty
-	 * @throws PreprocessorException
-	 *             if the number of arguments is not consistent with that
-	 *             specified by the macro definition
-	 */
-	private CivlcToken[] findInvocationArguments(FunctionMacro macro,
-			Iterator<CivlcToken> argumentIterator)
-					throws PreprocessorException {
-		try {
-			return findInvocationArgumentsWorker(macro, argumentIterator);
-		} catch (IllegalMacroArgumentException e) {
-			throw new PreprocessorException(e.getMessage());
-		}
-	}
-
-	/**
-	 * <p>
-	 * Given an iterator of {@link CivlcToken}s which comprise the arguments to
-	 * a macro, parses the list to separate the arguments.
-	 * </p>
-	 * 
-	 * <p>
-	 * This method does NOT create any new tokens. It DOES modify the tokens
-	 * coming out of the iterator by setting their "next" fields appropriately.
-	 * [DOES THIS MESS WITH THE ITERATOR?] The "next" field in the last token
-	 * for each argument is set to null, in order to terminate the new list. The
-	 * commas separating arguments are spliced out of the list.
-	 * </p>
-	 * 
-	 * <p>
-	 * Note that any or all of the entries in the array returned may be
-	 * <code>null</code>. This is because a macro argument can be empty, as in
-	 * "f()" or "f(1,,3)".
-	 * </p>
-	 * 
-	 * <p>
-	 * The first token in the given argumentIterator had better be LPAREN (left
-	 * parenthesis). Otherwise this is not an invocation of a function macro.
-	 * The arguments finish when the matching RPAREN is reached.
-	 * </p>
-	 * 
-	 * <p>
-	 * It is guaranteed that this method will invoke next() on the
-	 * argumentIterator until it reaches the final ')' (unless that is not
-	 * possible for some reason, in which case an exception is thrown). The
-	 * method will not iterate beyond that point. In other words, after this
-	 * method returns, the "cursor" in the iterator will be at the point just
-	 * after the ')'.
-	 * </p>
-	 * 
-	 * <p>
-	 * Implementation notes: doing a little parsing here. Scan the tokens
-	 * dividing into the following classes: LPAREN, RPAREN, COMMA, and OTHER.
-	 * </p>
-	 * 
-	 * @param macro
-	 *            the function-like macro being applied
-	 * @param argumentIterator
-	 *            iterator over tokens comprising the actual arguments
-	 * @exception PreprocessorException
-	 *                if the number of actual arguments does not match the
-	 *                number of formals in the macro definition
-	 * @return an array whose length is the number of arguments, in which
-	 *         element i points to the first token of the i-th actual argument,
-	 *         or is <code>null</code> if that actual argument is empty
-	 */
-	private CivlcToken[] findInvocationArgumentsWorker(FunctionMacro macro,
-			Iterator<CivlcToken> argumentIterator)
-					throws PreprocessorException {
-		int numFormals = macro.getNumFormals();
-		CivlcToken[] result = new CivlcToken[numFormals];
-		int argCount = 0, type, parenDepth;
-		CivlcToken token, previousToken;
-
-		// first, skip through all the white space to get to the '(':
-		while (true) {
-			if (!argumentIterator.hasNext())
-				throw new PreprocessorException("Macro invocation " + macro
-						+ " does not contain any arguments");
-			token = argumentIterator.next();
-			if (!PreprocessorUtils.isWhiteSpace(token))
-				break;
-		}
-		if (token.getType() != PreprocessorLexer.LPAREN)
-			throw new PreprocessorException(
-					"Invocation of function macro does not begin with '(': "
-							+ macro,
-					token);
-		if (numFormals == 0) {
-			if (!argumentIterator.hasNext())
-				throw new PreprocessorException(
-						"Macro invocation " + macro + " does not end in ')'",
-						token);
-			token = argumentIterator.next();
-			if (token.getType() != PreprocessorLexer.RPAREN)
-				throw new PreprocessorException(
-						"Invocation of function macro with 0 arguments"
-								+ "must have form f() with no spaces between the parentheses",
-						token);
-			return result;
-		}
-		parenDepth = 1;
-		while (true) {
-			if (!argumentIterator.hasNext())
-				throw new PreprocessorException(
-						"Not enough arguments to macro " + macro, token);
-			previousToken = token;
-			token = argumentIterator.next();
-			type = token.getType();
-			if (parenDepth == 1 && type == PreprocessorLexer.COMMA) {
-				if (result[argCount] != null)
-					previousToken.setNext(null);
-				argCount++;
-				if (argCount >= numFormals)
-					throw new PreprocessorException(
-							"Number of arguments to macro " + macro
-									+ " exceeds " + "expected number "
-									+ numFormals,
-							token);
-
-			} else {
-				if (type == PreprocessorLexer.LPAREN)
-					parenDepth++;
-				else if (type == PreprocessorLexer.RPAREN) {
-					parenDepth--;
-					if (parenDepth < 0)
-						throw new PreprocessorException("Extra ')'", token);
-					if (parenDepth == 0) {
-						if (result[argCount] != null)
-							previousToken.setNext(null);
-						argCount++;
-						break;
-					}
-				}
-				if (result[argCount] != null)
-					previousToken.setNext(token);
-				else
-					result[argCount] = token;
-			}
-		}
-		if (argCount != numFormals)
-			throw new PreprocessorException(
-					"Invocation of macro " + macro.getName() + ": expected "
-							+ numFormals + " arguments but saw " + argCount,
-					token);
-		return result;
+		return iter;
 	}
 
 	// processEOF...
@@ -2068,8 +1902,11 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			} catch (PreprocessorRuntimeException e) {
 				throw e;
 			} catch (RuntimeException e) {
-				throw new PreprocessorRuntimeException(e.toString(),
-						firstOutput);
+				PreprocessorRuntimeException pre = new PreprocessorRuntimeException(
+						e.toString(), firstOutput);
+
+				pre.setStackTrace(e.getStackTrace());
+				throw pre;
 			}
 		if (firstOutput.getType() == PreprocessorLexer.EOF)
 			finalToken = firstOutput;

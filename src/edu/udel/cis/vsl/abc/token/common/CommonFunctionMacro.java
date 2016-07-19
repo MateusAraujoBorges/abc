@@ -13,6 +13,7 @@ import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
 public class CommonFunctionMacro extends CommonMacro implements FunctionMacro {
 
+	private boolean variadic = false;
 
 	public CommonFunctionMacro(Tree definitionNode, SourceFile file) {
 		super(definitionNode, file);
@@ -25,7 +26,16 @@ public class CommonFunctionMacro extends CommonMacro implements FunctionMacro {
 		Map<String, Integer> nameMap = new HashMap<String, Integer>(numFormals);
 
 		for (int i = 0; i < numFormals; i++) {
-			nameMap.put(getFormal(i).getText(), i);
+			Token formal = getFormal(i);
+			String formalName;
+
+			if (i == numFormals - 1 && "...".equals(formal.getText())) {
+				formalName = "__VA_ARGS__";
+				variadic = true;
+			} else
+				formalName = formal.getText();
+			nameMap.put(formalName, i);
+
 		}
 		for (int j = 0; j < numReplacements; j++) {
 			FunctionReplacementUnit unit = getReplacementUnit(j);
@@ -118,6 +128,11 @@ public class CommonFunctionMacro extends CommonMacro implements FunctionMacro {
 	protected ReplacementUnit makeReplacement(int index, Token token,
 			Token[] whitespace) {
 		return new FunctionReplacementUnit(index, token, whitespace);
+	}
+
+	@Override
+	public boolean isVariadic() {
+		return variadic;
 	}
 
 }

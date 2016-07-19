@@ -92,6 +92,11 @@ public class TokenUtils {
 		int line2, pos2;
 		CivlcToken next = last.getNext();
 
+		if (pos1 < 0) {
+			// TODO: figure out why this happens and stop it
+			//System.err.println("Problem here"); // problem
+		}
+
 		if (next != null) {
 			int line3 = next.getLine();
 			int pos3 = next.getCharPositionInLine();

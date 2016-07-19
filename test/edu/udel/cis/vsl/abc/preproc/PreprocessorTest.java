@@ -32,7 +32,7 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils.LexerFactory;
 
 public class PreprocessorTest {
 
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	private static PrintStream out = System.out;
 
@@ -487,10 +487,20 @@ public class PreprocessorTest {
 	public void stringification1() throws PreprocessorException {
 		checkPair("stringification1");
 	}
-	
+
 	@Test
 	public void stringification2() throws PreprocessorException {
 		checkPair("stringification2");
+	}
+
+	@Test
+	public void variadic1() throws PreprocessorException {
+		checkPair("variadic1");
+	}
+	
+	@Test
+	public void variadic2() throws PreprocessorException {
+		checkPair("variadic2");
 	}
 
 	@Test

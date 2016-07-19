@@ -127,8 +127,12 @@ macrobody	: white*
 
 paramlist	: LPAREN white* 
 		  ( RPAREN -> ^(PARAMLIST)
-		  | identifier (white* COMMA white* identifier)* white* RPAREN
-		    -> ^(PARAMLIST identifier+)
+		  | ELLIPSIS white* RPAREN -> ^(PARAMLIST ELLIPSIS)
+		  | identifier (white* COMMA white* identifier)* white*
+		    ( RPAREN -> ^(PARAMLIST identifier+)
+		    | COMMA white* ELLIPSIS white* RPAREN
+		      -> ^(PARAMLIST identifier+ ELLIPSIS)
+		    )
 		  )
 		;
 

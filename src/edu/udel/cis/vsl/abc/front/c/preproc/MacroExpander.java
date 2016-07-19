@@ -1,11 +1,13 @@
 package edu.udel.cis.vsl.abc.front.c.preproc;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
+import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant;
@@ -93,18 +95,37 @@ public class MacroExpander {
 	private CivlcToken origin;
 
 	/**
-	 * For {@link FunctionMacro}s, the number of actual arguments in the macro
-	 * invocation. 0 for {@link ObjectMacro}s.
+	 * The given iterator over the tokens that comprise the arguments of a
+	 * function macro. Not used for object macro.
 	 */
-	private int numArgs;
+	private Iterator<CivlcToken> argumentIter;
 
 	/**
-	 * For {@link FunctionMacro}s, actual arguments to macro invocation. Element
-	 * i is a null-terminated linked list of tokens. Element i may be
-	 * <code>null</code>, indicating an empty argument. Not used for
-	 * {@link ObjectMacro}s.
+	 * For {@link FunctionMacro}s, the number of formal parameters, including
+	 * the possible "..." parameter. 0 for {@link ObjectMacro}s.
+	 */
+	private int numParameters;
+
+	/**
+	 * For {@link FunctionMacro}s, actual arguments to macro invocation. The
+	 * length must equal {@link #numParameters} --- if there are more actual
+	 * arguments occurring in the text than the number of parameters in a
+	 * variadic macro, the final arguments beyond the n-th are treated as a
+	 * single argument, to ensure in the end that the number of arguments is
+	 * exactly equal to the number of formals. Element i is a null-terminated
+	 * linked list of tokens. Element i may be <code>null</code>, indicating an
+	 * empty argument. Not used for {@link ObjectMacro}s.
 	 */
 	private CivlcToken[] arguments;
+
+	/**
+	 * For a function-like macro, the argument list begins with a "(" token; the
+	 * arguments are separated by "," tokens, and the argument list is
+	 * terminated with a closing ")" token. If there are n arguments, there are
+	 * n+1 such delimiter tokens. (Exception: if there are 0 arguments, there
+	 * are still 2 delimiter tokens.)
+	 */
+	private CivlcToken[] delimiters;
 
 	/**
 	 * For {@link FunctionMacro}s, the cached results of macro expanding each of
@@ -142,20 +163,18 @@ public class MacroExpander {
 	 *            indicating an empty argument.
 	 */
 	public MacroExpander(PreprocessorTokenSource ts, FunctionMacro macro,
-			CivlcToken origin, CivlcToken[] arguments) {
+			CivlcToken origin, Iterator<CivlcToken> argumentIter) {
 		this.ts = ts;
 		this.tokenFactory = ts.getTokenFactory();
 		this.macro = macro;
 		this.origin = origin;
-		this.arguments = arguments;
-		this.numArgs = arguments.length;
-
-		@SuppressWarnings("unchecked")
-		Pair<CivlcToken, CivlcToken>[] temp = (Pair<CivlcToken, CivlcToken>[]) new Pair<?, ?>[numArgs];
-
-		this.expandedArguments = temp;
+		this.argumentIter = argumentIter;
 		this.placemarker = tokenFactory.newCivlcToken(placemarkerType, "",
 				null);
+		if (macro instanceof FunctionMacro)
+			this.numParameters = ((FunctionMacro) macro).getNumFormals();
+		else
+			this.numParameters = 0;
 	}
 
 	/**
@@ -177,7 +196,7 @@ public class MacroExpander {
 		this.macro = macro;
 		this.origin = origin;
 		this.arguments = null;
-		this.numArgs = 0;
+		this.numParameters = 0;
 		this.expandedArguments = null;
 		this.placemarker = null;
 	}
@@ -279,6 +298,161 @@ public class MacroExpander {
 		void setConcat(boolean flag) {
 			this.concat = flag;
 		}
+	}
+
+	/**
+	 * <p>
+	 * Finds the invocation arguments from a sequence of tokens beginning just
+	 * after the macro name. The first token may be "(" or some white space
+	 * preceding the "(". This method will consume from the
+	 * {@link #argumentIter} stopping just after consuming the closing ")"
+	 * token. It will modify the tokens obtained from the iterator by changing
+	 * the next token field of the last token in an argument to
+	 * <code>null</code>. The effect is to set {@link #arguments} to an array
+	 * whose length is the number of arguments, in which element i points to the
+	 * first token of the i-th actual argument, or is <code>null</code> if that
+	 * actual argument is empty.
+	 * </p>
+	 * 
+	 * <p>
+	 * In the case of a variadic macro with n parameters, where n includes the
+	 * final formal parameter "...": the number of actual arguments must be at
+	 * least n. Any arguments beyond the n-th will be joined together (including
+	 * the commas) to form a single n-th argument. So in the end, the number of
+	 * arguments will be n.
+	 * </p>
+	 * 
+	 * <p>
+	 * This method does NOT create any new tokens. It DOES modify the tokens
+	 * coming out of the iterator by setting their "next" fields appropriately.
+	 * The "next" field in the last token for each argument is set to null, in
+	 * order to terminate the new list. The commas separating arguments are
+	 * spliced out of the list.
+	 * </p>
+	 * 
+	 * <p>
+	 * Note that any or all of the entries in the array returned may be
+	 * <code>null</code>. This is because a macro argument can be empty, as in
+	 * "f()" or "f(1,,3)".
+	 * </p>
+	 * 
+	 * <p>
+	 * The first token in the given argumentIterator had better be LPAREN (left
+	 * parenthesis). Otherwise this is not an invocation of a function macro.
+	 * The arguments finish when the matching RPAREN is reached.
+	 * </p>
+	 * 
+	 * <p>
+	 * It is guaranteed that this method will invoke next() on the
+	 * argumentIterator until it reaches the final ')' (unless that is not
+	 * possible for some reason, in which case an exception is thrown). The
+	 * method will not iterate beyond that point. In other words, after this
+	 * method returns, the "cursor" in the iterator will be at the point just
+	 * after the ')'.
+	 * </p>
+	 * 
+	 * <p>
+	 * Implementation notes: doing a little parsing here. Scan the tokens
+	 * dividing into the following classes: LPAREN, RPAREN, COMMA, and OTHER.
+	 * </p>
+	 * 
+	 * @exception PreprocessorException
+	 *                if the number of actual arguments does not match the
+	 *                number of formals in the macro definition
+	 */
+	private void findInvocationArguments() throws PreprocessorException {
+		int argCount = 0, type, parenDepth;
+		CivlcToken token, previousToken;
+		List<CivlcToken> delimiterList = new LinkedList<>();
+		boolean variadic = ((FunctionMacro) macro).isVariadic();
+
+		arguments = new CivlcToken[numParameters];
+		// first, skip through all the white space to get to the '(':
+		while (true) {
+			if (!argumentIter.hasNext())
+				throw new PreprocessorException("Macro invocation " + macro
+						+ " does not contain any arguments");
+			token = argumentIter.next();
+			if (!PreprocessorUtils.isWhiteSpace(token))
+				break;
+		}
+		if (token.getType() != PreprocessorLexer.LPAREN)
+			throw new PreprocessorException(
+					"Invocation of function macro does not begin with '(': "
+							+ macro,
+					token);
+		delimiterList.add(token);
+		if (numParameters == 0) {
+			if (!argumentIter.hasNext())
+				throw new PreprocessorException(
+						"Macro invocation " + macro + " does not end in ')'",
+						token);
+			token = argumentIter.next();
+			if (token.getType() != PreprocessorLexer.RPAREN)
+				throw new PreprocessorException(
+						"Invocation of function macro with 0 arguments"
+								+ "must have form f() with no spaces between the parentheses",
+						token);
+			delimiterList.add(token);
+		} else { // numParameters > 0
+			parenDepth = 1;
+			// argCount is the total number of actual arguments completely
+			// consumed = number of separating commas consumed
+			while (true) {
+				if (!argumentIter.hasNext())
+					throw new PreprocessorException(
+							"Not enough arguments to macro " + macro, token);
+				previousToken = token;
+				token = argumentIter.next();
+				type = token.getType();
+				// variadic macro: f(x,y,...) : numParameters=3
+				// consumed: (a,b,c : argCount=2
+				// see ",": (a,b,c, : not a separating comma. argCount remains 2
+				if (parenDepth == 1 && type == PreprocessorLexer.COMMA
+						&& (!variadic || argCount < numParameters - 1)) {
+					// this is a separating comma
+					if (arguments[argCount] != null)
+						previousToken.setNext(null);
+					argCount++;
+					if (argCount >= numParameters)
+						throw new PreprocessorException(
+								"Number of arguments to macro " + macro
+										+ " exceeds " + "expected number "
+										+ numParameters,
+								token);
+					delimiterList.add(token);
+				} else {
+					if (type == PreprocessorLexer.LPAREN)
+						parenDepth++;
+					else if (type == PreprocessorLexer.RPAREN) {
+						parenDepth--;
+						if (parenDepth < 0)
+							throw new PreprocessorException("Extra ')'", token);
+						if (parenDepth == 0) {
+							if (arguments[argCount] != null)
+								previousToken.setNext(null);
+							argCount++;
+							delimiterList.add(token);
+							break;
+						}
+					}
+					if (arguments[argCount] != null)
+						previousToken.setNext(token);
+					else
+						arguments[argCount] = token;
+				}
+			}
+			if (argCount != numParameters)
+				throw new PreprocessorException("Invocation of macro "
+						+ macro.getName() + ": expected " + numParameters
+						+ " arguments but saw " + argCount, token);
+		}
+		delimiters = delimiterList
+				.toArray(new CivlcToken[delimiterList.size()]);
+		if (numParameters == 0)
+			assert delimiters.length == 2;
+		else
+			assert delimiters.length == numParameters + 1;
 	}
 
 	/**
@@ -443,19 +617,30 @@ public class MacroExpander {
 	 * a formal parameter.
 	 * </p>
 	 * 
-	 * @param token
-	 *            the first token in a null-terminated linked list of tokens
 	 * @param tokenIndex
 	 *            the index of the occurrence of the parameter in the macro body
 	 *            token sequence
 	 * @return the string literal token formed by concatenating the token text
 	 *         as specified in C11 6.10.3.2 (2)
+	 * @throws PreprocessException
+	 *             if the tokenIndex-th replacement token in the macro
+	 *             definition is not an occurrence of a formal parameter
 	 */
-	private CivlcToken stringifyTokenSequence(CivlcToken token, int tokenIndex)
+	private CivlcToken stringifyTokenSequence(int tokenIndex)
 			throws PreprocessorException {
+		FunctionReplacementUnit ru = ((FunctionMacro) macro)
+				.getReplacementUnit(tokenIndex);
+
+		if (ru.formalIndex < 0)
+			throw new PreprocessorException(
+					"# must be followed by macro parameter in function-like macro definition",
+					ru.token);
+
+		CivlcToken token = arguments[ru.formalIndex];
+
 		StringBuffer concatBuffer = new StringBuffer();
 		boolean first = true;
-		List<CivlcToken> tokenList = new LinkedList<>();
+		ArrayList<CivlcToken> tokenList = new ArrayList<>();
 
 		concatBuffer.append('"'); // open " of new string literal
 		for (CivlcToken t = token; t != null; t = t.getNext()) {
@@ -480,9 +665,32 @@ public class MacroExpander {
 		String text = concatBuffer.toString();
 		Formation formation = tokenFactory.newStringification(
 				(FunctionMacro) macro, tokenIndex, tokenList);
-		CivlcToken newToken = tokenFactory.newCivlcToken(
-				CivlcTokenConstant.STRING_LITERAL, text, formation);
+		// delimiter immediately preceding empty argument: "(" or ","
+		CivlcToken delimiter = delimiters[ru.formalIndex];
+		int start, stop, line, charPositionInLine;
 
+		// RETHINk THIS...
+		
+		if (token == null) { // empty argument
+			start = ((CommonToken) delimiter).getStartIndex() + 1;
+			stop = ((CommonToken) delimiters[ru.formalIndex + 1])
+					.getStartIndex() - 1;
+			line = delimiter.getLine();
+			charPositionInLine = delimiter.getCharPositionInLine();
+		} else {
+			start = ((CommonToken) token).getStartIndex();
+			stop = ((CommonToken) tokenList.get(tokenList.size() - 1))
+					.getStopIndex();
+			line = token.getLine();
+			charPositionInLine = token.getCharPositionInLine();
+		}
+
+		CivlcToken newToken = tokenFactory.newCivlcToken(
+				delimiter.getInputStream(), CivlcTokenConstant.STRING_LITERAL,
+				delimiter.getChannel(), start, stop, formation, line,
+				charPositionInLine);
+
+		newToken.setText(text);
 		return newToken;
 	}
 
@@ -647,6 +855,11 @@ public class MacroExpander {
 		int numTokens = macro.getNumReplacements();
 		ArrayList<ExpandedToken> result = new ArrayList<>(numTokens);
 
+		findInvocationArguments();
+		@SuppressWarnings("unchecked")
+		Pair<CivlcToken, CivlcToken>[] temp = (Pair<CivlcToken, CivlcToken>[]) new Pair<?, ?>[numParameters];
+
+		this.expandedArguments = temp;
 		for (int i = 0; i < numTokens; i++) {
 			FunctionReplacementUnit ru = ((FunctionMacro) macro)
 					.getReplacementUnit(i);
@@ -660,12 +873,7 @@ public class MacroExpander {
 							token);
 				i++;
 				ru = ((FunctionMacro) macro).getReplacementUnit(i);
-				if (ru.formalIndex < 0)
-					throw new PreprocessorException(
-							"# must be followed by macro parameter in function-like macro definition",
-							ru.token);
-				result.add(new ExpandedToken(
-						stringifyTokenSequence(arguments[ru.formalIndex], i),
+				result.add(new ExpandedToken(stringifyTokenSequence(i),
 						cloneWhitespace(ru)));
 			} else if (type == PreprocessorParser.HASHHASH) {
 				addClone(result, ru).setConcat(true);
