@@ -11,6 +11,13 @@ import org.antlr.runtime.ANTLRStringStream;
 
 // TODO: make this platform-independent newline?
 
+// TODO: problem: doesn't this throw the line numbering off?
+// Yes, it does.  Need to keep track of the number of newlines
+// removed --- so change to a streaming style where this is executed:
+// line++;
+// charPositionInLine=0;
+// every time you remove the \\\n.
+
 /**
  * An ANTLR stream which reads from a file and removes any two consecutive
  * characters that are backslash followed by newline. This is part of the C

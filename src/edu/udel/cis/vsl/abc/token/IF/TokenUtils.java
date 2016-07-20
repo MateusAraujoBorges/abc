@@ -97,11 +97,11 @@ public class TokenUtils {
 		int line2, pos2;
 		// CivlcToken next = last.getNext();
 
-		if (pos1 < 0) {
-			throw new ABCRuntimeException(
-					"Encountered token without charPositionInLine: "
-							+ first.getText());
-		}
+		// if (pos1 < 0) {
+		// throw new ABCRuntimeException(
+		// "Encountered token without charPositionInLine: "
+		// + first.getText());
+		// }
 
 		// if (next != null) {
 		// int line3 = next.getLine();
@@ -138,8 +138,8 @@ public class TokenUtils {
 			if (line1 == line2) {
 				// TODO: When intermediate file used, delete below:
 				// = = = = =
-				if (line1 == 0 && line2 == 0)
-					return "Code inserted by " + filename1 + ": ";
+				if (line1 <= 0 && line2 <= 0)
+					return filename1 ;
 				// = = = = =
 				if (pos1 == pos2)
 					result = filename1 + ":" + line1 + "." + pos1;
