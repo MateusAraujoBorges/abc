@@ -360,8 +360,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		}
 	}
 
-	// Implementation of methods from CTokenSource...
-
 	/**
 	 * Returns current file being processed.
 	 * 
@@ -374,8 +372,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		else
 			return sourceStack.peek().getFile();
 	}
-
-	// The implementation methods...
 
 	/**
 	 * Process the next node in the CPP AST. This may actually involve
@@ -442,24 +438,35 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	// processText...
 
 	/**
-	 * Process a text node, i.e., a node for a token which is not a preprocessor
-	 * directive and does not have any special meaning to the preprocessor,
-	 * though it may be a macro invocation. This node may or may not be in a
-	 * text block.
+	 * <p>
+	 * Processes a text node, i.e., a node for a token which is not a
+	 * preprocessor directive and does not have any special meaning to the
+	 * preprocessor, though it may be a macro invocation. This node may or may
+	 * not be in a text block.
+	 * </p>
 	 * 
+	 * <p>
 	 * Precondition: This method should be called only from the outermost scope
 	 * of expansion, i.e., we are not currently in a macro expansion.
+	 * </p>
 	 * 
-	 * Postcondition: if the node is not an identifier for a macro, a CToken for
-	 * it is created and added to the output buffer. If it is a macro, macro
-	 * expansion takes place. For a function macro, this involves consuming more
-	 * input tokens (the tokens comprising the left parenthesis, the arguments,
-	 * and the final right parenthesis). The current position in the input AST
-	 * is moved to the point just after that last token. The CTokens resulting
-	 * from the expansion are added to the output buffer.
+	 * <p>
+	 * Postcondition: if the node is not an identifier for a macro, a
+	 * {@link CivlcToken} for it is created and added to the output buffer. If
+	 * it is a macro, macro expansion takes place. For a function macro, this
+	 * involves consuming more input tokens (the tokens comprising the left
+	 * parenthesis, the arguments, and the final right parenthesis). The current
+	 * position in the input AST is moved to the point just after that last
+	 * token. The tokens resulting from the expansion are added to the output
+	 * buffer.
+	 * </p>
 	 * 
 	 * @param textNode
+	 *            the text node to process
 	 * @throws PreprocessorException
+	 *             if something goes wrong with macro expansion, or if a
+	 *             ppnumber token does not have the form of a CIVL-C range
+	 *             expression (a..b)
 	 */
 	private void processText(Tree textNode) throws PreprocessorException {
 		Token token = ((CommonTree) textNode).getToken();
@@ -572,8 +579,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			incrementNextNode();
 		}
 	}
-
-	// Macro Expansion...
 
 	/**
 	 * <p>
@@ -1008,8 +1013,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		return iter;
 	}
 
-	// processEOF...
-
 	/**
 	 * Process and End-of-file token. If this is the root file, you are all
 	 * done, and the EOF token is moved to the output buffer. Otherwise, you pop
@@ -1044,15 +1047,17 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		}
 	}
 
-	// processTextBlock...
-
 	/**
+	 * <p>
 	 * Processes a text block node by moving the current position to the first
 	 * child (the first token in the text block).
+	 * </p>
 	 * 
+	 * <p>
 	 * A text block consists of a sequence of tokens that do not contain any
 	 * preprocessor directives. The sequence may, however, contains macro
 	 * invocations which need to be expanded.
+	 * </p>
 	 * 
 	 * @param node
 	 *            a node in the tree with TEXT_BLOCK token
@@ -1436,6 +1441,34 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 *            preprocessor parse tree node for <code>#line</code> directive
 	 */
 	private void processLine(Tree lineNode) {
+		// TODO
+		
+		// strategy: get the real line number from the "line" token.
+		// let delta = new line number - real line number
+		// when creating new CivlcTokens: add delta to line number.
+		// this delta goes on the include stack: each entry has its own.
+		// setting the file also affects the entry on include stack
+		//
+		// macro definition: when processing the macro definition, common
+		// tokens from the preprocessor parse tree are used.  These will
+		// have original (unadjusted) line numbers.  And filenames.
+		// could pass arguments to CommonMacro to adjust these things.
+		// or do it before calling CommonMacro.
+		
+		// macro expansion: creates new tokens by copying replacement
+		// tokens and argument tokens.  The replacement token copy already
+		// has the right line number and should not be further modified.
+		// The argument tokens should be adjusted when they are created
+		// the first time and not further changed.
+		
+		// Moral: tokens should have the correct (adjusted) line/file
+		// information when they are created, not just before
+		// being shifted to output stream.
+		
+		// alternatively: if all line/file info ultimately comes from
+		// common tokens, adjust them first before using them
+		// to create CivlcTokens.
+
 		jumpNextNode();
 	}
 
@@ -1509,20 +1542,29 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	/**
+	 * <p>
 	 * Move next node to the next sibling. If there is no next sibling, proceed
 	 * as in DFS. In other words, this is the same as DFS after removing all
 	 * children of the current next node.
+	 * </p>
 	 * 
+	 * <p>
 	 * When backtracking through a conditional node, this method will skip over
 	 * the alternative branch. In other words, if we start in the "true" branch
 	 * and then backtrack, we will NOT go down the false branch. This is because
 	 * we only want to traverse one of the two branches when we preprocess a
 	 * file.
+	 * </p>
 	 * 
-	 * The inTextBlock flag is turned off when we exit a block.
+	 * <p>
+	 * The {@link #inTextBlock}, {@link #inInlineAnnotation}, and
+	 * {@link #inBlockAnnotation} flags are turned off when we exit a block.
+	 * </p>
 	 * 
+	 * <p>
 	 * If given null this method is a no-op. If there is no node to jump to, it
 	 * returns null. It should never throw an exception.
+	 * </p>
 	 */
 	private void jumpNextNode() {
 		CommonTree node = (CommonTree) getNextInputNode();
@@ -1598,10 +1640,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	private Formation getIncludeHistory() {
 		return sourceStack.peek().getIncludeHistory();
 	}
-
-	// private boolean inTextBlock() {
-	// return inTextBlock;
-	// }
 
 	// Methods modifying the output list...
 
