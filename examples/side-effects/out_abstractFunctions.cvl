@@ -1,8 +1,3 @@
-//======================== civlc.cvh =======================
-/*@ depends_on \nothing;
-  @ executes_when $true;
-  @*/
-$system[civlc] void $assert(_Bool expr, ...);
 //======================== assert.h ========================
 /*@ depends_on \nothing;
   @*/
