@@ -1,26 +1,89 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.statement;
 
+import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpNode;
 
 public interface StatementNode extends BlockItemNode {
 
 	// TODO add javadocs
 	public enum StatementKind {
-		ATOMIC, CHOOSE, CIVL_FOR, COMPOUND, EXPRESSION, IF, JUMP, LABELED, LOOP, NULL,
 		/**
-		 * indicates a OmpNode instance {@link OmpNode}
+		 * A CIVL-C <code>$atomic</code> or <code>$atom</code> statement. Can be
+		 * cast to {@link AtomicNode}
 		 */
-		OMP, PRAGMA,
+		ATOMIC,
 		/**
-		 * A CIVL-C run expression, A expression node with such a kind may be
-		 * cast to {@link RunNode}.
+		 * A CIVL-C <code>$choose</code> statement. Can be cast to
+		 * {@link ChooseStatementNode}
 		 */
-		RUN, SWITCH, WHEN,
+		CHOOSE,
 		/**
-		 * A CIVL-C $with expression ( <code>$with/$call_with statement</code>);
-		 * can be cast to {@link WithNode}
+		 * A CIVL-C <code>$for</code> or <code>$parfor</code> statement. Can be
+		 * cast to {@link CivlForNode}
 		 */
-		WITH,
+		CIVL_FOR,
+		/**
+		 * A compound statement, which is wrapped by a pair of <code>{}</code>.
+		 * Can be cast to {@link CompoundStatementNode}
+		 */
+		COMPOUND,
+		/**
+		 * An expression statement. Can be cast to
+		 * {@link ExpressionStatementNode}
+		 */
+		EXPRESSION,
+		/**
+		 * An <code>if-else</code> (where <code>else</code> part is optional).
+		 * Can be cast to {@link IfNode}
+		 */
+		IF,
+		/**
+		 * A jump statement, which could be one of <code>break</code>,
+		 * <code>continue</code>, <code>go to</code> and <code>return </code>.
+		 * Can be cast to {@link JumpNode}
+		 */
+		JUMP,
+		/**
+		 * A labeled statement. Can be cast to {@link LabeledStatementNode}
+		 */
+		LABELED,
+		/**
+		 * A loop statement, which could be a <code>for</code>,
+		 * <code>while</code> or <code>do-while</code> loop. Can be cast to
+		 * {@link LoopNode}.
+		 */
+		LOOP,
+		/**
+		 * A null statement. Can be cast to {@link NullStatementNode}
+		 */
+		NULL,
+		/**
+		 * A statement which has OpenMP pragmas. Can be cast to {@link OmpNode}
+		 */
+		OMP,
+		/**
+		 * A statement node which has unknown pragmas. Can be cast to
+		 * {@link PragmaNode}
+		 */
+		PRAGMA,
+		/**
+		 * A CIVL-C <code>$run</code> statement. Can be cast to {@link RunNode}.
+		 */
+		RUN,
+		/**
+		 * A <code>switch</code> statement. Can be cast to {@link SwitchNode}
+		 */
+		SWITCH,
+		/**
+		 * A CIVL-C guarded statement (<code>$when</code>). Can be cast to
+		 * {@link WhenNOde}
+		 */
+		WHEN,
+		/**
+		 * A CIVL-C <code>$with</code>/<code>$call_with</code> statement. Can be
+		 * cast to {@link WithNode}
+		 */
+		WITH
 	}
 
 	@Override
