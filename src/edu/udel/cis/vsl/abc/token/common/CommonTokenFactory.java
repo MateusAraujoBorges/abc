@@ -139,6 +139,18 @@ public class CommonTokenFactory implements TokenFactory {
 		CommonStringToken result = new CommonStringToken(type, concatenation,
 				data);
 
+		if (!tokens.isEmpty()) {
+			CivlcToken first = tokens.get(0);
+			CivlcToken last = concatenation
+					.getConstituent(concatenation.getNumConstituents() - 1);
+
+			result.setInputStream(first.getInputStream());
+			result.setChannel(first.getChannel());
+			result.setCharPositionInLine(first.getCharPositionInLine());
+			result.setStartIndex(first.getStartIndex());
+			result.setLine(first.getLine());
+			result.setStopIndex(last.getStopIndex());
+		}
 		return result;
 	}
 

@@ -84,6 +84,14 @@ public interface CivlcToken extends Token {
 	 */
 	void makeNonExpandable();
 
+	int getStartIndex();
+
+	int getStopIndex();
+
+	void setStartIndex(int index);
+
+	void setStopIndex(int index);
+
 	/**
 	 * Return this token's white text, which is used for Fortran lexer
 	 * 

@@ -156,6 +156,18 @@ public interface TokenFactory {
 
 	StringToken newStringToken(CivlcToken token) throws SyntaxException;
 
+	/**
+	 * Constructs a new string literal token (instance of {@link StringToken})
+	 * by concatenating a list of string literal tokens. According to the C
+	 * Standard, after preprocessing, adjacent string literal tokens are
+	 * concatenated. (They may be separated by white space, which is ignored.)
+	 * 
+	 * @param tokens
+	 *            sequence of non-null string literal tokens
+	 * @return a single token obtained by concatenating the given ones
+	 * @throws SyntaxException
+	 *             if the new string cannot be formed for some reason
+	 */
 	StringToken newStringToken(List<CivlcToken> tokens) throws SyntaxException;
 
 	// Source objects...

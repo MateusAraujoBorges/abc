@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.ControlFlowAnalysis;
@@ -103,6 +104,7 @@ public class ControlFlowGraphTest {
 		check("jumps");
 	}
 
+	@Ignore
 	@Test
 	public void branchconst() throws ABCException, IOException {
 		check("branchconst");

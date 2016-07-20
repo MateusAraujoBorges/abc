@@ -58,8 +58,6 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
  * 
  * TODO: deal with #line.
  * 
- * TODO: deal with variadic macros.
- * 
  * @author Stephen F. Siegel
  */
 public class PreprocessorTokenSource implements CivlcTokenSource {
@@ -1157,9 +1155,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		// expand all macro invocations in the expression...
 		expandedFirst = expandList(first).left;
 		// form a TokenSource from this list...
-
-		// TODO: somehow the line number is not right. It is set to one.
-
 		source = TokenUtils.makeTokenSourceFromList(expandedFirst);
 		// evaluate to get integer result...
 		result = expressionAnalyzer.evaluate(source);
@@ -1819,14 +1814,6 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	public String toString() {
 		return "PreprocessorTokenSource[" + getSourceName() + "]";
 	}
-
-	// @Override
-	// public void printShorterFileNameMap(PrintStream out) {
-	// out.println();
-	// out.println("File name list:");
-	// for (SourceFile sourceFile : sourceFiles)
-	// out.println(sourceFile.getIndex() + "\t: " + sourceFile.getName());
-	// }
 
 	@Override
 	public TokenFactory getTokenFactory() {

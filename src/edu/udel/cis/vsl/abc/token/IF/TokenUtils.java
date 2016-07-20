@@ -7,6 +7,8 @@ import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
 
+import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
+
 /**
  * Utility class providing static methods dealing with Token objects.
  * 
@@ -81,6 +83,9 @@ public class TokenUtils {
 		}
 	}
 
+	// This doesn't make sense in case of macro expansion.
+	// the next token is misleading if the token is the
+	// last replacement token...
 	public static String summarizeRangeLocation(CivlcToken first,
 			CivlcToken last, boolean abbreviated) {
 		String result;
@@ -90,36 +95,40 @@ public class TokenUtils {
 		int pos1 = first.getCharPositionInLine();
 		String endPosition;
 		int line2, pos2;
-		CivlcToken next = last.getNext();
+		// CivlcToken next = last.getNext();
 
 		if (pos1 < 0) {
-			// TODO: figure out why this happens and stop it
-			//System.err.println("Problem here"); // problem
+			throw new ABCRuntimeException(
+					"Encountered token without charPositionInLine: "
+							+ first.getText());
 		}
 
-		if (next != null) {
-			int line3 = next.getLine();
-			int pos3 = next.getCharPositionInLine();
-
-			if (pos3 == 0) {
-				line2 = line3 - 1;
-				if (line2 == last.getLine()) {
-					pos2 = last.getCharPositionInLine()
-							+ last.getText().length();
-				} else {
-					pos2 = -1;
-				}
-			} else {
-				line2 = line3;
-				pos2 = pos3;
-			}
-		} else {
-			line2 = last.getLine();
-			if (last.getType() == Token.EOF)
-				pos2 = 0;
-			else
-				pos2 = last.getCharPositionInLine() + last.getText().length();
-		}
+		// if (next != null) {
+		// int line3 = next.getLine();
+		// int pos3 = next.getCharPositionInLine();
+		//
+		// if (pos3 == 0) {
+		// line2 = line3 - 1;
+		// if (line2 == last.getLine()) {
+		// // better to use start and stop indexes
+		// // which may be more accurate than text
+		// pos2 = last.getCharPositionInLine()
+		// + last.getText().length();
+		// } else {
+		// pos2 = -1;
+		// }
+		// } else {
+		// line2 = line3;
+		// pos2 = pos3;
+		// }
+		// } else {
+		line2 = last.getLine();
+		if (last.getType() == Token.EOF)
+			pos2 = 0;
+		else
+			pos2 = last.getCharPositionInLine() + last.getStopIndex()
+					- last.getStartIndex();
+		// }
 		if (pos2 >= 0) {
 			endPosition = line2 + "." + pos2;
 		} else {

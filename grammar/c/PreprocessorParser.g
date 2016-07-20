@@ -145,7 +145,8 @@ includeline	: INCLUDE white* t+=pptoken (t+=wpptoken* t+=pptoken)?
 		  -> ^(INCLUDE $t+)
 		;
 
-pragmaline	: PRAGMA wpptoken* NEWLINE -> ^(PPRAGMA wpptoken* NEWLINE)
+pragmaline	: PRAGMA{$PRAGMA.setType(PPRAGMA);} wpptoken* NEWLINE ->
+		  ^(PRAGMA wpptoken* NEWLINE)
 		;
 
 errorline	: ERROR wpptoken* NEWLINE -> ^(ERROR wpptoken*)

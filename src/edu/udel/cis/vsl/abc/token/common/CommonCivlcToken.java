@@ -197,6 +197,6 @@ public class CommonCivlcToken extends CommonToken implements CivlcToken {
 	public void setWhiteText(String text) {
 		whiteText = text == null ? "" : text;
 	}
-	/* Methods for Frotran parser */
+	/* Methods for Fortran parser */
 
 }
