@@ -39,6 +39,10 @@ typedef enum Operation $operation;
 
 /* **************************** Misc. Functions **************************** */
 
+$system $state $get_state($scope top);
+
+$system $state combineStates($state target, $state source, $scope top);
+
 /* Wait for another process p to terminate. */
 $system void $wait($proc p);
 
@@ -104,28 +108,6 @@ $system void $pathCondition(void);
   @ executes_when \true;
   @*/
 $system _Bool $is_concrete_int(int value);
-
-/* Returns the current program state */
-/*@ pure;
-  @ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$system $state $get_state($scope scope);
-
-/* We denote that a process state of the calling process in a program
- * state s as: cp(s). Let D represents the set of all dynamic scopes
- * (dyscope) that can be reached from the call stack of cp(new), let d
- * represents the youngest (in terms of descendants) dyscope of
- * 'scope' in cp(new). It requires that d in D. Let D' represnets the set of all
- * descendant dyscopes of d. This function adds {D - D'} to the 'old'
- * state for cp(old), returns the updated state.
- */
-/* @ pure;
-   @ depends_on \nothing;
-   @ executes_when \true;
-   @*/
-$system $state $combine_states($state old, $state new, $scope scope);
-
 /* **************************** Memory Functions *************************** */
 
 /* The CIVL-C malloc function, which takes a reference to a scope */

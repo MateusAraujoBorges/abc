@@ -52,6 +52,12 @@ $gcollator gcollator_create($scope scope, int nprocs);
 /* Interface for creating a $collator: */
 $collator   collator_create($gcollator gcollator, $scope scope, int place);
 
+/* Destroy a $gcollator */
+$atomic_f void gcollator_destroy($gcollator g);
+
+/* Destroy a $collator */
+$atomic_f void collator_destroy($collator c);
+
 /*
  * Take a snapshot on the current state of the current process. The
  * specification of the snap-shooting action requires that: 
@@ -69,7 +75,7 @@ $collator   collator_create($gcollator gcollator, $scope scope, int place);
  * dyscope already in s. Also add the call stack of p to s. In this
  * way s is always a valid state.
  */
-$collate_state $collate_snapshot($collator c, $scope scope);
+$collate_state $collate_snapshot($collator c);
 
 /* Collectively free a collate state. The last process will be
  * responsible for dequeue the collate state at the head of the queue.
