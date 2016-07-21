@@ -191,7 +191,8 @@ public class ABCExecutor {
 
 					if (!functionNames.contains(functionName)) {
 						if (i == 0)
-							out.println("==== functions without definition ====");
+							out.println(
+									"==== functions without definition ====");
 						else
 							out.print(",");
 						out.print(functionName);
@@ -250,10 +251,26 @@ public class ABCExecutor {
 	 */
 	private Timer timer;
 
+	/**
+	 * The total number of known unit tasks, including those that have not yet
+	 * been executed. Initially, this is the number of unit tasks specified at
+	 * construction, but this number can grow as new unit tasks are created
+	 * through executing unit tasks.
+	 */
 	private int numUnits;
 
+	/**
+	 * The total number of unit tasks that have been completed (executed). This
+	 * number is necessarily less that or equal to {@link #numUnits}.
+	 */
 	private int numUnitTasksDone = 0;
 
+	/**
+	 * The unit tasks. These are the unit tasks that are executed. Each unit
+	 * tasks corresponds to the processing of a single translation unit.
+	 * Initially, these tasks are specified at construction, but this list can
+	 * grow as new unit tasks are created during execution.
+	 */
 	private ArrayList<UnitTask> unitTasks;
 
 	/**
@@ -338,11 +355,26 @@ public class ABCExecutor {
 
 	// Helpers...
 
-	private <T> void addNulls(int n, ArrayList<T> vec) {
+	/**
+	 * Adds <code>n</code> <code>null</code> values to <code>vec</code>.
+	 * 
+	 * @param n
+	 *            nonnegative integer
+	 * @param vec
+	 *            any array list
+	 */
+	private static <T> void addNulls(int n, ArrayList<T> vec) {
 		for (int i = 0; i < n; i++)
 			vec.add(null);
 	}
 
+	/**
+	 * Adds <code>n</code> <code>null</code> values to each of the lists
+	 * {@link #tokenSources}, {@link #parseTrees}, and {@link #asts}.
+	 * 
+	 * @param n
+	 *            a nonnegative integer
+	 */
 	private void addNulls(int n) {
 		addNulls(n, tokenSources);
 		addNulls(n, parseTrees);
@@ -392,6 +424,19 @@ public class ABCExecutor {
 		out.flush();
 	}
 
+	/**
+	 * Executes a comparison. This is a very special kind of task that involves
+	 * exactly two translation units, which are processed and compared
+	 * syntactically. This method will print a human readable summary declaring
+	 * either that the ASTs are identical or describing some difference between
+	 * them.
+	 * 
+	 * This method should be invoked after the two unit tasks have been executed
+	 * and the two ASTs are available.
+	 * 
+	 * @throws ABCException
+	 *             if {@link #numUnits} is not exactly 2
+	 */
 	private void executeComparison() throws ABCException {
 		assert task.getShowDiff();
 
@@ -462,8 +507,8 @@ public class ABCExecutor {
 			int type;
 
 			if (verbose)
-				out.println(bar + " Preprocessor output for " + name + " "
-						+ bar);
+				out.println(
+						bar + " Preprocessor output for " + name + " " + bar);
 			if (showTime) {
 				do {
 					token = (CommonToken) tokens.nextToken();
@@ -528,24 +573,33 @@ public class ABCExecutor {
 			return;
 
 		Analyzer analyzer = frontEnd.getStandardAnalyzer(language);
+		boolean change = true;
 
 		// if you are going to link, there is no need to do final
 		// analysis because the linker will do it anyway...
-
 		if (stage.compareTo(TranslationStage.TRANSFORM_ASTS) >= 0) {
 			for (TransformRecord record : unitTask.getTransformRecords()) {
-				Transformer transformer = record.create(frontEnd
-						.getASTFactory());
+				Transformer transformer = record
+						.create(frontEnd.getASTFactory());
 
-				analyzer.clear(ast);
-				analyzer.analyze(ast);
-				ast = transformer.transform(ast);
+				if (change) {
+					analyzer.clear(ast);
+					analyzer.analyze(ast);
+				}
+
+				AST ast2 = transformer.transform(ast);
+
+				change = (ast != ast2);
+				ast = ast2;
 			}
 			asts.set(index, ast);
 			if (stage.compareTo(TranslationStage.LINK) >= 0)
 				return;
 		}
-		analyzer.analyze(ast);
+		if (change) {
+			analyzer.clear(ast);
+			analyzer.analyze(ast);
+		}
 	}
 
 	// Public methods...
@@ -602,8 +656,8 @@ public class ABCExecutor {
 				out.flush();
 			}
 			program.apply(transformer);
-			timer.markTime("apply transformer "
-					+ transformer.getShortDescription());
+			timer.markTime(
+					"apply transformer " + transformer.getShortDescription());
 		}
 		if (!showTime && !task.isSilent())
 			printProgram();

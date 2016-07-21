@@ -7,8 +7,6 @@ import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 import org.antlr.runtime.TokenSource;
 
-import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
-
 /**
  * Utility class providing static methods dealing with Token objects.
  * 
@@ -83,9 +81,23 @@ public class TokenUtils {
 		}
 	}
 
-	// This doesn't make sense in case of macro expansion.
-	// the next token is misleading if the token is the
-	// last replacement token...
+	/**
+	 * Given a non-empty list of tokens, constructs a string which summarizes
+	 * the range of text in the original source file(s) from whence those tokens
+	 * came. The string may have a form such as "filename:n.a-m.b" where n is
+	 * the line number of the first token, a is the character index of the first
+	 * token, m is the line number of the last token, and b is the character
+	 * index of the last token. Or this form may be abbreviated or modified as
+	 * necessary.
+	 * 
+	 * @param first
+	 *            first token in linked list
+	 * @param last
+	 *            last token in linked list
+	 * @param abbreviated
+	 *            should the filename be abbreviated?
+	 * @return string representation of token range
+	 */
 	public static String summarizeRangeLocation(CivlcToken first,
 			CivlcToken last, boolean abbreviated) {
 		String result;
@@ -95,6 +107,11 @@ public class TokenUtils {
 		int pos1 = first.getCharPositionInLine();
 		String endPosition;
 		int line2, pos2;
+
+		// This doesn't make sense in case of macro expansion.
+		// the next token is misleading if the token is the
+		// last replacement token...
+
 		// CivlcToken next = last.getNext();
 
 		// if (pos1 < 0) {
@@ -139,7 +156,7 @@ public class TokenUtils {
 				// TODO: When intermediate file used, delete below:
 				// = = = = =
 				if (line1 <= 0 && line2 <= 0)
-					return filename1 ;
+					return filename1;
 				// = = = = =
 				if (pos1 == pos2)
 					result = filename1 + ":" + line1 + "." + pos1;
