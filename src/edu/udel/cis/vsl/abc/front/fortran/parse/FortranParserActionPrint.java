@@ -3677,7 +3677,7 @@ public class FortranParserActionPrint implements IFortranParserAction {
     * connect_spec
     */
    public void connect_spec(Token id) {
-      printRuleHeader(721, "equiv-op");
+      printRuleHeader(905, "connect-spec");
       if(id != null) printParameter(id, "connect-spec");
       printRuleTrailer();
    }		
@@ -3775,7 +3775,7 @@ public class FortranParserActionPrint implements IFortranParserAction {
 	 */
 	 public void io_control_spec(boolean hasExpression, Token keyword, 
 										  boolean hasAsterisk) {
-			printRuleHeader(913, "io-control-spec-list");
+			printRuleHeader(913, "io-control-spec");
 			printParameter(hasExpression, "hasExpression");
 			printParameter(keyword, "keyword");
 			printParameter(hasAsterisk, "hasAsterisk");
