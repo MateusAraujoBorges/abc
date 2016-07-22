@@ -269,6 +269,10 @@ public class TypeAnalyzer {
 		String name = typeNode.getName().name();
 		Scope scope = typeNode.getScope();
 		OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(true, name);
+
+		if (entity == null)
+			throw error("Typedef name used before definition?", typeNode);
+
 		EntityKind kind = entity.getEntityKind();
 		Typedef typedef;
 		Type result;
