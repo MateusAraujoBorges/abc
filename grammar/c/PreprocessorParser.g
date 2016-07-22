@@ -404,6 +404,7 @@ civl_keyword	:	ABSTRACT
 		|	SYSTEM 
 		|	UNIFORM  
 		|	WHEN
+		|	WITH
 		;
 
 /* CUDA-C keywords beyond those in C11: */

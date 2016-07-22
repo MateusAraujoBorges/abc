@@ -133,6 +133,7 @@ SPAWN		:	'$spawn'	;
 SYSTEM      	:   	'$system'	;
 UNIFORM		:	'$uniform'	;
 WHEN		:	'$when'		;
+WITH		:	'$with'		;
 
 /* Cuda-C keywords */
 DEVICE		:	'__device__'	;

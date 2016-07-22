@@ -229,6 +229,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.type.CommonFunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonPointerTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonRangeTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonScopeTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.common.type.CommonStateTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonStructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonTypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonTypeofNode;
@@ -1116,13 +1117,17 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public WithNode newWithNode(Source source, ExpressionNode stateRef, StatementNode statement,
-			boolean isCallWithNode) {
+	public WithNode newWithNode(Source source, ExpressionNode stateRef, StatementNode statement) {
 		return new CommonWithNode(source, stateRef, statement);
 	}
 
 	@Override
 	public RunNode newRunNode(Source source, StatementNode statement) {
 		return new CommonRunNode(source, statement);
+	}
+
+	@Override
+	public TypeNode newStateTypeNode(Source source) {
+		return new CommonStateTypeNode(source);
 	}
 }

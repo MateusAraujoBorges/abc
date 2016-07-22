@@ -123,6 +123,8 @@ $system void* $malloc($scope s, int size);
   @*/
 $system void $free(void *p);
 
+/******/
+
 /* Assigns arbitrary value to the memory location specified by the given pointer.
  */
 /*@ depends_on \access(ptr);
@@ -137,5 +139,12 @@ $system void $havoc(void *ptr);
   @ executes_when \true;
   @*/
 $system double $pow(double base, double exp);
+
+/******/
+/* Returns a reference to the current state */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$system $state $this_state();
 
 #endif

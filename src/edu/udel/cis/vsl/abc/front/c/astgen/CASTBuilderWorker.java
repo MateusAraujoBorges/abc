@@ -1520,8 +1520,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	/**
 	 * Given a base type and a declarator suffix, returns the new derived type.
-	 * Example: base type is "int", suffix is "[10]", returns the type
-	 * "array of int of length 10".
+	 * Example: base type is "int", suffix is "[10]", returns the type "array of
+	 * int of length 10".
 	 * 
 	 * @param suffix
 	 *            a CommonTree node of type ARRAY_SUFFIX or FUNCTION_SUFFIX
@@ -1895,6 +1895,14 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				translateStatement((CommonTree) statementTree.getChild(1), new SimpleScope(loopScope)), getContract());
 	}
 
+	private StatementNode translateWith(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
+		Source source = this.newSource(statementTree);
+		ExpressionNode colState = this.translateExpression((CommonTree) statementTree.getChild(0), scope);
+		StatementNode body = this.translateStatement((CommonTree) statementTree.getChild(1), scope);
+
+		return nodeFactory.newWithNode(source, colState, body);
+	}
+
 	private StatementNode translateSwitch(CommonTree statementTree, SimpleScope scope) throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		CommonTree expressionTree = (CommonTree) statementTree.getChild(0);
@@ -2162,6 +2170,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					translateStatement((CommonTree) statementTree.getChild(1), scope));
 		case WHILE:
 			return translateWhile(statementTree, scope);
+		case WITH:
+			return translateWith(statementTree, scope);
 		default:
 			throw error("Unknown statement type " + kind, statementTree);
 		}

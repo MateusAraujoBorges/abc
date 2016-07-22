@@ -234,6 +234,7 @@ public interface CivlcTokenConstant {
 	public static final int VOLATILE = CivlCParser.VOLATILE;
 	public static final int WHEN = CivlCParser.WHEN;
 	public static final int WHILE = CivlCParser.WHILE;
+	public static final int WITH = CivlCParser.WITH;
 	public static final int WS = CivlCParser.WS;
 	public static final int Zero = CivlCParser.Zero;
 	public static final int BODY = CivlCParser.BODY;

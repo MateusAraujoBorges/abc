@@ -1333,6 +1333,7 @@ statement
     | atomicStatement -> ^(STATEMENT atomicStatement)
     | datomicStatement -> ^(STATEMENT datomicStatement)
     | runStatement -> ^(STATEMENT runStatement)
+    | withStatement -> ^(STATEMENT withStatement)
     ;
 
 statementWithScope
@@ -1579,9 +1580,13 @@ annotationBody : (~ ANNOTATION_END)+ ;
  * Child 0: statement
  */
 runStatement
-    :   RUN statement
-        -> ^(RUN statement)
+    	: RUN statement -> ^(RUN statement)
     ;
+
+withStatement
+	: WITH LPAREN assignmentExpression RPAREN statement
+	  -> ^(WITH assignmentExpression statement)
+	;
 
 /* CIVL-C $when statement.  This is a guarded command.
  * Syntax: $when (expr) stmt, where expr is a boolean

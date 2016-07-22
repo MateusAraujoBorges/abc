@@ -22,7 +22,7 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils.LexerFactory;
 
 public class CIVLTranslationTest {
 
-	private static boolean debug = false;
+	private static boolean debug = true;
 
 	private static PrintStream out = System.out;
 
@@ -56,6 +56,7 @@ public class CIVLTranslationTest {
 		TranslationTask task = new TranslationTask(file);
 
 		task.addAllTransformCodes(codes);
+		task.setPrettyPrint(true);
 		task.setVerbose(debug);
 		ABCExecutor.execute(task);
 	}
@@ -174,6 +175,11 @@ public class CIVLTranslationTest {
 	@Test
 	public void arrayLambda() throws ABCException, IOException {
 		check("lambda");
+	}
+
+	@Test
+	public void with() throws ABCException, IOException {
+		check("with");
 	}
 
 	@Test(expected = SyntaxException.class)

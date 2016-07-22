@@ -74,6 +74,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.RunNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.WhenNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.WithNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
@@ -233,6 +234,7 @@ public class SideEffectRemover extends BaseTransformer {
 
 	/* Private methods */
 
+	// TODO shall this be moved to NodeFactory?
 	/**
 	 * Given a {@link Type}, creates a new type node tree that will generate
 	 * that type.
@@ -2500,9 +2502,27 @@ public class SideEffectRemover extends BaseTransformer {
 			return translateSwitch((SwitchNode) statement);
 		case WHEN:
 			return translateWhen((WhenNode) statement);
+		case WITH:
+			return translateWith((WithNode) statement);
 		default:
 			throw new ABCRuntimeException("unreachable");
 		}
+	}
+
+	private List<BlockItemNode> translateWith(WithNode with) {
+		StatementNode bodyNode = with.getBodyNode();
+		int stateIndex = with.getStateReference().childIndex(), bodyIndex = bodyNode.childIndex();
+		ExprTriple stateTriple = this.translate(with.getStateReference(), false);
+		List<BlockItemNode> result = new LinkedList<>();
+		List<BlockItemNode> bodyItems = translateStatement(bodyNode);
+
+		purify(stateTriple);
+		result.addAll(stateTriple.getBefore());
+		with.setChild(stateIndex, stateTriple.getNode());
+		removeNodes(bodyItems);
+		with.setChild(bodyIndex, makeOneBlockItem(bodyNode.getSource(), bodyItems));
+		result.add(with);
+		return result;
 	}
 
 	/**

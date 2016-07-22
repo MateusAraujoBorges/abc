@@ -8,7 +8,9 @@ import java.util.List;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Typedef;
+import edu.udel.cis.vsl.abc.ast.type.IF.StructureOrUnionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
+import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
@@ -24,6 +26,8 @@ import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
  * 
  */
 public class StandardTypes {
+
+	public final static String COLLATE_STATE_TYPE = "_collate_state";
 
 	private EntityFactory entityFactory;
 
@@ -93,4 +97,20 @@ public class StandardTypes {
 		return standardTypedefs;
 	}
 
+	/**
+	 * Is the given type a $collate_state type?
+	 * 
+	 * @param type
+	 * @return
+	 */
+	public boolean isCollateStateType(Type type) {
+		if (type.kind() == TypeKind.STRUCTURE_OR_UNION) {
+			StructureOrUnionType structType = (StructureOrUnionType) type;
+
+			if (structType.isStruct()) {
+				return structType.getName().equals(COLLATE_STATE_TYPE);
+			}
+		}
+		return false;
+	}
 }

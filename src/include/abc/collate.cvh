@@ -100,6 +100,23 @@ _Bool $collate_arrived($collate_state cp, $range range);
   @*/
 _Bool $collate_complete($collate_state cp);
 
+/* enters the given collate state cs, 
+ * returns the reference to the pre-state and 
+ * control switches to the collate state cols
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true; 
+  @ */
+$system $state $enter_collate_state($collate_state cs);
+
+/* exits the current state (which is the collate state), copying the path condition
+ * to the real state rs and control goes back to the modified real state rs
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true; 
+  @ */
+$system void $exit_collate_state($collate_state cs, $state rs);
+
 #endif
 
 

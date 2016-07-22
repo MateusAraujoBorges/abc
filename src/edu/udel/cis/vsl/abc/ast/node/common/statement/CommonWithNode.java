@@ -20,14 +20,14 @@ public class CommonWithNode extends CommonStatementNode implements WithNode {
 	}
 
 	@Override
-	public StatementNode getStatementNode() {
+	public StatementNode getBodyNode() {
 		return (StatementNode) child(1);
 	}
 
 	@Override
 	public WithNode copy() {
 		return new CommonWithNode(getSource(), duplicate(getStateReference()),
-				duplicate(getStatementNode()));
+				duplicate(getBodyNode()));
 	}
 
 	@Override

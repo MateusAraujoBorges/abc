@@ -388,9 +388,15 @@ public class StatementAnalyzer {
 		}
 		case WITH: {
 			WithNode withNode = (WithNode) statement;
+			ExpressionNode stateRef = withNode.getStateReference();
+			Type stateType;
 
-			processExpression(withNode.getStateReference());
-			processStatement(withNode.getStatementNode());
+			processExpression(stateRef);
+			stateType = stateRef.getConvertedType();
+			if (!entityAnalyzer.standardTypes.isCollateStateType(stateType))
+				throw this.error("The state reference expression of $with doesn't have type of collate statet",
+						statement);
+			processStatement(withNode.getBodyNode());
 			break;
 		}
 		case CHOOSE: {

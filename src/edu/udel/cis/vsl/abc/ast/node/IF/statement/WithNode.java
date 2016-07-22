@@ -37,7 +37,7 @@ public interface WithNode extends StatementNode {
 	 * 
 	 * @return A {@link StatementNode} attached with the whole with expression.
 	 */
-	StatementNode getStatementNode();
+	StatementNode getBodyNode();
 
 	@Override
 	WithNode copy();

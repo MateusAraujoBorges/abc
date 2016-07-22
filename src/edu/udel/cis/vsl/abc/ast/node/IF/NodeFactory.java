@@ -375,6 +375,16 @@ public interface NodeFactory {
 	TypeNode newScopeTypeNode(Source source);
 
 	/**
+	 * Returns a new state type node ("<code>$state</code>"). This is a CIVL-C
+	 * type.
+	 * 
+	 * @param source
+	 *            source information for the occurrence of <code>$state</code>
+	 * @return the new instance of state type
+	 */
+	TypeNode newStateTypeNode(Source source);
+
+	/**
 	 * Returns a new instance of a typedef name node. This is a use of a typedef
 	 * name. The source is the same as that of the identifier name.
 	 * 
@@ -620,8 +630,8 @@ public interface NodeFactory {
 	ExpressionNode newSelfNode(Source source);
 
 	/**
-	 * Constructs a new node representing an occurrence of the CIVL-C
-	 * "null process" constant, written <code>$proc_null</code>.
+	 * Constructs a new node representing an occurrence of the CIVL-C "null
+	 * process" constant, written <code>$proc_null</code>.
 	 * 
 	 * @param source
 	 *            source information for the occurrence of the constant
@@ -631,8 +641,8 @@ public interface NodeFactory {
 	ExpressionNode newProcnullNode(Source source);
 
 	/**
-	 * Constructs a new node representing an occurrence of the CIVL-C
-	 * "null state" constant, written <code>$state_null</code>
+	 * Constructs a new node representing an occurrence of the CIVL-C "null
+	 * state" constant, written <code>$state_null</code>
 	 * 
 	 * @param source
 	 *            source information for the occurrence of the constant
@@ -2452,7 +2462,7 @@ public interface NodeFactory {
 	 *            The statement attached with the $with statement
 	 * @return A new {@link WithNode}
 	 */
-	WithNode newWithNode(Source source, ExpressionNode stateRef, StatementNode statement, boolean isCallWithNode);
+	WithNode newWithNode(Source source, ExpressionNode stateRef, StatementNode statement);
 
 	/**
 	 * Create a new {@link UpdateNode}
