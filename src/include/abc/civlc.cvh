@@ -39,10 +39,6 @@ typedef enum Operation $operation;
 
 /* **************************** Misc. Functions **************************** */
 
-$system $state $get_state($scope top);
-
-$system $state combineStates($state target, $state source, $scope top);
-
 /* Wait for another process p to terminate. */
 $system void $wait($proc p);
 

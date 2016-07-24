@@ -19,7 +19,7 @@ public class CommonStatenullNode extends CommonConstantNode implements Statenull
 
 	@Override
 	public ConstantKind constantKind() {
-		return ConstantKind.STATE_NULL;
+		return ConstantKind.STATENULL;
 	}
 
 	@Override

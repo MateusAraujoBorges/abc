@@ -58,6 +58,38 @@ $atomic_f void gcollator_destroy($gcollator g);
 /* Destroy a $collator */
 $atomic_f void collator_destroy($collator c);
 
+/* Take a snapshot on the current state. Returns the collate state
+ * which contains the snapshot. This function allows processes commit
+ * their snapshots collectively. The final collate state will be the
+ * state consists of snapshots from all participant processes, one for
+ * each. The collate state is always a valid program state as long as
+ * it consists of at least one snapshot.
+ *
+ *
+ * Pre-conditions:
+ *   scope must be reachable from the call stack of the calling
+ *   process.
+ *
+ *   all participant processes P must be peers, i.e. for each
+ *   procecess p in P, p is spawned by another process p' and p' is
+ *   not in P.
+ *
+ *
+ * Post-conditions: 
+ *   There is a process set P which represents all processes that
+ *   already commit their snapshots to the collate state cp, cp has
+ *   size(P) live processes (a live process has non-empty call stack).
+ *   For each process p in P, its' snapshot in cp is a process state
+ *   whose pid is same as its' place in the collator. cp is always a
+ *   valid state for P.
+ */
+/*@
+  @ pure;
+  @ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$system void $collate_snapshot($collate_state cp, int nprocs, $scope scope);
+
 /*
  * Take a snapshot on the current state of the current process. The
  * specification of the snap-shooting action requires that: 
@@ -75,7 +107,7 @@ $atomic_f void collator_destroy($collator c);
  * dyscope already in s. Also add the call stack of p to s. In this
  * way s is always a valid state.
  */
-$collate_state $collate_snapshot($collator c);
+$collate_state $collate_arrives($collator c, $scope scope);
 
 /* Collectively free a collate state. The last process will be
  * responsible for dequeue the collate state at the head of the queue.
@@ -83,7 +115,7 @@ $collate_state $collate_snapshot($collator c);
  * If there is no arrived collate state by the process, it should
  * report an error.
  */
-$collate_state $collate_unsnapshot($collator c);
+$collate_state $collate_departs($collator c);
 
 /* Tests if a set of participants defined by a $range have all arrived
  * the specific $collate_entry referenced by cp.

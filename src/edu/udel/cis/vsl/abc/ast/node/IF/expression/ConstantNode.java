@@ -26,7 +26,7 @@ public interface ConstantNode extends ExpressionNode {
 		 * type <code>$state</code>. A node if this kind may be safely cast to
 		 * {@link StatenullNode}
 		 */
-		STATE_NULL, STRING
+		STATENULL, STRING
 	}
 
 	ConstantKind constantKind();
