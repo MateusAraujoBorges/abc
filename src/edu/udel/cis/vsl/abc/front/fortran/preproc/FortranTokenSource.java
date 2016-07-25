@@ -80,8 +80,10 @@ public class FortranTokenSource implements CivlcTokenSource {
 
 	private FortranTokenStream tokenStream;
 
-	public FortranTokenSource(Configuration config, FileIndexer indexer, CharStream[] streams, Formation[] formations,
-			File[] systemIncludePaths, File[] userIncludePaths, Map<String, Macro> macroMap, TokenFactory tokenFactory,
+	public FortranTokenSource(Configuration config, FileIndexer indexer,
+			CharStream[] streams, Formation[] formations,
+			File[] systemIncludePaths, File[] userIncludePaths,
+			Map<String, Macro> macroMap, TokenFactory tokenFactory,
 			FortranTokenStream tokenStream) throws PreprocessorException {
 		int numStreams = streams.length;
 

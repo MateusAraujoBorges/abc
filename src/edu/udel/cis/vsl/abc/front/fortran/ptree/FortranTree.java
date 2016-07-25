@@ -271,9 +271,10 @@ public class FortranTree implements ParseTree {
 			// result += parent.nodeKind;
 		}
 		result += ": ";
-		//result += this.id;
+		// result += this.id;
 		result += "[";
-		if(rule != Integer.MIN_VALUE) result += " " + rule + " ";
+		if (rule != Integer.MIN_VALUE)
+			result += " " + rule + " ";
 		result += nodeName + "]";
 		if (cTokens != null && cTokens.length > 0) {
 			result += "<";

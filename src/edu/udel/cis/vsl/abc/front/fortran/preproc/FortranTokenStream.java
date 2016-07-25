@@ -96,8 +96,10 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 		// need to make sure the line was terminated with a T_EOS. this may
 		// not happen if we're working on a file that ended w/o a newline
 		if (pList.get(pList.size() - 1).getType() != FortranLexer.T_EOS) {
-			CommonCivlcToken eos = new CommonCivlcToken(lexer.getInput(), FortranLexer.T_EOS, Token.DEFAULT_CHANNEL,
-					lexer.getInput().index(), lexer.getInput().index() + 1, lexer.getFormation());
+			CommonCivlcToken eos = new CommonCivlcToken(lexer.getInput(),
+					FortranLexer.T_EOS, Token.DEFAULT_CHANNEL,
+					lexer.getInput().index(), lexer.getInput().index() + 1,
+					lexer.getFormation());
 			eos.setText("\n");
 			packedList.add(eos);
 		}
@@ -143,8 +145,10 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 		do {
 			token = super.get(start + lineLength);
 			lineLength++;
-		} while ((start + lineLength) < super.tokens.size() && (token.getChannel() == lexer.getIgnoreChannelNumber()
-				|| token.getType() != FortranLexer.T_EOS && token.getType() != FortranLexer.EOF));
+		} while ((start + lineLength) < super.tokens.size()
+				&& (token.getChannel() == lexer.getIgnoreChannelNumber()
+						|| token.getType() != FortranLexer.T_EOS
+								&& token.getType() != FortranLexer.EOF));
 
 		return lineLength;
 	} // end getLineLength()
@@ -159,7 +163,8 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 		do {
 			tk = (Token) (packedList.get(start));
 			start++;
-		} while (start < this.packedList.size() && tk.getType() != desiredToken);
+		} while (start < this.packedList.size()
+				&& tk.getType() != desiredToken);
 
 		if (tk.getType() == desiredToken)
 			// start is one token past the one we want
@@ -171,7 +176,8 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 	public Token getToken(int pos) {
 		if (pos >= this.packedList.size() || pos < 0) {
 			System.out.println("pos is out of range!");
-			System.out.println("pos: " + pos + " packedListSize: " + this.packedList.size());
+			System.out.println("pos: " + pos + " packedListSize: "
+					+ this.packedList.size());
 			return null;
 		} else
 			return (Token) (packedList.get(pos));
@@ -192,14 +198,16 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 
 		if (start >= this.packedList.size()) {
 			System.out.println("start is out of range!");
-			System.out.println("start: " + start + " packedListSize: " + this.packedList.size());
+			System.out.println("start: " + start + " packedListSize: "
+					+ this.packedList.size());
 			return -1;
 		}
 
 		do {
 			tk = (Token) (packedList.get(start));
 			start++;
-		} while (start < this.packedList.size() && tk.getType() != desiredToken);
+		} while (start < this.packedList.size()
+				&& tk.getType() != desiredToken);
 
 		if (tk.getType() == desiredToken)
 			// start is one token past the one we want
@@ -307,7 +315,8 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 			channel = token.getChannel();
 
 			// continue until find what looking for or reach end
-		} while ((tk != FortranLexer.EOF && tk != FortranLexer.T_EOS && tk != desiredToken)
+		} while ((tk != FortranLexer.EOF && tk != FortranLexer.T_EOS
+				&& tk != desiredToken)
 				|| channel == lexer.getIgnoreChannelNumber());
 
 		if (tk == desiredToken) {
@@ -382,7 +391,8 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 			tk = this.LA(lookAhead);
 			// update lookAhead in case we look again
 			lookAhead++;
-		} while (tk != FortranLexer.T_EOS && tk != FortranLexer.EOF && tk != desiredToken);
+		} while (tk != FortranLexer.T_EOS && tk != FortranLexer.EOF
+				&& tk != desiredToken);
 
 		if (tk == desiredToken) {
 			return true;
@@ -391,8 +401,10 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 		}
 	} // end testForFunction()
 
-	public boolean appendToken(int tokenType, String tokenText, Formation formation) {
-		CommonCivlcToken newToken = new CommonCivlcToken(tokenType, tokenText, formation);
+	public boolean appendToken(int tokenType, String tokenText,
+			Formation formation) {
+		CommonCivlcToken newToken = new CommonCivlcToken(tokenType, tokenText,
+				formation);
 		// append a token to the end of newTokenList
 		return this.packedList.add(newToken);
 	} // end appendToken()
@@ -401,7 +413,8 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 		this.packedList.add(token);
 	}
 
-	public void addToken(int index, int tokenType, String tokenText, Formation formation) {
+	public void addToken(int index, int tokenType, String tokenText,
+			Formation formation) {
 		try {
 			// for example:
 			// index = 1
@@ -409,7 +422,8 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 			// newTokenList.size() == 22
 			// 22-3+1=20
 			// so, inserted between the label and T_CONTINUE
-			this.packedList.add(index, new CommonCivlcToken(tokenType, tokenText, formation));
+			this.packedList.add(index,
+					new CommonCivlcToken(tokenType, tokenText, formation));
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -449,7 +463,8 @@ public class FortranTokenStream extends LegacyCommonTokenStream {
 		return this.packedList.size();
 	} // end getTokensListSize()
 
-	public CommonCivlcToken createToken(int type, String text, int line, int col, Formation formation) {
+	public CommonCivlcToken createToken(int type, String text, int line,
+			int col, Formation formation) {
 		CommonCivlcToken token = new CommonCivlcToken(type, text, formation);
 		token.setLine(line);
 		token.setCharPositionInLine(col);

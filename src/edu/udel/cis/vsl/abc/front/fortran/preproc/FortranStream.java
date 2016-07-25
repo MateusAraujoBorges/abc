@@ -61,7 +61,8 @@ public class FortranStream extends ANTLRFileStream {
 		line = 1;
 	}
 
-	public FortranStream(String filename, String path, int sourceForm) throws IOException {
+	public FortranStream(String filename, String path, int sourceForm)
+			throws IOException {
 		super(path);
 		this.filename = filename;
 		this.filepath = path;
@@ -69,7 +70,8 @@ public class FortranStream extends ANTLRFileStream {
 	}
 
 	public int determineSourceForm(String fileName) {
-		if (fileName.endsWith(new String(".f")) == true || fileName.endsWith(new String(".F")) == true) {
+		if (fileName.endsWith(new String(".f")) == true
+				|| fileName.endsWith(new String(".F")) == true) {
 			this.sourceForm = FIXED_FORM;
 			return FIXED_FORM;
 		} else {
@@ -159,7 +161,8 @@ public class FortranStream extends ANTLRFileStream {
 					i = ii;
 				}
 
-				while ((ii = consumeFreeFormCommentLine(i, data, comments)) != i) {
+				while ((ii = consumeFreeFormCommentLine(i, data,
+						comments)) != i) {
 					// comment line can't be added immediately because
 					// could be in the middle of a continued line
 					line += 1;
@@ -183,7 +186,8 @@ public class FortranStream extends ANTLRFileStream {
 							count += ii - i;
 							col += ii - i;
 							i = ii;
-							ii = completeContinuedString(quoteChar, i, data, count, newData);
+							ii = completeContinuedString(quoteChar, i, data,
+									count, newData);
 						}
 						count += ii - i;
 						col += ii - i;
@@ -226,7 +230,8 @@ public class FortranStream extends ANTLRFileStream {
 						count += ii - i;
 						col += ii - i;
 						i = ii;
-						ii = completeContinuedString(quoteChar, i, data, count, newData);
+						ii = completeContinuedString(quoteChar, i, data, count,
+								newData);
 					}
 					count += ii - i;
 					col += ii - i;
@@ -235,7 +240,8 @@ public class FortranStream extends ANTLRFileStream {
 				// Holleriths are matched after strings so Hollerith matching
 				// doesn't have
 				// to worry about string, i.e, the string, "4HThis is a string".
-				else if ((ii = consumeHollerith(i, data, count, newData)) != i) {
+				else if ((ii = consumeHollerith(i, data, count,
+						newData)) != i) {
 					// System.out.println("Found Hollerith character");
 					count += ii - i;
 					col += ii - i;
@@ -291,7 +297,8 @@ public class FortranStream extends ANTLRFileStream {
 					i = ii;
 				}
 
-				while ((ii = consumeFixedFormCommentLine(i, data, comments)) != i) {
+				while ((ii = consumeFixedFormCommentLine(i, data,
+						comments)) != i) {
 					count = consumeCommentLines(count, newData, comments);
 					line += 1;
 					i = ii;
@@ -353,7 +360,8 @@ public class FortranStream extends ANTLRFileStream {
 				// doesn't have
 				// to worry about strings, i.e, the string, "4HThis is a
 				// string".
-				else if ((ii = consumeHollerith(i, data, count, newData)) != i) {
+				else if ((ii = consumeHollerith(i, data, count,
+						newData)) != i) {
 					// System.out.println("Found Hollerith character");
 					count += ii - i;
 					col += ii - i;
@@ -433,7 +441,8 @@ public class FortranStream extends ANTLRFileStream {
 		return false;
 	}
 
-	private int consumeFreeFormCommentLine(int i, char buf[], StringBuffer comments) {
+	private int consumeFreeFormCommentLine(int i, char buf[],
+			StringBuffer comments) {
 		if (i >= super.n)
 			return i;
 
@@ -475,7 +484,8 @@ public class FortranStream extends ANTLRFileStream {
 	 * when processing comments.
 	 */
 	@SuppressWarnings("unused")
-	private int consumeFixedFormComments(int i, char buf[], StringBuffer comments) {
+	private int consumeFixedFormComments(int i, char buf[],
+			StringBuffer comments) {
 		if (i < super.n && buf[i] == '!') {
 			// found comment character, copy characters up to '\n'
 			do {
@@ -522,7 +532,8 @@ public class FortranStream extends ANTLRFileStream {
 	 * line comment to the comments buffer (without trailing '\n', and return
 	 * the position of the character after the '\n' character.
 	 */
-	private int consumeFixedFormCommentLine(int i, char buf[], StringBuffer comments) {
+	private int consumeFixedFormCommentLine(int i, char buf[],
+			StringBuffer comments) {
 		if (i >= super.n)
 			return i;
 
@@ -546,7 +557,8 @@ public class FortranStream extends ANTLRFileStream {
 	 * If character at i == c, skip to next line advancing past '\n', while
 	 * copying intervening characters to comments buffer.
 	 */
-	private int processLineForCommentChar(char c, int i, char buf[], StringBuffer comments) {
+	private int processLineForCommentChar(char c, int i, char buf[],
+			StringBuffer comments) {
 		if (i >= super.n)
 			return i;
 
@@ -575,7 +587,8 @@ public class FortranStream extends ANTLRFileStream {
 		return (buf[i] == '#');
 	}
 
-	private int consumePreprocessLine(int i, char buf[], StringBuffer comments) {
+	private int consumePreprocessLine(int i, char buf[],
+			StringBuffer comments) {
 		return processLineForCommentChar('#', i, buf, comments);
 	}
 
@@ -591,7 +604,8 @@ public class FortranStream extends ANTLRFileStream {
 	 * remaining characters to the comments buffer, including '\n', to retain
 	 * possible comments following the continuation character.
 	 */
-	private int consumeFreeFormContinuationAtEnd(int i, char buf[], StringBuffer comments) {
+	private int consumeFreeFormContinuationAtEnd(int i, char buf[],
+			StringBuffer comments) {
 		if (i >= super.n || buf[i] != '&')
 			return i;
 
@@ -641,7 +655,8 @@ public class FortranStream extends ANTLRFileStream {
 		// skip all preprocessor and comment lines
 		//
 		i += 1;
-		while (matchPreprocessLine(i, buf) || matchFixedFormCommentLine(i, buf)) {
+		while (matchPreprocessLine(i, buf)
+				|| matchFixedFormCommentLine(i, buf)) {
 			i = findCharacter('\n', i, buf);
 			if (buf[i] != '\n')
 				return false;
@@ -682,7 +697,8 @@ public class FortranStream extends ANTLRFileStream {
 	 *
 	 * WARNING, don't go beyond length of stream, super.n
 	 */
-	private int consumeFixedFormContinuation(int i, char buf[], StringBuffer comments) {
+	private int consumeFixedFormContinuation(int i, char buf[],
+			StringBuffer comments) {
 		int i0 = i; // save initial value of i
 		int ii = i + 1; // look ahead past the '\n'
 
@@ -816,7 +832,8 @@ public class FortranStream extends ANTLRFileStream {
 	 * Complete the processing of a string that is continued across multiple
 	 * lines.
 	 */
-	private int completeContinuedString(char quoteChar, int i, char buf[], int count, char newBuf[]) {
+	private int completeContinuedString(char quoteChar, int i, char buf[],
+			int count, char newBuf[]) {
 		int i0 = i;
 
 		// skip initial '&'
@@ -864,11 +881,13 @@ public class FortranStream extends ANTLRFileStream {
 		do {
 			newBuf[count++] = buf[i++];
 			// look for two quote chars in a row, if found copy both
-			if (i < super.n - 1 && buf[i] == quoteChar && buf[i + 1] == quoteChar) {
+			if (i < super.n - 1 && buf[i] == quoteChar
+					&& buf[i + 1] == quoteChar) {
 				newBuf[count++] = buf[i++];
 				newBuf[count++] = buf[i++];
 			}
-		} while (i < super.n && buf[i] != quoteChar && buf[i] != '&' && buf[i] != '\n');
+		} while (i < super.n && buf[i] != quoteChar && buf[i] != '&'
+				&& buf[i] != '\n');
 
 		return i;
 	}
@@ -894,7 +913,8 @@ public class FortranStream extends ANTLRFileStream {
 	 * '&' character on the next line; return the position of the trailing '&'.
 	 * If a string doesn't terminate it's an error, return '\n' position.
 	 */
-	private int consumeFreeFormString(int i, char buf[], int count, char newBuf[]) {
+	private int consumeFreeFormString(int i, char buf[], int count,
+			char newBuf[]) {
 		if (i >= super.n)
 			return i;
 
@@ -905,7 +925,8 @@ public class FortranStream extends ANTLRFileStream {
 		do {
 			newBuf[count++] = buf[i++];
 			// look for two quote chars in a row, if found copy both
-			if (i < super.n - 1 && buf[i] == quote_char && buf[i + 1] == quote_char) {
+			if (i < super.n - 1 && buf[i] == quote_char
+					&& buf[i + 1] == quote_char) {
 				newBuf[count++] = buf[i++];
 				newBuf[count++] = buf[i++];
 			}
@@ -922,7 +943,8 @@ public class FortranStream extends ANTLRFileStream {
 					newBuf[count++] = buf[i++];
 				}
 			}
-		} while (i < super.n && buf[i] != quote_char && buf[i] != '&' && buf[i] != '\n');
+		} while (i < super.n && buf[i] != quote_char && buf[i] != '&'
+				&& buf[i] != '\n');
 
 		return i;
 	}
@@ -940,7 +962,8 @@ public class FortranStream extends ANTLRFileStream {
 	 * quote character. If a string doesn't terminate it's an error, return '\n'
 	 * position.
 	 */
-	private int consumeFixedFormString(int i, char buf[], int count, char newBuf[]) {
+	private int consumeFixedFormString(int i, char buf[], int count,
+			char newBuf[]) {
 		if (i >= super.n)
 			return i;
 
@@ -951,7 +974,8 @@ public class FortranStream extends ANTLRFileStream {
 		do {
 			newBuf[count++] = buf[i++];
 			// look for two quote chars in a row, if found copy both
-			if (i < super.n - 1 && buf[i] == quote_char && buf[i + 1] == quote_char) {
+			if (i < super.n - 1 && buf[i] == quote_char
+					&& buf[i + 1] == quote_char) {
 				newBuf[count++] = buf[i++];
 				newBuf[count++] = buf[i++];
 			}

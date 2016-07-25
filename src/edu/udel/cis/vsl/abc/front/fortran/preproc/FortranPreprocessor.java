@@ -65,8 +65,8 @@ public class FortranPreprocessor implements Preprocessor {
 
 	// Constructors...
 
-	public FortranPreprocessor(Configuration config, Language language, FileIndexer indexer,
-			TokenFactory tokenFactory) {
+	public FortranPreprocessor(Configuration config, Language language,
+			FileIndexer indexer, TokenFactory tokenFactory) {
 		this.config = config;
 		this.language = language;
 		this.indexer = indexer;
@@ -89,7 +89,8 @@ public class FortranPreprocessor implements Preprocessor {
 	 * @throws PreprocessorException
 	 *             if one of the library files cannot be found or opened
 	 */
-	private void addAuxStreams(Map<String, String> predefinedMacros, ArrayList<CharStream> streamVector,
+	private void addAuxStreams(Map<String, String> predefinedMacros,
+			ArrayList<CharStream> streamVector,
 			ArrayList<Formation> formationVector) throws PreprocessorException {
 		addMacros(predefinedMacros, streamVector, formationVector);
 		// note that svcomp.h #includes gnuc.h so no need to include both:
@@ -114,7 +115,8 @@ public class FortranPreprocessor implements Preprocessor {
 	 * @throws PreprocessorException
 	 *             if the resource cannot be opened for some reason
 	 */
-	private void addLibrary(String libraryFilename, ArrayList<CharStream> streamVector,
+	private void addLibrary(String libraryFilename,
+			ArrayList<CharStream> streamVector,
 			ArrayList<Formation> formationVector) throws PreprocessorException {
 		File file = new File(Preprocessor.ABC_INCLUDE_PATH, libraryFilename);
 		SourceFile sourceFile = indexer.getOrAdd(file);
@@ -122,12 +124,15 @@ public class FortranPreprocessor implements Preprocessor {
 		String resource = file.getAbsolutePath();
 
 		try {
-			CharStream stream = PreprocessorUtils.newFilteredCharStreamFromResource(libraryFilename, resource);
+			CharStream stream = PreprocessorUtils
+					.newFilteredCharStreamFromResource(libraryFilename,
+							resource);
 
 			streamVector.add(stream);
 			formationVector.add(formation);
 		} catch (IOException e) {
-			throw new PreprocessorException("Error in opening civlc.cvh: " + e.getMessage());
+			throw new PreprocessorException(
+					"Error in opening civlc.cvh: " + e.getMessage());
 		}
 	}
 
@@ -143,10 +148,12 @@ public class FortranPreprocessor implements Preprocessor {
 	 * @param formationVector
 	 *            vector of corresponding formations
 	 */
-	private void addMacros(Map<String, String> predefinedMacros, ArrayList<CharStream> streamVector,
+	private void addMacros(Map<String, String> predefinedMacros,
+			ArrayList<CharStream> streamVector,
 			ArrayList<Formation> formationVector) {
 		if (!predefinedMacros.isEmpty()) {
-			CharStream macroStream = PreprocessorUtils.macroMapToCharStream(predefinedMacros);
+			CharStream macroStream = PreprocessorUtils
+					.macroMapToCharStream(predefinedMacros);
 			File file = new File("predefined macros");
 			SourceFile sourceFile = indexer.getOrAdd(file);
 			Formation formation = tokenFactory.newInclusion(sourceFile);
@@ -173,8 +180,9 @@ public class FortranPreprocessor implements Preprocessor {
 	 * @throws PreprocessorException
 	 *             if any source file cannot be found or opened
 	 */
-	private void addFiles(File[] sourceFiles, ArrayList<CharStream> streamVector, ArrayList<Formation> formationVector)
-			throws PreprocessorException {
+	private void addFiles(File[] sourceFiles,
+			ArrayList<CharStream> streamVector,
+			ArrayList<Formation> formationVector) throws PreprocessorException {
 		int numFiles = sourceFiles.length;
 
 		for (int i = 0; i < numFiles; i++) {
@@ -187,12 +195,16 @@ public class FortranPreprocessor implements Preprocessor {
 					stream = new FilteredANTLRFileStream(file);
 				} else {
 					String fileAbsPath = file.getAbsolutePath();
-					InputStream inputStream = FortranPreprocessor.class.getResourceAsStream(fileAbsPath);
+					InputStream inputStream = FortranPreprocessor.class
+							.getResourceAsStream(fileAbsPath);
 
-					stream = inputStream == null ? null : new FilteredANTLRInputStream(fileAbsPath, inputStream);
+					stream = inputStream == null ? null
+							: new FilteredANTLRInputStream(fileAbsPath,
+									inputStream);
 				}
 			} catch (IOException e) {
-				throw new PreprocessorException("Error in opening " + file + ": " + e.getMessage());
+				throw new PreprocessorException(
+						"Error in opening " + file + ": " + e.getMessage());
 			}
 			streamVector.add(stream);
 			formationVector.add(tokenFactory.newInclusion(sourceFile));
@@ -200,16 +212,19 @@ public class FortranPreprocessor implements Preprocessor {
 	}
 
 	@Override
-	public CivlcTokenSource preprocess(File[] systemIncludePaths, File[] userIncludePaths,
-			Map<String, String> predefinedMacros, File[] sourceUnit) throws PreprocessorException {
+	public CivlcTokenSource preprocess(File[] systemIncludePaths,
+			File[] userIncludePaths, Map<String, String> predefinedMacros,
+			File[] sourceUnit) throws PreprocessorException {
 		ArrayList<CharStream> streamVector = new ArrayList<>();
 		ArrayList<Formation> formationVector = new ArrayList<>();
 
 		addAuxStreams(predefinedMacros, streamVector, formationVector);
 		addFiles(sourceUnit, streamVector, formationVector);
 
-		CharStream[] streams = streamVector.toArray(new CharStream[streamVector.size()]);
-		Formation[] formations = formationVector.toArray(new Formation[formationVector.size()]);
+		CharStream[] streams = streamVector
+				.toArray(new CharStream[streamVector.size()]);
+		Formation[] formations = formationVector
+				.toArray(new Formation[formationVector.size()]);
 		Map<String, Macro> macroMap = new HashMap<>();
 		FortranStream fortranStream = null;
 
@@ -224,15 +239,17 @@ public class FortranPreprocessor implements Preprocessor {
 		lexer.setIncludeDirs(systemIncludePaths, userIncludePaths, sourceUnit);
 
 		FortranTokenStream tokenStream = new FortranTokenStream(lexer);
-		FortranLexicalPrepass prepass = new FortranLexicalPrepass(lexer, tokenStream);
+		FortranLexicalPrepass prepass = new FortranLexicalPrepass(lexer,
+				tokenStream);
 
 		// determine whether the file is fixed or free form and
 		// set the source form in the prepass so it knows how to handle lines.
 		prepass.setSourceForm(fortranStream.getSourceForm());
 		prepass.performPrepass();
 		tokenStream.finalizeTokenStream();
-		return new FortranTokenSource(config, indexer, streams, formations, systemIncludePaths, userIncludePaths,
-				macroMap, tokenFactory, tokenStream);
+		return new FortranTokenSource(config, indexer, streams, formations,
+				systemIncludePaths, userIncludePaths, macroMap, tokenFactory,
+				tokenStream);
 	}
 
 	@Override
@@ -242,7 +259,8 @@ public class FortranPreprocessor implements Preprocessor {
 
 	@Override
 	@Deprecated
-	public CivlcTokenSource preprocessLibrary(Map<String, String> predefinedMacros, String libraryFileName)
+	public CivlcTokenSource preprocessLibrary(
+			Map<String, String> predefinedMacros, String libraryFileName)
 			throws PreprocessorException {
 		return null;
 	}
