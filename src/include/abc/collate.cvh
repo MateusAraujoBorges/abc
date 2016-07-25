@@ -46,11 +46,11 @@ typedef struct _gcollate_state * $gcollate_state;
 typedef struct _collate_state $collate_state;
 
 /********************* Function prototypes: *********************/
-/* Interface for creating a $gcollator: */
-$gcollator $gcollator_create($scope scope, int nprocs);
+/* API for creating a $gcollator: */
+$atomic_f $gcollator $gcollator_create($scope scope, int nprocs);
 
-/* Interface for creating a $collator: */
-$collator  $collator_create($gcollator gcollator, $scope scope, int place);
+/* API for creating a $collator: */
+$atomic_f $collator  $collator_create($gcollator gcollator, $scope scope, int place);
 
 /* Take a snapshot on the current state. Returns the collate state
  * which contains the snapshot. This function allows processes commit
@@ -77,44 +77,46 @@ $collator  $collator_create($gcollator gcollator, $scope scope, int place);
  *   whose pid is same as its' place in the collator. cp is always a
  *   valid state for P.
  */
-/*@
-  @ pure;
+/*@ pure;
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
 $system void $collate_snapshot($collate_state cp, int nprocs, $scope scope);
 
-/*
- * Take a snapshot on the current state of the current process. The
- * specification of the snap-shooting action requires that: 
+/* This function is a collective function. It collectively completes a
+ * collate state. 
  *
- * 1. For a group of participants, each participant can only
- * snap-shoot once for one entry.
+ * A collate state is a valid state consists of n processes, where n
+ * is in between 1 and nprocs, when n participant processes called
+ * this function.
  *
- * 2. The implementation of a snap-shooting action must guarantee
- * that: Let D be the set of all dyscopes referenced from the call
- * stack of the calling process p, and let d be the least common
- * ancestor of D. We call d the "process scope" of p. d had better not
- * be in the current collated state s in c (the one that this snapshot
- * is about to affect), else, ERROR. Now add d and its descendants to
- * s, as well as the chain of ancestors from d up until the first
- * dyscope already in s. Also add the call stack of p to s. In this
- * way s is always a valid state.
+ * For one participant process, if it calls this function m times, it
+ * will get m differen collate states. A collate state reserves the
+ * current program state for the calling process until the collate
+ * state is freed.
  */
-$collate_state $collate_arrives($collator c, $scope scope);
+$atomic_f $collate_state $collate_arrives($collator c, $scope scope);
 
 /* Collectively free a collate state. The last process will be
  * responsible for dequeue the collate state at the head of the queue.
- * 
+ *
+ * A process is not allowed to access a freed collate state.
+ *  
  * If there is no arrived collate state by the process, it should
  * report an error.
  */
-void $collate_departs($collator c);
+/*@ pure;
+  @ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$atomic_f void $collate_departs($collator c);
 
 /* Tests if a set of participants defined by a $range have all arrived
  * the specific $collate_entry referenced by cp.
  */
 /*@ pure;
+  @ depends_on \access(cp);
+  @ executes_when \true;
   @*/
 _Bool $collate_arrived($collate_state cp, $range range);
 
@@ -123,6 +125,8 @@ _Bool $collate_arrived($collate_state cp, $range range);
  * participants in the specific $collate_entry referenced by cp. 
  */
 /*@ pure;
+  @ depends_on \access(cp);
+  @ executes_when \true;
   @*/
 _Bool $collate_complete($collate_state cp);
 
