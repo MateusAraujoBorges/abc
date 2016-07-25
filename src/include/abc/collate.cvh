@@ -47,16 +47,10 @@ typedef struct _collate_state $collate_state;
 
 /********************* Function prototypes: *********************/
 /* Interface for creating a $gcollator: */
-$gcollator gcollator_create($scope scope, int nprocs);
+$gcollator $gcollator_create($scope scope, int nprocs);
 
 /* Interface for creating a $collator: */
-$collator   collator_create($gcollator gcollator, $scope scope, int place);
-
-/* Destroy a $gcollator */
-$atomic_f void gcollator_destroy($gcollator g);
-
-/* Destroy a $collator */
-$atomic_f void collator_destroy($collator c);
+$collator  $collator_create($gcollator gcollator, $scope scope, int place);
 
 /* Take a snapshot on the current state. Returns the collate state
  * which contains the snapshot. This function allows processes commit
@@ -115,7 +109,7 @@ $collate_state $collate_arrives($collator c, $scope scope);
  * If there is no arrived collate state by the process, it should
  * report an error.
  */
-$collate_state $collate_departs($collator c);
+void $collate_departs($collator c);
 
 /* Tests if a set of participants defined by a $range have all arrived
  * the specific $collate_entry referenced by cp.
