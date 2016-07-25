@@ -402,7 +402,8 @@ civl_keyword	:	ABSTRACT
 		|	STATE_NULL
 		|	SPAWN
 		|	SYSTEM 
-		|	UNIFORM  
+		|	UNIFORM 
+		|	UPDATE 
 		|	WHEN
 		|	WITH
 		;

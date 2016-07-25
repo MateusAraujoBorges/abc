@@ -22,7 +22,7 @@ import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils.LexerFactory;
 
 public class CIVLTranslationTest {
 
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	private static PrintStream out = System.out;
 
@@ -180,6 +180,11 @@ public class CIVLTranslationTest {
 	@Test
 	public void with() throws ABCException, IOException {
 		check("with");
+	}
+
+	@Test
+	public void update() throws ABCException, IOException {
+		check("update");
 	}
 
 	@Test(expected = SyntaxException.class)

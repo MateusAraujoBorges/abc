@@ -132,6 +132,7 @@ READS       	:   	'$reads'	;
 SPAWN		:	'$spawn'	;
 SYSTEM      	:   	'$system'	;
 UNIFORM		:	'$uniform'	;
+UPDATE		:	'$update'	;
 WHEN		:	'$when'		;
 WITH		:	'$with'		;
 

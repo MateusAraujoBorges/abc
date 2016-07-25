@@ -1334,6 +1334,7 @@ statement
     | datomicStatement -> ^(STATEMENT datomicStatement)
     | runStatement -> ^(STATEMENT runStatement)
     | withStatement -> ^(STATEMENT withStatement)
+    | updateStatement -> ^(STATEMENT updateStatement)
     ;
 
 statementWithScope
@@ -1586,6 +1587,14 @@ runStatement
 withStatement
 	: WITH LPAREN assignmentExpression RPAREN statement
 	  -> ^(WITH assignmentExpression statement)
+	;
+	
+updateStatement
+	: UPDATE LPAREN assignmentExpression RPAREN 
+	  postfixExpressionRoot LPAREN argumentExpressionList RPAREN SEMI
+	  -> ^(UPDATE assignmentExpression  
+	  	^(CALL ABSENT postfixExpressionRoot ABSENT argumentExpressionList RPAREN)
+	      )
 	;
 
 /* CIVL-C $when statement.  This is a guarded command.

@@ -50,6 +50,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.RunNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.UpdateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.WhenNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.WithNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
@@ -87,15 +88,18 @@ public class StatementAnalyzer {
 
 	// ************************** Constructors ****************************
 
-	StatementAnalyzer(EntityAnalyzer entityAnalyzer, ExpressionAnalyzer expressionAnalyzer,
-			ConversionFactory conversionFactory, TypeFactory typeFactory, Configuration config) {
+	StatementAnalyzer(EntityAnalyzer entityAnalyzer,
+			ExpressionAnalyzer expressionAnalyzer,
+			ConversionFactory conversionFactory, TypeFactory typeFactory,
+			Configuration config) {
 		this.entityAnalyzer = entityAnalyzer;
 		this.nodeFactory = entityAnalyzer.nodeFactory;
 		this.expressionAnalyzer = expressionAnalyzer;
 		this.conversionFactory = conversionFactory;
 		this.typeFactory = typeFactory;
 		this.configuration = config;
-		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer, conversionFactory);
+		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer,
+				conversionFactory);
 	}
 
 	// ************************* Private Methods **************************
@@ -108,7 +112,8 @@ public class StatementAnalyzer {
 		return entityAnalyzer.error(e, node);
 	}
 
-	private void processExpression(ExpressionNode expression) throws SyntaxException {
+	private void processExpression(ExpressionNode expression)
+			throws SyntaxException {
 		if (expression != null)
 			expressionAnalyzer.processExpression(expression);
 	}
@@ -121,7 +126,8 @@ public class StatementAnalyzer {
 	}
 
 	private SwitchNode enclosingSwitch(SwitchLabelNode labelNode) {
-		for (ASTNode node = labelNode.parent(); node != null; node = node.parent()) {
+		for (ASTNode node = labelNode.parent(); node != null; node = node
+				.parent()) {
 			if (node instanceof SwitchNode)
 				return (SwitchNode) node;
 		}
@@ -129,14 +135,17 @@ public class StatementAnalyzer {
 	}
 
 	private ASTNode enclosingSwitchOrChoose(SwitchLabelNode labelNode) {
-		for (ASTNode node = labelNode.parent(); node != null; node = node.parent()) {
-			if (node instanceof SwitchNode || node instanceof ChooseStatementNode)
+		for (ASTNode node = labelNode.parent(); node != null; node = node
+				.parent()) {
+			if (node instanceof SwitchNode
+					|| node instanceof ChooseStatementNode)
 				return node;
 		}
 		return null;
 	}
 
-	private void processLabeledStatement(LabeledStatementNode node) throws SyntaxException {
+	private void processLabeledStatement(LabeledStatementNode node)
+			throws SyntaxException {
 		LabelNode labelNode = node.getLabel();
 		StatementNode statementNode = node.getStatement();
 		Function function = entityAnalyzer.enclosingFunction(node);
@@ -154,7 +163,8 @@ public class StatementAnalyzer {
 
 	}
 
-	private void processOrdinaryLabel(OrdinaryLabelNode node, Function function) throws SyntaxException {
+	private void processOrdinaryLabel(OrdinaryLabelNode node, Function function)
+			throws SyntaxException {
 		Label label = entityAnalyzer.entityFactory.newLabel(node);
 
 		node.setFunction(function);
@@ -167,8 +177,9 @@ public class StatementAnalyzer {
 		}
 	}
 
-	private void processSwitchLabel(LabeledStatementNode labeledStatement, SwitchLabelNode switchLabel,
-			Function function) throws SyntaxException {
+	private void processSwitchLabel(LabeledStatementNode labeledStatement,
+			SwitchLabelNode switchLabel, Function function)
+			throws SyntaxException {
 
 		if (switchLabel.isDefault()) {
 			ASTNode enclosing = enclosingSwitchOrChoose(switchLabel);
@@ -178,7 +189,9 @@ public class StatementAnalyzer {
 				LabeledStatementNode oldDefault = choose.getDefaultCase();
 
 				if (oldDefault != null)
-					throw error("Two default cases in choose statement.  First was at " + oldDefault.getSource(),
+					throw error(
+							"Two default cases in choose statement.  First was at "
+									+ oldDefault.getSource(),
 							switchLabel);
 				choose.setDefaultCase(labeledStatement);
 				return;
@@ -188,12 +201,15 @@ public class StatementAnalyzer {
 		SwitchNode switchNode = enclosingSwitch(switchLabel);
 
 		if (switchNode == null)
-			throw error("Switch label occurs outside of any switch statement", switchLabel);
+			throw error("Switch label occurs outside of any switch statement",
+					switchLabel);
 		if (switchLabel.isDefault()) {
 			LabeledStatementNode oldDefault = switchNode.getDefaultCase();
 
 			if (oldDefault != null)
-				throw error("Two default cases in switch statement.  First was at " + oldDefault.getSource(),
+				throw error(
+						"Two default cases in switch statement.  First was at "
+								+ oldDefault.getSource(),
 						switchLabel);
 			switchNode.setDefaultCase(labeledStatement);
 		} else {
@@ -206,12 +222,16 @@ public class StatementAnalyzer {
 				throw error("Case expression not constant", caseExpression);
 			constant = nodeFactory.getConstantValue(caseExpression);
 			while (cases.hasNext()) {
-				SwitchLabelNode labelNode = (SwitchLabelNode) cases.next().getLabel();
+				SwitchLabelNode labelNode = (SwitchLabelNode) cases.next()
+						.getLabel();
 				ExpressionNode oldExpression = labelNode.getExpression();
 				Value oldConstant = nodeFactory.getConstantValue(oldExpression);
 
 				if (constant.equals(oldConstant))
-					throw error("Case constant appears twice: first time was at " + oldExpression, caseExpression);
+					throw error(
+							"Case constant appears twice: first time was at "
+									+ oldExpression,
+							caseExpression);
 			}
 			switchNode.addCase(labeledStatement);
 		}
@@ -220,21 +240,26 @@ public class StatementAnalyzer {
 	private void processJump(JumpNode statement) throws SyntaxException {
 		switch (statement.getKind()) {
 		case RETURN: {
-			ExpressionNode expression = ((ReturnNode) statement).getExpression();
+			ExpressionNode expression = ((ReturnNode) statement)
+					.getExpression();
 			Function function = entityAnalyzer.enclosingFunction(statement);
 			ObjectType returnType = function.getType().getReturnType();
 			boolean returnTypeIsVoid = returnType.kind() == TypeKind.VOID;
 
 			if (expression == null) {
 				if (!this.configuration.getSVCOMP() && !returnTypeIsVoid)
-					throw error("Missing expression in return statement", statement);
+					throw error("Missing expression in return statement",
+							statement);
 			} else {
 				if (returnTypeIsVoid)
-					throw error("Argument for return in function returning void", statement);
+					throw error(
+							"Argument for return in function returning void",
+							statement);
 				if (expression != null)
 					processExpression(expression);
 				try {
-					expressionAnalyzer.processAssignment(returnType, expression);
+					expressionAnalyzer.processAssignment(returnType,
+							expression);
 				} catch (UnsourcedException e) {
 					throw error(e, expression);
 				}
@@ -279,10 +304,12 @@ public class StatementAnalyzer {
 				for (VariableDeclarationNode child : declarationList) {
 					if (child == null)
 						continue;
-					entityAnalyzer.declarationAnalyzer.processVariableDeclaration(child);
+					entityAnalyzer.declarationAnalyzer
+							.processVariableDeclaration(child);
 				}
 			} else
-				throw error("Unknown kind of initializer clause in for loop", initializer);
+				throw error("Unknown kind of initializer clause in for loop",
+						initializer);
 			processExpression(loopNode.getCondition());
 			processExpression(forNode.getIncrementer());
 			processStatement(loopNode.getBody());
@@ -304,30 +331,40 @@ public class StatementAnalyzer {
 		for (VariableDeclarationNode child : node.getVariables()) {
 			Type type;
 
-			entityAnalyzer.declarationAnalyzer.processVariableDeclaration(child);
+			entityAnalyzer.declarationAnalyzer
+					.processVariableDeclaration(child);
 			if (child.getInitializer() != null)
-				throw error("Loop variable " + numVars + " in $for/$parfor statement has initializer", child);
+				throw error(
+						"Loop variable " + numVars
+								+ " in $for/$parfor statement has initializer",
+						child);
 			type = child.getTypeNode().getType();
 			if (!(type instanceof IntegerType))
-				throw error("Loop variable " + numVars + " in $for/$parfor has non-integer type: " + type,
+				throw error("Loop variable " + numVars
+						+ " in $for/$parfor has non-integer type: " + type,
 						child.getTypeNode());
 			numVars++;
 		}
 		expressionAnalyzer.processExpression(domainNode);
 		domainNodeType = domainNode.getConvertedType();
 		if (domainNodeType.equals(typeFactory.rangeType())) {
-			domainNode.addConversion(conversionFactory.regularRangeToDomainConversion((ObjectType) domainNodeType,
-					typeFactory.domainType(1)));
+			domainNode.addConversion(conversionFactory
+					.regularRangeToDomainConversion((ObjectType) domainNodeType,
+							typeFactory.domainType(1)));
 			domainNodeType = domainNode.getConvertedType();
 		} else if (!(domainNodeType instanceof DomainType))
-			throw error("Domain expression in $for/$parfor does not have $domain type", domainNode);
+			throw error(
+					"Domain expression in $for/$parfor does not have $domain type",
+					domainNode);
 		domainType = (DomainType) domainNodeType;
 		if (!domainType.hasDimension())
-			throw error("Use of incomplete domain type in $for/$parfor", domainNode);
+			throw error("Use of incomplete domain type in $for/$parfor",
+					domainNode);
 		domainDimension = domainType.getDimension();
 		if (domainDimension != numVars)
-			throw error("Dimension of domain (" + domainDimension + ") " + "does not equal number of loop variables ("
-					+ numVars + ")", domainNode);
+			throw error("Dimension of domain (" + domainDimension + ") "
+					+ "does not equal number of loop variables (" + numVars
+					+ ")", domainNode);
 		processStatement(node.getBody());
 		if (node.loopContracts() != null)
 			acslAnalyzer.processLoopContractNodes(node.loopContracts());
@@ -343,7 +380,8 @@ public class StatementAnalyzer {
 			processCompoundStatement((CompoundStatementNode) statement);
 			break;
 		case EXPRESSION:
-			processExpression(((ExpressionStatementNode) statement).getExpression());
+			processExpression(
+					((ExpressionStatementNode) statement).getExpression());
 			break;
 		case IF:
 			processIf((IfNode) statement);
@@ -377,7 +415,9 @@ public class StatementAnalyzer {
 			Type guardType;
 
 			if (!guard.isSideEffectFree(false))
-				throw this.error("the guard of a $when statement is not allowed to have side effects.", guard);
+				throw this.error(
+						"the guard of a $when statement is not allowed to have side effects.",
+						guard);
 			processExpression(guard);
 			guardType = guard.getConvertedType();
 			// check guardType can be converted to a boolean...
@@ -394,9 +434,17 @@ public class StatementAnalyzer {
 			processExpression(stateRef);
 			stateType = stateRef.getConvertedType();
 			if (!entityAnalyzer.standardTypes.isCollateStateType(stateType))
-				throw this.error("The state reference expression of $with doesn't have type of collate statet",
+				throw this.error(
+						"The state reference expression of $with doesn't have type of collate statet",
 						statement);
 			processStatement(withNode.getBodyNode());
+			break;
+		}
+		case UPDATE: {
+			UpdateNode updateNode = (UpdateNode) statement;
+
+			processExpression(updateNode.getCollator());
+			processExpression(updateNode.getFunctionCall());
 			break;
 		}
 		case CHOOSE: {
@@ -446,25 +494,32 @@ public class StatementAnalyzer {
 
 		do {
 			if (next.nodeKind() == NodeKind.STATEMENT)
-				if (((StatementNode) next).statementKind() == StatementKind.JUMP)
+				if (((StatementNode) next)
+						.statementKind() == StatementKind.JUMP)
 					if (((JumpNode) next).getKind() == JumpKind.RETURN)
-						throw error("No return statement is allowed to be inside a $run statement block.", next);
+						throw error(
+								"No return statement is allowed to be inside a $run statement block.",
+								next);
 		} while ((next = next.nextDFS()) != null);
 	}
 
 	@SuppressWarnings("unchecked")
-	private void processOmpExecutableNode(OmpExecutableNode statement) throws SyntaxException {
+	private void processOmpExecutableNode(OmpExecutableNode statement)
+			throws SyntaxException {
 		OmpExecutableKind kind = statement.ompExecutableKind();
-		SequenceNode<OmpReductionNode> reductionList = (SequenceNode<OmpReductionNode>) statement.reductionList();
+		SequenceNode<OmpReductionNode> reductionList = (SequenceNode<OmpReductionNode>) statement
+				.reductionList();
 
 		for (int i = 0; i <= 5; i++) {
-			SequenceNode<ExpressionNode> list = (SequenceNode<ExpressionNode>) statement.child(i);
+			SequenceNode<ExpressionNode> list = (SequenceNode<ExpressionNode>) statement
+					.child(i);
 
 			if (list != null) {
 				int count = list.numChildren();
 
 				for (int j = 0; j < count; j++) {
-					this.expressionAnalyzer.processExpression(list.getSequenceChild(j));
+					this.expressionAnalyzer
+							.processExpression(list.getSequenceChild(j));
 				}
 			}
 		}
@@ -490,7 +545,8 @@ public class StatementAnalyzer {
 			switch (workshare.ompWorkshareNodeKind()) {
 			case FOR:
 				OmpForNode forNode = (OmpForNode) statement;
-				SequenceNode<FunctionCallNode> assertions = forNode.assertions();
+				SequenceNode<FunctionCallNode> assertions = forNode
+						.assertions();
 				FunctionCallNode invariant = forNode.invariant();
 				ExpressionNode chunkSize = forNode.chunkSize();
 
@@ -513,13 +569,15 @@ public class StatementAnalyzer {
 			processStatement(statement.statementNode());
 	}
 
-	private void processOmpReductionNode(OmpReductionNode reduction) throws SyntaxException {
+	private void processOmpReductionNode(OmpReductionNode reduction)
+			throws SyntaxException {
 		OmpReductionNodeKind kind = reduction.ompReductionOperatorNodeKind();
 		SequenceNode<IdentifierExpressionNode> list = reduction.variables();
 		int count = list.numChildren();
 
 		if (kind == OmpReductionNodeKind.FUNCTION) {
-			this.expressionAnalyzer.processExpression(((OmpFunctionReductionNode) reduction).function());
+			this.expressionAnalyzer.processExpression(
+					((OmpFunctionReductionNode) reduction).function());
 		}
 		for (int i = 0; i < count; i++) {
 			this.expressionAnalyzer.processExpression(list.getSequenceChild(i));
@@ -540,24 +598,31 @@ public class StatementAnalyzer {
 	 * @param node
 	 * @throws SyntaxException
 	 */
-	void processCompoundStatement(CompoundStatementNode node) throws SyntaxException {
+	void processCompoundStatement(CompoundStatementNode node)
+			throws SyntaxException {
 		for (BlockItemNode item : node) {
 			if (item == null)
 				continue;
 			if (item instanceof StatementNode)
 				processStatement((StatementNode) item);
 			else if (item instanceof StructureOrUnionTypeNode)
-				entityAnalyzer.typeAnalyzer.processStructureOrUnionType((StructureOrUnionTypeNode) item);
+				entityAnalyzer.typeAnalyzer.processStructureOrUnionType(
+						(StructureOrUnionTypeNode) item);
 			else if (item instanceof EnumerationTypeNode)
-				entityAnalyzer.typeAnalyzer.processEnumerationType((EnumerationTypeNode) item);
+				entityAnalyzer.typeAnalyzer
+						.processEnumerationType((EnumerationTypeNode) item);
 			else if (item instanceof StaticAssertionNode)
-				entityAnalyzer.processStaticAssertion((StaticAssertionNode) item);
+				entityAnalyzer
+						.processStaticAssertion((StaticAssertionNode) item);
 			else if (item instanceof VariableDeclarationNode)
-				entityAnalyzer.declarationAnalyzer.processVariableDeclaration((VariableDeclarationNode) item);
+				entityAnalyzer.declarationAnalyzer.processVariableDeclaration(
+						(VariableDeclarationNode) item);
 			else if (item instanceof FunctionDeclarationNode)
-				entityAnalyzer.declarationAnalyzer.processFunctionDeclaration((FunctionDeclarationNode) item);
+				entityAnalyzer.declarationAnalyzer.processFunctionDeclaration(
+						(FunctionDeclarationNode) item);
 			else if (item instanceof TypedefDeclarationNode)
-				entityAnalyzer.declarationAnalyzer.processTypedefDeclaration((TypedefDeclarationNode) item);
+				entityAnalyzer.declarationAnalyzer.processTypedefDeclaration(
+						(TypedefDeclarationNode) item);
 			else
 				throw error("Unknown kind of block item", item);
 		}

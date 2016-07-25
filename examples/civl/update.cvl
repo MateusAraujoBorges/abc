@@ -5,10 +5,9 @@ $collator collator=$collator_create(gcollator, $here, 0);
 
 int main(){
   $collate_state cs=$collate_arrives(collator, $here);
-    
-  $with (cs) {
-    $assert($true);
-  }
+  
+  $update (cs) 
+    $pow(5,6);
   $collate_departs(collator);
   $free(collator);
   $free(gcollator);

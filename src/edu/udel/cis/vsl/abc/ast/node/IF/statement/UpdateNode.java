@@ -1,4 +1,7 @@
-package edu.udel.cis.vsl.abc.ast.node.IF.expression;
+package edu.udel.cis.vsl.abc.ast.node.IF.statement;
+
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 
 /**
  * This node represents an expression <code>$update($collator c) f()</code>. It
@@ -13,14 +16,14 @@ package edu.udel.cis.vsl.abc.ast.node.IF.expression;
  * @author ziqingluo
  *
  */
-public interface UpdateNode extends ExpressionNode {
+public interface UpdateNode extends StatementNode {
 	/**
-	 * Get the {@link ExpressionNode} which represents the function call
+	 * Get the {@link FunctionCallNode} which represents the function call
 	 * expression attached with this node.
 	 * 
 	 * @return
 	 */
-	ExpressionNode getFunctionCall();
+	FunctionCallNode getFunctionCall();
 
 	/**
 	 * Get the {@link ExpressionNode} which has the type $collator. The collator
