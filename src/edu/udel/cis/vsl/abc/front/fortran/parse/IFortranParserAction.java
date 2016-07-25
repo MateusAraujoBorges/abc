@@ -64,8 +64,8 @@ public abstract interface IFortranParserAction {
 	 * @param numDeclConstructs
 	 *            Number of declaration constructs.
 	 */
-	public abstract void specification_part(int numUseStmts,
-			int numImportStmts, int numImplStmts, int numDeclConstructs);
+	public abstract void specification_part(int numUseStmts, int numImportStmts,
+			int numImplStmts, int numDeclConstructs);
 
 	/**
 	 * R205, R206, R207 declaration_construct
@@ -289,7 +289,8 @@ public abstract interface IFortranParserAction {
 	 * @param kindParam
 	 *            The kind parameter
 	 */
-	public abstract void int_literal_constant(Token digitString, Token kindParam);
+	public abstract void int_literal_constant(Token digitString,
+			Token kindParam);
 
 	/**
 	 * R407 kind_param
@@ -499,9 +500,8 @@ public abstract interface IFortranParserAction {
 	 * @param hasGenericNameList
 	 *            True if a generic-name-list is present.
 	 */
-	public abstract void derived_type_stmt(Token label, Token keyword,
-			Token id, Token eos, boolean hasTypeAttrSpecList,
-			boolean hasGenericNameList);
+	public abstract void derived_type_stmt(Token label, Token keyword, Token id,
+			Token eos, boolean hasTypeAttrSpecList, boolean hasGenericNameList);
 
 	/**
 	 * R431 type_attr_spec : access_spec | T_EXTENDS T_LPAREN T_IDENT T_RPAREN |
@@ -676,9 +676,9 @@ public abstract interface IFortranParserAction {
 	 * @param hasComponentInitialization
 	 *            True if has component initialization.
 	 */
-	public abstract void component_decl(Token id,
-			boolean hasComponentArraySpec, boolean hasCoarraySpec,
-			boolean hasCharLength, boolean hasComponentInitialization);
+	public abstract void component_decl(Token id, boolean hasComponentArraySpec,
+			boolean hasCoarraySpec, boolean hasCharLength,
+			boolean hasComponentInitialization);
 
 	/**
 	 * R442 list component_decl component_decl_list : component_decl ( T_COMMA
@@ -811,8 +811,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            T_EOS token.
 	 */
-	public abstract void binding_private_stmt(Token label,
-			Token privateKeyword, Token eos);
+	public abstract void binding_private_stmt(Token label, Token privateKeyword,
+			Token eos);
 
 	/**
 	 * R450 proc_binding_stmt : (label)? specific_binding T_EOS | (label)?
@@ -1293,8 +1293,8 @@ public abstract interface IFortranParserAction {
 	 * @param intent
 	 *            The type of intent-spec.
 	 */
-	public abstract void intent_spec(Token intentKeyword1,
-			Token intentKeyword2, int intent);
+	public abstract void intent_spec(Token intentKeyword1, Token intentKeyword2,
+			int intent);
 
 	/**
 	 * R518 access_stmt : (label)? access_spec ((T_COLON_COLON)?
@@ -1339,7 +1339,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            End of statement token.
 	 */
-	public abstract void allocatable_stmt(Token label, Token keyword, Token eos);
+	public abstract void allocatable_stmt(Token label, Token keyword,
+			Token eos);
 
 	/**
 	 * R527-F08 allocatable_decl : T_IDENT ( T_LPAREN array_spec T_RPAREN )? (
@@ -1382,7 +1383,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            End of statement token.
 	 */
-	public abstract void asynchronous_stmt(Token label, Token keyword, Token eos);
+	public abstract void asynchronous_stmt(Token label, Token keyword,
+			Token eos);
 
 	/**
 	 * R522 bind_stmt : (label)? language_binding_spec (T_COLON_COLON)?
@@ -1429,7 +1431,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            End of statement token
 	 */
-	public abstract void codimension_stmt(Token label, Token keyword, Token eos);
+	public abstract void codimension_stmt(Token label, Token keyword,
+			Token eos);
 
 	/**
 	 * R532-F08 codimension-decl : coarray-name lbracket coarray-spec rbracket
@@ -1707,7 +1710,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            End of statement token.
 	 */
-	public abstract void cray_pointer_stmt(Token label, Token keyword, Token eos);
+	public abstract void cray_pointer_stmt(Token label, Token keyword,
+			Token eos);
 
 	/**
 	 * R541-extension list cray_pointer_assoc_list : cray_pointer_decl ( T_COMMA
@@ -1974,8 +1978,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            T_EOS token.
 	 */
-	public abstract void equivalence_stmt(Token label,
-			Token equivalenceKeyword, Token eos);
+	public abstract void equivalence_stmt(Token label, Token equivalenceKeyword,
+			Token eos);
 
 	/**
 	 * R555 equivalence_set
@@ -2072,7 +2076,8 @@ public abstract interface IFortranParserAction {
 	 * @param hasShapeSpecList
 	 *            True if has an explicit shape spec list.
 	 */
-	public abstract void common_block_object(Token id, boolean hasShapeSpecList);
+	public abstract void common_block_object(Token id,
+			boolean hasShapeSpecList);
 
 	/**
 	 * R601 variable : designator
@@ -3171,8 +3176,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            The T_EOS token
 	 */
-	public abstract void end_block_stmt(Token label, Token id,
-			Token endKeyword, Token blockKeyword, Token eos);
+	public abstract void end_block_stmt(Token label, Token id, Token endKeyword,
+			Token blockKeyword, Token eos);
 
 	/**
 	 * R810-F08 critical-construct is critical-stmt block end-critical-stmt
@@ -4344,7 +4349,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            T_EOS token.
 	 */
-	public abstract void format_stmt(Token label, Token formatKeyword, Token eos);
+	public abstract void format_stmt(Token label, Token formatKeyword,
+			Token eos);
 
 	/**
 	 * R1002 format_specification
@@ -4489,8 +4495,8 @@ public abstract interface IFortranParserAction {
 	 * @param eos
 	 *            T_EOS token.
 	 */
-	public abstract void module_stmt(Token label, Token moduleKeyword,
-			Token id, Token eos);
+	public abstract void module_stmt(Token label, Token moduleKeyword, Token id,
+			Token eos);
 
 	/**
 	 * R1106 end_module_stmt : (label)? T_END T_MODULE (T_IDENT)? end_of_stmt |
@@ -5111,7 +5117,8 @@ public abstract interface IFortranParserAction {
 	 *            Flag specifying whether a proc-language-binding-spec was
 	 *            given.
 	 */
-	public abstract void suffix(Token resultKeyword, boolean hasProcLangBindSpec);
+	public abstract void suffix(Token resultKeyword,
+			boolean hasProcLangBindSpec);
 
 	/**
 	 * Unknown rule. result_name
@@ -5166,8 +5173,8 @@ public abstract interface IFortranParserAction {
 	 * @param hasArgSpecifier
 	 *            True if has anything between parentheses following statement.
 	 */
-	public abstract void subroutine_stmt(Token label, Token keyword,
-			Token name, Token eos, boolean hasPrefix, boolean hasDummyArgList,
+	public abstract void subroutine_stmt(Token label, Token keyword, Token name,
+			Token eos, boolean hasPrefix, boolean hasDummyArgList,
 			boolean hasBindingSpec, boolean hasArgSpecifier);
 
 	/**

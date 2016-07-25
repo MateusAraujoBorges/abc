@@ -17,11 +17,11 @@ public class FortranParser implements Parser {
 		FortranTokenSource fortranTokenSource = (FortranTokenSource) tokenSource;
 		FortranTokenStream fortranTokenStream = fortranTokenSource
 				.getTokenStream();
-		FortranParserExtras parser = new FortranParserExtras(fortranTokenStream);
+		FortranParserExtras parser = new FortranParserExtras(
+				fortranTokenStream);
 
 		// FIXME can we get rid of the path in the parser?
-		parser.initialize(new String[0],
-				FortranParserActionFactory.ACTION_TREE,
+		parser.initialize(new String[0], FortranParserActionFactory.ACTION_TREE,
 				fortranTokenSource.getSourceName(), "");
 		while (fortranTokenStream.LA(1) != FortranLexer.EOF) {
 			// attempt to parse the current program unit
@@ -137,21 +137,23 @@ public class FortranParser implements Parser {
 								.LA(lookAhead) == FortranLexer.T_DATA)) {
 					// try matching block data
 					error = parseBlockData(tokens, parser, start);
-				} else if (tokens.lookForToken(FortranLexer.T_SUBROUTINE) == true) {
+				} else if (tokens
+						.lookForToken(FortranLexer.T_SUBROUTINE) == true) {
 					// try matching a subroutine
 					error = parseSubroutine(tokens, parser, start);
-				} else if (tokens.lookForToken(FortranLexer.T_FUNCTION) == true) {
+				} else if (tokens
+						.lookForToken(FortranLexer.T_FUNCTION) == true) {
 					// try matching a function
 					error = parseFunction(tokens, parser, start);
 				} else {
 					// what's left should be a main program
 					error = parseMainProgram(tokens, parser, start);
-				}// end else(unhandled token)
-			}// end if(file had nothing but comments empty)
+				} // end else(unhandled token)
+			} // end if(file had nothing but comments empty)
 		} catch (RecognitionException e) {
 			e.printStackTrace();
 			error = true;
-		}// end try/catch(parsing program unit)
+		} // end try/catch(parsing program unit)
 
 		return error;
 	} // end parseProgramUnit()

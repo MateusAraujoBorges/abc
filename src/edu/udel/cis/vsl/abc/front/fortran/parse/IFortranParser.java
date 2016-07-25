@@ -18,28 +18,37 @@
  *****************************************************************************/
 
 package edu.udel.cis.vsl.abc.front.fortran.parse;
+
 import org.antlr.runtime.RecognitionException;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 
 public interface IFortranParser {
-	
-   public void initialize(String[] args, String kind, String filename, String path);
 
-   public void main_program()            throws RecognitionException;
-   public void module()                  throws RecognitionException;
-   public void submodule()               throws RecognitionException;
-   public void block_data()              throws RecognitionException;
-   public void subroutine_subprogram()   throws RecognitionException;
-   public void ext_function_subprogram() throws RecognitionException;
+	public void initialize(String[] args, String kind, String filename,
+			String path);
 
-   public IFortranParserAction getAction();
+	public void main_program() throws RecognitionException;
 
-   public boolean hasErrorOccurred();
-   public void reportError(RecognitionException re);
+	public void module() throws RecognitionException;
 
-   public void checkForInclude();
-   public void eofAction();
-   
-   public AST getAST();
+	public void submodule() throws RecognitionException;
+
+	public void block_data() throws RecognitionException;
+
+	public void subroutine_subprogram() throws RecognitionException;
+
+	public void ext_function_subprogram() throws RecognitionException;
+
+	public IFortranParserAction getAction();
+
+	public boolean hasErrorOccurred();
+
+	public void reportError(RecognitionException re);
+
+	public void checkForInclude();
+
+	public void eofAction();
+
+	public AST getAST();
 }
