@@ -133,7 +133,7 @@ _Bool $collate_complete($collate_state cp);
 /*@ depends_on \nothing;
   @ executes_when \true; 
   @ */
-$system $state $enter_collate_state($collate_state cs);
+$system $state $enter_collate_state($collate_state *cs);
 
 /* exits the current state (which is the collate state), copying the path condition
  * to the real state rs and control goes back to the modified real state rs
@@ -141,7 +141,7 @@ $system $state $enter_collate_state($collate_state cs);
 /*@ depends_on \nothing;
   @ executes_when \true; 
   @ */
-$system void $exit_collate_state($collate_state cs, $state rs);
+$system void $exit_collate_state($collate_state *cs);//, $state rs);
 
 #endif
 
