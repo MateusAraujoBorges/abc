@@ -15,7 +15,8 @@ public class FortranASTBuilder implements ASTBuilder {
 
 	private Configuration config;
 
-	public FortranASTBuilder(Configuration configuration, ASTFactory astFactory) {
+	public FortranASTBuilder(Configuration configuration,
+			ASTFactory astFactory) {
 		this.config = configuration;
 		this.astFactory = astFactory;
 	}
@@ -24,7 +25,8 @@ public class FortranASTBuilder implements ASTBuilder {
 	public AST getTranslationUnit(ParseTree tree) throws SyntaxException {
 		FortranTree fTree = (FortranTree) tree;
 		String filePath = "";
-		FortranASTBuilderWorker worker = new FortranASTBuilderWorker(config, fTree, astFactory, filePath);
+		FortranASTBuilderWorker worker = new FortranASTBuilderWorker(config,
+				fTree, astFactory, filePath);
 
 		return worker.generateAST();
 	}
