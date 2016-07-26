@@ -64,49 +64,6 @@ $atomic_f void $barrier_destroy($barrier barrier);
 /* Calls the barrier associated with this local barrier object.*/
 void $barrier_call($barrier barrier);
 
-/********* Functions For Collective Arrive Checking Record *********/
-/* Collective checker record entry */
-typedef struct _collator_entry  $collator_entry;
-
-/* Global collective operation checker */
-typedef struct _gcollator * $gcollator;
-
-/* Local handle of the collective operation checker */
-typedef struct _collator * $collator;
-
-/* Creates and initializes the global collective operation checker */
-/*@ depends_on \nothing;
-  @ reads \nothing;
-  @ assigns \nothing;
-  @ */
-$atomic_f $gcollator $gcollator_create($scope scope);
-
-/* Destroy a global collective operation checker.  Returns number of
-   junk records remaining in the checker. */
-/*@ depends_on \access(gcollator);
-  @ assigns gcollator;
-  @ reads \nothing;
-  @ */
-$atomic_f int $gcollator_destroy($gcollator gcollator);
-
-/* Creates and initializes the local collective operation checker */
-/*@ depends_on \nothing;
-  @ executes_when \true;
-  @ */
-$atomic_f $collator $collator_create($scope scope, 
-				       $gcollator gcollator);
-
-/* Destroy a local collective operation checker */
-/*@ depends_on \access(collator);
-  @ executes_when \true;
-  @ */
-$atomic_f void $collator_destroy($collator collator);
-
-/* Do a check for a collecive operation of one process */
-/*@ depends_on \access(collator);
-  @ executes_when \true;
-  @ */
-$system $bundle $collator_check($collator collator, int place, int nprocs,
-		    $bundle entries);
-
 #endif
+
+

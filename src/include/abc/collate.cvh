@@ -4,7 +4,7 @@
  */
 #ifndef _COLLATE_
 #define _COLLATE_
-
+#include <bundle.cvh>
 /************************** Datatypes: **************************/
 
 /* _gcollator: An invisible shared collation object;
@@ -146,6 +146,15 @@ $system $state $enter_collate_state($collate_state *cs);
   @ executes_when \true; 
   @ */
 $system void $exit_collate_state($collate_state *cs);//, $state rs);
+
+/* An interface for checking attributes among a group of processes
+   that all of the processes have the same value of the given
+   attributes collectively. */
+/*@ pure;
+  @ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$bundle $collate_check($collator c, $bundle attribute);
 
 #endif
 

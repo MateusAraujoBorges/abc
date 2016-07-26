@@ -5,9 +5,6 @@
 #include <comm.cvh>
 #include <concurrency.cvh>
 #include <bundle.cvh>
-#ifdef _MPI_CONTRACT
-#include <collate.cvh>
-#endif
 
 #define BCAST_TAG        9999
 #define REDUCE_TAG       9998
@@ -225,6 +222,7 @@ void $mpi_diff_coroutine_entries($bundle specEntry, $bundle mineEntry, int rank)
 void $mpi_coassert(MPI_Comm, _Bool);
 
 /*********** Section: contract helper functions ***********/
+
 /*********** Side-effect free functions *************/
 _Bool $mpi_isRecvBufEmpty(int x);
 
