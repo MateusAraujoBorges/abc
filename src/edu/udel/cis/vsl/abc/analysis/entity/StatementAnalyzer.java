@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.analysis.entity;
 
 import java.util.Iterator;
+import java.util.Stack;
 
 import edu.udel.cis.vsl.abc.ast.conversion.IF.ConversionFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
@@ -239,38 +240,38 @@ public class StatementAnalyzer {
 
 	private void processJump(JumpNode statement) throws SyntaxException {
 		switch (statement.getKind()) {
-		case RETURN: {
-			ExpressionNode expression = ((ReturnNode) statement)
-					.getExpression();
-			Function function = entityAnalyzer.enclosingFunction(statement);
-			ObjectType returnType = function.getType().getReturnType();
-			boolean returnTypeIsVoid = returnType.kind() == TypeKind.VOID;
+			case RETURN : {
+				ExpressionNode expression = ((ReturnNode) statement)
+						.getExpression();
+				Function function = entityAnalyzer.enclosingFunction(statement);
+				ObjectType returnType = function.getType().getReturnType();
+				boolean returnTypeIsVoid = returnType.kind() == TypeKind.VOID;
 
-			if (expression == null) {
-				if (!this.configuration.getSVCOMP() && !returnTypeIsVoid)
-					throw error("Missing expression in return statement",
-							statement);
-			} else {
-				if (returnTypeIsVoid)
-					throw error(
-							"Argument for return in function returning void",
-							statement);
-				if (expression != null)
-					processExpression(expression);
-				try {
-					expressionAnalyzer.processAssignment(returnType,
-							expression);
-				} catch (UnsourcedException e) {
-					throw error(e, expression);
+				if (expression == null) {
+					if (!this.configuration.getSVCOMP() && !returnTypeIsVoid)
+						throw error("Missing expression in return statement",
+								statement);
+				} else {
+					if (returnTypeIsVoid)
+						throw error(
+								"Argument for return in function returning void",
+								statement);
+					if (expression != null)
+						processExpression(expression);
+					try {
+						expressionAnalyzer.processAssignment(returnType,
+								expression);
+					} catch (UnsourcedException e) {
+						throw error(e, expression);
+					}
 				}
 			}
-		}
-		case GOTO: // taken care of later in processGotos
-		case BREAK: // nothing to do
-		case CONTINUE: // nothing to do
-			break;
-		default:
-			throw new RuntimeException("Unreachable");
+			case GOTO : // taken care of later in processGotos
+			case BREAK : // nothing to do
+			case CONTINUE : // nothing to do
+				break;
+			default :
+				throw new RuntimeException("Unreachable");
 		}
 	}
 
@@ -281,43 +282,44 @@ public class StatementAnalyzer {
 			this.acslAnalyzer.processLoopContractNodes(loopContracts);
 		}
 		switch (loopNode.getKind()) {
-		case WHILE:
-			processExpression(loopNode.getCondition());
-			processStatement(loopNode.getBody());
-			// processExpression(loopNode.getInvariant());
-			break;
-		case DO_WHILE:
-			processStatement(loopNode.getBody());
-			processExpression(loopNode.getCondition());
-			// processExpression(loopNode.getInvariant());
-			break;
-		case FOR: {
-			ForLoopNode forNode = (ForLoopNode) loopNode;
-			ForLoopInitializerNode initializer = forNode.getInitializer();
+			case WHILE :
+				processExpression(loopNode.getCondition());
+				processStatement(loopNode.getBody());
+				// processExpression(loopNode.getInvariant());
+				break;
+			case DO_WHILE :
+				processStatement(loopNode.getBody());
+				processExpression(loopNode.getCondition());
+				// processExpression(loopNode.getInvariant());
+				break;
+			case FOR : {
+				ForLoopNode forNode = (ForLoopNode) loopNode;
+				ForLoopInitializerNode initializer = forNode.getInitializer();
 
-			if (initializer == null) {
-			} else if (initializer instanceof ExpressionNode) {
-				processExpression((ExpressionNode) initializer);
-			} else if (initializer instanceof DeclarationListNode) {
-				DeclarationListNode declarationList = (DeclarationListNode) initializer;
+				if (initializer == null) {
+				} else if (initializer instanceof ExpressionNode) {
+					processExpression((ExpressionNode) initializer);
+				} else if (initializer instanceof DeclarationListNode) {
+					DeclarationListNode declarationList = (DeclarationListNode) initializer;
 
-				for (VariableDeclarationNode child : declarationList) {
-					if (child == null)
-						continue;
-					entityAnalyzer.declarationAnalyzer
-							.processVariableDeclaration(child);
-				}
-			} else
-				throw error("Unknown kind of initializer clause in for loop",
-						initializer);
-			processExpression(loopNode.getCondition());
-			processExpression(forNode.getIncrementer());
-			processStatement(loopNode.getBody());
-			// processExpression(loopNode.getInvariant());
-			break;
-		}
-		default:
-			throw new RuntimeException("Unreachable");
+					for (VariableDeclarationNode child : declarationList) {
+						if (child == null)
+							continue;
+						entityAnalyzer.declarationAnalyzer
+								.processVariableDeclaration(child);
+					}
+				} else
+					throw error(
+							"Unknown kind of initializer clause in for loop",
+							initializer);
+				processExpression(loopNode.getCondition());
+				processExpression(forNode.getIncrementer());
+				processStatement(loopNode.getBody());
+				// processExpression(loopNode.getInvariant());
+				break;
+			}
+			default :
+				throw new RuntimeException("Unreachable");
 		}
 	}
 
@@ -376,92 +378,93 @@ public class StatementAnalyzer {
 		StatementKind kind = statement.statementKind();
 
 		switch (kind) {
-		case COMPOUND:
-			processCompoundStatement((CompoundStatementNode) statement);
-			break;
-		case EXPRESSION:
-			processExpression(
-					((ExpressionStatementNode) statement).getExpression());
-			break;
-		case IF:
-			processIf((IfNode) statement);
-			break;
-		case JUMP:
-			processJump((JumpNode) statement);
-			break;
-		case LABELED:
-			processLabeledStatement((LabeledStatementNode) statement);
-			break;
-		case LOOP:
-			processLoop((LoopNode) statement);
-			break;
-		case SWITCH:
-			processExpression(((SwitchNode) statement).getCondition());
-			processStatement(((SwitchNode) statement).getBody());
-			break;
-		case PRAGMA:
-			entityAnalyzer.processPragma((PragmaNode) statement);
-			break;
-		case RUN:
-			processRunStatement((RunNode) statement);
-			break;
-		case OMP:
-			processOmpNode((OmpNode) statement);
-			break;
-		case NULL:
-			break;
-		case WHEN: {
-			ExpressionNode guard = ((WhenNode) statement).getGuard();
-			Type guardType;
+			case COMPOUND :
+				processCompoundStatement((CompoundStatementNode) statement);
+				break;
+			case EXPRESSION :
+				processExpression(
+						((ExpressionStatementNode) statement).getExpression());
+				break;
+			case IF :
+				processIf((IfNode) statement);
+				break;
+			case JUMP :
+				processJump((JumpNode) statement);
+				break;
+			case LABELED :
+				processLabeledStatement((LabeledStatementNode) statement);
+				break;
+			case LOOP :
+				processLoop((LoopNode) statement);
+				break;
+			case SWITCH :
+				processExpression(((SwitchNode) statement).getCondition());
+				processStatement(((SwitchNode) statement).getBody());
+				break;
+			case PRAGMA :
+				entityAnalyzer.processPragma((PragmaNode) statement);
+				break;
+			case RUN :
+				processRunStatement((RunNode) statement);
+				break;
+			case OMP :
+				processOmpNode((OmpNode) statement);
+				break;
+			case NULL :
+				break;
+			case WHEN : {
+				ExpressionNode guard = ((WhenNode) statement).getGuard();
+				Type guardType;
 
-			if (!guard.isSideEffectFree(false))
-				throw this.error(
-						"the guard of a $when statement is not allowed to have side effects.",
-						guard);
-			processExpression(guard);
-			guardType = guard.getConvertedType();
-			// check guardType can be converted to a boolean...
-			if (!guardType.isScalar())
-				throw error("Guard has non-scalar type " + guardType, guard);
-			processStatement(((WhenNode) statement).getBody());
-			break;
-		}
-		case WITH: {
-			WithNode withNode = (WithNode) statement;
-			ExpressionNode stateRef = withNode.getStateReference();
-			Type stateType;
+				if (!guard.isSideEffectFree(false))
+					throw this.error(
+							"the guard of a $when statement is not allowed to have side effects.",
+							guard);
+				processExpression(guard);
+				guardType = guard.getConvertedType();
+				// check guardType can be converted to a boolean...
+				if (!guardType.isScalar())
+					throw error("Guard has non-scalar type " + guardType,
+							guard);
+				processStatement(((WhenNode) statement).getBody());
+				break;
+			}
+			case WITH : {
+				WithNode withNode = (WithNode) statement;
+				ExpressionNode stateRef = withNode.getStateReference();
+				Type stateType;
 
-			processExpression(stateRef);
-			stateType = stateRef.getConvertedType();
-			if (!entityAnalyzer.standardTypes.isCollateStateType(stateType))
-				throw this.error(
-						"The state reference expression of $with doesn't have type of collate statet",
-						statement);
-			processStatement(withNode.getBodyNode());
-			break;
-		}
-		case UPDATE: {
-			UpdateNode updateNode = (UpdateNode) statement;
+				processExpression(stateRef);
+				stateType = stateRef.getConvertedType();
+				if (!entityAnalyzer.standardTypes.isCollateStateType(stateType))
+					throw this.error(
+							"The state reference expression of $with doesn't have type of collate statet",
+							statement);
+				processStatement(withNode.getBodyNode());
+				break;
+			}
+			case UPDATE : {
+				UpdateNode updateNode = (UpdateNode) statement;
 
-			processExpression(updateNode.getCollator());
-			processExpression(updateNode.getFunctionCall());
-			break;
-		}
-		case CHOOSE: {
-			ChooseStatementNode chooseStatement = (ChooseStatementNode) statement;
+				processExpression(updateNode.getCollator());
+				processExpression(updateNode.getFunctionCall());
+				break;
+			}
+			case CHOOSE : {
+				ChooseStatementNode chooseStatement = (ChooseStatementNode) statement;
 
-			for (StatementNode child : chooseStatement)
-				processStatement(child);
-			break;
-		}
-		case ATOMIC:
-			processStatement(((AtomicNode) statement).getBody());
-			break;
-		case CIVL_FOR:
-			processCivlFor((CivlForNode) statement);
-			break;
-		default:
-			throw error("Unknown kind of statement", statement);
+				for (StatementNode child : chooseStatement)
+					processStatement(child);
+				break;
+			}
+			case ATOMIC :
+				processStatement(((AtomicNode) statement).getBody());
+				break;
+			case CIVL_FOR :
+				processCivlFor((CivlForNode) statement);
+				break;
+			default :
+				throw error("Unknown kind of statement", statement);
 		}
 	}
 
@@ -469,11 +472,11 @@ public class StatementAnalyzer {
 		OmpNodeKind ompKind = ompNode.ompNodeKind();
 
 		switch (ompKind) {
-		case EXECUTABLE:
-			processOmpExecutableNode((OmpExecutableNode) ompNode);
-			break;
-		case DECLARATIVE:
-		default:
+			case EXECUTABLE :
+				processOmpExecutableNode((OmpExecutableNode) ompNode);
+				break;
+			case DECLARATIVE :
+			default :
 
 		}
 	}
@@ -491,16 +494,24 @@ public class StatementAnalyzer {
 
 		StatementNode body = runNode.getStatement();
 		ASTNode next = body;
+		Stack<ASTNode> children = new Stack<ASTNode>();
 
-		do {
-			if (next.nodeKind() == NodeKind.STATEMENT)
-				if (((StatementNode) next)
-						.statementKind() == StatementKind.JUMP)
-					if (((JumpNode) next).getKind() == JumpKind.RETURN)
-						throw error(
-								"No return statement is allowed to be inside a $run statement block.",
-								next);
-		} while ((next = next.nextDFS()) != null);
+		children.push(next);
+		while (!children.isEmpty()) {
+			ASTNode item = children.pop();
+
+			if (item != null) {
+				if (item.nodeKind() == NodeKind.STATEMENT)
+					if (((StatementNode) item)
+							.statementKind() == StatementKind.JUMP)
+						if (((JumpNode) item).getKind() == JumpKind.RETURN)
+							throw error(
+									"No return statement is allowed to be inside a $run statement block.",
+									item);
+				for (ASTNode child : item.children())
+					children.push(child);
+			}
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -531,38 +542,38 @@ public class StatementAnalyzer {
 			}
 		}
 		switch (kind) {
-		case PARALLEL:
-			OmpParallelNode parallel = (OmpParallelNode) statement;
+			case PARALLEL :
+				OmpParallelNode parallel = (OmpParallelNode) statement;
 
-			if (parallel.ifClause() != null)
-				processExpression(parallel.ifClause());
-			if (parallel.numThreads() != null)
-				processExpression(parallel.numThreads());
-			break;
-		case WORKSHARING:
-			OmpWorksharingNode workshare = (OmpWorksharingNode) statement;
-
-			switch (workshare.ompWorkshareNodeKind()) {
-			case FOR:
-				OmpForNode forNode = (OmpForNode) statement;
-				SequenceNode<FunctionCallNode> assertions = forNode
-						.assertions();
-				FunctionCallNode invariant = forNode.invariant();
-				ExpressionNode chunkSize = forNode.chunkSize();
-
-				if (assertions != null) {
-					for (FunctionCallNode node : assertions)
-						processExpression(node);
-				}
-				if (invariant != null)
-					processExpression(invariant);
-				if (chunkSize != null)
-					processExpression(chunkSize);
+				if (parallel.ifClause() != null)
+					processExpression(parallel.ifClause());
+				if (parallel.numThreads() != null)
+					processExpression(parallel.numThreads());
 				break;
-			default:
-			}
-			break;
-		default:
+			case WORKSHARING :
+				OmpWorksharingNode workshare = (OmpWorksharingNode) statement;
+
+				switch (workshare.ompWorkshareNodeKind()) {
+					case FOR :
+						OmpForNode forNode = (OmpForNode) statement;
+						SequenceNode<FunctionCallNode> assertions = forNode
+								.assertions();
+						FunctionCallNode invariant = forNode.invariant();
+						ExpressionNode chunkSize = forNode.chunkSize();
+
+						if (assertions != null) {
+							for (FunctionCallNode node : assertions)
+								processExpression(node);
+						}
+						if (invariant != null)
+							processExpression(invariant);
+						if (chunkSize != null)
+							processExpression(chunkSize);
+						break;
+					default :
+				}
+				break;
+			default :
 
 		}
 		if (statement.statementNode() != null)
