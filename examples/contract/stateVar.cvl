@@ -1,8 +1,0 @@
-#include<civlc.cvh>
-
-int main() {
-  $state state = $get_state($here);
-  
-  state = $combine_states(state, state, $here);
-  return 0;
-}
