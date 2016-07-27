@@ -114,20 +114,12 @@ $atomic_f void $collate_departs($collator c);
 /* Tests if a set of participants defined by a $range have all arrived
  * the specific $collate_entry referenced by cp.
  */
-/*@ pure;
-  @ depends_on \access(cp);
-  @ executes_when \true;
-  @*/
 _Bool $collate_arrived($collate_state cp, $range range);
 
 
 /* Equivalent to $arrived(cp, r') where r' represents the whole set of
  * participants in the specific $collate_entry referenced by cp. 
  */
-/*@ pure;
-  @ depends_on \access(cp);
-  @ executes_when \true;
-  @*/
 _Bool $collate_complete($collate_state cp);
 
 /* enters the given collate state cs, 

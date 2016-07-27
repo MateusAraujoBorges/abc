@@ -22,7 +22,8 @@ public class ContractTest {
 
 	private File root = new File(new File("examples"), "contract");
 
-	private static Configuration config = Configurations.newMinimalConfiguration();
+	private static Configuration config = Configurations
+			.newMinimalConfiguration();
 
 	private static FrontEnd f = new FrontEnd(config);
 
@@ -51,15 +52,5 @@ public class ContractTest {
 	@Test
 	public void contracts() throws ABCException, IOException {
 		check("contracts");
-	}
-
-	@Test
-	public void stateNull() throws ABCException, IOException {
-		check("stateNull");
-	}
-
-	@Test
-	public void stateVar() throws ABCException, IOException {
-		check("stateVar");
 	}
 }
