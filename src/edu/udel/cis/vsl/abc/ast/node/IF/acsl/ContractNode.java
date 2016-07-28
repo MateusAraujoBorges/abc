@@ -19,6 +19,10 @@ public interface ContractNode extends ASTNode {
 	 */
 	public enum ContractKind {
 		/**
+		 * an allocation clause. Can be safely cast to {@link AllocationNode}.
+		 */
+		ALLOCATES_OR_FREES,
+		/**
 		 * defines memory units assigned by the function
 		 */
 		ASSIGNS_READS,
