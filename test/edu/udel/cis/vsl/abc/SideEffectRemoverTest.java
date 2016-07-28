@@ -60,6 +60,8 @@ public class SideEffectRemoverTest {
 			out.println("Difference:");
 			out.println(program.getAST().diff(outputProgram.getAST()));
 			out.println("Output program:");
+			program.prettyPrint(out);
+			out.println("Oracle program:");
 			outputProgram.prettyPrint(out);
 		}
 		assertTrue(equiv);

@@ -1,6 +1,7 @@
 #include <civlc.cvh>
 #include <seq.cvh>
 
+
 $scope root = $here;
 
 typedef struct cqueue_t{
@@ -18,7 +19,7 @@ $atomic_f void create(cqueue* q)
   q->owner=$proc_null;
   $seq_init(&q->data, 0, NULL);
 }
-/*@ depends_on \read(q->owner);
+/*@ depends_on \read(&(q->owner));
   @ assigns q->owner;
 */
 $atomic_f _Bool lock(cqueue* q)
@@ -31,8 +32,7 @@ $atomic_f _Bool lock(cqueue* q)
   }else
     return $false;
 }
-/*@ pure;
-  @ depends_on \call(enqueue, q, ...), \call(dequeue,q, ...);
+/*@ depends_on \call(enqueue, q, ...), \call(dequeue,q, ...);
   @ reads q->data;
   @ assigns \nothing;
   @*/
@@ -43,7 +43,7 @@ $atomic_f int size(cqueue* q)
 /*@ reads q->owner;
   @ behavior success:
   @   assumes q->owner==$self;
-  @   depends_on \read(q->owner) + \write(q->owner);
+  @   depends_on \read(&(q->owner)) + \write(&(q->owner));
   @   assigns q->owner;
   @ behavior failure:
   @   assumes q->owner!=$self;

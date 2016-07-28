@@ -67,7 +67,7 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 * An arrow (<code>e->f</code>) expression; can be cast to
 		 * {@link ArrowNode}.
 		 */
-		ARROW, CALLS,
+		ARROW,
 		/**
 		 * A cast expression, which has the form <code>(typeName)expr</code>;
 		 * can be cast to {@link CastNode}.
@@ -114,6 +114,11 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 * A memory set of ACSL contracts. Can be cast to {@link MemorySetNode}.
 		 */
 		MEMORY_SET,
+		/**
+		 * An <code>$object_of</code> or <code>$region_of</code> expression,
+		 * which is uded in contract. Can be cast to {@link ObjectOrRegionNode}.
+		 */
+		OBJECT_OR_REGION_OF,
 		/**
 		 * An operator expression: this includes a large set of expressions
 		 * formed by using an operator represented by some C symbol, such as

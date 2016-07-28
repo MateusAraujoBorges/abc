@@ -1,4 +1,4 @@
-$system[mylib] int k(int);
+$system[mylib] $state_f int k(int);
 
 int main(){
   int a;

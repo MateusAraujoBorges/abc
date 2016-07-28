@@ -174,7 +174,9 @@ import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
  * and an empty "after" component.
  * </p>
  * 
- * TODO: check if a contract contains side-effects and report an error
+ * TODO: check if a contract contains side-effects and report an error <br>
+ * TODO: at most one function call to a state function that depends on something
+ * is allowed in an expressions
  * 
  * @author Timothy K. Zirkel
  * @author Stephen F. Siegel
@@ -2645,12 +2647,12 @@ public class SideEffectRemover extends BaseTransformer {
 		List<BlockItemNode> result = new LinkedList<>();
 
 		purify(collatorTriple);
-		purify(funcCallTriple);
 		result.addAll(collatorTriple.getBefore());
 		result.addAll(funcCallTriple.getBefore());
 		update.setChild(collatorIndex, collatorTriple.getNode());
 		update.setChild(functionCallIndex, funcCallTriple.getNode());
 		result.add(update);
+		result.addAll(funcCallTriple.getAfter());
 		return result;
 	}
 

@@ -94,8 +94,8 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 
 	/**
 	 * Does the declaration include the <code>$pure</code> function specifier? A
-	 * pure function is a function where the return value is only determined by
-	 * its input values, without observable side effects.
+	 * $pure function is a function whose return value is only determined by its
+	 * input values, without observable side effects.
 	 * 
 	 * @return <code>true</code> iff declaration contains <code>$pure</code>
 	 * @see #setPureFunctionSpecifier(boolean)
@@ -103,7 +103,7 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	boolean hasPureFunctionSpecifier();
 
 	/**
-	 * Set the pure function specifier bit to the given value.
+	 * Set the $pure function specifier bit to the given value.
 	 * 
 	 * @param value
 	 *            if <code>true</code>, says that this function declaration
@@ -112,6 +112,28 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	 * @see #hasPureFunctionSpecifier()
 	 */
 	void setPureFunctionSpecifier(boolean value);
+
+	/**
+	 * Does the declaration include the <code>$state_f</code> function
+	 * specifier? A $state_f function is a function whose return value is only
+	 * determined by its input values and the current state, without observable
+	 * side effects.
+	 * 
+	 * @return <code>true</code> iff declaration contains <code>$state_f</code>
+	 * @see #setStatefFunctionSpecifier(boolean)
+	 */
+	boolean hasStatefFunctionSpecifier();
+
+	/**
+	 * Set the $state_f function specifier bit to the given value.
+	 * 
+	 * @param value
+	 *            if <code>true</code>, says that this function declaration
+	 *            contains the <code>$state_f</code> specifier, if
+	 *            <code>false</code>, it doesn't
+	 * @see #hasStatefFunctionSpecifier()
+	 */
+	void setStatefFunctionSpecifier(boolean value);
 
 	/**
 	 * Does the declaration include the <code>$atomic_f</code> function

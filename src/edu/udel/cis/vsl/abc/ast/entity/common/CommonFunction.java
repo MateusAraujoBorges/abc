@@ -17,8 +17,7 @@ import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 
 public class CommonFunction extends CommonOrdinaryEntity implements Function {
 
-	private boolean isInlined, doesNotReturn, isAtomic, isSystemFunction,
-			isAbstract = false;
+	private boolean isInlined, doesNotReturn, isAtomic, isSystemFunction, isPure, isAbstract = false;
 
 	private Set<Function> callers = new HashSet<>();
 	private Set<Function> callees = new HashSet<>();
@@ -27,8 +26,7 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 
 	private List<ContractNode> contracts = new LinkedList<>();
 
-	public CommonFunction(String name, ProgramEntity.LinkageKind linkage,
-			Type type) {
+	public CommonFunction(String name, ProgramEntity.LinkageKind linkage, Type type) {
 		super(EntityKind.FUNCTION, name, linkage, type);
 	}
 
@@ -67,8 +65,7 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 			result = result.getParentScope();
 		}
 		if (result == null)
-			throw new ABCRuntimeException(
-					"Could not find function scope of function " + this);
+			throw new ABCRuntimeException("Could not find function scope of function " + this);
 		return result;
 	}
 
@@ -135,5 +132,15 @@ public class CommonFunction extends CommonOrdinaryEntity implements Function {
 	@Override
 	public void setSystemLibrary(String library) {
 		this.library = library;
+	}
+
+	@Override
+	public boolean isPure() {
+		return this.isPure;
+	}
+
+	@Override
+	public void setPure(boolean value) {
+		this.isPure = value;
 	}
 }

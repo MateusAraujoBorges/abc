@@ -20,6 +20,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.CallEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ObjectOrRegionOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -29,7 +30,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
@@ -134,7 +134,7 @@ public class ExpressionAnalyzer {
 
 	private ConversionFactory conversionFactory;
 
-	private TypeFactory typeFactory;
+	TypeFactory typeFactory;
 
 	private ASTFactory astFactory;
 
@@ -259,9 +259,6 @@ public class ExpressionAnalyzer {
 			case SPAWN:
 				processSpawn((SpawnNode) node);
 				break;
-			case CALLS:
-				processCalls((CallsNode) node);
-				break;
 			case STATEMENT_EXPRESSION:
 				processStatementExpression((StatementExpressionNode) node);
 				break;
@@ -277,9 +274,23 @@ public class ExpressionAnalyzer {
 			case NOTHING:
 				node.setInitialType(this.typeFactory.memoryType());
 				break;
+			case OBJECT_OR_REGION_OF: {
+				ExpressionNode operand = ((ObjectOrRegionOfNode) node)
+						.operand();
+
+				processExpression(operand);
+				if (!typeFactory.isPointerType(operand.getConvertedType()))
+					throw this
+							.error("the expression "
+									+ operand.prettyRepresentation()
+									+ " doesn't have pointer type "
+									+ "and thus can't be used with $object_of/$region_of",
+									node);
+				node.setInitialType(this.typeFactory.memoryType());
+				break;
+			}
 			default:
 				throw new ABCRuntimeException("Unreachable");
-
 			}
 		} catch (ASTException e) {
 			throw new SyntaxException(e.getMessage(), node.getSource());
@@ -878,11 +889,6 @@ public class ExpressionAnalyzer {
 		node.setInitialType(typeFactory.processType());
 	}
 
-	private void processCalls(CallsNode node) throws SyntaxException {
-		processFunctionCall(node.getCall());
-		node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
-	}
-
 	private void processGenericSelection(GenericSelectionNode node)
 			throws SyntaxException {
 		// TODO
@@ -1434,7 +1440,7 @@ public class ExpressionAnalyzer {
 	 * @param node
 	 *            the expression to be check
 	 */
-	private boolean isLvalue(ExpressionNode node) {
+	boolean isLvalue(ExpressionNode node) {
 		ExpressionKind kind = node.expressionKind();
 
 		switch (kind) {

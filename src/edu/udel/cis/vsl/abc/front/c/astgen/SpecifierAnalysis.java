@@ -24,6 +24,7 @@ import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.LIB_NAME;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.LONG;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.NORETURN;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.OUTPUT;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.PURE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.RANGE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.REAL;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.REGISTER;
@@ -31,6 +32,7 @@ import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.RESTRICT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.SHARED;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.SHORT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.SIGNED;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.STATE_F;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.STATIC;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.STRUCT;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.SYSTEM;
@@ -158,9 +160,13 @@ public class SpecifierAnalysis {
 	boolean noreturnSpecifier = false;
 	boolean abstractSpecifier = false;
 	boolean fatomicSpecifier = false;
-	boolean pureSpecifier = false;
 	boolean systemSpecifier = false;
 	String systemLibrary = null;
+	/**
+	 * CIVL-C function specifier $state_f (atomic, side-effect free,
+	 * deterministic on state and arguments)
+	 */
+	boolean statefSpecifier = false;
 	/**
 	 * CUDA specifier __global__
 	 */
@@ -169,6 +175,12 @@ public class SpecifierAnalysis {
 	 * CUDA specifier __device__
 	 */
 	boolean deviceSpecifier = false;
+
+	/**
+	 * $pure specifier
+	 */
+	boolean pureSpecifier;
+
 	// CIVL-C continuity for abstract functions: can occur only once
 	int continuity = 0;
 	// CIVL-C domain specifier: can occur only once
@@ -374,6 +386,12 @@ public class SpecifierAnalysis {
 					}
 					break;
 				}
+				case STATE_F:
+					statefSpecifier = true;
+					break;
+				case PURE:
+					this.pureSpecifier = true;
+					break;
 				default:
 					throw error("Unknown declaration specifier", node);
 				}

@@ -6,8 +6,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonNothingNode extends CommonExpressionNode implements
-		NothingNode {
+public class CommonNothingNode extends CommonExpressionNode implements NothingNode {
 
 	public CommonNothingNode(Source source) {
 		super(source);
@@ -20,7 +19,7 @@ public class CommonNothingNode extends CommonExpressionNode implements
 
 	@Override
 	protected void printBody(PrintStream out) {
-
+		out.println("NothingNode");
 	}
 
 	@Override

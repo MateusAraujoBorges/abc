@@ -1,7 +1,7 @@
 
 int x;
 
-/*@ reads &x; */
+/*@ reads x; */
 $system int foo();
 
 int main(){

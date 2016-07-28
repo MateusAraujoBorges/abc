@@ -97,6 +97,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AllocationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
@@ -230,17 +231,9 @@ public class AcslContractWorker {
 		CommonTree contractTree = parseTree.getRoot();
 
 		switch (contractTree.getType()) {
-		case AcslParser.FUNC_CONTRACT: {
-			CommonTree pure = (CommonTree) contractTree.getChild(1);
-			List<ContractNode> result = translateFunctionContractBlock(
+		case AcslParser.FUNC_CONTRACT:
+			return translateFunctionContractBlock(
 					(CommonTree) contractTree.getChild(0), scope);
-
-			if (pure != null) {
-				result.add(0,
-						this.nodeFactory.newPureNode(this.newSource(pure)));
-			}
-			return result;
-		}
 		case AcslParser.LOOP_CONTRACT:
 			return translateLoopContractBlock(
 					(CommonTree) contractTree.getChild(0), scope);
@@ -382,8 +375,8 @@ public class AcslContractWorker {
 			SimpleScope scope) throws SyntaxException {
 		int kind = tree.getType();
 		boolean isComplete = false;
-		SequenceNode<IdentifierNode> idList = this.translateIdList(
-				(CommonTree) tree.getChild(2), scope);
+		SequenceNode<IdentifierNode> idList = this
+				.translateIdList((CommonTree) tree.getChild(2), scope);
 		Source source = this.parseTree.source(tree);
 
 		switch (kind) {
@@ -441,8 +434,8 @@ public class AcslContractWorker {
 		SequenceNode<ContractNode> body = this.translateBehaviorBody(bodyTree,
 				scope);
 
-		return this.nodeFactory.newBehaviorNode(this.parseTree.source(tree),
-				id, body);
+		return this.nodeFactory.newBehaviorNode(this.parseTree.source(tree), id,
+				body);
 	}
 
 	/**
@@ -488,6 +481,10 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 
 		switch (kind) {
+		case AcslParser.ALLOC:
+			return this.translateAllocation(tree, scope, true);
+		case AcslParser.FREES:
+			return this.translateAllocation(tree, scope, false);
 		case AcslParser.REQUIRES_ACSL:
 			return this.translateRequires(tree, scope);
 		case AcslParser.ENSURES_ACSL:
@@ -507,6 +504,15 @@ public class AcslContractWorker {
 		default:
 			throw this.error("Unknown contract clause kind", tree);
 		}
+	}
+
+	private AllocationNode translateAllocation(CommonTree tree,
+			SimpleScope scope, boolean isAllocates) throws SyntaxException {
+		SequenceNode<ExpressionNode> memoryList = this
+				.translateArgumentList((CommonTree) tree.getChild(1), scope);
+
+		return this.nodeFactory.newAllocationNode(this.newSource(tree),
+				isAllocates, memoryList);
 	}
 
 	/**
@@ -636,10 +642,10 @@ public class AcslContractWorker {
 	private CompositeEventNode translateOperatorEvent(CommonTree tree,
 			EventOperator op, SimpleScope scope) throws SyntaxException {
 		Source source = this.parseTree.source(tree);
-		CommonTree leftTree = (CommonTree) tree.getChild(0), rightTree = (CommonTree) tree
-				.getChild(1);
-		DependsEventNode left = this.translateDependsEventBase(leftTree, scope), right = this
-				.translateDependsEventBase(rightTree, scope);
+		CommonTree leftTree = (CommonTree) tree.getChild(0),
+				rightTree = (CommonTree) tree.getChild(1);
+		DependsEventNode left = this.translateDependsEventBase(leftTree, scope),
+				right = this.translateDependsEventBase(rightTree, scope);
 
 		return this.nodeFactory.newOperatorEventNode(source, op, left, right);
 	}
@@ -678,10 +684,10 @@ public class AcslContractWorker {
 			SequenceNode<ExpressionNode> args = this.translateArgumentList(
 					(CommonTree) tree.getChild(1), scope);
 
-			return nodeFactory.newCallEventNode(
-					source,
+			return nodeFactory.newCallEventNode(source,
 					this.nodeFactory.newIdentifierExpressionNode(
-							function.getSource(), function), args);
+							function.getSource(), function),
+					args);
 		}
 		case NOTHING:
 			return nodeFactory.newNoactNode(source);
@@ -794,9 +800,19 @@ public class AcslContractWorker {
 			// scope),
 			// translateExpression(
 			// (CommonTree) expressionTree.getChild(1), scope));
+		case AcslParser.OBJECT_OF:
+			return translateObjectOf(source, expressionTree, scope);
 		default:
 			throw error("Unknown expression kind", expressionTree);
 		} // end switch
+	}
+
+	private ExpressionNode translateObjectOf(Source source, CommonTree tree,
+			SimpleScope scope) throws SyntaxException {
+		CommonTree operandTree = (CommonTree) tree.getChild(2);
+		ExpressionNode operand = this.translateExpression(operandTree, scope);
+
+		return nodeFactory.newObjectofNode(source, operand);
 	}
 
 	/**
@@ -876,11 +892,12 @@ public class AcslContractWorker {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree termTree = (CommonTree) tree.getChild(0);
 		CommonTree bindersTree = (CommonTree) tree.getChild(1);
-		CommonTree predicateTree = tree.getChildCount() > 2 ? (CommonTree) tree
-				.getChild(2) : null;
-		ExpressionNode term = this.translateExpression(termTree, newScope), predicate = null;
-		SequenceNode<VariableDeclarationNode> binders = this.translateBinders(
-				bindersTree, source, newScope);
+		CommonTree predicateTree = tree.getChildCount() > 2
+				? (CommonTree) tree.getChild(2) : null;
+		ExpressionNode term = this.translateExpression(termTree, newScope),
+				predicate = null;
+		SequenceNode<VariableDeclarationNode> binders = this
+				.translateBinders(bindersTree, source, newScope);
 
 		if (predicateTree != null)
 			predicate = this.translateExpression(predicateTree, newScope);
@@ -924,7 +941,8 @@ public class AcslContractWorker {
 		for (int i = 1; i < numChild; i++) {
 			CommonTree varIdent = (CommonTree) tree.getChild(i);
 
-			result.add(this.translateVariableIdent(varIdent, scope, type.copy()));
+			result.add(
+					this.translateVariableIdent(varIdent, scope, type.copy()));
 		}
 		return result;
 	}
@@ -935,8 +953,8 @@ public class AcslContractWorker {
 
 		switch (kind) {
 		case LOGIC_TYPE:
-			return this
-					.translateLogicType((CommonTree) tree.getChild(0), scope);
+			return this.translateLogicType((CommonTree) tree.getChild(0),
+					scope);
 		case C_TYPE:
 			return this.translateCType((CommonTree) tree.getChild(0), scope);
 		default:
@@ -951,8 +969,8 @@ public class AcslContractWorker {
 
 		switch (kind) {
 		case CHAR:
-			return this.nodeFactory
-					.newBasicTypeNode(source, BasicTypeKind.CHAR);
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.CHAR);
 		case DOUBLE:
 			return this.nodeFactory.newBasicTypeNode(source,
 					BasicTypeKind.DOUBLE);
@@ -962,8 +980,8 @@ public class AcslContractWorker {
 		case INT:
 			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
 		case LONG:
-			return this.nodeFactory
-					.newBasicTypeNode(source, BasicTypeKind.LONG);
+			return this.nodeFactory.newBasicTypeNode(source,
+					BasicTypeKind.LONG);
 		case SHORT:
 			return this.nodeFactory.newBasicTypeNode(source,
 					BasicTypeKind.SHORT);
@@ -1119,8 +1137,8 @@ public class AcslContractWorker {
 			CommonTree stringLiteral) throws SyntaxException {
 		StringToken token = (StringToken) stringLiteral.getToken();
 
-		return nodeFactory.newStringLiteralNode(source,
-				stringLiteral.getText(), token.getStringLiteral());
+		return nodeFactory.newStringLiteralNode(source, stringLiteral.getText(),
+				token.getStringLiteral());
 	}
 
 	private ExpressionNode translateRegularRange(Source source,

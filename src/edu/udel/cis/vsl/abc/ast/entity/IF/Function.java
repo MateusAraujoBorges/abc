@@ -52,6 +52,22 @@ public interface Function extends OrdinaryEntity {
 	void setAtomic(boolean value);
 
 	/**
+	 * Is the function declared with the <code>$pure</code> specifier,
+	 * indicating that this is a pure function?
+	 * 
+	 * @return <code>true</code> iff the function is a pure function
+	 */
+	boolean isPure();
+
+	/**
+	 * Sets whether this function is a pure function
+	 * 
+	 * @param value
+	 *            <code>true</code> if pure, <code>false</code> if not
+	 */
+	void setPure(boolean value);
+
+	/**
 	 * Is the function declared with the <code>$abstract</code> specifier,
 	 * indicating that this is an abstract function?
 	 * 

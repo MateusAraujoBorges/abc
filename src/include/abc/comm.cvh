@@ -174,7 +174,7 @@ $system void $comm_enqueue($comm comm, $message message);
   @ depends_on \access(comm);
   @ executes_when \true;
   @*/
-$system _Bool $comm_probe($comm comm, int source, int tag);
+$system $state_f _Bool $comm_probe($comm comm, int source, int tag);
 
 /* Finds the first matching message and returns it without modifying
  * the communication universe.  If no matching message exists, returns a message

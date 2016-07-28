@@ -6,8 +6,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonRequiresNode extends CommonContractNode implements
-		RequiresNode {
+public class CommonRequiresNode extends CommonContractNode implements RequiresNode {
 
 	public CommonRequiresNode(Source source, ExpressionNode expression) {
 		super(source, expression);
@@ -20,7 +19,7 @@ public class CommonRequiresNode extends CommonContractNode implements
 
 	@Override
 	protected void printBody(PrintStream out) {
-		out.print("Requires");
+		out.print("RequiresNode");
 	}
 
 	@Override

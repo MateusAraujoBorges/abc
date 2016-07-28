@@ -6,8 +6,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonAssumesNode extends CommonContractNode implements
-		AssumesNode {
+public class CommonAssumesNode extends CommonContractNode implements AssumesNode {
 
 	public CommonAssumesNode(Source source, ExpressionNode predicate) {
 		super(source, predicate);
@@ -30,7 +29,7 @@ public class CommonAssumesNode extends CommonContractNode implements
 
 	@Override
 	protected void printBody(PrintStream out) {
-		out.println("assumes");
+		out.println("AssumesNode");
 	}
 
 }

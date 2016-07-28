@@ -5,6 +5,7 @@ import java.util.List;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AllocationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AnyactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
@@ -30,7 +31,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ObjectOrRegionOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -49,7 +50,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
@@ -914,21 +914,6 @@ public interface NodeFactory {
 	 * @return the new expression node
 	 */
 	SizeofNode newSizeofNode(Source source, SizeableNode argument);
-
-	/**
-	 * Constructs a new CIVL-C $calls expression. A spawn expression has the
-	 * form <code>$calls</code> followed by a function call expression. Hence a
-	 * calls node has one argument, which is a function call node.
-	 * 
-	 * @param source
-	 *            source information for the occurrence of the entire
-	 *            <code>$calls</code> expression, including the entire function
-	 *            call
-	 * @param callNode
-	 *            the function call node
-	 * @return the new $calls expression node
-	 */
-	CallsNode newCallsNode(Source source, FunctionCallNode callNode);
 
 	/**
 	 * Constructs a new CIVL-C spawn expression. A spawn expression has the form
@@ -2501,14 +2486,6 @@ public interface NodeFactory {
 	TypeFactory typeFactory();
 
 	/**
-	 * Creates a new "pure" node.
-	 * 
-	 * @param source
-	 * @return
-	 */
-	PureNode newPureNode(Source source);
-
-	/**
 	 * Creates a new memory set node.
 	 * 
 	 * @param source
@@ -2577,4 +2554,43 @@ public interface NodeFactory {
 	 */
 	WaitsforNode newWaitsforNode(Source source,
 			SequenceNode<ExpressionNode> arguments);
+
+	/**
+	 * Creates a new <code>$object_of</code> node
+	 * 
+	 * @param source
+	 *            the source of the <code>$object_of</code> node
+	 * @param operand
+	 *            the operand of the <code>$object_of</code> node, which shall
+	 *            have pointer type
+	 * @return the new <code>$object_of</code> node
+	 */
+	ObjectOrRegionOfNode newObjectofNode(Source source, ExpressionNode operand);
+
+	/**
+	 * Creates a new <code>$region_of</code> node
+	 * 
+	 * @param source
+	 *            the source of the <code>$region_of</code> node
+	 * @param operand
+	 *            the operand of the <code>$region_of</code> node, which shall
+	 *            have pointer type
+	 * @return the new <code>$region_of</code> node
+	 */
+	ObjectOrRegionOfNode newRegionofNode(Source source, ExpressionNode operand);
+
+	/**
+	 * Creates a new allocation node, which represents either an
+	 * <code>allocates</code> or <code>frees</code> clause.
+	 * 
+	 * @param source
+	 *            the source of the allocation clause
+	 * @param isAllocates
+	 *            true if this is an <code>allocates</code> clause, otherwise, a
+	 *            <code>frees</code> clause
+	 * @param memoryList
+	 *            the list of memory units of the allocation clause
+	 * @return the new allocation node
+	 */
+	AllocationNode newAllocationNode(Source source, boolean isAllocates, SequenceNode<ExpressionNode> memoryList);
 }

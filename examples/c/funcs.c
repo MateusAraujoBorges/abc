@@ -2,8 +2,7 @@ int f(int a, int b);
 
 int f(int c, int d);
 
-/*@ pure;
-  @ executes_when k<g;
+/*@ executes_when k<g;
   @ requires k>0;
   @ ensures \result<1;
   @*/

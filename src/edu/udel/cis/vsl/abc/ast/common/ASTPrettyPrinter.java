@@ -11,6 +11,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AllocationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.BehaviorNode;
@@ -32,6 +33,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ObjectOrRegionOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -50,7 +52,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -221,6 +222,8 @@ public class ASTPrettyPrinter {
 		case PAIR:
 			return pairNode2Pretty((PairNode<ASTNode, ASTNode>) node,
 					maxLength);
+		case CONTRACT:
+			return contractNode2Pretty("", (ContractNode) node, maxLength);
 		default:
 			throw new ABCUnsupportedException(
 					"the pretty printing of AST node of " + kind
@@ -755,6 +758,10 @@ public class ASTPrettyPrinter {
 				out.print("] ");
 			}
 		}
+		if (function.hasStatefFunctionSpecifier())
+			out.print("$state_f ");
+		if (function.hasPureFunctionSpecifier())
+			out.print("$pure ");
 		if (function.hasInlineFunctionSpecifier())
 			out.print("inline ");
 		if (function.hasNoreturnFunctionSpecifier())
@@ -824,6 +831,10 @@ public class ASTPrettyPrinter {
 				result.append("] ");
 			}
 		}
+		if (function.hasStatefFunctionSpecifier())
+			result.append("$state_f ");
+		if (function.hasPureFunctionSpecifier())
+			result.append("$pure ");
 		if (function.hasInlineFunctionSpecifier())
 			result.append("inline ");
 		if (function.hasNoreturnFunctionSpecifier())
@@ -916,6 +927,17 @@ public class ASTPrettyPrinter {
 		ContractKind kind = contract.contractKind();
 
 		switch (kind) {
+		case ALLOCATES_OR_FREES: {
+			AllocationNode allocation = (AllocationNode) contract;
+
+			if (allocation.isAllocates())
+				result.append("allocates ");
+			else
+				result.append("frees ");
+			result.append(sequenceExpression2Pretty(allocation.memoryList(),
+					vacantLength(maxLength, result)));
+			break;
+		}
 		case ASSUMES: {
 			AssumesNode assumes = (AssumesNode) contract;
 
@@ -1069,8 +1091,10 @@ public class ASTPrettyPrinter {
 
 			if (rwEvent.isRead())
 				result.append("\\read");
-			else
+			else if (rwEvent.isWrite())
 				result.append("\\write");
+			else
+				result.append("\\access");
 			result.append("(");
 			result.append(sequenceExpression2Pretty(rwEvent.getMemoryList(),
 					vacantLength(maxLength, result)));
@@ -2583,7 +2607,6 @@ public class ASTPrettyPrinter {
 		result.append(prefix);
 		result.append("$with(");
 		result.append(expression2Pretty(withNode.getStateReference(), -1));
-		// System.out.println(withNode.getStateReference().prettyRepresentation());
 		result.append(") ");
 		stmt = withNode.getBodyNode();
 		result.append(statement2Pretty(myIndent, stmt, true, false,
@@ -2907,13 +2930,13 @@ public class ASTPrettyPrinter {
 					functionCall2Pretty(((SpawnNode) expression).getCall(),
 							vacantLength(maxLength, result)));
 			break;
-		case CALLS:
-			result.append("$calls(");
-			result.append(
-					functionCall2Pretty(((CallsNode) expression).getCall(),
-							vacantLength(maxLength, result)));
-			result.append(")");
-			break;
+		// case CALLS:
+		// result.append("$calls(");
+		// result.append(functionCall2Pretty(
+		// ((CallsNode) expression).getCall(),
+		// vacantLength(maxLength, result)));
+		// result.append(")");
+		// break;
 		case CONTRACT_VERIFY:
 			result.append("$contractVerify ");
 			result.append(
@@ -2951,6 +2974,19 @@ public class ASTPrettyPrinter {
 					memorySet2Pretty((MemorySetNode) expression, maxLength));
 			// result.append("MEMORY_SET in progress...");
 			break;
+		case OBJECT_OR_REGION_OF: {
+			ObjectOrRegionOfNode objectRegion = (ObjectOrRegionOfNode) expression;
+
+			if (objectRegion.isObjectOf())
+				result.append("$object_of");
+			else
+				result.append("$region_of");
+			result.append("(");
+			result.append(expression2Pretty(objectRegion.operand(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		}
 		default:
 			throw new ABCUnsupportedException(
 					"pretty print of expression node of " + kind + " kind");

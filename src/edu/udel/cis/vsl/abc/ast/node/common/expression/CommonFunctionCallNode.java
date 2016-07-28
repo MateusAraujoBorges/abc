@@ -6,21 +6,16 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode.ContractKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.CommonASTNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonFunctionCallNode extends CommonExpressionNode implements
-		FunctionCallNode {
+public class CommonFunctionCallNode extends CommonExpressionNode implements FunctionCallNode {
 
-	public CommonFunctionCallNode(Source source, ExpressionNode function,
-			SequenceNode<ExpressionNode> contextArguments,
-			SequenceNode<ExpressionNode> arguments,
-			SequenceNode<ExpressionNode> scopeList) {
+	public CommonFunctionCallNode(Source source, ExpressionNode function, SequenceNode<ExpressionNode> contextArguments,
+			SequenceNode<ExpressionNode> arguments, SequenceNode<ExpressionNode> scopeList) {
 		super(source, function, contextArguments, arguments, scopeList);
 	}
 
@@ -95,8 +90,7 @@ public class CommonFunctionCallNode extends CommonExpressionNode implements
 		@SuppressWarnings("unchecked")
 		SequenceNode<ExpressionNode> scopeList = (SequenceNode<ExpressionNode>) child(3);
 
-		return new CommonFunctionCallNode(getSource(),
-				duplicate(getFunction()), duplicate(contextArguments),
+		return new CommonFunctionCallNode(getSource(), duplicate(getFunction()), duplicate(contextArguments),
 				duplicate(arguments), duplicate(scopeList));
 	}
 
@@ -117,8 +111,7 @@ public class CommonFunctionCallNode extends CommonExpressionNode implements
 		boolean result = true;
 
 		if (functionExpr instanceof IdentifierExpressionNode) {
-			IdentifierNode functionIdentifier = ((IdentifierExpressionNode) functionExpr)
-					.getIdentifier();
+			IdentifierNode functionIdentifier = ((IdentifierExpressionNode) functionExpr).getIdentifier();
 
 			if (functionIdentifier.getEntity() == null) {
 				// FIXME: Why do we need this? Not having this check was
@@ -132,29 +125,19 @@ public class CommonFunctionCallNode extends CommonExpressionNode implements
 			if (functionEntity instanceof Function) {
 				Function function = (Function) functionEntity;
 
-				if (function.isAbstract())
-					isAtomicPureFunction = true;
-				else if (function.isSystemFunction()) {
-					for (ContractNode contract : function.getContracts()) {
-						if (contract.contractKind() == ContractKind.PURE) {
-							isAtomicPureFunction = true;
-							break;
-						}
-					}
-				}
+				isAtomicPureFunction = function.isAbstract()
+						|| ((function.isAtomic() || function.isSystemFunction()) && function.isPure());
 			}
 			if (isAtomicPureFunction) {
 				for (int i = 0; i < getNumberOfContextArguments(); i++) {
-					boolean argSEF = getContextArgument(i).isSideEffectFree(
-							errorsAreSideEffects);
+					boolean argSEF = getContextArgument(i).isSideEffectFree(errorsAreSideEffects);
 
 					if (!argSEF)
 						return false;
 				}
 				if (result) {
 					for (int i = 0; i < getNumberOfArguments(); i++) {
-						boolean argSEF = getArgument(i).isSideEffectFree(
-								errorsAreSideEffects);
+						boolean argSEF = getArgument(i).isSideEffectFree(errorsAreSideEffects);
 
 						if (!argSEF)
 							return false;

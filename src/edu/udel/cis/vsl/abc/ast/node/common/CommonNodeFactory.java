@@ -12,6 +12,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AllocationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AnyactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssumesNode;
@@ -37,7 +38,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PureNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ObjectOrRegionOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -56,7 +57,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.AlignOfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.CallsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
@@ -130,6 +130,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeofNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAllocationNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAnyactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonAssumesNode;
@@ -148,7 +149,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMemoryEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
-import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonPureNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonObjectOrRegionOfNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonRequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonWaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonArrayDesignatorNode;
@@ -165,7 +166,6 @@ import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonVariableDeclaratio
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonAlignOfNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonArrayLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonArrowNode;
-import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCallsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCastNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCompoundLiteralNode;
@@ -766,11 +766,6 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public CallsNode newCallsNode(Source source, FunctionCallNode callNode) {
-		return new CommonCallsNode(source, callNode);
-	}
-
-	@Override
 	public RemoteOnExpressionNode newRemoteOnExpressionNode(Source source,
 			ExpressionNode left, ExpressionNode right) {
 		return new CommonRemoteExpressionNode(source, left, right);
@@ -1169,11 +1164,6 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public PureNode newPureNode(Source source) {
-		return new CommonPureNode(source);
-	}
-
-	@Override
 	public MemorySetNode newMemorySetNode(Source source, ExpressionNode term,
 			SequenceNode<VariableDeclarationNode> binders,
 			ExpressionNode predicate) {
@@ -1249,6 +1239,24 @@ public class CommonNodeFactory implements NodeFactory {
 	@Override
 	public RunNode newRunNode(Source source, StatementNode statement) {
 		return new CommonRunNode(source, statement);
+	}
+
+	@Override
+	public ObjectOrRegionOfNode newObjectofNode(Source source,
+			ExpressionNode operand) {
+		return new CommonObjectOrRegionOfNode(source, true, operand);
+	}
+
+	@Override
+	public ObjectOrRegionOfNode newRegionofNode(Source source,
+			ExpressionNode operand) {
+		return new CommonObjectOrRegionOfNode(source, false, operand);
+	}
+
+	@Override
+	public AllocationNode newAllocationNode(Source source, boolean isAllocates,
+			SequenceNode<ExpressionNode> memoryList) {
+		return new CommonAllocationNode(source, isAllocates, memoryList);
 	}
 
 	@Override

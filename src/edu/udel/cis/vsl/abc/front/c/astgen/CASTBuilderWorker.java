@@ -797,9 +797,6 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			return translateRegularRange(source, expressionTree, scope);
 		case ELLIPSIS:
 			return translateWildcard(source, expressionTree, scope);
-		case CALLS:
-			return nodeFactory.newCallsNode(source,
-					translateCall(source, expressionTree, scope));
 		case STATEMENT_EXPRESSION:
 			return translateStatementExpression(source, expressionTree, scope);
 		default:
@@ -1398,6 +1395,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			declaration.setPureFunctionSpecifier(true);
 		if (analysis.fatomicSpecifier)
 			declaration.setAtomicFunctionSpecifier(true);
+		if (analysis.statefSpecifier)
+			declaration.setStatefFunctionSpecifier(true);
 		if (analysis.systemSpecifier) {
 			declaration.setSystemFunctionSpecifier(true);
 			if (analysis.systemLibrary != null)

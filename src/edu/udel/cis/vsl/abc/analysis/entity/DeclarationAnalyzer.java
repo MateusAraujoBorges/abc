@@ -76,8 +76,7 @@ public class DeclarationAnalyzer {
 	 */
 	DeclarationAnalyzer(EntityAnalyzer entityAnalyzer) {
 		this.entityAnalyzer = entityAnalyzer;
-		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer,
-				entityAnalyzer.conversionFactory);
+		this.acslAnalyzer = new AcslContractAnalyzer(entityAnalyzer, entityAnalyzer.conversionFactory);
 	}
 
 	// ************************* Exported Methods *************************
@@ -100,8 +99,7 @@ public class DeclarationAnalyzer {
 	 * @throws SyntaxException
 	 *             if anything is wrong with the typedef declaration
 	 */
-	void processTypedefDeclaration(TypedefDeclarationNode node)
-			throws SyntaxException {
+	void processTypedefDeclaration(TypedefDeclarationNode node) throws SyntaxException {
 		IdentifierNode identifier = node.getIdentifier();
 		String name = identifier.name();
 		Scope scope = node.getScope();
@@ -128,15 +126,13 @@ public class DeclarationAnalyzer {
 				Type oldType;
 
 				if (!(entity instanceof Typedef))
-					throw entityAnalyzer.error("Typedef name already used at "
-							+ entity.getDefinition().getSource(), node);
+					throw entityAnalyzer.error("Typedef name already used at " + entity.getDefinition().getSource(),
+							node);
 				typedef = (Typedef) entity;
 				oldType = typedef.getType();
 				if (!type.equals(oldType))
-					throw entityAnalyzer
-							.error("Redefiniton of typedef name with different type.  "
-									+ "Original definition was at "
-									+ typedef.getDefinition().getSource(), node);
+					throw entityAnalyzer.error("Redefiniton of typedef name with different type.  "
+							+ "Original definition was at " + typedef.getDefinition().getSource(), node);
 			} else {
 				typedef = entityAnalyzer.entityFactory.newTypedef(name, type);
 				try {
@@ -165,8 +161,7 @@ public class DeclarationAnalyzer {
 	 * @throws SyntaxException
 	 *             if anything is wrong with the declaration
 	 */
-	Variable processVariableDeclaration(VariableDeclarationNode node)
-			throws SyntaxException {
+	Variable processVariableDeclaration(VariableDeclarationNode node) throws SyntaxException {
 		return processVariableDeclaration(node, false);
 	}
 
@@ -180,15 +175,13 @@ public class DeclarationAnalyzer {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	Function processFunctionDeclaration(FunctionDeclarationNode node)
-			throws SyntaxException {
+	Function processFunctionDeclaration(FunctionDeclarationNode node) throws SyntaxException {
 		Function result = (Function) processOrdinaryDeclaration(node, false);
 		SequenceNode<ContractNode> contract = node.getContract();
 
 		addDeclarationToFunction(result, node);
 		if (node instanceof FunctionDefinitionNode) {
-			CompoundStatementNode body = ((FunctionDefinitionNode) node)
-					.getBody();
+			CompoundStatementNode body = ((FunctionDefinitionNode) node).getBody();
 
 			node.setIsDefinition(true);
 			entityAnalyzer.statementAnalyzer.processCompoundStatement(body);
@@ -199,7 +192,8 @@ public class DeclarationAnalyzer {
 			//
 			// if (funcDecl != node && funcDecl.getContract() != null) {
 			// throw this
-			// .error("for a non-system/abstract function, only the function definition is allowed to have contracts",
+			// .error("for a non-system/abstract function, only the function
+			// definition is allowed to have contracts",
 			// funcDecl);
 			// }
 			// }
@@ -224,10 +218,12 @@ public class DeclarationAnalyzer {
 	 *         the existing one or a new one)
 	 * @throws SyntaxException
 	 */
-	Variable processVariableDeclaration(VariableDeclarationNode node,
-			boolean isParameter) throws SyntaxException {
-		Variable result = (Variable) processOrdinaryDeclaration(node,
-				isParameter); // result has type and linkage
+	Variable processVariableDeclaration(VariableDeclarationNode node, boolean isParameter) throws SyntaxException {
+		Variable result = (Variable) processOrdinaryDeclaration(node, isParameter); // result
+																					// has
+																					// type
+																					// and
+																					// linkage
 
 		if (result != null) {
 			addDeclarationToVariable(result, node);
@@ -240,8 +236,7 @@ public class DeclarationAnalyzer {
 				// if this is a compound initializer, the type
 				// of the initializer refines the type of the variable
 				if (initializer instanceof CompoundInitializerNode)
-					result.setType(entityAnalyzer.typeFactory.compositeType(
-							type,
+					result.setType(entityAnalyzer.typeFactory.compositeType(type,
 							((CompoundInitializerNode) initializer).getType()));
 			}
 		}
@@ -261,45 +256,35 @@ public class DeclarationAnalyzer {
 	 *             if anything is wrong with this initializer, for example, if
 	 *             it has the wrong type
 	 */
-	public void processInitializer(InitializerNode initializer,
-			ObjectType currentType) throws SyntaxException {
+	public void processInitializer(InitializerNode initializer, ObjectType currentType) throws SyntaxException {
 		assert currentType != null;
 		if (initializer instanceof ArrayLambdaNode) {
 			Type arrayLambdaType;
 
-			entityAnalyzer.expressionAnalyzer
-					.processArrayLambda((ArrayLambdaNode) initializer);
+			entityAnalyzer.expressionAnalyzer.processArrayLambda((ArrayLambdaNode) initializer);
 			arrayLambdaType = ((ArrayLambdaNode) initializer).getType();
 			if (!currentType.equals(arrayLambdaType)) {
-				throw error(
-						"incompatible types between the variable declaration and the initializer"
-								+ "\n\tvariable is declared as type "
-								+ currentType + "\n\tintializer has type "
-								+ arrayLambdaType, initializer);
+				throw error("incompatible types between the variable declaration and the initializer"
+						+ "\n\tvariable is declared as type " + currentType + "\n\tintializer has type "
+						+ arrayLambdaType, initializer);
 
 			}
 		} else if (initializer instanceof ExpressionNode) {
 			ExpressionNode rhs = (ExpressionNode) initializer;
 
-			entityAnalyzer.expressionAnalyzer
-					.processExpression((ExpressionNode) initializer);
+			entityAnalyzer.expressionAnalyzer.processExpression((ExpressionNode) initializer);
 			try {
-				entityAnalyzer.expressionAnalyzer.processAssignment(
-						currentType, rhs);
+				entityAnalyzer.expressionAnalyzer.processAssignment(currentType, rhs);
 			} catch (UnsourcedException e) {
 				throw error(e, initializer);
 			}
 		} else if (initializer instanceof CompoundInitializerNode) {
 			if (currentType.kind() == TypeKind.DOMAIN)
-				entityAnalyzer.expressionAnalyzer
-						.processCartesianDomainInitializer(
-								(CompoundInitializerNode) initializer,
-								(DomainType) currentType);
+				entityAnalyzer.expressionAnalyzer.processCartesianDomainInitializer(
+						(CompoundInitializerNode) initializer, (DomainType) currentType);
 			else
 				entityAnalyzer.compoundLiteralAnalyzer
-						.processCompoundInitializer(
-								(CommonCompoundInitializerNode) initializer,
-								currentType);
+						.processCompoundInitializer((CommonCompoundInitializerNode) initializer, currentType);
 		}
 	}
 
@@ -354,8 +339,7 @@ public class DeclarationAnalyzer {
 	 *             class specifier that is not "extern". (This is prohibited by
 	 *             C11, but is allowed in CIVL-C.)
 	 */
-	private LinkageKind computeLinkage(OrdinaryDeclarationNode node)
-			throws SyntaxException {
+	private LinkageKind computeLinkage(OrdinaryDeclarationNode node) throws SyntaxException {
 		boolean isFunction = node instanceof FunctionDeclarationNode;
 		IdentifierNode identifier = node.getIdentifier();
 		Scope scope = node.getScope();
@@ -370,18 +354,15 @@ public class DeclarationAnalyzer {
 			return LinkageKind.INTERNAL;
 		}
 		hasNoStorageClass = hasNoStorageClass(node);
-		if (node.hasExternStorage()
-				|| (isFunction && hasNoStorageClass && (isFileScope || !civl()))) {
-			OrdinaryEntity previous = scope.getLexicalOrdinaryEntity(false,
-					name);
+		if (node.hasExternStorage() || (isFunction && hasNoStorageClass && (isFileScope || !civl()))) {
+			OrdinaryEntity previous = scope.getLexicalOrdinaryEntity(false, name);
 
 			if (previous == null) {
 				return LinkageKind.EXTERNAL;
 			} else {
 				LinkageKind previousLinkage = previous.getLinkage();
 
-				if (previousLinkage == LinkageKind.INTERNAL
-						|| previousLinkage == LinkageKind.EXTERNAL)
+				if (previousLinkage == LinkageKind.INTERNAL || previousLinkage == LinkageKind.EXTERNAL)
 					return previousLinkage;
 				else
 					return LinkageKind.EXTERNAL;
@@ -390,11 +371,9 @@ public class DeclarationAnalyzer {
 		// if you are in C mode and this is a function, throw an
 		// exception.
 		if (isFunction && !civl())
-			throw error(
-					"C11 6.7.1(7) states: \"The declaration of an "
-							+ " identifier for a function that has block scope shall "
-							+ "have no explicit storage-class specifier other than extern.\"",
-					node);
+			throw error("C11 6.7.1(7) states: \"The declaration of an "
+					+ " identifier for a function that has block scope shall "
+					+ "have no explicit storage-class specifier other than extern.\"", node);
 		if (isFileScope) {
 			if (!isFunction && hasNoStorageClass)
 				return LinkageKind.EXTERNAL;
@@ -415,7 +394,8 @@ public class DeclarationAnalyzer {
 	 * <code>null</code></li>
 	 * <li>if the declared {@link Entity} has not yet been encountered, an
 	 * {@link Entity} object is created and added to the appropriate scope. The
-	 * new entity will have type and linkage as specified by the declaration.</li>
+	 * new entity will have type and linkage as specified by the
+	 * declaration.</li>
 	 * <li>if on the other hand the entity already exists, the declaration's
 	 * linkage is checked for consistency with that of the existing entity, the
 	 * entity's type is updated to be the composite type of its current type and
@@ -450,14 +430,12 @@ public class DeclarationAnalyzer {
 	 *             if the type or linkage specified by the declaration node is
 	 *             not compatible with that of earlier declarations
 	 */
-	private OrdinaryEntity processOrdinaryDeclaration(
-			OrdinaryDeclarationNode node, boolean isParameter)
+	private OrdinaryEntity processOrdinaryDeclaration(OrdinaryDeclarationNode node, boolean isParameter)
 			throws SyntaxException {
 		AST ast = node.getOwner();
 		IdentifierNode identifier = node.getIdentifier();
 		TypeNode typeNode = node.getTypeNode();
-		Type type = entityAnalyzer.typeAnalyzer.processTypeNode(typeNode,
-				isParameter);
+		Type type = entityAnalyzer.typeAnalyzer.processTypeNode(typeNode, isParameter);
 		Scope scope;
 		boolean isFunction;
 		LinkageKind linkage;
@@ -481,19 +459,15 @@ public class DeclarationAnalyzer {
 			if (entity != null) {
 				if (!(civl() && isFunction && scope.getScopeKind() == ScopeKind.BLOCK))
 					throw error(
-							"Redeclaration of identifier " + identifier.name()
-									+ " with no linkage. "
-									+ "Original declaration was at "
-									+ entity.getDeclaration(0).getSource(),
+							"Redeclaration of identifier " + identifier.name() + " with no linkage. "
+									+ "Original declaration was at " + entity.getDeclaration(0).getSource(),
 							identifier);
 			} else {
 				if (!isFunction && type.kind() == TypeKind.VOID) {
-					throw error("declaring variable " + name + " as void type",
-							node);
+					throw error("declaring variable " + name + " as void type", node);
 				}
-				entity = isFunction ? entityAnalyzer.entityFactory.newFunction(
-						name, linkage, type) : entityAnalyzer.entityFactory
-						.newVariable(name, linkage, type);
+				entity = isFunction ? entityAnalyzer.entityFactory.newFunction(name, linkage, type)
+						: entityAnalyzer.entityFactory.newVariable(name, linkage, type);
 				isNew = true;
 				try {
 					scope.add(entity);
@@ -504,22 +478,16 @@ public class DeclarationAnalyzer {
 		} else { // declaration node's linkage is EXTERNAL or INTERNAL
 			if (entity != null) { // entity found in current scope
 				if (entity.getLinkage() != linkage)
-					throw error(
-							"Disagreement on internal/external linkage between two declarations",
-							node);
+					throw error("Disagreement on internal/external linkage between two declarations", node);
 			} else { // entity not in current scope, look elsewhere...
 				entity = ast.getInternalOrExternalEntity(name); // find the
 																// entity
 				if (entity != null) { // entity found in different scope
 					if (entity.getLinkage() != linkage)
-						throw error(
-								"Disagreement on internal/external linkage between two declarations",
-								node);
+						throw error("Disagreement on internal/external linkage between two declarations", node);
 				} else { // entity does not yet exist
-					entity = isFunction ? entityAnalyzer.entityFactory
-							.newFunction(name, linkage, type)
-							: entityAnalyzer.entityFactory.newVariable(name,
-									linkage, type);
+					entity = isFunction ? entityAnalyzer.entityFactory.newFunction(name, linkage, type)
+							: entityAnalyzer.entityFactory.newVariable(name, linkage, type);
 					isNew = true;
 					ast.add(entity);
 				}
@@ -540,15 +508,13 @@ public class DeclarationAnalyzer {
 		if (!isNew) {
 			addTypeToVariableOrFunction(typeNode, entity);
 			if (isFunction) {
-				checkSystemLibraryForFunction((FunctionDeclarationNode) node,
-						(Function) entity);
+				checkSystemLibraryForFunction((FunctionDeclarationNode) node, (Function) entity);
 			}
 		}
 		return entity;
 	}
 
-	private void checkSystemLibraryForFunction(
-			FunctionDeclarationNode functionNode, Function entity)
+	private void checkSystemLibraryForFunction(FunctionDeclarationNode functionNode, Function entity)
 			throws SyntaxException {
 		String entityLib = entity.systemLibrary();
 
@@ -557,8 +523,7 @@ public class DeclarationAnalyzer {
 
 			if (funcLib != null)
 				if (!entityLib.equals(funcLib))
-					throw error(
-							"Disagreement on system library between two declarations of a system function",
+					throw error("Disagreement on system library between two declarations of a system function",
 							functionNode);
 		}
 	}
@@ -566,9 +531,8 @@ public class DeclarationAnalyzer {
 	/**
 	 * Given a type node and an existing {@link Function} or {@link Variable}
 	 * entity, this method adds the type specified by the type node to the
-	 * existing type of the entity. By "add" we mean it forms the
-	 * "composite type" and updates the type of the entity to that composite
-	 * type.
+	 * existing type of the entity. By "add" we mean it forms the "composite
+	 * type" and updates the type of the entity to that composite type.
 	 * 
 	 * @param typeNode
 	 *            a type node
@@ -578,8 +542,7 @@ public class DeclarationAnalyzer {
 	 *             if the type specified by the type node and the type of the
 	 *             entity are not compatible
 	 */
-	private void addTypeToVariableOrFunction(TypeNode typeNode,
-			OrdinaryEntity entity) throws SyntaxException {
+	private void addTypeToVariableOrFunction(TypeNode typeNode, OrdinaryEntity entity) throws SyntaxException {
 		if (typeNode != null) {
 			Type type = typeNode.getType();
 			Type oldType = entity.getType();
@@ -590,12 +553,9 @@ public class DeclarationAnalyzer {
 				entity.setType(type);
 			else {
 				if (!oldType.compatibleWith(type))
-					throw error(
-							"Redeclaration of entity with incompatible type: "
-									+ entity.getName() + "\nOriginal type: "
-									+ oldType + "\nNew type: " + type, typeNode);
-				entity.setType(entityAnalyzer.typeFactory.compositeType(
-						oldType, type));
+					throw error("Redeclaration of entity with incompatible type: " + entity.getName()
+							+ "\nOriginal type: " + oldType + "\nNew type: " + type, typeNode);
+				entity.setType(entityAnalyzer.typeFactory.compositeType(oldType, type));
 			}
 		}
 	}
@@ -632,22 +592,18 @@ public class DeclarationAnalyzer {
 	 *             if the type of <code>declaration</code> is incompatible with
 	 *             that of <code>variable</code>
 	 */
-	private void addDeclarationToVariable(Variable variable,
-			VariableDeclarationNode declaration) throws SyntaxException {
+	private void addDeclarationToVariable(Variable variable, VariableDeclarationNode declaration)
+			throws SyntaxException {
 		InitializerNode initializer = declaration.getInitializer();
-		SequenceNode<TypeNode> typeAlignmentSpecifiers = declaration
-				.typeAlignmentSpecifiers();
-		SequenceNode<ExpressionNode> constantAlignmentSpecifiers = declaration
-				.constantAlignmentSpecifiers();
+		SequenceNode<TypeNode> typeAlignmentSpecifiers = declaration.typeAlignmentSpecifiers();
+		SequenceNode<ExpressionNode> constantAlignmentSpecifiers = declaration.constantAlignmentSpecifiers();
 
 		if (initializer != null) {
 			InitializerNode oldInitializer = variable.getInitializer();
 
 			if (oldInitializer != null)
-				throw error(
-						"Re-initialization of variable " + variable.getName()
-								+ ". First was at "
-								+ oldInitializer.getSource() + ".", initializer);
+				throw error("Re-initialization of variable " + variable.getName() + ". First was at "
+						+ oldInitializer.getSource() + ".", initializer);
 			variable.setInitializer(initializer);
 			variable.setDefinition(declaration);
 			declaration.setIsDefinition(true);
@@ -657,16 +613,14 @@ public class DeclarationAnalyzer {
 		}
 		if (typeAlignmentSpecifiers != null) {
 			for (TypeNode child : typeAlignmentSpecifiers)
-				variable.addTypeAlignment(entityAnalyzer.typeAnalyzer
-						.processTypeNode(child));
+				variable.addTypeAlignment(entityAnalyzer.typeAnalyzer.processTypeNode(child));
 		}
 		if (constantAlignmentSpecifiers != null) {
 			for (ExpressionNode expression : constantAlignmentSpecifiers) {
 				Value constant = entityAnalyzer.valueOf(expression);
 
 				if (constant == null)
-					throw error("Value for enumerator must be constant",
-							expression);
+					throw error("Value for enumerator must be constant", expression);
 				variable.addConstantAlignment(constant);
 			}
 		}
@@ -713,10 +667,9 @@ public class DeclarationAnalyzer {
 	 *             declarations of the function, or if this is a second
 	 *             definition of that function
 	 */
-	private void addDeclarationToFunction(Function function,
-			FunctionDeclarationNode declaration) throws SyntaxException {
-		Iterator<DeclarationNode> declarationIter = function.getDeclarations()
-				.iterator();
+	private void addDeclarationToFunction(Function function, FunctionDeclarationNode declaration)
+			throws SyntaxException {
+		Iterator<DeclarationNode> declarationIter = function.getDeclarations().iterator();
 
 		if (!declarationIter.hasNext()) {
 			if (declaration.hasInlineFunctionSpecifier())
@@ -730,24 +683,21 @@ public class DeclarationAnalyzer {
 				if (declaration.getSystemLibrary() != null)
 					function.setSystemLibrary(declaration.getSystemLibrary());
 			}
+			if (declaration.hasPureFunctionSpecifier())
+				function.setPure(true);
 			if (declaration instanceof AbstractFunctionDefinitionNode)
 				function.setAbstract(true);
-		} else if (declaration.hasNoreturnFunctionSpecifier() != function
-				.doesNotReturn()) {
+		} else if (declaration.hasNoreturnFunctionSpecifier() != function.doesNotReturn()) {
 			// all declarations must agree on the Noreturn specifier...
-			throw error(
-					"Disagreement on Noreturn function specifier at function declaration.\n"
-							+ "  Previous declaration was at "
-							+ declarationIter.next().getSource(), declaration);
+			throw error("Disagreement on Noreturn function specifier at function declaration.\n"
+					+ "  Previous declaration was at " + declarationIter.next().getSource(), declaration);
 		}
 		if (declaration instanceof FunctionDefinitionNode) {
-			FunctionDefinitionNode previousDefinition = function
-					.getDefinition();
+			FunctionDefinitionNode previousDefinition = function.getDefinition();
 
 			if (previousDefinition != null)
-				throw error(
-						"Redefinition of function.  Previous definition was at "
-								+ previousDefinition.getSource(), declaration);
+				throw error("Redefinition of function.  Previous definition was at " + previousDefinition.getSource(),
+						declaration);
 			function.setDefinition(declaration);
 		}
 		function.addDeclaration(declaration);
@@ -757,8 +707,8 @@ public class DeclarationAnalyzer {
 		if (node.hasExternStorage() || node.hasStaticStorage())
 			return false;
 		if (node instanceof VariableDeclarationNode)
-			return !(((VariableDeclarationNode) node).hasRegisterStorage() || ((VariableDeclarationNode) node)
-					.hasAutoStorage());
+			return !(((VariableDeclarationNode) node).hasRegisterStorage()
+					|| ((VariableDeclarationNode) node).hasAutoStorage());
 		return true;
 	}
 
@@ -783,8 +733,7 @@ public class DeclarationAnalyzer {
 			Label label = scope.getLexicalLabel(name);
 
 			if (label == null)
-				throw error("Goto statement refers to non-existent label",
-						identifier);
+				throw error("Goto statement refers to non-existent label", identifier);
 			identifier.setEntity(label);
 		}
 		for (ASTNode child : childIter) {

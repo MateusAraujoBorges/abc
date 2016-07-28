@@ -1,6 +1,6 @@
 //========================= func.c =========================
 int x;
-/*@ reads &x;*/
+/*@ reads x;*/
 $system[func] int foo();
 int main()
 {

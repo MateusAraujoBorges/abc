@@ -176,6 +176,7 @@ public interface CivlcTokenConstant {
 	public static final int PPRAGMA = CivlCParser.PPRAGMA;
 	public static final int PROCNULL = CivlCParser.PROCNULL;
 	public static final int PROGRAM = CivlCParser.PROGRAM;
+	public static final int PURE = CivlCParser.PURE;
 	public static final int UNDEF = CivlCParser.UNDEF;
 	public static final int QMARK = CivlCParser.QMARK;
 	public static final int QUANTIFIED = CivlCParser.QUANTIFIED;
@@ -218,6 +219,7 @@ public interface CivlcTokenConstant {
 	public static final int SUB = CivlCParser.SUB;
 	public static final int SUBEQ = CivlCParser.SUBEQ;
 	public static final int SWITCH = CivlCParser.SWITCH;
+	public static final int STATE_F = CivlCParser.STATE_F;
 	public static final int SYSTEM = CivlCParser.SYSTEM;
 	public static final int THREADLOCAL = CivlCParser.THREADLOCAL;
 	public static final int TILDE = CivlCParser.TILDE;

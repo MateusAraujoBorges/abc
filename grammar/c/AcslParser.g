@@ -87,6 +87,7 @@ tokens{
     MPI_REGION;
     NULL_ACSL;
     NOTHING;
+    OBJECT_OF;
     OPERATOR;
     P2P;
     PURE;
@@ -301,7 +302,7 @@ ensures_clause
     ;
 
 allocation_clause
-    : alloc_key argumentExpressionList (COMMA term)? ->^(ALLOC alloc_key argumentExpressionList term?)
+    : alloc_key argumentExpressionList ->^(ALLOC alloc_key argumentExpressionList)
     | frees_key argumentExpressionList ->^(FREES frees_key argumentExpressionList)
     ;
 
@@ -753,6 +754,7 @@ primaryExpression
        	 	->^(SET_SIMPLE term)
 	| LPAREN term RPAREN 
 	  	-> ^(TERM_PARENTHESIZED term)
+	| object_of_key LPAREN term RPAREN -> ^(OBJECT_OF object_of_key LPAREN term RPAREN)
     	| mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
     	| remoteExpression
 	;
@@ -922,7 +924,7 @@ invariant_key
     ;
 
 loop_key 
-    : {input.LT(1).getText().equals("loop")}? IDENTIFIER
+	: {input.LT(1).getText().equals("loop")}? IDENTIFIER
     ; 
 
 requires_key
@@ -1055,12 +1057,19 @@ dependson_key
     : {input.LT(1).getText().equals("depends_on")}? IDENTIFIER
 //    -> ^(DEPENDSON IDENTIFIER)
     ;
+    
+object_of_key
+    : {input.LT(1).getText().equals("\\object_of")}? EXTENDED_IDENTIFIER
+    ; 
 
 read_key
     : {input.LT(1).getText().equals("\\read")}? EXTENDED_IDENTIFIER
 //    -> ^(READ_ACSL EXTENDED_IDENTIFIER)
     ;
-
+    
+region_of_key
+    : {input.LT(1).getText().equals("\\region_of")}? EXTENDED_IDENTIFIER
+    ;
 
 write_key
     : {input.LT(1).getText().equals("\\write")}? EXTENDED_IDENTIFIER

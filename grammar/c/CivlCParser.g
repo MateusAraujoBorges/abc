@@ -906,6 +906,8 @@ functionSpecifier
     | ABSTRACT CONTIN LPAREN INTEGER_CONSTANT RPAREN 
       -> ^(ABSTRACT INTEGER_CONSTANT)
     | ABSTRACT -> ^(ABSTRACT)
+    | PURE -> ^(PURE)
+    | STATE_F -> ^(STATE_F)
     | ((SYSTEM libraryName) => SYSTEM libraryName) -> ^(SYSTEM libraryName)
     | SYSTEM  -> ^(SYSTEM ABSENT)
     | FATOMIC -> ^(FATOMIC)

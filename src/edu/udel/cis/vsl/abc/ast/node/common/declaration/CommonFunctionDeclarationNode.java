@@ -13,8 +13,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonFunctionDeclarationNode extends
-		CommonOrdinaryDeclarationNode implements FunctionDeclarationNode {
+public class CommonFunctionDeclarationNode extends CommonOrdinaryDeclarationNode
+		implements FunctionDeclarationNode {
 
 	private boolean inlineFunctionSpecifier = false;
 
@@ -23,6 +23,7 @@ public class CommonFunctionDeclarationNode extends
 	private boolean globalFunctionSpecifier = false;
 
 	private boolean atomicFunctionSpecifier = false;// $atomic_f
+	private boolean stateFunctionSpecifier = false;
 	private boolean pureFunctionSpecifier = false;
 	private boolean systemFunctionSpecifier = false;
 	private String systemLibrary = null;
@@ -129,6 +130,8 @@ public class CommonFunctionDeclarationNode extends
 		result.setGlobalFunctionSpecifier(hasGlobalFunctionSpecifier());
 		result.setAtomicFunctionSpecifier(this.hasAtomicFunctionSpecifier());
 		result.setSystemFunctionSpecifier(this.hasSystemFunctionSpecifier());
+		result.setPureFunctionSpecifier(this.hasPureFunctionSpecifier());
+		result.setStatefFunctionSpecifier(this.hasStatefFunctionSpecifier());
 		copyStorage(result);
 		result.setSystemLibrary(this.systemLibrary);
 		return result;
@@ -150,8 +153,9 @@ public class CommonFunctionDeclarationNode extends
 			FunctionDeclarationNode thatFunction = (FunctionDeclarationNode) that;
 
 			if (!(this.inlineFunctionSpecifier == thatFunction
-					.hasInlineFunctionSpecifier() && this.noreturnFunctionSpecifier == thatFunction
-					.hasNoreturnFunctionSpecifier()))
+					.hasInlineFunctionSpecifier()
+					&& this.noreturnFunctionSpecifier == thatFunction
+							.hasNoreturnFunctionSpecifier()))
 				return new DifferenceObject(this, that, DiffKind.OTHER,
 						"different function inline/noreturn specifier");
 			else
@@ -161,8 +165,8 @@ public class CommonFunctionDeclarationNode extends
 	}
 
 	@Override
-	public void setPureFunctionSpecifier(boolean value) {
-		this.pureFunctionSpecifier = value;
+	public void setStatefFunctionSpecifier(boolean value) {
+		this.stateFunctionSpecifier = value;
 	}
 
 	@Override
@@ -176,8 +180,8 @@ public class CommonFunctionDeclarationNode extends
 	}
 
 	@Override
-	public boolean hasPureFunctionSpecifier() {
-		return this.pureFunctionSpecifier;
+	public boolean hasStatefFunctionSpecifier() {
+		return this.stateFunctionSpecifier;
 	}
 
 	@Override
@@ -198,5 +202,15 @@ public class CommonFunctionDeclarationNode extends
 	@Override
 	public void setSystemLibrary(String library) {
 		this.systemLibrary = library;
+	}
+
+	@Override
+	public boolean hasPureFunctionSpecifier() {
+		return this.pureFunctionSpecifier;
+	}
+
+	@Override
+	public void setPureFunctionSpecifier(boolean value) {
+		this.pureFunctionSpecifier = value;
 	}
 }

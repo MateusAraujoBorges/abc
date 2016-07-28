@@ -103,7 +103,7 @@ $system void $pathCondition(void);
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-$system _Bool $is_concrete_int(int value);
+$system $pure _Bool $is_concrete_int(int value);
 /* **************************** Memory Functions *************************** */
 
 /* The CIVL-C malloc function, which takes a reference to a scope */
@@ -135,12 +135,5 @@ $system void $havoc(void *ptr);
   @ executes_when \true;
   @*/
 $system double $pow(double base, double exp);
-
-/******/
-/* Returns a reference to the current state */
-/*@ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$system $state $this_state();
 
 #endif

@@ -293,6 +293,7 @@ identifier	:	IDENTIFIER
 
 /* C and preprocessor keywords: */
 
+
 /* Words that are used in both C and the preprocessor */
 c_pp_keyword	:	IF
 		|	ELSE
@@ -391,6 +392,7 @@ civl_keyword	:	ABSTRACT
 		|	OUTPUT
 		|	PARFOR
 		|	PROCNULL
+		|	PURE
 		|	RANGE
 		|	READS
 		|	REAL
@@ -399,6 +401,7 @@ civl_keyword	:	ABSTRACT
 		|	RUN
 		|	SCOPEOF
 		|	SELF
+		|	STATE_F
 		|	STATE_NULL
 		|	SPAWN
 		|	SYSTEM 
