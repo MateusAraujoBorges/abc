@@ -13,6 +13,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
@@ -248,112 +249,117 @@ public class SideEffectRemover extends BaseTransformer {
 	 */
 	private TypeNode typeNode(Source source, Type type) {
 		switch (type.kind()) {
-		case ARRAY:
-			ArrayType arrayType = (ArrayType) type;
+			case ARRAY :
+				ArrayType arrayType = (ArrayType) type;
 
-			return nodeFactory.newArrayTypeNode(source,
-					typeNode(source, arrayType.getElementType()), null);
-		case ATOMIC:
-			AtomicType atomicType = (AtomicType) type;
+				return nodeFactory.newArrayTypeNode(source,
+						typeNode(source, arrayType.getElementType()), null);
+			case ATOMIC :
+				AtomicType atomicType = (AtomicType) type;
 
-			return nodeFactory.newAtomicTypeNode(source,
-					typeNode(source, atomicType.getBaseType()));
-		case BASIC:
-			StandardBasicType basicType = (StandardBasicType) type;
+				return nodeFactory.newAtomicTypeNode(source,
+						typeNode(source, atomicType.getBaseType()));
+			case BASIC :
+				StandardBasicType basicType = (StandardBasicType) type;
 
-			return nodeFactory.newBasicTypeNode(source,
-					basicType.getBasicTypeKind());
-		case DOMAIN: {
-			DomainType domainType = (DomainType) type;
+				return nodeFactory.newBasicTypeNode(source,
+						basicType.getBasicTypeKind());
+			case DOMAIN : {
+				DomainType domainType = (DomainType) type;
 
-			if (domainType.hasDimension()) {
-				String dimensionString = Integer
-						.toString(domainType.getDimension());
-				IntegerConstantNode dimensionNode;
+				if (domainType.hasDimension()) {
+					String dimensionString = Integer
+							.toString(domainType.getDimension());
+					IntegerConstantNode dimensionNode;
 
-				try {
-					dimensionNode = nodeFactory.newIntegerConstantNode(source,
-							dimensionString);
-				} catch (SyntaxException e) {
-					throw new ABCRuntimeException(
-							"error creating integer constant node for "
-									+ dimensionString);
-				}
-				return nodeFactory.newDomainTypeNode(source, dimensionNode);
-			} else
-				return nodeFactory.newDomainTypeNode(source);
-		}
-		case POINTER: {
-			PointerType pointerType = (PointerType) type;
-
-			return nodeFactory.newPointerTypeNode(source,
-					typeNode(source, pointerType.referencedType()));
-		}
-		case VOID:
-			return nodeFactory.newVoidTypeNode(source);
-		case ENUMERATION: {
-			// if original type is anonymous enum, need to spell out
-			// the type again.
-			// if original type has tag, and is visible, can leave out
-			// the enumerators
-			EnumerationType enumType = (EnumerationType) type;
-			String tag = enumType.getTag();
-
-			if (tag != null) {
-				IdentifierNode tagNode = nodeFactory.newIdentifierNode(source,
-						tag);
-				TypeNode result = nodeFactory.newEnumerationTypeNode(source,
-						tagNode, null);
-
-				return result;
-			} else {
-				throw new ABCUnsupportedException(
-						"converting anonymous enumeration type  " + type,
-						source.getSummary(false));
+					try {
+						dimensionNode = nodeFactory.newIntegerConstantNode(
+								source, dimensionString);
+					} catch (SyntaxException e) {
+						throw new ABCRuntimeException(
+								"error creating integer constant node for "
+										+ dimensionString);
+					}
+					return nodeFactory.newDomainTypeNode(source, dimensionNode);
+				} else
+					return nodeFactory.newDomainTypeNode(source);
 			}
-		}
-		case STRUCTURE_OR_UNION: {
-			StructureOrUnionType structOrUnionType = (StructureOrUnionType) type;
+			case POINTER : {
+				PointerType pointerType = (PointerType) type;
 
-			return nodeFactory.newStructOrUnionTypeNode(source,
-					structOrUnionType.isStruct(), nodeFactory.newIdentifierNode(
-							source, structOrUnionType.getName()),
-					null);
-		}
-		case SCOPE:
-			return nodeFactory.newScopeTypeNode(source);
-		case OTHER_INTEGER: {
-			// for now, just using "int" for all the "other integer types"
-			return nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
-		}
-		case PROCESS: {
-			return nodeFactory.newTypedefNameNode(
-					nodeFactory.newIdentifierNode(source, "$proc"), null);
-		}
-		case QUALIFIED: {
-			QualifiedObjectType qualifiedType = (QualifiedObjectType) type;
-			TypeNode baseTypeNode = this.typeNode(source,
-					qualifiedType.getBaseType());
+				return nodeFactory.newPointerTypeNode(source,
+						typeNode(source, pointerType.referencedType()));
+			}
+			case VOID :
+				return nodeFactory.newVoidTypeNode(source);
+			case ENUMERATION : {
+				// if original type is anonymous enum, need to spell out
+				// the type again.
+				// if original type has tag, and is visible, can leave out
+				// the enumerators
+				EnumerationType enumType = (EnumerationType) type;
+				String tag = enumType.getTag();
 
-			baseTypeNode.setConstQualified(qualifiedType.isConstQualified());
-			// baseTypeNode.setAtomicQualified(qualifiedType.is); TODO how to
-			// get _Atomic qualified feature?
-			baseTypeNode.setInputQualified(qualifiedType.isInputQualified());
-			baseTypeNode.setOutputQualified(qualifiedType.isOutputQualified());
-			baseTypeNode
-					.setRestrictQualified(qualifiedType.isRestrictQualified());
-			baseTypeNode
-					.setVolatileQualified(qualifiedType.isVolatileQualified());
-			return baseTypeNode;
-		}
-		case FUNCTION:
-			// TODO
-		case HEAP:
-			// TODO
-		default:
-			throw new ABCUnsupportedException(
-					"converting type " + type + " to a type node.",
-					source.getSummary(false));
+				if (tag != null) {
+					IdentifierNode tagNode = nodeFactory
+							.newIdentifierNode(source, tag);
+					TypeNode result = nodeFactory.newEnumerationTypeNode(source,
+							tagNode, null);
+
+					return result;
+				} else {
+					throw new ABCUnsupportedException(
+							"converting anonymous enumeration type  " + type,
+							source.getSummary(false));
+				}
+			}
+			case STRUCTURE_OR_UNION : {
+				StructureOrUnionType structOrUnionType = (StructureOrUnionType) type;
+
+				return nodeFactory.newStructOrUnionTypeNode(source,
+						structOrUnionType.isStruct(),
+						nodeFactory.newIdentifierNode(source,
+								structOrUnionType.getName()),
+						null);
+			}
+			case SCOPE :
+				return nodeFactory.newScopeTypeNode(source);
+			case OTHER_INTEGER : {
+				// for now, just using "int" for all the "other integer types"
+				return nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
+			}
+			case PROCESS : {
+				return nodeFactory.newTypedefNameNode(
+						nodeFactory.newIdentifierNode(source, "$proc"), null);
+			}
+			case QUALIFIED : {
+				QualifiedObjectType qualifiedType = (QualifiedObjectType) type;
+				TypeNode baseTypeNode = this.typeNode(source,
+						qualifiedType.getBaseType());
+
+				baseTypeNode
+						.setConstQualified(qualifiedType.isConstQualified());
+				// baseTypeNode.setAtomicQualified(qualifiedType.is); TODO how
+				// to
+				// get _Atomic qualified feature?
+				baseTypeNode
+						.setInputQualified(qualifiedType.isInputQualified());
+				baseTypeNode
+						.setOutputQualified(qualifiedType.isOutputQualified());
+				baseTypeNode.setRestrictQualified(
+						qualifiedType.isRestrictQualified());
+				baseTypeNode.setVolatileQualified(
+						qualifiedType.isVolatileQualified());
+				return baseTypeNode;
+			}
+			case FUNCTION :
+				// TODO
+			case HEAP :
+				// TODO
+			default :
+				throw new ABCUnsupportedException(
+						"converting type " + type + " to a type node.",
+						source.getSummary(false));
 		}
 	}
 
@@ -509,65 +515,68 @@ public class SideEffectRemover extends BaseTransformer {
 		ExpressionKind kind = lhs.expressionKind();
 
 		switch (kind) {
-		case ARROW: {
-			// p->f = (*p).f
-			ArrowNode arrow = (ArrowNode) lhs;
-			ExprTriple result = translate(arrow.getStructurePointer(), false);
-
-			purify(result);
-			arrow.setStructurePointer(result.getNode());
-			result.setNode(arrow);
-			return result;
-		}
-		case DOT: {
-			// e.f
-			DotNode dotNode = (DotNode) lhs;
-			ExprTriple result = translate(dotNode.getStructure(), false);
-
-			purify(result);
-			dotNode.setStructure(result.getNode());
-			result.setNode(dotNode);
-			return result;
-		}
-		case IDENTIFIER_EXPRESSION:
-			return new ExprTriple(lhs);
-		case OPERATOR: {
-			OperatorNode opNode = (OperatorNode) lhs;
-			Operator op = opNode.getOperator();
-
-			switch (op) {
-			case DEREFERENCE: { // *p
-				ExprTriple result = translate(opNode.getArgument(0), false);
+			case ARROW : {
+				// p->f = (*p).f
+				ArrowNode arrow = (ArrowNode) lhs;
+				ExprTriple result = translate(arrow.getStructurePointer(),
+						false);
 
 				purify(result);
-				opNode.setArgument(0, result.getNode());
-				result.setNode(opNode);
+				arrow.setStructurePointer(result.getNode());
+				result.setNode(arrow);
 				return result;
 			}
-			case SUBSCRIPT: {
-				// expr[i].
-				// expr can be a LHSExpression of array type (like a[j][k])
-				// expr can be an expression of pointer type
+			case DOT : {
+				// e.f
+				DotNode dotNode = (DotNode) lhs;
+				ExprTriple result = translate(dotNode.getStructure(), false);
 
-				ExprTriple t1 = translate(opNode.getArgument(0), false),
-						t2 = translate(opNode.getArgument(1), false);
-
-				purify(t1);
-				purify(t2);
-				opNode.setArgument(0, t1.getNode());
-				opNode.setArgument(1, t2.getNode());
-				t1.addAllBefore(t2.getBefore());
-				t1.setNode(opNode);
-				return t1;
+				purify(result);
+				dotNode.setStructure(result.getNode());
+				result.setNode(dotNode);
+				return result;
 			}
-			default:
+			case IDENTIFIER_EXPRESSION :
+				return new ExprTriple(lhs);
+			case OPERATOR : {
+				OperatorNode opNode = (OperatorNode) lhs;
+				Operator op = opNode.getOperator();
+
+				switch (op) {
+					case DEREFERENCE : { // *p
+						ExprTriple result = translate(opNode.getArgument(0),
+								false);
+
+						purify(result);
+						opNode.setArgument(0, result.getNode());
+						result.setNode(opNode);
+						return result;
+					}
+					case SUBSCRIPT : {
+						// expr[i].
+						// expr can be a LHSExpression of array type (like
+						// a[j][k])
+						// expr can be an expression of pointer type
+
+						ExprTriple t1 = translate(opNode.getArgument(0), false),
+								t2 = translate(opNode.getArgument(1), false);
+
+						purify(t1);
+						purify(t2);
+						opNode.setArgument(0, t1.getNode());
+						opNode.setArgument(1, t2.getNode());
+						t1.addAllBefore(t2.getBefore());
+						t1.setNode(opNode);
+						return t1;
+					}
+					default :
+						throw new ABCRuntimeException(
+								"Unreachable: unknown LHS operator: " + op);
+				}
+			}
+			default :
 				throw new ABCRuntimeException(
-						"Unreachable: unknown LHS operator: " + op);
-			}
-		}
-		default:
-			throw new ABCRuntimeException(
-					"Unreachable: unknown LHS expression kind: " + kind);
+						"Unreachable: unknown LHS expression kind: " + kind);
 		}
 	}
 
@@ -618,25 +627,25 @@ public class SideEffectRemover extends BaseTransformer {
 		boolean pre;
 
 		switch (op) {
-		case PREINCREMENT:
-			unaryOp = Operator.PLUS;
-			pre = true;
-			break;
-		case POSTINCREMENT:
-			unaryOp = Operator.PLUS;
-			pre = false;
-			break;
-		case PREDECREMENT:
-			unaryOp = Operator.MINUS;
-			pre = true;
-			break;
-		case POSTDECREMENT:
-			unaryOp = Operator.MINUS;
-			pre = false;
-			break;
-		default:
-			throw new ABCRuntimeException(
-					"Unreachable: unexpected operator: " + op);
+			case PREINCREMENT :
+				unaryOp = Operator.PLUS;
+				pre = true;
+				break;
+			case POSTINCREMENT :
+				unaryOp = Operator.PLUS;
+				pre = false;
+				break;
+			case PREDECREMENT :
+				unaryOp = Operator.MINUS;
+				pre = true;
+				break;
+			case POSTDECREMENT :
+				unaryOp = Operator.MINUS;
+				pre = false;
+				break;
+			default :
+				throw new ABCRuntimeException(
+						"Unreachable: unexpected operator: " + op);
 		}
 
 		ExpressionNode arg = opNode.getArgument(0);
@@ -999,39 +1008,39 @@ public class SideEffectRemover extends BaseTransformer {
 		Operator binaryOp;
 
 		switch (assignmentOp) {
-		case PLUSEQ:
-			binaryOp = Operator.PLUS;
-			break;
-		case MINUSEQ:
-			binaryOp = Operator.MINUS;
-			break;
-		case BITANDEQ:
-			binaryOp = Operator.BITAND;
-			break;
-		case BITOREQ:
-			binaryOp = Operator.BITOR;
-			break;
-		case BITXOREQ:
-			binaryOp = Operator.BITXOR;
-			break;
-		case DIVEQ:
-			binaryOp = Operator.DIV;
-			break;
-		case MODEQ:
-			binaryOp = Operator.MOD;
-			break;
-		case SHIFTLEFTEQ:
-			binaryOp = Operator.SHIFTLEFT;
-			break;
-		case SHIFTRIGHTEQ:
-			binaryOp = Operator.SHIFTRIGHT;
-			break;
-		case TIMESEQ:
-			binaryOp = Operator.TIMES;
-			break;
-		default:
-			throw new ABCRuntimeException(
-					"Unexpected assignment operator: " + assignmentOp);
+			case PLUSEQ :
+				binaryOp = Operator.PLUS;
+				break;
+			case MINUSEQ :
+				binaryOp = Operator.MINUS;
+				break;
+			case BITANDEQ :
+				binaryOp = Operator.BITAND;
+				break;
+			case BITOREQ :
+				binaryOp = Operator.BITOR;
+				break;
+			case BITXOREQ :
+				binaryOp = Operator.BITXOR;
+				break;
+			case DIVEQ :
+				binaryOp = Operator.DIV;
+				break;
+			case MODEQ :
+				binaryOp = Operator.MOD;
+				break;
+			case SHIFTLEFTEQ :
+				binaryOp = Operator.SHIFTLEFT;
+				break;
+			case SHIFTRIGHTEQ :
+				binaryOp = Operator.SHIFTRIGHT;
+				break;
+			case TIMESEQ :
+				binaryOp = Operator.TIMES;
+				break;
+			default :
+				throw new ABCRuntimeException(
+						"Unexpected assignment operator: " + assignmentOp);
 		}
 
 		ExpressionNode lhs = opNode.getArgument(0);
@@ -1189,6 +1198,31 @@ public class SideEffectRemover extends BaseTransformer {
 	}
 
 	/**
+	 * MPI contract expression shall have no side-effects, thus report an error
+	 * if there is any.
+	 * 
+	 * @param expression
+	 *            An {@link MPIContractExpressionNode}
+	 * @return
+	 */
+	private ExprTriple translateMpiContractExpression(
+			MPIContractExpressionNode expression) {
+		ExprTriple result;
+		int numArgs = expression.numArguments();
+
+		for (int i = 0; i < numArgs; i++) {
+			ExpressionNode arg = expression.getArgument(i);
+
+			if (!arg.isSideEffectFree(false))
+				throw new ABCRuntimeException(
+						"MPI contract expression " + arg.prettyRepresentation()
+								+ " shall not contain any side-effects.");
+		}
+		result = new ExprTriple(expression);
+		return result;
+	}
+
+	/**
 	 * Translates any operator expression to an equivalent triple. Delegates to
 	 * helper methods as needed.
 	 * 
@@ -1201,72 +1235,72 @@ public class SideEffectRemover extends BaseTransformer {
 		ExprTriple result;
 
 		switch (expression.getOperator()) {
-		case ASSIGN:
-			result = translateAssign(expression, isVoid);
-			break;
-		case DEREFERENCE:
-			result = translateDereference(expression, isVoid);
-			break;
-		case ADDRESSOF:
-		case NOT:
-		case UNARYMINUS:
-		case UNARYPLUS:
-		case BIG_O:
-		case BITCOMPLEMENT:
-			result = translateGenericUnaryOperator(expression, isVoid);
-			break;
-		case PREINCREMENT:
-		case PREDECREMENT:
-		case POSTINCREMENT:
-		case POSTDECREMENT:
-			result = translateIncrementOrDecrement(expression, isVoid);
-			break;
-		case HASH:
-		case BITAND:
-		case BITOR:
-		case BITXOR:
-		case PLUS:
-		case MINUS:
-		case DIV:
-		case TIMES:
-		case SUBSCRIPT:
-		case LAND:
-		case LOR:
-		case EQUALS:
-		case NEQ:
-		case LT:
-		case GT:
-		case LTE:
-		case GTE:
-		case IMPLIES:
-		case MOD:
-		case SHIFTLEFT:
-		case SHIFTRIGHT:
-			result = translateGenericBinaryOperator(expression, isVoid);
-			break;
-		case BITANDEQ:
-		case BITOREQ:
-		case BITXOREQ:
-		case PLUSEQ:
-		case MINUSEQ:
-		case TIMESEQ:
-		case DIVEQ:
-		case MODEQ:
-		case SHIFTLEFTEQ:
-		case SHIFTRIGHTEQ:
-			result = translateGeneralAssignment(expression, isVoid);
-			break;
-		case COMMA:
-			result = translateComma(expression, isVoid);
-			break;
-		case CONDITIONAL:
-			result = translateConditional(expression, isVoid);
-			break;
-		default:
-			throw new ABCRuntimeException(
-					"Unexpected operator: " + expression.getOperator() + ": "
-							+ expression,
-					expression.getSource().getSummary(false));
+			case ASSIGN :
+				result = translateAssign(expression, isVoid);
+				break;
+			case DEREFERENCE :
+				result = translateDereference(expression, isVoid);
+				break;
+			case ADDRESSOF :
+			case NOT :
+			case UNARYMINUS :
+			case UNARYPLUS :
+			case BIG_O :
+			case BITCOMPLEMENT :
+				result = translateGenericUnaryOperator(expression, isVoid);
+				break;
+			case PREINCREMENT :
+			case PREDECREMENT :
+			case POSTINCREMENT :
+			case POSTDECREMENT :
+				result = translateIncrementOrDecrement(expression, isVoid);
+				break;
+			case HASH :
+			case BITAND :
+			case BITOR :
+			case BITXOR :
+			case PLUS :
+			case MINUS :
+			case DIV :
+			case TIMES :
+			case SUBSCRIPT :
+			case LAND :
+			case LOR :
+			case EQUALS :
+			case NEQ :
+			case LT :
+			case GT :
+			case LTE :
+			case GTE :
+			case IMPLIES :
+			case MOD :
+			case SHIFTLEFT :
+			case SHIFTRIGHT :
+				result = translateGenericBinaryOperator(expression, isVoid);
+				break;
+			case BITANDEQ :
+			case BITOREQ :
+			case BITXOREQ :
+			case PLUSEQ :
+			case MINUSEQ :
+			case TIMESEQ :
+			case DIVEQ :
+			case MODEQ :
+			case SHIFTLEFTEQ :
+			case SHIFTRIGHTEQ :
+				result = translateGeneralAssignment(expression, isVoid);
+				break;
+			case COMMA :
+				result = translateComma(expression, isVoid);
+				break;
+			case CONDITIONAL :
+				result = translateConditional(expression, isVoid);
+				break;
+			default :
+				throw new ABCRuntimeException(
+						"Unexpected operator: " + expression.getOperator()
+								+ ": " + expression,
+						expression.getSource().getSummary(false));
 		}
 		return result;
 	}
@@ -1780,72 +1814,80 @@ public class SideEffectRemover extends BaseTransformer {
 		ExpressionKind kind = expression.expressionKind();
 
 		switch (kind) {
-		case CONSTANT: {
-			if (isVoid) {
-				Value value = ((ConstantNode) expression).getConstantValue();
+			case CONSTANT : {
+				if (isVoid) {
+					Value value = ((ConstantNode) expression)
+							.getConstantValue();
 
-				if (this.isStrictlyConformingValue(value))
-					return new ExprTriple(null);
+					if (this.isStrictlyConformingValue(value))
+						return new ExprTriple(null);
 
+					ExprTriple result = new ExprTriple(expression);
+
+					shift(result, true);
+					return result;
+				} else {
+					return new ExprTriple(expression);
+				}
+			}
+			case ALIGNOF :
+			case DERIVATIVE_EXPRESSION :
+			case IDENTIFIER_EXPRESSION :
+			case RESULT : {
 				ExprTriple result = new ExprTriple(expression);
 
-				shift(result, true);
+				if (isVoid)
+					shift(result, true);
 				return result;
-			} else {
-				return new ExprTriple(expression);
 			}
-		}
-		case ALIGNOF:
-		case DERIVATIVE_EXPRESSION:
-		case IDENTIFIER_EXPRESSION:
-		case RESULT: {
-			ExprTriple result = new ExprTriple(expression);
-
-			if (isVoid)
-				shift(result, true);
-			return result;
-		}
-		case ARROW:
-			return translateArrow((ArrowNode) expression, isVoid);
-		case CAST:
-			return translateCast((CastNode) expression, isVoid);
-		case COMPOUND_LITERAL:
-			return translateCompoundLiteral((CompoundLiteralNode) expression,
-					isVoid);
-		case DOT:
-			return translateDot((DotNode) expression, isVoid);
-		case FUNCTION_CALL:
-			return translateFunctionCall((FunctionCallNode) expression, isVoid);
-		case CONTRACT_VERIFY:
-			return translateContractVerify((ContractVerifyNode) expression,
-					isVoid);
-		case GENERIC_SELECTION:
-			return translateGenericSelection((GenericSelectionNode) expression);
-		case OPERATOR:
-			return translateOperatorExpression((OperatorNode) expression,
-					isVoid);
-		case QUANTIFIED_EXPRESSION:
-			return translateQuantifiedExpression(
-					(QuantifiedExpressionNode) expression);
-		case REGULAR_RANGE:
-			return translateRegularRange((RegularRangeNode) expression, isVoid);
-		case REMOTE_REFERENCE:
-			return translateRemoteReference(
-					(RemoteOnExpressionNode) expression);
-		case SCOPEOF:
-			return translateScopeOf((ScopeOfNode) expression, isVoid);
-		case SIZEOF:
-			return translateSizeof((SizeofNode) expression, isVoid);
-		case SPAWN:
-			return translateSpawn((SpawnNode) expression, isVoid);
-		case STATEMENT_EXPRESSION:
-			return translateStatementExpression(
-					(StatementExpressionNode) expression, isVoid);
-		case ARRAY_LAMBDA:
-			return translateArrayLambdaExpression((ArrayLambdaNode) expression);
-		default:
-			throw new ABCUnsupportedException(
-					"removing side-effects for " + kind + " expression");
+			case ARROW :
+				return translateArrow((ArrowNode) expression, isVoid);
+			case CAST :
+				return translateCast((CastNode) expression, isVoid);
+			case COMPOUND_LITERAL :
+				return translateCompoundLiteral(
+						(CompoundLiteralNode) expression, isVoid);
+			case DOT :
+				return translateDot((DotNode) expression, isVoid);
+			case FUNCTION_CALL :
+				return translateFunctionCall((FunctionCallNode) expression,
+						isVoid);
+			case CONTRACT_VERIFY :
+				return translateContractVerify((ContractVerifyNode) expression,
+						isVoid);
+			case GENERIC_SELECTION :
+				return translateGenericSelection(
+						(GenericSelectionNode) expression);
+			case MPI_CONTRACT_EXPRESSION :
+				return translateMpiContractExpression(
+						(MPIContractExpressionNode) expression);
+			case OPERATOR :
+				return translateOperatorExpression((OperatorNode) expression,
+						isVoid);
+			case QUANTIFIED_EXPRESSION :
+				return translateQuantifiedExpression(
+						(QuantifiedExpressionNode) expression);
+			case REGULAR_RANGE :
+				return translateRegularRange((RegularRangeNode) expression,
+						isVoid);
+			case REMOTE_REFERENCE :
+				return translateRemoteReference(
+						(RemoteOnExpressionNode) expression);
+			case SCOPEOF :
+				return translateScopeOf((ScopeOfNode) expression, isVoid);
+			case SIZEOF :
+				return translateSizeof((SizeofNode) expression, isVoid);
+			case SPAWN :
+				return translateSpawn((SpawnNode) expression, isVoid);
+			case STATEMENT_EXPRESSION :
+				return translateStatementExpression(
+						(StatementExpressionNode) expression, isVoid);
+			case ARRAY_LAMBDA :
+				return translateArrayLambdaExpression(
+						(ArrayLambdaNode) expression);
+			default :
+				throw new ABCUnsupportedException(
+						"removing side-effects for " + kind + " expression");
 		}
 	}
 
@@ -1914,19 +1956,19 @@ public class SideEffectRemover extends BaseTransformer {
 		OrdinaryDeclarationKind kind = ordinaryDecl.ordinaryDeclarationKind();
 
 		switch (kind) {
-		case VARIABLE_DECLARATION:
-			return this.translateVariableDeclaration(
-					(VariableDeclarationNode) ordinaryDecl);
-		case FUNCTION_DEFINITION:
-			this.normalizeFunctionDefinition(
-					(FunctionDefinitionNode) ordinaryDecl);
-		case FUNCTION_DECLARATION:
-		case ABSTRACT_FUNCTION_DEFINITION:
-			return Arrays.asList((BlockItemNode) ordinaryDecl);
-		default:
-			throw new ABCUnsupportedException(
-					"normalization of ordinary declaration of " + kind
-							+ " kind in side-effect remover");
+			case VARIABLE_DECLARATION :
+				return this.translateVariableDeclaration(
+						(VariableDeclarationNode) ordinaryDecl);
+			case FUNCTION_DEFINITION :
+				this.normalizeFunctionDefinition(
+						(FunctionDefinitionNode) ordinaryDecl);
+			case FUNCTION_DECLARATION :
+			case ABSTRACT_FUNCTION_DEFINITION :
+				return Arrays.asList((BlockItemNode) ordinaryDecl);
+			default :
+				throw new ABCUnsupportedException(
+						"normalization of ordinary declaration of " + kind
+								+ " kind in side-effect remover");
 		}
 	}
 
@@ -2488,15 +2530,15 @@ public class SideEffectRemover extends BaseTransformer {
 	 */
 	private List<BlockItemNode> translateLoop(LoopNode loop) {
 		switch (loop.getKind()) {
-		case DO_WHILE:
-			return translateDoLoop(loop);
-		case FOR:
-			return translateForLoop((ForLoopNode) loop);
-		case WHILE:
-			return translateWhileLoop(loop);
-		default:
-			throw new ABCRuntimeException(
-					"Unknown kind of loop: " + loop.getKind());
+			case DO_WHILE :
+				return translateDoLoop(loop);
+			case FOR :
+				return translateForLoop((ForLoopNode) loop);
+			case WHILE :
+				return translateWhileLoop(loop);
+			default :
+				throw new ABCRuntimeException(
+						"Unknown kind of loop: " + loop.getKind());
 		}
 	}
 
@@ -2597,43 +2639,44 @@ public class SideEffectRemover extends BaseTransformer {
 	 */
 	private List<BlockItemNode> translateStatement(StatementNode statement) {
 		switch (statement.statementKind()) {
-		case ATOMIC:
-			return translateAtomic((AtomicNode) statement);
-		case CHOOSE:
-			return translateChoose((ChooseStatementNode) statement);
-		case CIVL_FOR:
-			return translateCivlFor((CivlForNode) statement);
-		case COMPOUND:
-			return translateCompound((CompoundStatementNode) statement);
-		case EXPRESSION:
-			return translateExpressionStatement(
-					(ExpressionStatementNode) statement);
-		case IF:
-			return translateIf((IfNode) statement);
-		case JUMP:
-			return translateJump((JumpNode) statement);
-		case LABELED:
-			return translateLabeledStatement((LabeledStatementNode) statement);
-		case LOOP:
-			return translateLoop((LoopNode) statement);
-		case NULL:
-			return Arrays.asList((BlockItemNode) statement);
-		case OMP:
-			return translateOmpExecutable((OmpExecutableNode) statement);
-		case PRAGMA:// ignore side effects in pragma nodes
-			return Arrays.asList((BlockItemNode) statement);
-		case RUN:
-			return translateRun((RunNode) statement);
-		case SWITCH:
-			return translateSwitch((SwitchNode) statement);
-		case WHEN:
-			return translateWhen((WhenNode) statement);
-		case WITH:
-			return translateWith((WithNode) statement);
-		case UPDATE:
-			return translateUpdate((UpdateNode) statement);
-		default:
-			throw new ABCRuntimeException("unreachable");
+			case ATOMIC :
+				return translateAtomic((AtomicNode) statement);
+			case CHOOSE :
+				return translateChoose((ChooseStatementNode) statement);
+			case CIVL_FOR :
+				return translateCivlFor((CivlForNode) statement);
+			case COMPOUND :
+				return translateCompound((CompoundStatementNode) statement);
+			case EXPRESSION :
+				return translateExpressionStatement(
+						(ExpressionStatementNode) statement);
+			case IF :
+				return translateIf((IfNode) statement);
+			case JUMP :
+				return translateJump((JumpNode) statement);
+			case LABELED :
+				return translateLabeledStatement(
+						(LabeledStatementNode) statement);
+			case LOOP :
+				return translateLoop((LoopNode) statement);
+			case NULL :
+				return Arrays.asList((BlockItemNode) statement);
+			case OMP :
+				return translateOmpExecutable((OmpExecutableNode) statement);
+			case PRAGMA :// ignore side effects in pragma nodes
+				return Arrays.asList((BlockItemNode) statement);
+			case RUN :
+				return translateRun((RunNode) statement);
+			case SWITCH :
+				return translateSwitch((SwitchNode) statement);
+			case WHEN :
+				return translateWhen((WhenNode) statement);
+			case WITH :
+				return translateWith((WithNode) statement);
+			case UPDATE :
+				return translateUpdate((UpdateNode) statement);
+			default :
+				throw new ABCRuntimeException("unreachable");
 		}
 	}
 
@@ -3057,24 +3100,26 @@ public class SideEffectRemover extends BaseTransformer {
 		BlockItemKind kind = item.blockItemKind();
 
 		switch (kind) {
-		case ENUMERATION:
-			return translateEnumeration((EnumerationTypeNode) item);
-		case ORDINARY_DECLARATION:
-			return translateOrdinaryDeclaration((OrdinaryDeclarationNode) item);
-		case PRAGMA:
-			return Arrays.asList((BlockItemNode) item);
-		case STATEMENT:
-			return translateStatement((StatementNode) item);
-		case STATIC_ASSERTION:
-			throw new ABCUnsupportedException(
-					"normalization of static assertions in side-effect remover");
-		case STRUCT_OR_UNION:
-			return translateStructOrUnion((StructureOrUnionTypeNode) item);
-		case TYPEDEF:
-			return translateTypedef((TypedefDeclarationNode) item);
-		default:
-			throw new ABCUnsupportedException("normalization of block item of "
-					+ kind + " kind in side-effect remover");
+			case ENUMERATION :
+				return translateEnumeration((EnumerationTypeNode) item);
+			case ORDINARY_DECLARATION :
+				return translateOrdinaryDeclaration(
+						(OrdinaryDeclarationNode) item);
+			case PRAGMA :
+				return Arrays.asList((BlockItemNode) item);
+			case STATEMENT :
+				return translateStatement((StatementNode) item);
+			case STATIC_ASSERTION :
+				throw new ABCUnsupportedException(
+						"normalization of static assertions in side-effect remover");
+			case STRUCT_OR_UNION :
+				return translateStructOrUnion((StructureOrUnionTypeNode) item);
+			case TYPEDEF :
+				return translateTypedef((TypedefDeclarationNode) item);
+			default :
+				throw new ABCUnsupportedException(
+						"normalization of block item of " + kind
+								+ " kind in side-effect remover");
 		}
 	}
 
@@ -3228,12 +3273,12 @@ public class SideEffectRemover extends BaseTransformer {
 								Operator.NOT, lhs);
 					else
 						condition = lhs;
-					trueAssign = this.nodeFactory
-							.newOperatorNode(lhsSource, Operator.ASSIGN,
-									Arrays.asList(tmpId.copy(),
-											nodeFactory.newIntegerConstantNode(
-													lhsSource, isAnd ? "0"
-															: "1")));
+					trueAssign = this.nodeFactory.newOperatorNode(lhsSource,
+							Operator.ASSIGN,
+							Arrays.asList(tmpId.copy(), nodeFactory
+									.newIntegerConstantNode(lhsSource, isAnd
+											? "0"
+											: "1")));
 					rhs.remove();
 					falseAssign = this.nodeFactory.newOperatorNode(rhsSource,
 							Operator.ASSIGN, Arrays.asList(tmpId.copy(), rhs));
