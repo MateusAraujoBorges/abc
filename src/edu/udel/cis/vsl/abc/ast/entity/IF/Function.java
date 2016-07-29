@@ -51,6 +51,10 @@ public interface Function extends OrdinaryEntity {
 	 */
 	void setAtomic(boolean value);
 
+	boolean isStateFunction();
+
+	void setStateFunction(boolean value);
+
 	/**
 	 * Is the function declared with the <code>$pure</code> specifier,
 	 * indicating that this is a pure function?
