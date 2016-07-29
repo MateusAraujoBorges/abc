@@ -12,10 +12,13 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.CommonASTNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonFunctionCallNode extends CommonExpressionNode implements FunctionCallNode {
+public class CommonFunctionCallNode extends CommonExpressionNode
+		implements FunctionCallNode {
 
-	public CommonFunctionCallNode(Source source, ExpressionNode function, SequenceNode<ExpressionNode> contextArguments,
-			SequenceNode<ExpressionNode> arguments, SequenceNode<ExpressionNode> scopeList) {
+	public CommonFunctionCallNode(Source source, ExpressionNode function,
+			SequenceNode<ExpressionNode> contextArguments,
+			SequenceNode<ExpressionNode> arguments,
+			SequenceNode<ExpressionNode> scopeList) {
 		super(source, function, contextArguments, arguments, scopeList);
 	}
 
@@ -84,14 +87,18 @@ public class CommonFunctionCallNode extends CommonExpressionNode implements Func
 	@Override
 	public FunctionCallNode copy() {
 		@SuppressWarnings("unchecked")
-		SequenceNode<ExpressionNode> contextArguments = (SequenceNode<ExpressionNode>) child(1);
+		SequenceNode<ExpressionNode> contextArguments = (SequenceNode<ExpressionNode>) child(
+				1);
 		@SuppressWarnings("unchecked")
-		SequenceNode<ExpressionNode> arguments = (SequenceNode<ExpressionNode>) child(2);
+		SequenceNode<ExpressionNode> arguments = (SequenceNode<ExpressionNode>) child(
+				2);
 		@SuppressWarnings("unchecked")
-		SequenceNode<ExpressionNode> scopeList = (SequenceNode<ExpressionNode>) child(3);
+		SequenceNode<ExpressionNode> scopeList = (SequenceNode<ExpressionNode>) child(
+				3);
 
-		return new CommonFunctionCallNode(getSource(), duplicate(getFunction()), duplicate(contextArguments),
-				duplicate(arguments), duplicate(scopeList));
+		return new CommonFunctionCallNode(getSource(), duplicate(getFunction()),
+				duplicate(contextArguments), duplicate(arguments),
+				duplicate(scopeList));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -111,7 +118,8 @@ public class CommonFunctionCallNode extends CommonExpressionNode implements Func
 		boolean result = true;
 
 		if (functionExpr instanceof IdentifierExpressionNode) {
-			IdentifierNode functionIdentifier = ((IdentifierExpressionNode) functionExpr).getIdentifier();
+			IdentifierNode functionIdentifier = ((IdentifierExpressionNode) functionExpr)
+					.getIdentifier();
 
 			if (functionIdentifier.getEntity() == null) {
 				// FIXME: Why do we need this? Not having this check was
@@ -126,18 +134,22 @@ public class CommonFunctionCallNode extends CommonExpressionNode implements Func
 				Function function = (Function) functionEntity;
 
 				isAtomicPureFunction = function.isAbstract()
-						|| ((function.isAtomic() || function.isSystemFunction()) && function.isPure());
+						|| ((function.isAtomic() || function.isSystemFunction())
+								&& (function.isPure()
+										|| function.isStateFunction()));
 			}
 			if (isAtomicPureFunction) {
 				for (int i = 0; i < getNumberOfContextArguments(); i++) {
-					boolean argSEF = getContextArgument(i).isSideEffectFree(errorsAreSideEffects);
+					boolean argSEF = getContextArgument(i)
+							.isSideEffectFree(errorsAreSideEffects);
 
 					if (!argSEF)
 						return false;
 				}
 				if (result) {
 					for (int i = 0; i < getNumberOfArguments(); i++) {
-						boolean argSEF = getArgument(i).isSideEffectFree(errorsAreSideEffects);
+						boolean argSEF = getArgument(i)
+								.isSideEffectFree(errorsAreSideEffects);
 
 						if (!argSEF)
 							return false;
