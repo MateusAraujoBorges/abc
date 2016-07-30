@@ -175,16 +175,6 @@ public class FilteredStream implements CharStream {
 		}
 	}
 
-	// private void unconsume() {
-	// if (currentIndex == 0)
-	// return;
-	// // if at beginning of line, loop back until you reach a nonempty line
-	// while (firsts[currentLine] == currentIndex) {
-	// currentLine--;
-	// }
-	// currentIndex--;
-	// }
-
 	@Override
 	public int LA(int i) {
 		if (i > 0) {
