@@ -8,13 +8,12 @@ import java.io.PrintStream;
 import org.antlr.runtime.CharStream;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.front.c.preproc.FilteredANTLRFileStream;
-import edu.udel.cis.vsl.abc.front.c.preproc.FilteredANTLRInputStream;
+import edu.udel.cis.vsl.abc.front.c.preproc.CommonCharacterStream;
+import edu.udel.cis.vsl.abc.front.c.preproc.FilteredStream;
 
 /**
- * Tests the removal of backslash-newline sequences from character streams in
- * the two classes {@link FilteredANTLRFileStream} and
- * {@link FilteredANTLRInputStream}.
+ * Tests the removal of backslash-newline sequences from character streams using
+ * the two classes {@link CommonCharacterStream} and {@link FilteredStream}.
  * 
  * @author siegel
  *
@@ -47,13 +46,12 @@ public class FilteredCharStreamTest {
 		return result;
 	}
 
-	String fileFilter(String original) throws IOException {
-		return filter(new FilteredANTLRFileStream(original));
-	}
-
 	String streamFilter(String original, int chunkSize) throws IOException {
-		return filter(
-				new FilteredANTLRInputStream("test", original, chunkSize));
+		CharStream stringStream = new CommonCharacterStream("test", original,
+				chunkSize);
+		CharStream filteredStream = new FilteredStream(stringStream);
+
+		return filter(filteredStream);
 	}
 
 	private void test(String expected, String original) throws IOException {
@@ -66,10 +64,10 @@ public class FilteredCharStreamTest {
 			expected = expected + "\n";
 		// why? because the filtered stream adds \n at end if not
 		// already there.
-		assertEquals(expected, fileFilter(original));
+		// assertEquals(expected, fileFilter(original));
 		assertEquals(expected, streamFilter(original, 1));
 		assertEquals(expected, streamFilter(original, 2));
-		assertEquals(expected, streamFilter(original, 8192));
+		assertEquals(expected, streamFilter(original, 8));
 	}
 
 	@Test

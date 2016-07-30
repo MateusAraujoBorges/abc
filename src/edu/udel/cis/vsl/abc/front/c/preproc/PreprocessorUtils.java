@@ -100,6 +100,7 @@ import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.WHEN;
 import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.WHILE;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -127,18 +128,15 @@ public class PreprocessorUtils {
 				CHOOSE, CIVLATOM, CIVLATOMIC, CIVLFOR, COLLECTIVE, COMPLEX,
 				CONST, CONTIN, CONTINUE, DEFAULT, DEFINE, DEFINED, DEPENDS,
 				DERIV, DEVICE, DO, DOMAIN, DOUBLE, ELIF, ELSE, ENDIF, ENSURES,
-				ENUM, ERROR, EXISTS, EXTERN, 
-				//FALSE,
-				FATOMIC, FLOAT, FOR, FORALL,
+				ENUM, ERROR, EXISTS, EXTERN, FATOMIC, FLOAT, FOR, FORALL,
 				GENERIC, GLOBAL, GOTO, GUARD, HERE, IF, IFDEF, IFNDEF,
 				IMAGINARY, INCLUDE, INLINE, INPUT, INT, INVARIANT, LAMBDA, LINE,
 				LONG, NORETURN, OUTPUT, PARFOR, PRAGMA, PROCNULL, RANGE, READS,
 				REAL, REGISTER, REQUIRES, RESTRICT, RESULT, RETURN, SCOPEOF,
 				SELF, SHARED, SHORT, SIGNED, SIZEOF, SPAWN, STATIC,
-				STATICASSERT, STRUCT, SWITCH, SYSTEM, THREADLOCAL,
-				//TRUE,
-				TYPEDEF, TYPEOF, UNDEF, UNIFORM, UNION, UNSIGNED, VOID,
-				VOLATILE, WHEN, WHILE };
+				STATICASSERT, STRUCT, SWITCH, SYSTEM, THREADLOCAL, TYPEDEF,
+				TYPEOF, UNDEF, UNIFORM, UNION, UNSIGNED, VOID, VOLATILE, WHEN,
+				WHILE };
 		boolean[] result;
 		int length;
 		int min = identifierIndexes[0], max = identifierIndexes[0];
@@ -366,7 +364,12 @@ public class PreprocessorUtils {
 
 	public static CharStream newFilteredCharStreamFromFile(File file)
 			throws IOException {
-		return new FilteredANTLRFileStream(file);
+		InputStream inputStream = new FileInputStream(file);
+		CharStream charStream = new CommonCharacterStream(
+				file.getAbsolutePath(), inputStream);
+		CharStream filteredStream = new FilteredStream(charStream);
+
+		return filteredStream;
 	}
 
 	/**
@@ -392,7 +395,11 @@ public class PreprocessorUtils {
 
 		if (inputStream == null)
 			return null;
-		return new FilteredANTLRInputStream(name, inputStream);
+
+		CharStream charStream = new CommonCharacterStream(name, inputStream);
+		CharStream filteredStream = new FilteredStream(charStream);
+
+		return filteredStream;
 	}
 
 	/**
