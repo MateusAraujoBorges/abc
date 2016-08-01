@@ -192,6 +192,18 @@ $system $message $comm_seek($comm comm, int source, int tag);
   @*/
 $system $message $comm_dequeue($comm comm, int source, int tag);
 
+/*@ pure;
+  @ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$system $state_f _Bool $comm_empty_in($comm );
+
+/*@ pure;
+  @ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$system $state_f _Bool $comm_empty_out($comm );
+
 /* Returns $true iff comm points to a valid object. */
 //_Bool $comm_defined($comm comm);
 
