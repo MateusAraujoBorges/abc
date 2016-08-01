@@ -6,10 +6,7 @@
 #define _ASSERT_
 #include<civlc.cvh>
 
-/*@ depends_on \nothing; */
-$atomic_f void assert(_Bool expr){
-  $assert(expr);
-}
+$atomic_f void assert(_Bool expr);
 
 #define static_assert _Static_assert
 
