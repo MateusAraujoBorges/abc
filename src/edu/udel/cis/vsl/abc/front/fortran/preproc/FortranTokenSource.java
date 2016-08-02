@@ -85,13 +85,13 @@ public class FortranTokenSource implements CivlcTokenSource {
 			File[] systemIncludePaths, File[] userIncludePaths,
 			Map<String, Macro> macroMap, TokenFactory tokenFactory,
 			FortranTokenStream tokenStream) throws PreprocessorException {
-		int numStreams = streams.length;
+//		int numStreams = streams.length;
 
 		assert systemIncludePaths != null;
 		assert userIncludePaths != null;
 		this.indexer = indexer;
 		this.tokenFactory = tokenFactory;
-		assert numStreams == formations.length;
+//		assert numStreams == formations.length;
 		// this.theStreams = streams;
 		// this.theFormations = formations;
 		// this.systemIncludePaths = systemIncludePaths;

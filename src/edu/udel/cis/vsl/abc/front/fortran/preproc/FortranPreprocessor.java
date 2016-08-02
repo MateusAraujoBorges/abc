@@ -2,7 +2,6 @@ package edu.udel.cis.vsl.abc.front.fortran.preproc;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +12,6 @@ import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
-import edu.udel.cis.vsl.abc.front.c.preproc.FilteredANTLRFileStream;
-import edu.udel.cis.vsl.abc.front.c.preproc.FilteredANTLRInputStream;
 import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorUtils;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
@@ -188,25 +185,30 @@ public class FortranPreprocessor implements Preprocessor {
 		for (int i = 0; i < numFiles; i++) {
 			File file = sourceFiles[i];
 			SourceFile sourceFile = indexer.getOrAdd(file);
-			CharStream stream;
-
-			try {
-				if (file.exists()) {
-					stream = new FilteredANTLRFileStream(file);
-				} else {
-					String fileAbsPath = file.getAbsolutePath();
-					InputStream inputStream = FortranPreprocessor.class
-							.getResourceAsStream(fileAbsPath);
-
-					stream = inputStream == null ? null
-							: new FilteredANTLRInputStream(fileAbsPath,
-									inputStream);
-				}
-			} catch (IOException e) {
-				throw new PreprocessorException(
-						"Error in opening " + file + ": " + e.getMessage());
-			}
-			streamVector.add(stream);
+//			String fileAbsPath = file.getAbsolutePath();
+//			CharStream stream;
+//
+//			try {
+//				if (file.exists()) {
+//					InputStream inputStream = new FileInputStream(file);
+//					CharStream charStream = new CommonCharacterStream(
+//							fileAbsPath, inputStream);
+//
+//					stream = new FortranFilteredStream(charStream);
+//				} else {
+//					InputStream inputStream = PreprocessorUtils.class
+//							.getResourceAsStream(fileAbsPath);
+//					CharStream charStream = new CommonCharacterStream(fileAbsPath,
+//							inputStream);
+//
+//					stream = inputStream == null ? null
+//							: new FortranFilteredStream(charStream);
+//				}
+//			} catch (IOException e) {
+//				throw new PreprocessorException(
+//						"Error in opening " + file + ": " + e.getMessage());
+//			}
+//			streamVector.add(stream);
 			formationVector.add(tokenFactory.newInclusion(sourceFile));
 		}
 	}
