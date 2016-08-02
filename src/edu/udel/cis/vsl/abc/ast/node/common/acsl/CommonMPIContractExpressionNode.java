@@ -10,11 +10,10 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonMPIContractExpressionNode extends CommonExpressionNode
-		implements MPIContractExpressionNode {
+		implements
+			MPIContractExpressionNode {
 
 	private MPIContractExpressionKind kind;
-
-	private ExpressionNode[] arguments;
 
 	private int numArgs = -1;
 
@@ -26,17 +25,16 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 		super(source, arguments);
 		this.kind = kind;
 		this.exprName = exprName;
-		this.arguments = new ExpressionNode[arguments.size()];
-		arguments.toArray(this.arguments);
+		this.numArgs = arguments.size();
 	}
 
 	@Override
 	public ExpressionNode copy() {
 		List<ExpressionNode> argCopy = new LinkedList<>();
-		int numArgs = arguments.length;
+		int numArgs = this.numArgs;
 
 		for (int i = 0; i < numArgs; i++)
-			argCopy.add(duplicate(arguments[i]));
+			argCopy.add(duplicate(getArgument(i)));
 		return new CommonMPIContractExpressionNode(this.getSource(), argCopy,
 				kind, exprName);
 	}
@@ -67,32 +65,32 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 			return numArgs;
 		else {
 			switch (kind) {
-			case MPI_AGREE:
-				numArgs = 1;
-				break;
-			case MPI_EMPTY_IN:
-				numArgs = 1;
-				break;
-			case MPI_EMPTY_OUT:
-				numArgs = 1;
-				break;
-			case MPI_EQUALS:
-				numArgs = 4;
-				break;
-			case MPI_EXTENT:
-				numArgs = 1;
-				break;
-			case MPI_VALID:
-				numArgs = 3;
-				break;
-			case MPI_OFFSET:
-				numArgs = 3;
-				break;
-			case MPI_REGION:
-				numArgs = 3;
-				break;
-			default:
-				numArgs = -1;
+				case MPI_AGREE :
+					numArgs = 1;
+					break;
+				case MPI_EMPTY_IN :
+					numArgs = 1;
+					break;
+				case MPI_EMPTY_OUT :
+					numArgs = 1;
+					break;
+				case MPI_EQUALS :
+					numArgs = 4;
+					break;
+				case MPI_EXTENT :
+					numArgs = 1;
+					break;
+				case MPI_VALID :
+					numArgs = 3;
+					break;
+				case MPI_OFFSET :
+					numArgs = 3;
+					break;
+				case MPI_REGION :
+					numArgs = 3;
+					break;
+				default :
+					numArgs = -1;
 			}
 		}
 		return numArgs;
@@ -100,7 +98,7 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 
 	@Override
 	public ExpressionNode getArgument(int index) {
-		return arguments[index];
+		return (ExpressionNode) child(index);
 	}
 
 	@Override

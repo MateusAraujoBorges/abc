@@ -5,6 +5,7 @@
 #include <comm.cvh>
 #include <concurrency.cvh>
 #include <bundle.cvh>
+#include <collate.cvh>
 
 #define BCAST_TAG        9999
 #define REDUCE_TAG       9998
@@ -222,46 +223,18 @@ void $mpi_diff_coroutine_entries($bundle specEntry, $bundle mineEntry, int rank)
 void $mpi_coassert(MPI_Comm, _Bool);
 
 /*********** Section: contract helper functions ***********/
+$collate_state $mpi_snapshot(MPI_Comm comm, $scope scope);
 
-/*********** Side-effect free functions *************/
-_Bool $mpi_isRecvBufEmpty(int x);
+void $mpi_unsnapshot(MPI_Comm comm);
 
-/*********** Helper functions *************/
-/* Enqueue and Dequeue functions extended from "comm" library:
- * These MPI enqueue and dequeue functions will take a snaphot
- * while they delivery the messages */
-
-/* Take a snapshot for an MPI send operation. It will modify
-   existing point-2-point snapshots as if an MPI send happens on
-   them */
-/*@ depends_on \nothing;
+/*@ 
+  @ depends_on \nothing;
   @ executes_when \true;
-  @*/
-$system[mpi] void $mpi_p2pSendShot(int commID, $message msg, int place);
+  @ */
+$atomic_f void $mpi_target_enters(MPI_Comm comm);
 
-/* Take a snapshot for an MPI send operation. It will modify
-   existing collective snapshots as if an MPI send happens on
-   them */
-/*@ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$system[mpi] void $mpi_colSendShot(int commID, $message msg, int place);
-
-/* Take a snapshot for an MPI receive operation. It will modify
-   existing point-2-point snapshots as if an MPI receive happens on
-   them */
-/*@ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$system[mpi] void $mpi_p2pRecvShot(int commID, int source, int dest, int tag);
-
-/* Take a snapshot for an MPI receive operation. It will modify
-   existing collective snapshots as if an MPI receive happens on
-   them */
-/*@ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$system[mpi] void $mpi_colRecvShot(int commID, int source, int dest, int tag);
+/* Reduction contracts needs the definition of MPI_Comm */
+$state_f _Bool $mpi_target_entered(MPI_Comm comm, $range range);
 
 #endif
 
