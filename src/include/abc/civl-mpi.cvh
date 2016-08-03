@@ -227,6 +227,8 @@ $collate_state $mpi_snapshot(MPI_Comm comm, $scope scope);
 
 void $mpi_unsnapshot(MPI_Comm comm);
 
+void * $mpi_valid(int count, MPI_Datatype datatype);
+
 /*@ 
   @ depends_on \nothing;
   @ executes_when \true;
