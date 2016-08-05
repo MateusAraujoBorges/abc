@@ -114,7 +114,7 @@ public class FortranASTBuilderWorker {
 		Parser libParser = Front.newParser(Language.C);
 
 		this.libFactory = new LibraryASTFactory(libPreproc, libParser,
-				astBuilder);
+				Front.newASTBuilder(Language.C, configuration, astFactory));
 	}
 
 	/* Private Functions */
