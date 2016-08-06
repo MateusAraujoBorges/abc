@@ -6,6 +6,7 @@
 #include <concurrency.cvh>
 #include <bundle.cvh>
 #include <collate.cvh>
+#include <stddef.h>
 
 #define BCAST_TAG        9999
 #define REDUCE_TAG       9998
@@ -227,7 +228,15 @@ $collate_state $mpi_snapshot(MPI_Comm comm, $scope scope);
 
 void $mpi_unsnapshot(MPI_Comm comm);
 
-void * $mpi_valid(int count, MPI_Datatype datatype);
+/* Returns the number of bytes(chars) of the given MPI_Datatype */
+/*@ pure;
+  @ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+size_t $mpi_sizeof(MPI_Datatype);
+
+/* Assigns fresh new symbolic constants to the given mpi region */
+void $mpi_assigns(void * buf, int count, MPI_Datatype datatype);
 
 /*@ 
   @ depends_on \nothing;
