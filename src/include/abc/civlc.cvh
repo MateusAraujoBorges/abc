@@ -136,4 +136,10 @@ $system void $havoc(void *ptr);
   @*/
 $system double $pow(double base, double exp);
 
+/** returns true iff the given pointer is a dereferable pointer */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$system $state_f _Bool $is_derefable(void*ptr);
+
 #endif
