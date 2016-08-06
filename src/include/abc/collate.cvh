@@ -156,8 +156,10 @@ $system void $exit_collate_state($collate_state *cs);//, $state rs);
   @*/
 $bundle $collate_check($collator c, $bundle attribute);
 
+/* Marks the status of entering the collator to be true. */
 $atomic_f void $collator_enters($collator collator);
 
+/* Checks if the given processes in the range have all entered the collator. */
 $atomic_f _Bool $collator_has_entered($collator colaltor, $range range);
 
 #endif
