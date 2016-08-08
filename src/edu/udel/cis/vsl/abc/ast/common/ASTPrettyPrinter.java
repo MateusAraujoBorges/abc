@@ -506,7 +506,8 @@ public class ASTPrettyPrinter {
 	}
 
 	private static StringBuffer structOrUnion2Pretty(String prefix,
-			StructureOrUnionTypeNode strOrUnion, int maxLength) {
+			StructureOrUnionTypeNode strOrUnion, boolean isTypeDeclaration,
+			int maxLength) {
 		if (maxLength == 0)
 			return EMPTY_STRING_BUFFER;
 
@@ -522,7 +523,7 @@ public class ASTPrettyPrinter {
 			result.append("union ");
 		if (strOrUnion.getName() != null)
 			result.append(strOrUnion.getName());
-		if (fields != null) {
+		if (isTypeDeclaration && fields != null) {
 			int numFields = fields.numChildren();
 
 			result.append("{");
@@ -530,9 +531,10 @@ public class ASTPrettyPrinter {
 				FieldDeclarationNode field = fields.getSequenceChild(i);
 
 				result.append("\n");
-				if (!(field.getTypeNode() instanceof StructureOrUnionTypeNode))
-					result.append(myIndent);
-				result.append(fieldDeclaration2Pretty(prefix, field,
+				// if (!(field.getTypeNode() instanceof
+				// StructureOrUnionTypeNode))
+				// result.append(myIndent);
+				result.append(fieldDeclaration2Pretty(myIndent, field,
 						vacantLength(maxLength, result)));
 				result.append(";");
 			}
@@ -660,7 +662,7 @@ public class ASTPrettyPrinter {
 
 				if (i != 0)
 					result.append(",");
-				result.append("\n  ");
+				result.append("\n");
 				result.append(myIndent);
 				result.append(enumeratorDeclaration2Pretty(enumerator,
 						vacantLength(maxLength, result)));
@@ -869,7 +871,7 @@ public class ASTPrettyPrinter {
 
 	private static void pPrintContracts(PrintStream out, String prefix,
 			SequenceNode<ContractNode> contracts) {
-		String newLinePrefix = prefix + "\n  @ ";
+		String newLinePrefix = "\n" + prefix + "  @ ";
 		int numContracts = contracts.numChildren();
 		boolean isFirst = true;
 
@@ -896,7 +898,7 @@ public class ASTPrettyPrinter {
 			return EMPTY_STRING_BUFFER;
 
 		StringBuffer result = new StringBuffer();
-		String newLinePrefix = prefix + "\n  @ ";
+		String newLinePrefix = "\n" + prefix + "  @ ";
 		int numContracts = contracts.numChildren();
 		boolean isFirst = true;
 
@@ -1333,7 +1335,7 @@ public class ASTPrettyPrinter {
 			break;
 		case STRUCT_OR_UNION:
 			out.print(structOrUnion2Pretty(prefix,
-					(StructureOrUnionTypeNode) block, -1));
+					(StructureOrUnionTypeNode) block, true, -1));
 			out.print(";");
 			break;
 		default:
@@ -1381,7 +1383,7 @@ public class ASTPrettyPrinter {
 			return pragma2Pretty(prefix, (PragmaNode) block, maxLength);
 		case STRUCT_OR_UNION:
 			result.append(structOrUnion2Pretty(prefix,
-					(StructureOrUnionTypeNode) block, maxLength));
+					(StructureOrUnionTypeNode) block, true, maxLength));
 			result.append(";");
 			break;
 		default:
@@ -1989,7 +1991,7 @@ public class ASTPrettyPrinter {
 		}
 		out.print(": ");
 		out.print(expression2Pretty(civlFor.getDomain(), -1));
-		out.println(")");
+		out.print(")");
 		if (body.statementKind() == StatementKind.COMPOUND)
 			out.print(" ");
 		else
@@ -2385,7 +2387,7 @@ public class ASTPrettyPrinter {
 			out.print("\n");
 			out.print(prefix);
 			out.print("else");
-			if (trueBranch.statementKind() == StatementKind.COMPOUND)
+			if (falseBranch.statementKind() == StatementKind.COMPOUND)
 				out.print(" ");
 			else
 				out.println();
@@ -2411,17 +2413,25 @@ public class ASTPrettyPrinter {
 			result.append(expression2Pretty(condition,
 					vacantLength(maxLength, result)));
 		result.append(")");
+
 		if (trueBranch == null)
 			result.append(";");
 		else {
-			result.append("\n");
+			if (trueBranch.statementKind() == StatementKind.COMPOUND)
+				result.append(" ");
+			else
+				result.append("\n");
 			result.append(statement2Pretty(myIndent, trueBranch, true, false,
 					vacantLength(maxLength, result)));
 		}
 		if (falseBranch != null) {
 			result.append("\n");
 			result.append(prefix);
-			result.append("else\n");
+			result.append("else");
+			if (falseBranch.statementKind() == StatementKind.COMPOUND)
+				result.append(" ");
+			else
+				result.append("\n");
 			result.append(statement2Pretty(myIndent, falseBranch, true, false,
 					vacantLength(maxLength, result)));
 		}
@@ -2945,16 +2955,16 @@ public class ASTPrettyPrinter {
 			result.append(")");
 			break;
 		case REMOTE_REFERENCE:
-			result.append("\\remote(");
-			result.append(expression2Pretty(
-					((RemoteOnExpressionNode) expression)
-							.getForeignExpressionNode(),
-					vacantLength(maxLength, result)));
-			result.append(" , ");
+			result.append("$on(");
 			result.append(expression2Pretty(
 					((RemoteOnExpressionNode) expression)
 							.getProcessExpression(),
 					maxLength - result.length()));
+			result.append(" , ");
+			result.append(expression2Pretty(
+					((RemoteOnExpressionNode) expression)
+							.getForeignExpressionNode(),
+					vacantLength(maxLength, result)));
 			result.append(")");
 			break;
 		case RESULT:
@@ -3616,7 +3626,8 @@ public class ASTPrettyPrinter {
 		case STRUCTURE_OR_UNION: {
 			StructureOrUnionTypeNode strOrUnion = (StructureOrUnionTypeNode) type;
 
-			return structOrUnion2Pretty(prefix, strOrUnion, maxLength);
+			return structOrUnion2Pretty(prefix, strOrUnion, isTypeDeclaration,
+					maxLength);
 		}
 		case POINTER:
 			result.append(
