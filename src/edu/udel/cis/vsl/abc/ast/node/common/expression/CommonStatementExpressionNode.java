@@ -16,15 +16,16 @@ public class CommonStatementExpressionNode extends CommonExpressionNode
 	public CommonStatementExpressionNode(Source source,
 			CompoundStatementNode statement) {
 		super(source, statement);
-		assert statement.getSequenceChild(statement.numChildren() - 1) instanceof ExpressionStatementNode;
+		assert statement.getSequenceChild(
+				statement.numChildren() - 1) instanceof ExpressionStatementNode;
 		expression = ((ExpressionStatementNode) statement
 				.getSequenceChild(statement.numChildren() - 1)).getExpression();
 	}
 
 	@Override
 	public ExpressionNode copy() {
-		return new CommonStatementExpressionNode(this.getSource(), this
-				.getCompoundStatement().copy());
+		return new CommonStatementExpressionNode(this.getSource(),
+				duplicate(this.getCompoundStatement()));
 	}
 
 	@Override

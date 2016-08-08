@@ -17,7 +17,8 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
  * 
  */
 
-public class CommonAtomicNode extends CommonStatementNode implements AtomicNode {
+public class CommonAtomicNode extends CommonStatementNode
+		implements AtomicNode {
 
 	/**
 	 * True iff the atomic node is declared by <code>$atom</code>; otherwise, it
@@ -48,10 +49,8 @@ public class CommonAtomicNode extends CommonStatementNode implements AtomicNode 
 
 	@Override
 	public AtomicNode copy() {
-		StatementNode body = getBody();
-		StatementNode bodyCopy = body == null ? null : body.copy();
-
-		return new CommonAtomicNode(getSource(), this.isAtom, bodyCopy);
+		return new CommonAtomicNode(getSource(), this.isAtom,
+				duplicate(getBody()));
 	}
 
 	@Override

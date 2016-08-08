@@ -134,4 +134,11 @@ public class ACSLTest {
 			throws PreprocessorException, SyntaxException, ParseException {
 		this.parse("pointers.c");
 	}
+
+	@Test
+	public void extendQuant()
+			throws PreprocessorException, SyntaxException, ParseException {
+		parse("extendQuant.c");
+	}
+
 }

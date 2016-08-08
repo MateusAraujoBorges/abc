@@ -6,8 +6,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonRegularRangeNode extends CommonExpressionNode implements
-		RegularRangeNode {
+public class CommonRegularRangeNode extends CommonExpressionNode
+		implements RegularRangeNode {
 
 	public CommonRegularRangeNode(Source source, ExpressionNode low,
 			ExpressionNode high) {
@@ -21,14 +21,8 @@ public class CommonRegularRangeNode extends CommonExpressionNode implements
 
 	@Override
 	public ExpressionNode copy() {
-		ExpressionNode stepNode = getStep();
-
-		if (stepNode == null)
-			return new CommonRegularRangeNode(getSource(), getLow().copy(),
-					getHigh().copy());
-		else
-			return new CommonRegularRangeNode(getSource(), getLow().copy(),
-					getHigh().copy(), stepNode.copy());
+		return new CommonRegularRangeNode(getSource(), duplicate(getLow()),
+				duplicate(getHigh()), duplicate(getStep()));
 	}
 
 	@Override
@@ -47,8 +41,8 @@ public class CommonRegularRangeNode extends CommonExpressionNode implements
 
 		return getLow().isSideEffectFree(errorsAreSideEffects)
 				&& getHigh().isSideEffectFree(errorsAreSideEffects)
-				&& (stepNode == null || stepNode
-						.isSideEffectFree(errorsAreSideEffects));
+				&& (stepNode == null
+						|| stepNode.isSideEffectFree(errorsAreSideEffects));
 	}
 
 	@Override

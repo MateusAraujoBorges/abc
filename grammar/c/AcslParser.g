@@ -62,6 +62,7 @@ tokens{
     INDEX;
     INTEGER;
     INTER;
+    LAMBDA_ACSL;
     LOGIC_TYPE;
     LOOP_ALLOC;
     LOOP_ASSIGNS;
@@ -72,6 +73,8 @@ tokens{
     LOOP_FREE;
     LOOP_INVARIANT;
     LOOP_VARIANT;
+    MAX;
+    MIN;
     MPI_AGREE;
     MPI_COLLECTIVE;
     MPI_COMM_RANK;
@@ -85,13 +88,16 @@ tokens{
     MPI_OFFSET;
     MPI_VALID;
     MPI_REGION;
-    NULL_ACSL;
     NOTHING;
+    NULL_ACSL;
+    NUMOF;
     OBJECT_OF;
     OPERATOR;
     P2P;
+    PROD;
     PURE;
     QUANTIFIED;
+    QUANTIFIED_EXT;
     READ_ACSL;
     READS_ACSL;
     REAL_ACSL;
@@ -102,6 +108,7 @@ tokens{
     SET_SIMPLE;
     SIZEOF_EXPR;
     SIZEOF_TYPE;
+    SUM;
     TERM_PARENTHESIZED;
     TERMINATES;
     TRUE_ACSL;
@@ -448,6 +455,8 @@ quantifierExpression
 	: logicalEquivExpression
     	| quantifier binders SEMI a=logicalOrExpression IMPLIES_ACSL b=logicalOrExpression
 	   -> ^(QUANTIFIED quantifier binders $a $b)
+	| lambda_key binders SEMI logicalOrExpression
+	   -> ^(LAMBDA_ACSL lambda_key binders logicalOrExpression)
 	;
 
 logicalEquivExpression
@@ -703,6 +712,20 @@ unaryExpression
           -> ^(INTER inter_key argumentExpressionList)
    	| valid_key LPAREN term RPAREN
        	  -> ^(VALID valid_key term)
+       	| extendedQuantification ->^(QUANTIFIED_EXT extendedQuantification)
+	;
+	
+extendedQuantification
+	: sum_key LPAREN term COMMA term COMMA term RPAREN
+       	  -> ^(SUM sum_key term+)
+       	| max_key LPAREN term COMMA term COMMA term RPAREN
+       	  -> ^(MAX max_key term+)
+       	| min_key LPAREN term COMMA term COMMA term RPAREN
+       	  -> ^(MIN min_key term+)
+       	| product_key LPAREN term COMMA term COMMA term RPAREN
+       	  -> ^(PROD product_key term+)
+       	| numof_key LPAREN term COMMA term COMMA term RPAREN
+       	  -> ^(NUMOF numof_key term+)
 	;
 
 /* 6.5.2 *
@@ -811,7 +834,7 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| true_key | false_key  | result_key | nothing_key | ELLIPSIS
-    	| SELF | null_key | TRUE | FALSE
+    	| SELF | null_key
     	| mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
 
@@ -875,17 +898,14 @@ real_type
     
 alloc_key 
     : {input.LT(1).getText().equals("allocates")}? IDENTIFIER
-//    -> ^(ALLOC IDENTIFIER)
     ; 
 
 assigns_key 
     : {input.LT(1).getText().equals("assigns")}? IDENTIFIER
-//    -> ^(ASSIGNS_ACSL IDENTIFIER)
     ; 
 
 assumes_key 
     : {input.LT(1).getText().equals("assumes")}? IDENTIFIER
-//    -> ^(ASSUMES_ACSL IDENTIFIER)
     ; 
 
 behaviors_key 
@@ -894,7 +914,6 @@ behaviors_key
 
 behavior_key 
     : {input.LT(1).getText().equals("behavior")}? IDENTIFIER
-//    -> ^(BEHAVIOR IDENTIFIER)
     ; 
 
 completes_key 
@@ -911,12 +930,10 @@ disjoint_key
 
 ensures_key 
     : {input.LT(1).getText().equals("ensures")}? IDENTIFIER
-//    -> ^(ENSURES_ACSL IDENTIFIER)
     ;    
   
 frees_key
     : {input.LT(1).getText().equals("frees")}? IDENTIFIER
-//    -> ^(FREES IDENTIFIER)    
     ; 
   
 invariant_key
@@ -929,12 +946,10 @@ loop_key
 
 requires_key
     : {input.LT(1).getText().equals("requires")}? IDENTIFIER
-//    -> ^(REQUIRES_ACSL IDENTIFIER)
     ;
     
 terminates_key
     : {input.LT(1).getText().equals("terminates")}? IDENTIFIER
-//    -> ^(TERMINATES IDENTIFIER)
     ;
    
 variant_key
@@ -943,7 +958,6 @@ variant_key
 
 waitsfor_key
     : {input.LT(1).getText().equals("waitsfor")}? IDENTIFIER
-//    -> ^(WAITSFOR IDENTIFIER)
     ;
 
 /* ACSL terms keywords */
@@ -969,7 +983,6 @@ forall_key
 
 inter_key
     : {input.LT(1).getText().equals("\\inter")}? EXTENDED_IDENTIFIER
-//    -> ^(INTER EXTENDED_IDENTIFIER)
     ;
 
 let_key
@@ -1139,12 +1152,34 @@ mpioffset_key
     ;
 
 mpivalid_key
-    : {input.LT(1).getText().equals("\\mpi_valid")}? EXTENDED_IDENTIFIER
-//    -> ^(MPI_VALID EXTENDED_IDENTIFIER)
-    ;
+	: {input.LT(1).getText().equals("\\mpi_valid")}? EXTENDED_IDENTIFIER
+        ;
 
 mpiregion_key
-    : {input.LT(1).getText().equals("\\mpi_region")}? EXTENDED_IDENTIFIER
-//    -> ^(MPI_REGION EXTENDED_IDENTIFIER)
-    ;
+	: {input.LT(1).getText().equals("\\mpi_region")}? EXTENDED_IDENTIFIER
+	;
 
+/** ACSL higher-order keywords */
+lambda_key
+	: {input.LT(1).getText().equals("\\lambda")}? EXTENDED_IDENTIFIER
+	;
+	
+sum_key
+	: {input.LT(1).getText().equals("\\sum")}? EXTENDED_IDENTIFIER
+	;
+
+max_key
+	: {input.LT(1).getText().equals("\\max")}? EXTENDED_IDENTIFIER
+	;
+	
+min_key
+	: {input.LT(1).getText().equals("\\min")}? EXTENDED_IDENTIFIER
+	;
+
+product_key
+	: {input.LT(1).getText().equals("\\product")}? EXTENDED_IDENTIFIER
+	;
+	
+numof_key
+	: {input.LT(1).getText().equals("\\numof")}? EXTENDED_IDENTIFIER
+	;

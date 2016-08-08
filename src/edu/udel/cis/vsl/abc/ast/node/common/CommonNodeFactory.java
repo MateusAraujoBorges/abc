@@ -25,6 +25,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode.ExtendedQuantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
@@ -71,6 +73,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
@@ -140,6 +143,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompletenessNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonCompositeEventNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonDependsNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonEnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonExtendedQuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonGuardNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonInvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMPICollectiveBlockNode;
@@ -178,6 +182,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonFunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonHereOrRootNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIntegerConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonOperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonProcnullNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonQuantifiedExpressionNode;
@@ -1225,6 +1230,19 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
+	public LambdaNode newLambdaNode(Source source,
+			SequenceNode<VariableDeclarationNode> boundVariableDeclarationList,
+			ExpressionNode expression) {
+		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList = new LinkedList<>();
+
+		variableList
+				.add(newPairNode(source, boundVariableDeclarationList, null));
+		return new CommonLambdaNode(source,
+				newSequenceNode(source, "bound variable list", variableList),
+				null, expression);
+	}
+
+	@Override
 	public UpdateNode newUpdateNode(Source source, ExpressionNode collator,
 			FunctionCallNode call) {
 		return new CommonUpdateNode(source, collator, call);
@@ -1263,4 +1281,13 @@ public class CommonNodeFactory implements NodeFactory {
 	public TypeNode newStateTypeNode(Source source) {
 		return new CommonStateTypeNode(source);
 	}
+
+	@Override
+	public ExtendedQuantifiedExpressionNode newExtendedQuantifiedExpressionNode(
+			Source source, ExtendedQuantifier quant, ExpressionNode lo,
+			ExpressionNode hi, ExpressionNode function) {
+		return new CommonExtendedQuantifiedExpressionNode(source, quant, lo, hi,
+				function);
+	}
+
 }

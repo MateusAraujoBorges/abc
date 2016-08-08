@@ -20,10 +20,10 @@ public class CommonTypeofNode extends CommonTypeNode implements TypeofNode {
 	@Override
 	public TypeofNode copy() {
 		if (this.hasExpressionOperand())
-			return new CommonTypeofNode(this.getSource(), this
-					.getExpressionOperand().copy());
-		return new CommonTypeofNode(this.getSource(), this.getTypeOperand()
-				.copy());
+			return new CommonTypeofNode(this.getSource(),
+					duplicate(getExpressionOperand()));
+		return new CommonTypeofNode(this.getSource(),
+				duplicate(getTypeOperand()));
 	}
 
 	@Override

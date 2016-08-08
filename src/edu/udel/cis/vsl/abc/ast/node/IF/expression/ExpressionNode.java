@@ -1,10 +1,12 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.expression;
 
 import edu.udel.cis.vsl.abc.ast.conversion.IF.Conversion;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ForLoopInitializerNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.UpdateNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 
 /**
@@ -47,8 +49,8 @@ import edu.udel.cis.vsl.abc.ast.type.IF.Type;
  * @author siegel
  * 
  */
-public interface ExpressionNode extends InitializerNode, SizeableNode,
-		ForLoopInitializerNode {
+public interface ExpressionNode
+		extends InitializerNode, SizeableNode, ForLoopInitializerNode {
 
 	/**
 	 * An enumerated type used to categorize the different kinds of expression
@@ -109,7 +111,11 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		/**
 		 * An array lambda expression. Can be cast to {@link ArrayLambdaNode}.
 		 */
-		ARRAY_LAMBDA,
+		ARRAY_LAMBDA, // TODO clean up ARRAY_LAMBDA using LAMBDA and cast
+		/**
+		 * A lambda expression. Can be cast to {@link LambdaNode}.
+		 */
+		LAMBDA,
 		/**
 		 * A memory set of ACSL contracts. Can be cast to {@link MemorySetNode}.
 		 */
@@ -185,12 +191,17 @@ public interface ExpressionNode extends InitializerNode, SizeableNode,
 		 * {@link WildcardNode}.
 		 */
 		WILDCARD,
-
 		/**
-		 * An ACSL nothing expression (<code></code>); can be cast to
+		 * An ACSL nothing expression (<code>\nothing</code>); can be cast to
 		 * {@link NothingNode}.
 		 */
-		NOTHING
+		NOTHING,
+		/**
+		 * An ACSL extended quantification expression
+		 * (<code>\sum, \min, \max, \product, \numof</code>); can be cast to
+		 * {@link ExtendedQuantifiedExpressionNode}.
+		 */
+		EXTENDED_QUANTIFIED
 	}
 
 	/**

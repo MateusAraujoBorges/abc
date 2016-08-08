@@ -35,8 +35,8 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
  * @author Manchun Zheng
  * 
  */
-public class CommonOmpForNode extends CommonOmpWorkshareNode implements
-		OmpForNode {
+public class CommonOmpForNode extends CommonOmpWorkshareNode
+		implements OmpForNode {
 
 	/**
 	 * The schedule specified by the optional schedule clause
@@ -206,16 +206,9 @@ public class CommonOmpForNode extends CommonOmpWorkshareNode implements
 
 	@Override
 	public OmpForNode copy() {
-		OmpForNode newForNode = new CommonOmpForNode(this.getSource(), null);
-		int numChildren = this.numChildren();
+		OmpForNode newForNode = new CommonOmpForNode(this.getSource(),
+				duplicate(statementNode()));
 
-		for (int i = 0; i < numChildren; i++) {
-			ASTNode child = this.child(i);
-
-			if (child != null) {
-				newForNode.setChild(i, child.copy());
-			}
-		}
 		newForNode.setCollapse(this.collapse);
 		newForNode.setOrdered(this.ordered);
 		newForNode.setSchedule(this.schedule);

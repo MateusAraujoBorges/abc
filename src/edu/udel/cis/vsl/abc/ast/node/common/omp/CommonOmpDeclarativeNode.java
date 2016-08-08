@@ -7,8 +7,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpDeclarativeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonOmpDeclarativeNode extends CommonOmpNode implements
-		OmpDeclarativeNode {
+public class CommonOmpDeclarativeNode extends CommonOmpNode
+		implements OmpDeclarativeNode {
 	/**
 	 * Child 0: variable list
 	 * 
@@ -48,8 +48,8 @@ public class CommonOmpDeclarativeNode extends CommonOmpNode implements
 
 	@Override
 	public OmpDeclarativeNode copy() {
-		return new CommonOmpDeclarativeNode(getSource(), this.variables()
-				.copy());
+		return new CommonOmpDeclarativeNode(getSource(),
+				duplicate(this.variables()));
 	}
 
 	@Override

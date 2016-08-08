@@ -24,6 +24,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode.DependsEventNodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
@@ -63,6 +64,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
@@ -2997,11 +2999,61 @@ public class ASTPrettyPrinter {
 			result.append(")");
 			break;
 		}
+		case EXTENDED_QUANTIFIED:
+			result.append(extendedQuantifiedExpression2Pretty(
+					(ExtendedQuantifiedExpressionNode) expression, maxLength));
+			break;
+		case LAMBDA:
+			result.append(lambda2Pretty((LambdaNode) expression, maxLength));
+			break;
 		default:
 			throw new ABCUnsupportedException(
 					"pretty print of expression node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
+	}
+
+	private static StringBuffer lambda2Pretty(LambdaNode lambda,
+			int maxLength) {
+		if (maxLength == 0)
+			return EMPTY_STRING_BUFFER;
+
+		StringBuffer result = new StringBuffer();
+
+		result.append("$lambda");
+		result.append(" (");
+		result.append(boundVariableList2Pretty(lambda.boundVariableList(),
+				vacantLength(maxLength, result)));
+		if (lambda.restriction() != null) {
+			result.append(" | ");
+			result.append(expression2Pretty(lambda.restriction(),
+					vacantLength(maxLength, result)));
+		}
+		result.append(") ");
+		result.append(expression2Pretty(lambda.expression(),
+				vacantLength(maxLength, result)));
+		return trimStringBuffer(result, maxLength);
+	}
+
+	private static StringBuffer extendedQuantifiedExpression2Pretty(
+			ExtendedQuantifiedExpressionNode extQuantified, int maxLength) {
+		if (maxLength == 0)
+			return EMPTY_STRING_BUFFER;
+
+		StringBuffer result = new StringBuffer();
+
+		result.append(extQuantified.extQuantifier());
+		result.append("(");
+		result.append(expression2Pretty(extQuantified.lower(),
+				vacantLength(maxLength, result)));
+		result.append(", ");
+		result.append(expression2Pretty(extQuantified.higher(),
+				vacantLength(maxLength, result)));
+		result.append(", ");
+		result.append(expression2Pretty(extQuantified.function(),
+				vacantLength(maxLength, result)));
+		result.append(")");
+		return result;
 	}
 
 	private static StringBuffer memorySet2Pretty(MemorySetNode memSet,

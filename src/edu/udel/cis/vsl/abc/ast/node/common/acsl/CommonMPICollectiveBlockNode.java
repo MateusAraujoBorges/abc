@@ -8,8 +8,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonMPICollectiveBlockNode extends CommonContractNode implements
-		MPICollectiveBlockNode {
+public class CommonMPICollectiveBlockNode extends CommonContractNode
+		implements MPICollectiveBlockNode {
 	private SequenceNode<ContractNode> body;
 
 	private MPICollectiveKind kind;
@@ -44,7 +44,7 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode implements
 	@Override
 	public MPICollectiveBlockNode copy() {
 		return new CommonMPICollectiveBlockNode(this.getSource(),
-				(ExpressionNode) child(0).copy(), kind, this.body);
+				duplicate(getMPIComm()), kind, this.body);
 	}
 
 	@Override

@@ -66,12 +66,8 @@ public class CommonPragmaNode extends CommonASTNode implements PragmaNode {
 
 	@Override
 	public PragmaNode copy() {
-		IdentifierNode identifier = getPragmaIdentifier();
-		IdentifierNode identifierCopy = identifier == null ? null : identifier
-				.copy();
-
-		return new CommonPragmaNode(getSource(), identifierCopy, tokenSequence,
-				newlineToken);
+		return new CommonPragmaNode(getSource(),
+				duplicate(getPragmaIdentifier()), tokenSequence, newlineToken);
 	}
 
 	@Override
@@ -99,8 +95,8 @@ public class CommonPragmaNode extends CommonASTNode implements PragmaNode {
 				return new DifferenceObject(this, that,
 						DiffKind.PRAGMA_NUM_TOKENS);
 			for (int i = 0; i < numTokens; i++) {
-				String thisToken = this.getToken(i).getText(), thatToken = thatPragma
-						.getToken(i).getText();
+				String thisToken = this.getToken(i).getText(),
+						thatToken = thatPragma.getToken(i).getText();
 
 				if (!thisToken.equals(thatToken))
 					return new DifferenceObject(this, that, DiffKind.OTHER,

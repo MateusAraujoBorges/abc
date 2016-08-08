@@ -13,16 +13,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-/**
- * A quantified expression consists of a quantifier, a variable bound by the
- * quantifier, an expression restricting the values of the quantified variable,
- * and a quantified expression. e.g. forall {int x | x > 1} x > 0;
- * 
- * @author zirkel
- * 
- */
-public class CommonArrayLambdaNode extends CommonExpressionNode implements
-		ArrayLambdaNode {
+public class CommonArrayLambdaNode extends CommonExpressionNode
+		implements ArrayLambdaNode {
 
 	/**
 	 * @param source
@@ -37,13 +29,11 @@ public class CommonArrayLambdaNode extends CommonExpressionNode implements
 	 * @param expression
 	 *            the expression that is quantified
 	 */
-	public CommonArrayLambdaNode(
-			Source source,
-			TypeNode type,
+	public CommonArrayLambdaNode(Source source, TypeNode type,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList,
 			ExpressionNode restriction, ExpressionNode expression) {
-		super(source, Arrays
-				.asList(type, variableList, restriction, expression));
+		super(source,
+				Arrays.asList(type, variableList, restriction, expression));
 	}
 
 	@Override
@@ -53,10 +43,9 @@ public class CommonArrayLambdaNode extends CommonExpressionNode implements
 
 	@Override
 	public ExpressionNode copy() {
-		return new CommonArrayLambdaNode(this.getSource(), type().copy(),
-				boundVariableList().copy(),
-				restriction() != null ? restriction().copy() : null,
-				expression().copy());
+		return new CommonArrayLambdaNode(this.getSource(), duplicate(type()),
+				duplicate(boundVariableList()), duplicate(restriction()),
+				duplicate(expression()));
 	}
 
 	@Override
@@ -96,9 +85,8 @@ public class CommonArrayLambdaNode extends CommonExpressionNode implements
 		boolean result = expression().isSideEffectFree(errorsAreSideEffects);
 
 		if (restriction() != null)
-			result = result
-					&& this.restriction()
-							.isSideEffectFree(errorsAreSideEffects);
+			result = result && this.restriction()
+					.isSideEffectFree(errorsAreSideEffects);
 		return result;
 	}
 

@@ -4,27 +4,16 @@ import java.io.PrintStream;
 import java.util.Arrays;
 
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
-import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject.DiffKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-/**
- * A quantified expression consists of a quantifier, a variable bound by the
- * quantifier, an expression restricting the values of the quantified variable,
- * and a quantified expression. e.g. forall {int x | x > 1} x > 0;
- * 
- * @author zirkel
- * 
- */
-public class CommonQuantifiedExpressionNode extends CommonExpressionNode
-		implements QuantifiedExpressionNode {
-
-	private Quantifier quantifier;
+public class CommonLambdaNode extends CommonExpressionNode
+		implements LambdaNode {
 
 	/**
 	 * @param source
@@ -39,11 +28,10 @@ public class CommonQuantifiedExpressionNode extends CommonExpressionNode
 	 * @param expression
 	 *            the expression that is quantified
 	 */
-	public CommonQuantifiedExpressionNode(Source source, Quantifier quantifier,
+	public CommonLambdaNode(Source source,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList,
 			ExpressionNode restriction, ExpressionNode expression) {
 		super(source, Arrays.asList(variableList, restriction, expression));
-		this.quantifier = quantifier;
 	}
 
 	@Override
@@ -53,14 +41,9 @@ public class CommonQuantifiedExpressionNode extends CommonExpressionNode
 
 	@Override
 	public ExpressionNode copy() {
-		return new CommonQuantifiedExpressionNode(this.getSource(), quantifier,
+		return new CommonLambdaNode(this.getSource(),
 				duplicate(boundVariableList()), duplicate(restriction()),
 				duplicate(expression()));
-	}
-
-	@Override
-	public Quantifier quantifier() {
-		return quantifier;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -82,25 +65,12 @@ public class CommonQuantifiedExpressionNode extends CommonExpressionNode
 
 	@Override
 	protected void printBody(PrintStream out) {
-		String output = "";
-
-		switch (quantifier) {
-		case FORALL:
-			output = "forall";
-			break;
-		case EXISTS:
-			output = "exists";
-			break;
-		case UNIFORM:
-			output = "uniform";
-			break;
-		}
-		out.print(output);
+		out.print("lambda");
 	}
 
 	@Override
 	public ExpressionKind expressionKind() {
-		return ExpressionKind.QUANTIFIED_EXPRESSION;
+		return ExpressionKind.LAMBDA;
 	}
 
 	@Override
@@ -115,15 +85,15 @@ public class CommonQuantifiedExpressionNode extends CommonExpressionNode
 
 	@Override
 	protected DifferenceObject diffWork(ASTNode that) {
-		if (that instanceof QuantifiedExpressionNode) {
-			QuantifiedExpressionNode thatQuan = (QuantifiedExpressionNode) that;
-
-			if (this.quantifier == thatQuan.quantifier())
-				return null;
-			else
-				return new DifferenceObject(this, that, DiffKind.OTHER,
-						"different quantifier");
-		}
+		// if (that instanceof QuantifiedExpressionNode) {
+		// QuantifiedExpressionNode thatQuan = (QuantifiedExpressionNode) that;
+		//
+		// if (this. == thatQuan.quantifier())
+		// return null;
+		// else
+		// return new DifferenceObject(this, that, DiffKind.OTHER,
+		// "different quantifier");
+		// }
 		return new DifferenceObject(this, that);
 	}
 }

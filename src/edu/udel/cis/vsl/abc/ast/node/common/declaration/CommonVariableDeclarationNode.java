@@ -20,8 +20,8 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
 // child 3: constant alignment specifiers or null or absent
 // child 4: type alignment specifiers or null or absent
 
-public class CommonVariableDeclarationNode extends
-		CommonOrdinaryDeclarationNode implements VariableDeclarationNode {
+public class CommonVariableDeclarationNode extends CommonOrdinaryDeclarationNode
+		implements VariableDeclarationNode {
 
 	private boolean autoStorage = false;
 
@@ -186,8 +186,6 @@ public class CommonVariableDeclarationNode extends
 	public VariableDeclarationNode copy() {
 		InitializerNode initializer = getInitializer();
 		CommonVariableDeclarationNode result;
-		SequenceNode<ExpressionNode> specifiers = constantAlignmentSpecifiers();
-		SequenceNode<TypeNode> typeAlignmentSpecifiers = typeAlignmentSpecifiers();
 
 		if (initializer == null)
 			result = new CommonVariableDeclarationNode(getSource(),
@@ -201,10 +199,9 @@ public class CommonVariableDeclarationNode extends
 		result.setRegisterStorage(hasRegisterStorage());
 		result.setThreadLocalStorage(hasThreadLocalStorage());
 		result.setSharedStorage(hasSharedStorage());
-		if (specifiers != null)
-			result.setConstantAlignmentSpecifiers(specifiers.copy());
-		if (typeAlignmentSpecifiers != null)
-			result.setTypeAlignmentSpecifiers(typeAlignmentSpecifiers.copy());
+		result.setConstantAlignmentSpecifiers(
+				duplicate(constantAlignmentSpecifiers()));
+		result.setTypeAlignmentSpecifiers(duplicate(typeAlignmentSpecifiers()));
 		return result;
 	}
 
@@ -224,8 +221,9 @@ public class CommonVariableDeclarationNode extends
 			VariableDeclarationNode thatVar = (VariableDeclarationNode) that;
 
 			if (!(this.autoStorage == thatVar.hasAutoStorage()
-					&& this.registerStorage == thatVar.hasRegisterStorage() && this.threadLocalStorage == thatVar
-						.hasThreadLocalStorage()))
+					&& this.registerStorage == thatVar.hasRegisterStorage()
+					&& this.threadLocalStorage == thatVar
+							.hasThreadLocalStorage()))
 				return new DifferenceObject(this, that, DiffKind.OTHER,
 						"different variable declaration auto/register/thread-local specifier");
 			else

@@ -31,12 +31,8 @@ public class CommonWhenNode extends CommonStatementNode implements WhenNode {
 
 	@Override
 	public WhenNode copy() {
-		ExpressionNode guard = getGuard();
-		ExpressionNode guardCopy = guard == null ? null : guard.copy();
-		StatementNode body = getBody();
-		StatementNode bodyCopy = body == null ? null : body.copy();
-
-		return new CommonWhenNode(getSource(), guardCopy, bodyCopy);
+		return new CommonWhenNode(getSource(), duplicate(getGuard()),
+				duplicate(getBody()));
 	}
 
 	@Override

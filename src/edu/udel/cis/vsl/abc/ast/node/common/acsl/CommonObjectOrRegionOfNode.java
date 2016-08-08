@@ -8,21 +8,24 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonObjectOrRegionOfNode extends CommonExpressionNode implements ObjectOrRegionOfNode {
+public class CommonObjectOrRegionOfNode extends CommonExpressionNode
+		implements ObjectOrRegionOfNode {
 	/**
 	 * true iff this is an <code>$object_of</code> node; otherwise, this is a
 	 * <code>$region_of</code> node
 	 */
 	private boolean isObject = true;
 
-	public CommonObjectOrRegionOfNode(Source source, boolean isObject, ASTNode operand) {
+	public CommonObjectOrRegionOfNode(Source source, boolean isObject,
+			ASTNode operand) {
 		super(source, operand);
 		this.isObject = isObject;
 	}
 
 	@Override
 	public ObjectOrRegionOfNode copy() {
-		return new CommonObjectOrRegionOfNode(this.getSource(), this.isObject, this.operand().copy());
+		return new CommonObjectOrRegionOfNode(this.getSource(), this.isObject,
+				duplicate(this.operand()));
 	}
 
 	@Override

@@ -18,6 +18,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode.ExtendedQuantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
@@ -64,6 +66,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
@@ -1030,6 +1033,21 @@ public interface NodeFactory {
 	ArrayLambdaNode newArrayLambdaNode(Source source, TypeNode type,
 			List<VariableDeclarationNode> boundVariableDeclarationList,
 			ExpressionNode restriction, ExpressionNode expression);
+
+	/**
+	 * Constructs a new lambda expression.
+	 * 
+	 * @param source
+	 *            The source code information for the entire expression
+	 * @param boundVariableDeclarationList
+	 *            The list of bound variable declarations.
+	 * @param expression
+	 *            The body-expression
+	 * @return The new array lambda expression with the given children.
+	 */
+	LambdaNode newLambdaNode(Source source,
+			SequenceNode<VariableDeclarationNode> boundVariableDeclarationList,
+			ExpressionNode expression);
 
 	/**
 	 * 
@@ -2592,5 +2610,26 @@ public interface NodeFactory {
 	 *            the list of memory units of the allocation clause
 	 * @return the new allocation node
 	 */
-	AllocationNode newAllocationNode(Source source, boolean isAllocates, SequenceNode<ExpressionNode> memoryList);
+	AllocationNode newAllocationNode(Source source, boolean isAllocates,
+			SequenceNode<ExpressionNode> memoryList);
+
+	/**
+	 * Creates a new extended quantified expression node.
+	 * 
+	 * @param source
+	 *            the source of the node
+	 * @param quant
+	 *            the extended quantifier, which could be one of
+	 *            <code>\sum, \max, \min, \numof, \product</code>.
+	 * @param lo
+	 *            the lower bound argument
+	 * @param hi
+	 *            the upper bound argument
+	 * @param function
+	 *            the function argument
+	 * @return the new extended quantified expression node.
+	 */
+	ExtendedQuantifiedExpressionNode newExtendedQuantifiedExpressionNode(
+			Source source, ExtendedQuantifier quant, ExpressionNode lo,
+			ExpressionNode hi, ExpressionNode function);
 }

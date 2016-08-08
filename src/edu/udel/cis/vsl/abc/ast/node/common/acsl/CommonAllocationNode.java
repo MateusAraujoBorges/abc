@@ -7,14 +7,16 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AllocationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonAllocationNode extends CommonContractNode implements AllocationNode {
+public class CommonAllocationNode extends CommonContractNode
+		implements AllocationNode {
 
 	/**
 	 * True if this is an allocates clause; otherwise, this is a frees clause.
 	 */
 	private boolean isAllocates;
 
-	public CommonAllocationNode(Source source, boolean isAllocates, SequenceNode<ExpressionNode> memoryList) {
+	public CommonAllocationNode(Source source, boolean isAllocates,
+			SequenceNode<ExpressionNode> memoryList) {
 		super(source, memoryList);
 		this.isAllocates = isAllocates;
 	}
@@ -26,7 +28,8 @@ public class CommonAllocationNode extends CommonContractNode implements Allocati
 
 	@Override
 	public AllocationNode copy() {
-		return new CommonAllocationNode(this.getSource(), this.isAllocates, this.memoryList().copy());
+		return new CommonAllocationNode(this.getSource(), this.isAllocates,
+				duplicate(this.memoryList()));
 	}
 
 	@Override

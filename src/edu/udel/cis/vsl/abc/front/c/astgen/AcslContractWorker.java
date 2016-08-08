@@ -29,7 +29,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_INTS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PARENTHESIZED;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PLUS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_SUB;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FALSE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FALSE_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOAT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOATING_CONSTANT;
@@ -73,7 +72,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STRING_LITERAL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TERM_PARENTHESIZED;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TILDE;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TRUE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TRUE_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TYPE_BUILTIN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.TYPE_ID;
@@ -108,6 +106,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsEventNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.DependsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode.ExtendedQuantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
@@ -759,10 +758,8 @@ public class AcslContractWorker {
 			return translateDotOrArrow(source, expressionTree, scope);
 		case OPERATOR:
 			return translateOperatorExpression(source, expressionTree, scope);
-		case TRUE:
 		case TRUE_ACSL:
 			return translateTrue(source);
-		case FALSE:
 		case FALSE_ACSL:
 			return translateFalse(source);
 		case RESULT_ACSL:
@@ -791,6 +788,13 @@ public class AcslContractWorker {
 			return translateQuantifiedExpression(expressionTree, source, scope);
 		case FUNC_CALL:
 			return translateCall(source, expressionTree, scope);
+		case AcslParser.OBJECT_OF:
+			return translateObjectOf(source, expressionTree, scope);
+		case AcslParser.QUANTIFIED_EXT:
+			return translateExtendedQuantification(source,
+					(CommonTree) expressionTree.getChild(0), scope);
+		case AcslParser.LAMBDA_ACSL:
+			return translateLambda(source, expressionTree, scope);
 		case SIZEOF:
 			// return translateSizeOf(source, expressionTree, scope);
 		case CAST:
@@ -800,11 +804,55 @@ public class AcslContractWorker {
 			// scope),
 			// translateExpression(
 			// (CommonTree) expressionTree.getChild(1), scope));
-		case AcslParser.OBJECT_OF:
-			return translateObjectOf(source, expressionTree, scope);
 		default:
 			throw error("Unknown expression kind", expressionTree);
 		} // end switch
+	}
+
+	private ExpressionNode translateLambda(Source source, CommonTree lambda,
+			SimpleScope scope) throws SyntaxException {
+		SimpleScope newScope = new SimpleScope(scope);
+		SequenceNode<VariableDeclarationNode> variableList = this
+				.translateBinders((CommonTree) lambda.getChild(1),
+						this.newSource((CommonTree) lambda.getChild(1)),
+						newScope);
+		ExpressionNode expression=this.translateExpression((CommonTree) lambda.getChild(2), newScope);
+		
+		return nodeFactory.newLambdaNode(source, variableList, expression);
+	}
+
+	private ExpressionNode translateExtendedQuantification(Source source,
+			CommonTree extQuant, SimpleScope scope) throws SyntaxException {
+		int quant = extQuant.getType();
+		ExtendedQuantifier quantifier = null;
+		ExpressionNode lo = this
+				.translateExpression((CommonTree) extQuant.getChild(1), scope),
+				hi = this.translateExpression((CommonTree) extQuant.getChild(2),
+						scope),
+				function = this.translateExpression(
+						(CommonTree) extQuant.getChild(3), scope);
+
+		switch (quant) {
+		case AcslParser.MAX:
+			quantifier = ExtendedQuantifier.MAX;
+			break;
+		case AcslParser.MIN:
+			quantifier = ExtendedQuantifier.MIN;
+			break;
+		case AcslParser.SUM:
+			quantifier = ExtendedQuantifier.SUM;
+			break;
+		case AcslParser.PROD:
+			quantifier = ExtendedQuantifier.PROD;
+			break;
+		case AcslParser.NUMOF:
+			quantifier = ExtendedQuantifier.NUMOF;
+			break;
+		default:
+			throw this.error("unknown kind of extended quantifier ", extQuant);
+		}
+		return nodeFactory.newExtendedQuantifiedExpressionNode(source,
+				quantifier, lo, hi, function);
 	}
 
 	private ExpressionNode translateObjectOf(Source source, CommonTree tree,
@@ -828,6 +876,7 @@ public class AcslContractWorker {
 	private ExpressionNode translateQuantifiedExpression(
 			CommonTree expressionTree, Source source, SimpleScope scope)
 			throws SyntaxException {
+		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree quantifierTree = (CommonTree) expressionTree.getChild(0);
 		CommonTree bindersTree = (CommonTree) expressionTree.getChild(1);
 		CommonTree restrictTree = (CommonTree) expressionTree.getChild(2);
@@ -849,26 +898,10 @@ public class AcslContractWorker {
 		else
 			throw error("Unexpexted quantifier " + quantifierTree.getType(),
 					quantifierTree);
-		binders = translateBinders(bindersTree, source, scope);
+		binders = translateBinders(bindersTree, source, newScope);
 		boundVariableList.add(nodeFactory.newPairNode(source, binders, null));
-		restrict = translateExpression(restrictTree, scope);
-		pred = translateExpression(predTree, scope);
-		// for (VariableDeclarationNode binder : binders) {
-		// QuantifiedExpressionNode quantifiedExprNode = nodeFactory
-		// .newQuantifiedExpressionNode(source, quantifier,
-		// binder.copy(), restrict, pred);
-		//
-		// if (firstQuantifiedExpr) {
-		// result = quantifiedExprNode;
-		// firstQuantifiedExpr = false;
-		// } else
-		// result = nodeFactory.newOperatorNode(source, Operator.LAND,
-		// result, quantifiedExprNode);
-		// }
-		// if (result == null) {
-		// // no binder, just return the predicate:
-		// return pred;
-		// }
+		restrict = translateExpression(restrictTree, newScope);
+		pred = translateExpression(predTree, newScope);
 		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
 				nodeFactory.newSequenceNode(source,
 						"bound variable declaration list", boundVariableList),

@@ -7,8 +7,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonStaticAssertionNode extends CommonASTNode implements
-		StaticAssertionNode {
+public class CommonStaticAssertionNode extends CommonASTNode
+		implements StaticAssertionNode {
 
 	public CommonStaticAssertionNode(Source source, ExpressionNode expression,
 			StringLiteralNode message) {
@@ -32,14 +32,8 @@ public class CommonStaticAssertionNode extends CommonASTNode implements
 
 	@Override
 	public StaticAssertionNode copy() {
-		ExpressionNode expression = getExpression();
-		ExpressionNode expressionCopy = expression == null ? null : expression
-				.copy();
-		StringLiteralNode message = getMessage();
-		StringLiteralNode messageCopy = message == null ? null : message.copy();
-
-		return new CommonStaticAssertionNode(getSource(), expressionCopy,
-				messageCopy);
+		return new CommonStaticAssertionNode(getSource(),
+				duplicate(getExpression()), duplicate(getMessage()));
 	}
 
 	@Override
