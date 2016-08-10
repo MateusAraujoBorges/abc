@@ -331,6 +331,8 @@ scope DeclarationScope;
 	  -> ^(SCOPEOF unaryExpression)
 	| ALIGNOF LPAREN typeName RPAREN
 	  -> ^(ALIGNOF typeName)
+	| VALUE_AT LPAREN assignmentExpression COMMA assignmentExpression RPAREN
+	  -> ^(VALUE_AT assignmentExpression+ RPAREN)
 	| spawnExpression
     	| callsExpression
 	;

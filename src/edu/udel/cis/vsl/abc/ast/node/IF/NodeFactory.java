@@ -79,6 +79,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StatementExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ValueAtNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.WildcardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.LabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
@@ -2632,4 +2633,19 @@ public interface NodeFactory {
 	ExtendedQuantifiedExpressionNode newExtendedQuantifiedExpressionNode(
 			Source source, ExtendedQuantifier quant, ExpressionNode lo,
 			ExpressionNode hi, ExpressionNode function);
+
+	/**
+	 * Creates a new expression node for <code>$value_at</code>, which evaluates
+	 * an expression at a given state (instead of the current state).
+	 * 
+	 * @param source
+	 *            the source of the expression
+	 * @param state
+	 *            the state to be used for evaluation
+	 * @param expression
+	 *            the expression to be evaluated
+	 * @return the new <code>$value_at</code> expression node
+	 */
+	ValueAtNode newValueAtNode(Source source, ExpressionNode state,
+			ExpressionNode expression);
 }

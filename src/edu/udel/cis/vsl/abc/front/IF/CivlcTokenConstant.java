@@ -233,6 +233,7 @@ public interface CivlcTokenConstant {
 	public static final int UniversalCharacterName = CivlCParser.UniversalCharacterName;
 	public static final int UnsignedSuffix = CivlCParser.UnsignedSuffix;
 	public static final int UPDATE = CivlCParser.UPDATE;
+	public static final int VALUE_AT = CivlCParser.VALUE_AT;
 	public static final int VOID = CivlCParser.VOID;
 	public static final int VOLATILE = CivlCParser.VOLATILE;
 	public static final int WHEN = CivlCParser.WHEN;

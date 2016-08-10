@@ -186,6 +186,11 @@ public class CIVLTranslationTest {
 	public void update() throws ABCException, IOException {
 		check("update");
 	}
+	
+	@Test
+	public void valueat() throws ABCException, IOException {
+		check("valueat");
+	}
 
 	@Test(expected = SyntaxException.class)
 	public void lex_test() throws ABCException {

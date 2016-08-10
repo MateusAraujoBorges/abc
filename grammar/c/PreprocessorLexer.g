@@ -135,6 +135,7 @@ SPAWN		:	'$spawn'	;
 SYSTEM      	:   	'$system'	;
 UNIFORM		:	'$uniform'	;
 UPDATE		:	'$update'	;
+VALUE_AT	:	'$value_at'	;
 WHEN		:	'$when'		;
 WITH		:	'$with'		;
 

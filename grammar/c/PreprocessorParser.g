@@ -407,6 +407,7 @@ civl_keyword	:	ABSTRACT
 		|	SYSTEM 
 		|	UNIFORM 
 		|	UPDATE 
+		|	VALUE_AT
 		|	WHEN
 		|	WITH
 		;

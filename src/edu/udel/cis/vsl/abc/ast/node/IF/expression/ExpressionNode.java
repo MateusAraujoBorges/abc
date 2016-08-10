@@ -50,7 +50,10 @@ import edu.udel.cis.vsl.abc.ast.type.IF.Type;
  * 
  */
 public interface ExpressionNode
-		extends InitializerNode, SizeableNode, ForLoopInitializerNode {
+		extends
+			InitializerNode,
+			SizeableNode,
+			ForLoopInitializerNode {
 
 	/**
 	 * An enumerated type used to categorize the different kinds of expression
@@ -186,6 +189,11 @@ public interface ExpressionNode
 		 * {@link UpdateNode}.
 		 */
 		UPDATE,
+		/**
+		 * A CIVL-C <code>$value_at</code> expression. It may be cast to
+		 * {@link ValueAtNode}
+		 */
+		VALUE_AT,
 		/**
 		 * An ACSL-CIVL-C wildcard expression (<code>...</code>); can be cast to
 		 * {@link WildcardNode}.

@@ -86,6 +86,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StatementExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ValueAtNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.WildcardNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.LabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
@@ -196,6 +197,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonSpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStatementExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStatenullNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonStringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonValueAtNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonWildcardNode;
 import edu.udel.cis.vsl.abc.ast.node.common.label.CommonOrdinaryLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.common.label.CommonSwitchLabelNode;
@@ -1288,6 +1290,12 @@ public class CommonNodeFactory implements NodeFactory {
 			ExpressionNode hi, ExpressionNode function) {
 		return new CommonExtendedQuantifiedExpressionNode(source, quant, lo, hi,
 				function);
+	}
+
+	@Override
+	public ValueAtNode newValueAtNode(Source source, ExpressionNode state,
+			ExpressionNode expression) {
+		return new CommonValueAtNode(source, state, expression);
 	}
 
 }

@@ -92,6 +92,7 @@ tokens{
     NULL_ACSL;
     NUMOF;
     OBJECT_OF;
+    OLD;
     OPERATOR;
     P2P;
     PROD;
@@ -704,15 +705,20 @@ unaryExpression
 	  -> ^(OPERATOR unary_op ^(ARGUMENT_LIST castExpression))
 	| (SIZEOF LPAREN type_expr)=> SIZEOF LPAREN type_expr RPAREN
 	  -> ^(SIZEOF_TYPE type_expr)
-	| SIZEOF unaryExpression
-	  -> ^(SIZEOF_EXPR unaryExpression)
+	| SIZEOF LPAREN unaryExpression RPAREN
+	  -> ^(SIZEOF_EXPR unaryExpression RPAREN)
     	| union_key LPAREN argumentExpressionList RPAREN
-          -> ^(UNION_ACSL union_key argumentExpressionList)
+          -> ^(UNION_ACSL union_key argumentExpressionList RPAREN)
     	| inter_key LPAREN argumentExpressionList RPAREN
-          -> ^(INTER inter_key argumentExpressionList)
+          -> ^(INTER inter_key argumentExpressionList RPAREN)
    	| valid_key LPAREN term RPAREN
-       	  -> ^(VALID valid_key term)
+       	  -> ^(VALID valid_key term RPAREN)
        	| extendedQuantification ->^(QUANTIFIED_EXT extendedQuantification)
+       	| object_of_key LPAREN term RPAREN -> ^(OBJECT_OF object_of_key LPAREN term RPAREN)
+    	| mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
+    	| remoteExpression
+    	| old_key LPAREN term RPAREN 
+    	  -> ^(OLD old_key term RPAREN)
 	;
 	
 extendedQuantification
@@ -777,9 +783,6 @@ primaryExpression
        	 	->^(SET_SIMPLE term)
 	| LPAREN term RPAREN 
 	  	-> ^(TERM_PARENTHESIZED term)
-	| object_of_key LPAREN term RPAREN -> ^(OBJECT_OF object_of_key LPAREN term RPAREN)
-    	| mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
-    	| remoteExpression
 	;
 
 
