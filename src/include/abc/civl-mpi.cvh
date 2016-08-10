@@ -239,7 +239,7 @@ void $mpi_unsnapshot(MPI_Comm comm);
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-$state_f size_t $mpi_extentof(MPI_Datatype);
+$state_f $atomic_f  size_t $mpi_extentof(MPI_Datatype);
 
 /* Assigns fresh new symbolic constants to the given mpi region */
 void $mpi_assigns(void * buf, int count, MPI_Datatype datatype);
