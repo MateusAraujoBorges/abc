@@ -1121,10 +1121,10 @@ public class AcslContractWorker {
 		ExpressionNode rangeNode;
 
 		ptrNode = translateExpression(pointer, scope);
-		if (tree.getChildCount() > 2) {
+		if (tree.getChildCount() > 3) {
 			CommonTree range;
 
-			range = (CommonTree) tree.getChild(2);
+			range = (CommonTree) tree.getChild(3);
 			rangeNode = translateExpression(range, scope);
 			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode,
 					rangeNode);

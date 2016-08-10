@@ -1,11 +1,8 @@
 //======================== assert.h ========================
-/*@ depends_on \nothing;
-  @*/
-$atomic_f void assert(_Bool expr) {
-  $assert(expr);
-}
+$atomic_f void assert(_Bool expr);
 //================== abstractFunctions.cvl =================
 $abstract int f(int);
 int main() {
   assert($forall (int i | i > 0) f(i));
 }
+

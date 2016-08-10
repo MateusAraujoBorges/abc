@@ -705,8 +705,8 @@ unaryExpression
 	  -> ^(OPERATOR unary_op ^(ARGUMENT_LIST castExpression))
 	| (SIZEOF LPAREN type_expr)=> SIZEOF LPAREN type_expr RPAREN
 	  -> ^(SIZEOF_TYPE type_expr)
-	| SIZEOF LPAREN unaryExpression RPAREN
-	  -> ^(SIZEOF_EXPR unaryExpression RPAREN)
+	| SIZEOF unaryExpression
+	  -> ^(SIZEOF_EXPR unaryExpression)
     	| union_key LPAREN argumentExpressionList RPAREN
           -> ^(UNION_ACSL union_key argumentExpressionList RPAREN)
     	| inter_key LPAREN argumentExpressionList RPAREN
