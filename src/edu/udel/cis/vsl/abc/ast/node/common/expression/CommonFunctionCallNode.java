@@ -13,7 +13,8 @@ import edu.udel.cis.vsl.abc.ast.node.common.CommonASTNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonFunctionCallNode extends CommonExpressionNode
-		implements FunctionCallNode {
+		implements
+			FunctionCallNode {
 
 	public CommonFunctionCallNode(Source source, ExpressionNode function,
 			SequenceNode<ExpressionNode> contextArguments,
@@ -133,10 +134,9 @@ public class CommonFunctionCallNode extends CommonExpressionNode
 			if (functionEntity instanceof Function) {
 				Function function = (Function) functionEntity;
 
-				isAtomicPureFunction = function.isAbstract()
-						|| ((function.isAtomic() || function.isSystemFunction())
-								&& (function.isPure()
-										|| function.isStateFunction()));
+				isAtomicPureFunction = function.isAbstract() || (function
+						.isSystemFunction()
+						&& (function.isPure() || function.isStateFunction()));
 			}
 			if (isAtomicPureFunction) {
 				for (int i = 0; i < getNumberOfContextArguments(); i++) {
