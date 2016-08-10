@@ -2584,10 +2584,10 @@ public class ExpressionAnalyzer {
 				return;
 			}
 		}
-		throw error(
-				"\\" + name
-						+ " requires that the third argument has an MPI_Datatype type.",
-				type);
+		// throw error(
+		// "\\" + name
+		// + " requires that the third argument has an MPI_Datatype type.",
+		// type);
 	}
 
 	/**

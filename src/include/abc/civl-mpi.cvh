@@ -111,7 +111,11 @@ typedef enum {
 typedef struct $mpi_gcomm $mpi_gcomm; 
 
 /****************************** Helper Functions **********************************/
-int sizeofDatatype(MPI_Datatype);
+/*@ pure;
+  @ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$state_f $atomic_f int sizeofDatatype(MPI_Datatype);
 
 #ifdef _MPI_CONTRACT
 typedef struct _mpi_data_size $mpi_data_size_t;
