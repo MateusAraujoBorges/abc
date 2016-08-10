@@ -1259,6 +1259,10 @@ public class ExpressionAnalyzer {
 			case VALID :
 				processValidExpression(node);
 				break;
+			case OLD :
+				processExpression(node.getArgument(0));
+				node.setInitialType(node.getArgument(0).getConvertedType());
+				break;
 			default :
 				throw new RuntimeException("Unknown operator: " + operator);
 		}

@@ -227,6 +227,10 @@ public interface OperatorNode extends ExpressionNode {
 		 */
 		NOT,
 		/**
+		 * The ACSL <code>\old</code> operator.
+		 */
+		OLD,
+		/**
 		 * The binary addition operator <code>+</code>, as in <code>e+f</code>.
 		 * If both arguments are numeric, the result is the numeric sum; if one
 		 * argument is a pointer and the other an integer, the result is a

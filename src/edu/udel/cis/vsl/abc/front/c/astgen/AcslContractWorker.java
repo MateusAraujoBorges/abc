@@ -230,14 +230,14 @@ public class AcslContractWorker {
 		CommonTree contractTree = parseTree.getRoot();
 
 		switch (contractTree.getType()) {
-		case AcslParser.FUNC_CONTRACT:
-			return translateFunctionContractBlock(
-					(CommonTree) contractTree.getChild(0), scope);
-		case AcslParser.LOOP_CONTRACT:
-			return translateLoopContractBlock(
-					(CommonTree) contractTree.getChild(0), scope);
-		default:
-			throw this.error("unknown kind of contract", contractTree);
+			case AcslParser.FUNC_CONTRACT :
+				return translateFunctionContractBlock(
+						(CommonTree) contractTree.getChild(0), scope);
+			case AcslParser.LOOP_CONTRACT :
+				return translateLoopContractBlock(
+						(CommonTree) contractTree.getChild(0), scope);
+			default :
+				throw this.error("unknown kind of contract", contractTree);
 		}
 	}
 
@@ -264,14 +264,15 @@ public class AcslContractWorker {
 			int loopItemKind = loopIterm.getType();
 
 			switch (loopItemKind) {
-			case AcslParser.LOOP_CLAUSE:
-				result.add(this.translateLoopClause(
-						(CommonTree) loopIterm.getChild(0), scope));
-				break;
-			case AcslParser.LOOP_BEHAVIOR:
-			case AcslParser.LOOP_VARIANT:
-			default:
-				throw this.error("unknown kind of loop contract", loopIterm);
+				case AcslParser.LOOP_CLAUSE :
+					result.add(this.translateLoopClause(
+							(CommonTree) loopIterm.getChild(0), scope));
+					break;
+				case AcslParser.LOOP_BEHAVIOR :
+				case AcslParser.LOOP_VARIANT :
+				default :
+					throw this.error("unknown kind of loop contract",
+							loopIterm);
 			}
 		}
 		return result;
@@ -296,18 +297,19 @@ public class AcslContractWorker {
 		Source source = this.newSource(tree);
 
 		switch (loopClauseKind) {
-		case AcslParser.LOOP_INVARIANT: {
-			CommonTree exprTree = (CommonTree) tree.getChild(0);
-			ExpressionNode expression = this.translateExpression(exprTree,
-					scope);
+			case AcslParser.LOOP_INVARIANT : {
+				CommonTree exprTree = (CommonTree) tree.getChild(0);
+				ExpressionNode expression = this.translateExpression(exprTree,
+						scope);
 
-			return this.nodeFactory.newInvariantNode(source, true, expression);
-		}
-		case AcslParser.LOOP_ASSIGNS:
-		case AcslParser.LOOP_ALLOC:
-		case AcslParser.LOOP_FREE:
-		default:
-			throw this.error("unkown kind of loop contract clause", tree);
+				return this.nodeFactory.newInvariantNode(source, true,
+						expression);
+			}
+			case AcslParser.LOOP_ASSIGNS :
+			case AcslParser.LOOP_ALLOC :
+			case AcslParser.LOOP_FREE :
+			default :
+				throw this.error("unkown kind of loop contract clause", tree);
 		}
 	}
 
@@ -334,24 +336,24 @@ public class AcslContractWorker {
 			int childKind = child.getType();
 
 			switch (childKind) {
-			case AcslParser.CLAUSE_NORMAL:
-				result.add(this.translateContractClause(
-						(CommonTree) child.getChild(0), scope));
-				break;
-			case AcslParser.CLAUSE_BEHAVIOR:
-				result.add(this.translateBehavior(
-						(CommonTree) child.getChild(0), scope));
-				break;
-			case AcslParser.CLAUSE_COMPLETE:
-				result.add(this.translateCompleteness(
-						(CommonTree) child.getChild(0), scope));
-				break;
-			case AcslParser.MPI_COLLECTIVE:
-				result.add(this.translateMPICollectiveBlock(
-						this.parseTree.source(child), child, scope));
-				break;
-			default:
-				throw this.error("Unknown contract kind", tree);
+				case AcslParser.CLAUSE_NORMAL :
+					result.add(this.translateContractClause(
+							(CommonTree) child.getChild(0), scope));
+					break;
+				case AcslParser.CLAUSE_BEHAVIOR :
+					result.add(this.translateBehavior(
+							(CommonTree) child.getChild(0), scope));
+					break;
+				case AcslParser.CLAUSE_COMPLETE :
+					result.add(this.translateCompleteness(
+							(CommonTree) child.getChild(0), scope));
+					break;
+				case AcslParser.MPI_COLLECTIVE :
+					result.add(this.translateMPICollectiveBlock(
+							this.parseTree.source(child), child, scope));
+					break;
+				default :
+					throw this.error("Unknown contract kind", tree);
 			}
 		}
 		return result;
@@ -379,13 +381,13 @@ public class AcslContractWorker {
 		Source source = this.parseTree.source(tree);
 
 		switch (kind) {
-		case AcslParser.BEHAVIOR_COMPLETE:
-			isComplete = true;
-			break;
-		case AcslParser.BEHAVIOR_DISJOINT:
-			break;
-		default:
-			throw this.error("Unknown kind of completeness clause", tree);
+			case AcslParser.BEHAVIOR_COMPLETE :
+				isComplete = true;
+				break;
+			case AcslParser.BEHAVIOR_DISJOINT :
+				break;
+			default :
+				throw this.error("Unknown kind of completeness clause", tree);
 		}
 		return this.nodeFactory.newCompletenessNode(source, isComplete, idList);
 	}
@@ -480,28 +482,28 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 
 		switch (kind) {
-		case AcslParser.ALLOC:
-			return this.translateAllocation(tree, scope, true);
-		case AcslParser.FREES:
-			return this.translateAllocation(tree, scope, false);
-		case AcslParser.REQUIRES_ACSL:
-			return this.translateRequires(tree, scope);
-		case AcslParser.ENSURES_ACSL:
-			return this.translateEnsures(tree, scope);
-		case AcslParser.ASSIGNS_ACSL:
-			return this.translateReadsOrAssigns(tree, scope, false);
-		case AcslParser.ASSUMES_ACSL:
-			return this.translateAssumes(tree, scope);
-		case AcslParser.READS_ACSL:
-			return this.translateReadsOrAssigns(tree, scope, true);
-		case AcslParser.DEPENDSON:
-			return this.translateDepends(tree, scope);
-		case AcslParser.EXECUTES_WHEN:
-			return this.translateGuards(tree, scope);
-		case AcslParser.WAITSFOR:
-			return this.translateWaitsfor(tree, scope);
-		default:
-			throw this.error("Unknown contract clause kind", tree);
+			case AcslParser.ALLOC :
+				return this.translateAllocation(tree, scope, true);
+			case AcslParser.FREES :
+				return this.translateAllocation(tree, scope, false);
+			case AcslParser.REQUIRES_ACSL :
+				return this.translateRequires(tree, scope);
+			case AcslParser.ENSURES_ACSL :
+				return this.translateEnsures(tree, scope);
+			case AcslParser.ASSIGNS_ACSL :
+				return this.translateReadsOrAssigns(tree, scope, false);
+			case AcslParser.ASSUMES_ACSL :
+				return this.translateAssumes(tree, scope);
+			case AcslParser.READS_ACSL :
+				return this.translateReadsOrAssigns(tree, scope, true);
+			case AcslParser.DEPENDSON :
+				return this.translateDepends(tree, scope);
+			case AcslParser.EXECUTES_WHEN :
+				return this.translateGuards(tree, scope);
+			case AcslParser.WAITSFOR :
+				return this.translateWaitsfor(tree, scope);
+			default :
+				throw this.error("Unknown contract clause kind", tree);
 		}
 	}
 
@@ -620,21 +622,21 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 
 		switch (kind) {
-		case EVENT_PLUS:
-			EventOperator operator = EventOperator.UNION;
-			return translateOperatorEvent(tree, operator, scope);
-		case EVENT_SUB:
-			operator = EventOperator.DIFFERENCE;
-			return translateOperatorEvent(tree, operator, scope);
-		case EVENT_INTS:
-			operator = EventOperator.INTERSECT;
-			return translateOperatorEvent(tree, operator, scope);
-		case EVENT_BASE:
-			return translateDependsEventBase((CommonTree) tree.getChild(0),
-					scope);
-		default:
-			throw this.error("unknown kind of operator for depends events",
-					tree);
+			case EVENT_PLUS :
+				EventOperator operator = EventOperator.UNION;
+				return translateOperatorEvent(tree, operator, scope);
+			case EVENT_SUB :
+				operator = EventOperator.DIFFERENCE;
+				return translateOperatorEvent(tree, operator, scope);
+			case EVENT_INTS :
+				operator = EventOperator.INTERSECT;
+				return translateOperatorEvent(tree, operator, scope);
+			case EVENT_BASE :
+				return translateDependsEventBase((CommonTree) tree.getChild(0),
+						scope);
+			default :
+				throw this.error("unknown kind of operator for depends events",
+						tree);
 		}
 	}
 
@@ -655,47 +657,52 @@ public class AcslContractWorker {
 		Source source = this.parseTree.source(tree);
 
 		switch (kind) {
-		case READ_ACSL: {
-			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
-					(CommonTree) tree.getChild(1), scope);
+			case READ_ACSL : {
+				SequenceNode<ExpressionNode> memList = this
+						.translateArgumentList((CommonTree) tree.getChild(1),
+								scope);
 
-			return nodeFactory.newMemoryEventNode(source,
-					MemoryEventNodeKind.READ, memList);
-		}
-		case WRITE_ACSL: {
-			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
-					(CommonTree) tree.getChild(1), scope);
+				return nodeFactory.newMemoryEventNode(source,
+						MemoryEventNodeKind.READ, memList);
+			}
+			case WRITE_ACSL : {
+				SequenceNode<ExpressionNode> memList = this
+						.translateArgumentList((CommonTree) tree.getChild(1),
+								scope);
 
-			return nodeFactory.newMemoryEventNode(source,
-					MemoryEventNodeKind.WRITE, memList);
-		}
-		case ACCESS_ACSL: {
-			SequenceNode<ExpressionNode> memList = this.translateArgumentList(
-					(CommonTree) tree.getChild(1), scope);
+				return nodeFactory.newMemoryEventNode(source,
+						MemoryEventNodeKind.WRITE, memList);
+			}
+			case ACCESS_ACSL : {
+				SequenceNode<ExpressionNode> memList = this
+						.translateArgumentList((CommonTree) tree.getChild(1),
+								scope);
 
-			return nodeFactory.newMemoryEventNode(source,
-					MemoryEventNodeKind.REACH, memList);
+				return nodeFactory.newMemoryEventNode(source,
+						MemoryEventNodeKind.REACH, memList);
 
-		}
-		case CALL_ACSL: {
-			IdentifierNode function = this
-					.translateIdentifier((CommonTree) tree.getChild(1));
-			SequenceNode<ExpressionNode> args = this.translateArgumentList(
-					(CommonTree) tree.getChild(1), scope);
+			}
+			case CALL_ACSL : {
+				IdentifierNode function = this
+						.translateIdentifier((CommonTree) tree.getChild(1));
+				SequenceNode<ExpressionNode> args = this.translateArgumentList(
+						(CommonTree) tree.getChild(1), scope);
 
-			return nodeFactory.newCallEventNode(source,
-					this.nodeFactory.newIdentifierExpressionNode(
-							function.getSource(), function),
-					args);
-		}
-		case NOTHING:
-			return nodeFactory.newNoactNode(source);
-		case ANYACT:
-			return nodeFactory.newAnyactNode(source);
-		case EVENT_PARENTHESIZED:
-			return translateDependsEvent((CommonTree) tree.getChild(0), scope);
-		default:
-			throw this.error("unknown kind of nodes for depends events", tree);
+				return nodeFactory.newCallEventNode(source,
+						this.nodeFactory.newIdentifierExpressionNode(
+								function.getSource(), function),
+						args);
+			}
+			case NOTHING :
+				return nodeFactory.newNoactNode(source);
+			case ANYACT :
+				return nodeFactory.newAnyactNode(source);
+			case EVENT_PARENTHESIZED :
+				return translateDependsEvent((CommonTree) tree.getChild(0),
+						scope);
+			default :
+				throw this.error("unknown kind of nodes for depends events",
+						tree);
 		}
 	}
 
@@ -733,80 +740,94 @@ public class AcslContractWorker {
 		int kind = expressionTree.getType();
 
 		switch (kind) {
-		case INTEGER_CONSTANT:
-			return translateIntegerConstant(source, expressionTree);
-		case FLOATING_CONSTANT:
-			return translateFloatingConstant(source, expressionTree);
-		case CHARACTER_CONSTANT:
-			return translateCharacterConstant(source, expressionTree);
-		case STRING_LITERAL:
-			return translateStringLiteral(source, expressionTree);
-		case IDENTIFIER: {
-			IdentifierNode identifier = translateIdentifier(expressionTree);
-			ExpressionNode enumerationConsant = translateEnumerationConstant(
-					identifier, scope);
+			case INTEGER_CONSTANT :
+				return translateIntegerConstant(source, expressionTree);
+			case FLOATING_CONSTANT :
+				return translateFloatingConstant(source, expressionTree);
+			case CHARACTER_CONSTANT :
+				return translateCharacterConstant(source, expressionTree);
+			case STRING_LITERAL :
+				return translateStringLiteral(source, expressionTree);
+			case IDENTIFIER : {
+				IdentifierNode identifier = translateIdentifier(expressionTree);
+				ExpressionNode enumerationConsant = translateEnumerationConstant(
+						identifier, scope);
 
-			return enumerationConsant != null ? enumerationConsant
-					: nodeFactory.newIdentifierExpressionNode(source,
-							identifier);
-		}
-		case TERM_PARENTHESIZED:
-			return translateExpression((CommonTree) expressionTree.getChild(0),
-					scope);
-		case DOT:
-		case ARROW:
-			return translateDotOrArrow(source, expressionTree, scope);
-		case OPERATOR:
-			return translateOperatorExpression(source, expressionTree, scope);
-		case TRUE_ACSL:
-			return translateTrue(source);
-		case FALSE_ACSL:
-			return translateFalse(source);
-		case RESULT_ACSL:
-			return nodeFactory.newResultNode(source);
-		case SELF:
-			return nodeFactory.newSelfNode(source);
-		case DOTDOT:
-			return translateRegularRange(source, expressionTree, scope);
-		case WRITE_ACSL:
-			return translateWriteEvent(source, expressionTree, scope);
-		case NOTHING:
-			return this.nodeFactory.newNothingNode(source);
-		case ELLIPSIS:
-			return this.nodeFactory.newWildcardNode(source);
-		case MPI_CONSTANT:
-			return translateMPIConstantNode(expressionTree, source);
-		case MPI_EXPRESSION:
-			return translateMPIExpressionNode(expressionTree, source, scope);
-		case VALID:
-			return this.translateValidNode(expressionTree, source, scope);
-		case SET_BINDERS:
-			return this.translateSetBinders(expressionTree, source, scope);
-		case REMOTE_ACCESS:
-			return translateRemoteExpression(expressionTree, source, scope);
-		case QUANTIFIED:
-			return translateQuantifiedExpression(expressionTree, source, scope);
-		case FUNC_CALL:
-			return translateCall(source, expressionTree, scope);
-		case AcslParser.OBJECT_OF:
-			return translateObjectOf(source, expressionTree, scope);
-		case AcslParser.QUANTIFIED_EXT:
-			return translateExtendedQuantification(source,
-					(CommonTree) expressionTree.getChild(0), scope);
-		case AcslParser.LAMBDA_ACSL:
-			return translateLambda(source, expressionTree, scope);
-		case SIZEOF:
-			// return translateSizeOf(source, expressionTree, scope);
-		case CAST:
-			// return nodeFactory.newCastNode(
-			// source,
-			// translateTypeName((CommonTree) expressionTree.getChild(0),
-			// scope),
-			// translateExpression(
-			// (CommonTree) expressionTree.getChild(1), scope));
-		default:
-			throw error("Unknown expression kind", expressionTree);
+				return enumerationConsant != null
+						? enumerationConsant
+						: nodeFactory.newIdentifierExpressionNode(source,
+								identifier);
+			}
+			case TERM_PARENTHESIZED :
+				return translateExpression(
+						(CommonTree) expressionTree.getChild(0), scope);
+			case DOT :
+			case ARROW :
+				return translateDotOrArrow(source, expressionTree, scope);
+			case OPERATOR :
+				return translateOperatorExpression(source, expressionTree,
+						scope);
+			case TRUE_ACSL :
+				return translateTrue(source);
+			case FALSE_ACSL :
+				return translateFalse(source);
+			case RESULT_ACSL :
+				return nodeFactory.newResultNode(source);
+			case SELF :
+				return nodeFactory.newSelfNode(source);
+			case DOTDOT :
+				return translateRegularRange(source, expressionTree, scope);
+			case WRITE_ACSL :
+				return translateWriteEvent(source, expressionTree, scope);
+			case NOTHING :
+				return this.nodeFactory.newNothingNode(source);
+			case ELLIPSIS :
+				return this.nodeFactory.newWildcardNode(source);
+			case MPI_CONSTANT :
+				return translateMPIConstantNode(expressionTree, source);
+			case MPI_EXPRESSION :
+				return translateMPIExpressionNode(expressionTree, source,
+						scope);
+			case VALID :
+				return this.translateValidNode(expressionTree, source, scope);
+			case SET_BINDERS :
+				return this.translateSetBinders(expressionTree, source, scope);
+			case REMOTE_ACCESS :
+				return translateRemoteExpression(expressionTree, source, scope);
+			case QUANTIFIED :
+				return translateQuantifiedExpression(expressionTree, source,
+						scope);
+			case FUNC_CALL :
+				return translateCall(source, expressionTree, scope);
+			case AcslParser.OBJECT_OF :
+				return translateObjectOf(source, expressionTree, scope);
+			case AcslParser.QUANTIFIED_EXT :
+				return translateExtendedQuantification(source,
+						(CommonTree) expressionTree.getChild(0), scope);
+			case AcslParser.LAMBDA_ACSL :
+				return translateLambda(source, expressionTree, scope);
+			case AcslParser.OLD :
+				return translateOld(source, expressionTree, scope);
+			case SIZEOF :
+				// return translateSizeOf(source, expressionTree, scope);
+			case CAST :
+				// return nodeFactory.newCastNode(
+				// source,
+				// translateTypeName((CommonTree) expressionTree.getChild(0),
+				// scope),
+				// translateExpression(
+				// (CommonTree) expressionTree.getChild(1), scope));
+			default :
+				throw error("Unknown expression kind", expressionTree);
 		} // end switch
+	}
+
+	private ExpressionNode translateOld(Source source, CommonTree old,
+			SimpleScope scope) throws SyntaxException {
+		ExpressionNode expr = this
+				.translateExpression((CommonTree) old.getChild(1), scope);
+
+		return nodeFactory.newOperatorNode(source, Operator.OLD, expr);
 	}
 
 	private ExpressionNode translateLambda(Source source, CommonTree lambda,
@@ -816,8 +837,9 @@ public class AcslContractWorker {
 				.translateBinders((CommonTree) lambda.getChild(1),
 						this.newSource((CommonTree) lambda.getChild(1)),
 						newScope);
-		ExpressionNode expression=this.translateExpression((CommonTree) lambda.getChild(2), newScope);
-		
+		ExpressionNode expression = this
+				.translateExpression((CommonTree) lambda.getChild(2), newScope);
+
 		return nodeFactory.newLambdaNode(source, variableList, expression);
 	}
 
@@ -833,23 +855,24 @@ public class AcslContractWorker {
 						(CommonTree) extQuant.getChild(3), scope);
 
 		switch (quant) {
-		case AcslParser.MAX:
-			quantifier = ExtendedQuantifier.MAX;
-			break;
-		case AcslParser.MIN:
-			quantifier = ExtendedQuantifier.MIN;
-			break;
-		case AcslParser.SUM:
-			quantifier = ExtendedQuantifier.SUM;
-			break;
-		case AcslParser.PROD:
-			quantifier = ExtendedQuantifier.PROD;
-			break;
-		case AcslParser.NUMOF:
-			quantifier = ExtendedQuantifier.NUMOF;
-			break;
-		default:
-			throw this.error("unknown kind of extended quantifier ", extQuant);
+			case AcslParser.MAX :
+				quantifier = ExtendedQuantifier.MAX;
+				break;
+			case AcslParser.MIN :
+				quantifier = ExtendedQuantifier.MIN;
+				break;
+			case AcslParser.SUM :
+				quantifier = ExtendedQuantifier.SUM;
+				break;
+			case AcslParser.PROD :
+				quantifier = ExtendedQuantifier.PROD;
+				break;
+			case AcslParser.NUMOF :
+				quantifier = ExtendedQuantifier.NUMOF;
+				break;
+			default :
+				throw this.error("unknown kind of extended quantifier ",
+						extQuant);
 		}
 		return nodeFactory.newExtendedQuantifiedExpressionNode(source,
 				quantifier, lo, hi, function);
@@ -926,7 +949,8 @@ public class AcslContractWorker {
 		CommonTree termTree = (CommonTree) tree.getChild(0);
 		CommonTree bindersTree = (CommonTree) tree.getChild(1);
 		CommonTree predicateTree = tree.getChildCount() > 2
-				? (CommonTree) tree.getChild(2) : null;
+				? (CommonTree) tree.getChild(2)
+				: null;
 		ExpressionNode term = this.translateExpression(termTree, newScope),
 				predicate = null;
 		SequenceNode<VariableDeclarationNode> binders = this
@@ -985,13 +1009,14 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 
 		switch (kind) {
-		case LOGIC_TYPE:
-			return this.translateLogicType((CommonTree) tree.getChild(0),
-					scope);
-		case C_TYPE:
-			return this.translateCType((CommonTree) tree.getChild(0), scope);
-		default:
-			throw this.error("unkown kind of tyep expression", tree);
+			case LOGIC_TYPE :
+				return this.translateLogicType((CommonTree) tree.getChild(0),
+						scope);
+			case C_TYPE :
+				return this.translateCType((CommonTree) tree.getChild(0),
+						scope);
+			default :
+				throw this.error("unkown kind of tyep expression", tree);
 		}
 	}
 
@@ -1001,27 +1026,28 @@ public class AcslContractWorker {
 		Source source = this.newSource(tree);
 
 		switch (kind) {
-		case CHAR:
-			return this.nodeFactory.newBasicTypeNode(source,
-					BasicTypeKind.CHAR);
-		case DOUBLE:
-			return this.nodeFactory.newBasicTypeNode(source,
-					BasicTypeKind.DOUBLE);
-		case FLOAT:
-			return this.nodeFactory.newBasicTypeNode(source,
-					BasicTypeKind.FLOAT);
-		case INT:
-			return this.nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
-		case LONG:
-			return this.nodeFactory.newBasicTypeNode(source,
-					BasicTypeKind.LONG);
-		case SHORT:
-			return this.nodeFactory.newBasicTypeNode(source,
-					BasicTypeKind.SHORT);
-		case VOID:
-			return this.nodeFactory.newVoidTypeNode(source);
-		default:
-			throw this.error("unknown C type", tree);
+			case CHAR :
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.CHAR);
+			case DOUBLE :
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.DOUBLE);
+			case FLOAT :
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.FLOAT);
+			case INT :
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.INT);
+			case LONG :
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.LONG);
+			case SHORT :
+				return this.nodeFactory.newBasicTypeNode(source,
+						BasicTypeKind.SHORT);
+			case VOID :
+				return this.nodeFactory.newVoidTypeNode(source);
+			default :
+				throw this.error("unknown C type", tree);
 		}
 	}
 
@@ -1031,29 +1057,29 @@ public class AcslContractWorker {
 		Source source = this.newSource(tree);
 
 		switch (kind) {
-		case TYPE_BUILTIN: {
-			int typeKind = tree.getChild(0).getType();
+			case TYPE_BUILTIN : {
+				int typeKind = tree.getChild(0).getType();
 
-			switch (typeKind) {
-			case BOOLEAN:
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.BOOL);
-			case INTEGER:
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.INT);
-			case REAL_ACSL:
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.REAL);
-			default:
-				throw this.error("unknown built-in logic type", tree);
+				switch (typeKind) {
+					case BOOLEAN :
+						return this.nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.BOOL);
+					case INTEGER :
+						return this.nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.INT);
+					case REAL_ACSL :
+						return this.nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.REAL);
+					default :
+						throw this.error("unknown built-in logic type", tree);
+				}
 			}
-		}
-		case TYPE_ID:
-			return this.nodeFactory.newTypedefNameNode(
-					this.translateIdentifier((CommonTree) tree.getChild(0)),
-					null);
-		default:
-			throw this.error("unknown kind of logic type", tree);
+			case TYPE_ID :
+				return this.nodeFactory.newTypedefNameNode(
+						this.translateIdentifier((CommonTree) tree.getChild(0)),
+						null);
+			default :
+				throw this.error("unknown kind of logic type", tree);
 		}
 	}
 
@@ -1063,33 +1089,38 @@ public class AcslContractWorker {
 		Source source = this.newSource(tree);
 
 		switch (kind) {
-		case VAR_ID_STAR: {
-			VariableDeclarationNode baseVar = this.translateVariableIdentBase(
-					(CommonTree) tree.getChild(0), source, scope, baseType);
-			TypeNode baseVarType, type;
+			case VAR_ID_STAR : {
+				VariableDeclarationNode baseVar = this
+						.translateVariableIdentBase(
+								(CommonTree) tree.getChild(0), source, scope,
+								baseType);
+				TypeNode baseVarType, type;
 
-			baseVarType = baseVar.getTypeNode();
-			baseVarType.remove();
-			type = this.nodeFactory.newPointerTypeNode(source, baseVarType);
-			baseVar.setTypeNode(type);
-			return baseVar;
-		}
-		case VAR_ID_SQUARE: {
-			VariableDeclarationNode baseVar = this.translateVariableIdentBase(
-					(CommonTree) tree.getChild(0), source, scope, baseType);
-			TypeNode baseVarType, type;
+				baseVarType = baseVar.getTypeNode();
+				baseVarType.remove();
+				type = this.nodeFactory.newPointerTypeNode(source, baseVarType);
+				baseVar.setTypeNode(type);
+				return baseVar;
+			}
+			case VAR_ID_SQUARE : {
+				VariableDeclarationNode baseVar = this
+						.translateVariableIdentBase(
+								(CommonTree) tree.getChild(0), source, scope,
+								baseType);
+				TypeNode baseVarType, type;
 
-			baseVarType = baseVar.getTypeNode();
-			baseVarType.remove();
-			type = this.nodeFactory.newArrayTypeNode(source, baseVarType, null);
-			baseVar.setTypeNode(type);
-			return baseVar;
-		}
-		case VAR_ID:
-			return this.translateVariableIdentBase(
-					(CommonTree) tree.getChild(0), source, scope, baseType);
-		default:
-			throw this.error("unknown kind of variable identity", tree);
+				baseVarType = baseVar.getTypeNode();
+				baseVarType.remove();
+				type = this.nodeFactory.newArrayTypeNode(source, baseVarType,
+						null);
+				baseVar.setTypeNode(type);
+				return baseVar;
+			}
+			case VAR_ID :
+				return this.translateVariableIdentBase(
+						(CommonTree) tree.getChild(0), source, scope, baseType);
+			default :
+				throw this.error("unknown kind of variable identity", tree);
 		}
 	}
 
@@ -1099,17 +1130,18 @@ public class AcslContractWorker {
 		int kind = tree.getType();
 
 		switch (kind) {
-		case IDENTIFIER: {
-			IdentifierNode identifier = this.translateIdentifier(tree);
+			case IDENTIFIER : {
+				IdentifierNode identifier = this.translateIdentifier(tree);
 
-			return this.nodeFactory.newVariableDeclarationNode(
-					identifier.getSource(), identifier, baseType);
-		}
-		case VAR_ID_BASE:
-			return this.translateVariableIdent((CommonTree) tree.getChild(0),
-					scope, baseType);
-		default:
-			throw this.error("unknown kind of variable identity base", tree);
+				return this.nodeFactory.newVariableDeclarationNode(
+						identifier.getSource(), identifier, baseType);
+			}
+			case VAR_ID_BASE :
+				return this.translateVariableIdent(
+						(CommonTree) tree.getChild(0), scope, baseType);
+			default :
+				throw this.error("unknown kind of variable identity base",
+						tree);
 		}
 	}
 
@@ -1272,99 +1304,99 @@ public class AcslContractWorker {
 			arguments.add(argument);
 		}
 		switch (operatorKind) {
-		case AMPERSAND:
-			operator = numArgs == 1 ? Operator.ADDRESSOF : Operator.BITAND;
-			break;
-		case ASSIGN:
-			operator = Operator.ASSIGN;
-			break;
-		case TILDE:
-			operator = Operator.BITCOMPLEMENT;
-			break;
-		case BITOR:
-			operator = Operator.BITOR;
-			break;
-		case BITXOR:
-			operator = Operator.BITXOR;
-			break;
-		case COMMA:
-			operator = Operator.COMMA;
-			break;
-		case QMARK:
-			operator = Operator.CONDITIONAL;
-			break;
-		case STAR:
-			operator = numArgs == 1 ? Operator.DEREFERENCE : Operator.TIMES;
-			break;
-		case DIV:
-			operator = Operator.DIV;
-			break;
-		case EQUALS:
-			operator = Operator.EQUALS;
-			break;
-		case GT:
-			operator = Operator.GT;
-			break;
-		case GTE:
-			operator = Operator.GTE;
-			break;
-		case HASH:
-			operator = Operator.HASH;
-			break;
-		case AND:
-			operator = Operator.LAND;
-			break;
-		case OR:
-			operator = Operator.LOR;
-			break;
-		case IMPLIES_ACSL:
-			operator = Operator.IMPLIES;
-			break;
-		case LT:
-			operator = Operator.LT;
-			break;
-		case LTE:
-			operator = Operator.LTE;
-			break;
-		case SUB:
-			operator = numArgs == 1 ? Operator.UNARYMINUS : Operator.MINUS;
-			break;
-		case MOD:
-			operator = Operator.MOD;
-			break;
-		case NEQ:
-			operator = Operator.NEQ;
-			break;
-		case NOT:
-			operator = Operator.NOT;
-			break;
-		case PLUS:
-			operator = numArgs == 1 ? Operator.UNARYPLUS : Operator.PLUS;
-			break;
-		case SHIFTLEFT:
-			operator = Operator.SHIFTLEFT;
-			break;
-		case SHIFTRIGHT:
-			operator = Operator.SHIFTRIGHT;
-			break;
-		case INDEX:
-			operator = Operator.SUBSCRIPT;
-			break;
-		case XOR_ACSL:
-			operator = Operator.LXOR;
-			break;
-		case BEQUIV_ACSL:
-			operator = Operator.BITEQUIV;
-			break;
-		case BIMPLIES_ACSL:
-			operator = Operator.BITIMPLIES;
-			break;
-		case EQUIV_ACSL:
-			operator = Operator.LEQ;
-			break;
-		default:
-			throw error("Unknown operator : " + operatorTree.getText(),
-					operatorTree);
+			case AMPERSAND :
+				operator = numArgs == 1 ? Operator.ADDRESSOF : Operator.BITAND;
+				break;
+			case ASSIGN :
+				operator = Operator.ASSIGN;
+				break;
+			case TILDE :
+				operator = Operator.BITCOMPLEMENT;
+				break;
+			case BITOR :
+				operator = Operator.BITOR;
+				break;
+			case BITXOR :
+				operator = Operator.BITXOR;
+				break;
+			case COMMA :
+				operator = Operator.COMMA;
+				break;
+			case QMARK :
+				operator = Operator.CONDITIONAL;
+				break;
+			case STAR :
+				operator = numArgs == 1 ? Operator.DEREFERENCE : Operator.TIMES;
+				break;
+			case DIV :
+				operator = Operator.DIV;
+				break;
+			case EQUALS :
+				operator = Operator.EQUALS;
+				break;
+			case GT :
+				operator = Operator.GT;
+				break;
+			case GTE :
+				operator = Operator.GTE;
+				break;
+			case HASH :
+				operator = Operator.HASH;
+				break;
+			case AND :
+				operator = Operator.LAND;
+				break;
+			case OR :
+				operator = Operator.LOR;
+				break;
+			case IMPLIES_ACSL :
+				operator = Operator.IMPLIES;
+				break;
+			case LT :
+				operator = Operator.LT;
+				break;
+			case LTE :
+				operator = Operator.LTE;
+				break;
+			case SUB :
+				operator = numArgs == 1 ? Operator.UNARYMINUS : Operator.MINUS;
+				break;
+			case MOD :
+				operator = Operator.MOD;
+				break;
+			case NEQ :
+				operator = Operator.NEQ;
+				break;
+			case NOT :
+				operator = Operator.NOT;
+				break;
+			case PLUS :
+				operator = numArgs == 1 ? Operator.UNARYPLUS : Operator.PLUS;
+				break;
+			case SHIFTLEFT :
+				operator = Operator.SHIFTLEFT;
+				break;
+			case SHIFTRIGHT :
+				operator = Operator.SHIFTRIGHT;
+				break;
+			case INDEX :
+				operator = Operator.SUBSCRIPT;
+				break;
+			case XOR_ACSL :
+				operator = Operator.LXOR;
+				break;
+			case BEQUIV_ACSL :
+				operator = Operator.BITEQUIV;
+				break;
+			case BIMPLIES_ACSL :
+				operator = Operator.BITIMPLIES;
+				break;
+			case EQUIV_ACSL :
+				operator = Operator.LEQ;
+				break;
+			default :
+				throw error("Unknown operator : " + operatorTree.getText(),
+						operatorTree);
 		}
 		return nodeFactory.newOperatorNode(source, operator, arguments);
 	}
@@ -1419,17 +1451,17 @@ public class AcslContractWorker {
 		mpiCommNode = translateExpression(mpiComm, scope);
 		// The mpi collective kind can only be :COL, P2P or BOTH
 		switch (kind.getType()) {
-		case AcslParser.COL:
-			colKind = MPICollectiveKind.COL;
-			break;
-		case AcslParser.P2P:
-			colKind = MPICollectiveKind.P2P;
-			break;
-		case AcslParser.BOTH:
-			colKind = MPICollectiveKind.BOTH;
-			break;
-		default:
-			throw error("Unknown MPI collective kind", kind);
+			case AcslParser.COL :
+				colKind = MPICollectiveKind.COL;
+				break;
+			case AcslParser.P2P :
+				colKind = MPICollectiveKind.P2P;
+				break;
+			case AcslParser.BOTH :
+				colKind = MPICollectiveKind.BOTH;
+				break;
+			default :
+				throw error("Unknown MPI collective kind", kind);
 		}
 		bodyComponents.addAll(translateFunctionContractBlock(body, scope));
 		bodyNode = nodeFactory.newSequenceNode(source, "mpi_collective body",
@@ -1444,16 +1476,16 @@ public class AcslContractWorker {
 		MPIContractConstantNode result;
 
 		switch (constantTree.getType()) {
-		case AcslParser.MPI_COMM_RANK:
-			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK,
-					MPIConstantKind.MPI_COMM_RANK, ConstantKind.INT);
-			break;
-		case AcslParser.MPI_COMM_SIZE:
-			result = nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE,
-					MPIConstantKind.MPI_COMM_SIZE, ConstantKind.INT);
-			break;
-		default:
-			throw error("Unknown MPI Constant", tree);
+			case AcslParser.MPI_COMM_RANK :
+				result = nodeFactory.newMPIConstantNode(source, MPI_COMM_RANK,
+						MPIConstantKind.MPI_COMM_RANK, ConstantKind.INT);
+				break;
+			case AcslParser.MPI_COMM_SIZE :
+				result = nodeFactory.newMPIConstantNode(source, MPI_COMM_SIZE,
+						MPIConstantKind.MPI_COMM_SIZE, ConstantKind.INT);
+				break;
+			default :
+				throw error("Unknown MPI Constant", tree);
 		}
 		result.setInitialType(typeFactory.signedIntegerType(SignedIntKind.INT));
 		return result;
@@ -1472,41 +1504,47 @@ public class AcslContractWorker {
 		int numChildren = expression.getChildCount();
 
 		switch (kind) {
-		case AcslParser.MPI_AGREE:
-			mpiExprKind = MPIContractExpressionKind.MPI_AGREE;
-			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
-			break;
-		case AcslParser.MPI_EMPTY_IN:
-			mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_IN;
-			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
-			break;
-		case AcslParser.MPI_EMPTY_OUT:
-			mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_OUT;
-			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
-			break;
-		case AcslParser.MPI_EQUALS:
-			mpiExprKind = MPIContractExpressionKind.MPI_EQUALS;
-			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
-			break;
-		case AcslParser.MPI_EXTENT:
-			mpiExprKind = MPIContractExpressionKind.MPI_EXTENT;
-			initialType = typeFactory
-					.unsignedIntegerType(UnsignedIntKind.UNSIGNED);
-			break;
-		case AcslParser.MPI_REGION:
-			mpiExprKind = MPIContractExpressionKind.MPI_REGION;
-			initialType = typeFactory.pointerType(typeFactory.voidType());
-			break;
-		case AcslParser.MPI_OFFSET:
-			mpiExprKind = MPIContractExpressionKind.MPI_OFFSET;
-			initialType = typeFactory.pointerType(typeFactory.voidType());
-			break;
-		case AcslParser.MPI_VALID:
-			mpiExprKind = MPIContractExpressionKind.MPI_VALID;
-			initialType = typeFactory.unsignedIntegerType(UnsignedIntKind.BOOL);
-			break;
-		default:
-			throw error("Unknown MPI expression " + exprName, expressionTree);
+			case AcslParser.MPI_AGREE :
+				mpiExprKind = MPIContractExpressionKind.MPI_AGREE;
+				initialType = typeFactory
+						.unsignedIntegerType(UnsignedIntKind.BOOL);
+				break;
+			case AcslParser.MPI_EMPTY_IN :
+				mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_IN;
+				initialType = typeFactory
+						.unsignedIntegerType(UnsignedIntKind.BOOL);
+				break;
+			case AcslParser.MPI_EMPTY_OUT :
+				mpiExprKind = MPIContractExpressionKind.MPI_EMPTY_OUT;
+				initialType = typeFactory
+						.unsignedIntegerType(UnsignedIntKind.BOOL);
+				break;
+			case AcslParser.MPI_EQUALS :
+				mpiExprKind = MPIContractExpressionKind.MPI_EQUALS;
+				initialType = typeFactory
+						.unsignedIntegerType(UnsignedIntKind.BOOL);
+				break;
+			case AcslParser.MPI_EXTENT :
+				mpiExprKind = MPIContractExpressionKind.MPI_EXTENT;
+				initialType = typeFactory
+						.unsignedIntegerType(UnsignedIntKind.UNSIGNED);
+				break;
+			case AcslParser.MPI_REGION :
+				mpiExprKind = MPIContractExpressionKind.MPI_REGION;
+				initialType = typeFactory.pointerType(typeFactory.voidType());
+				break;
+			case AcslParser.MPI_OFFSET :
+				mpiExprKind = MPIContractExpressionKind.MPI_OFFSET;
+				initialType = typeFactory.pointerType(typeFactory.voidType());
+				break;
+			case AcslParser.MPI_VALID :
+				mpiExprKind = MPIContractExpressionKind.MPI_VALID;
+				initialType = typeFactory
+						.unsignedIntegerType(UnsignedIntKind.BOOL);
+				break;
+			default :
+				throw error("Unknown MPI expression " + exprName,
+						expressionTree);
 		}
 		for (int i = 1; i < numChildren; i++) {
 			ExpressionNode child = translateExpression(
