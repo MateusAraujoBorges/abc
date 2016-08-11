@@ -320,16 +320,15 @@ public class ExpressionAnalyzer {
 	private void processValueAt(ValueAtNode valueAt) throws SyntaxException {
 		ExpressionNode state = valueAt.stateNode(),
 				expr = valueAt.expressionNode();
-		// Type stateType;
+		Type stateType;
 
 		processExpression(state);
-		// stateType = state.getConvertedType();
-		// if (!typeFactory.stateType().equivalentTo(stateType))
-		// throw error(
-		// "the first argument of $value_of should have $state type, but the
-		// actual type is "
-		// + stateType,
-		// valueAt);
+		stateType = state.getConvertedType();
+		if (!typeFactory.stateType().equivalentTo(stateType))
+			throw error(
+					"the first argument of $value_of should have $state type, but the actual type is "
+							+ stateType,
+					valueAt);
 		processExpression(expr);
 		if (!expr.isSideEffectFree(false))
 			throw this.error(
