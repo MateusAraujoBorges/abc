@@ -817,10 +817,12 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			CommonTree valueAt, SimpleScope scope) throws SyntaxException {
 		ExpressionNode state = this
 				.translateExpression((CommonTree) valueAt.getChild(0), scope);
-		ExpressionNode expr = this
+		ExpressionNode pid = this
 				.translateExpression((CommonTree) valueAt.getChild(1), scope);
+		ExpressionNode expr = this
+				.translateExpression((CommonTree) valueAt.getChild(2), scope);
 
-		return nodeFactory.newValueAtNode(source, state, expr);
+		return nodeFactory.newValueAtNode(source, state, pid, expr);
 	}
 
 	private ArrayLambdaNode translateArrayLambdaExpression(Source source,

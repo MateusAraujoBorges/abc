@@ -2647,5 +2647,5 @@ public interface NodeFactory {
 	 * @return the new <code>$value_at</code> expression node
 	 */
 	ValueAtNode newValueAtNode(Source source, ExpressionNode state,
-			ExpressionNode expression);
+			ExpressionNode pid, ExpressionNode expression);
 }

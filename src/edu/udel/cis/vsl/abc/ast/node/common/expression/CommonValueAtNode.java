@@ -11,14 +11,14 @@ public class CommonValueAtNode extends CommonExpressionNode
 			ValueAtNode {
 
 	public CommonValueAtNode(Source source, ExpressionNode state,
-			ExpressionNode expr) {
-		super(source, state, expr);
+			ExpressionNode pid, ExpressionNode expr) {
+		super(source, state, pid, expr);
 	}
 
 	@Override
 	public ExpressionNode copy() {
 		return new CommonValueAtNode(getSource(), duplicate(stateNode()),
-				duplicate(expressionNode()));
+				duplicate(pidNode()), duplicate(expressionNode()));
 	}
 
 	@Override
@@ -42,8 +42,13 @@ public class CommonValueAtNode extends CommonExpressionNode
 	}
 
 	@Override
-	public ExpressionNode expressionNode() {
+	public ExpressionNode pidNode() {
 		return (ExpressionNode) child(1);
+	}
+
+	@Override
+	public ExpressionNode expressionNode() {
+		return (ExpressionNode) child(2);
 
 	}
 

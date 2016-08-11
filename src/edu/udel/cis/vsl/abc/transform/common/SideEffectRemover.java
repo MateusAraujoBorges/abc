@@ -333,6 +333,8 @@ public class SideEffectRemover extends BaseTransformer {
 				return nodeFactory.newTypedefNameNode(
 						nodeFactory.newIdentifierNode(source, "$proc"), null);
 			}
+			case STATE :
+				return nodeFactory.newStateTypeNode(source);
 			case QUALIFIED : {
 				QualifiedObjectType qualifiedType = (QualifiedObjectType) type;
 				TypeNode baseTypeNode = this.typeNode(source,

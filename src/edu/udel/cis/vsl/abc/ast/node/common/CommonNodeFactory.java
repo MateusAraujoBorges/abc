@@ -1294,8 +1294,8 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public ValueAtNode newValueAtNode(Source source, ExpressionNode state,
-			ExpressionNode expression) {
-		return new CommonValueAtNode(source, state, expression);
+			ExpressionNode pid, ExpressionNode expression) {
+		return new CommonValueAtNode(source, state, pid, expression);
 	}
 
 }

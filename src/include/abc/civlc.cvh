@@ -142,4 +142,8 @@ $system double $pow(double base, double exp);
   @*/
 $system $state_f _Bool $is_derefable(void*ptr);
 
+/** returns the reference to the current state */
+/*@ depends_on \nothing; */
+$system $state_f $state $get_state();
+
 #endif

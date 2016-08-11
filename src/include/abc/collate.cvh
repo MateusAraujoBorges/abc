@@ -162,6 +162,10 @@ $atomic_f void $collator_enters($collator collator);
 /* Checks if the given processes in the range have all entered the collator. */
 $atomic_f _Bool $collator_has_entered($collator colaltor, $range range);
 
+/** returns the state reference. */
+/*@ depends_on \nothing; */
+$atomic_f $state_f $state $collate_get_state($collate_state state);
+
 #endif
 
 
