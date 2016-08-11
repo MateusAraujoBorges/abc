@@ -14,18 +14,16 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
-import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
-import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
-import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
  * Constant propagation implementation
- * Most methods are stolen from dwyer, some modifications are indicated.
- * Needs more comments
+ * 
+ * The lattice is a map from variables, identified by entity, to singleton constant values or "top" (indicated
+ * by the first element of the pair).
+ * 
  * @author dxu
- *
+ * Most methods are stolen from dwyer, some modifications are indicated.
  */
 
 public class ConstantPropagation extends DataFlowFramework<Pair<Entity,Pair<Boolean,ConstantNode>>>{
@@ -35,6 +33,9 @@ public class ConstantPropagation extends DataFlowFramework<Pair<Entity,Pair<Bool
 	
 	ControlFlowAnalysis cfa;
 	
+	/**
+	 * DFAs are singletons.  This allows them to be applied incrementally across a code base.
+	 */
 	protected ConstantPropagation(){};
 	
 	public static ConstantPropagation getInstance(){

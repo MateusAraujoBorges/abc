@@ -6,42 +6,40 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.udel.cis.vsl.abc.analysis.dataflow.IF.Evaluation;
-import edu.udel.cis.vsl.abc.analysis.dataflow.common.MyInterval;
+import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
-import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
-import edu.udel.cis.vsl.abc.ast.value.IF.Value;
-import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
-public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>>{
-	private static IntervalAnalysis instance = null;
+import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
+
+public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, IntervalValue>>{
+	private static IntervalAnalysisSARL instance = null;
 
 	Function currentFunction;
 
 	ControlFlowAnalysis cfa;
 
-	private EvaluateIntervalExpression ee;
+	private EvaluationCommon evaluator;
 
 	/**
 	 * DFAs are singletons.  This allows them to be applied incrementally across a code base.
 	 */
-	protected IntervalAnalysis() {}
+	protected IntervalAnalysisSARL() {
+		evaluator = new EvaluationCommon();
+	}
 
-	public static IntervalAnalysis getInstance() {
+	public static IntervalAnalysisSARL getInstance() {
 		if (instance == null) {
-			instance = new IntervalAnalysis();
+			instance = new IntervalAnalysisSARL();
 		}
 		return instance;
 	}
@@ -63,16 +61,18 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 		cfa = ControlFlowAnalysis.getInstance();
 		cfa.analyze(f);
 
-		Set<Pair<Entity, MyInterval>> init = 
-				new HashSet<Pair<Entity,MyInterval>>();
+		Set<Pair<Entity, IntervalValue>> init = new HashSet<Pair<Entity,IntervalValue>>();
 
 		// Unprocessed nodes are assigned an empty set
-		Set<Pair<Entity, MyInterval>> bottom = 
-				new HashSet<Pair<Entity, MyInterval>>();
+		Set<Pair<Entity, IntervalValue>> bottom = new HashSet<Pair<Entity, IntervalValue>>();
 
 		computeFixPoint(init, bottom);
 	}
 
+	/*
+	 *  The next group of methods are stolen from reaching definitions, the OMP simplifier, and then expanded on significantly.
+	 *  	They should be factored out into some utilities.
+	 */
 	private boolean isAssignment(final ASTNode s) {
 		if (s instanceof ExpressionStatementNode) {
 			ExpressionNode e = ((ExpressionStatementNode)s).getExpression();
@@ -88,10 +88,18 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 					return true;
 				}
 			} 
+		} 
+		return false;
+	}
+	
+	private boolean isDefinition(final ASTNode s) {
+		if (s instanceof VariableDeclarationNode) {
+			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
+			return vdn.isDefinition() && vdn.getInitializer() != null;
 		}
 		return false;
 	}
-
+	
 	private IdentifierExpressionNode baseArray(OperatorNode subscript) {
 		assert subscript.getOperator() == OperatorNode.Operator.SUBSCRIPT : "Expected subscript expression";
 		if (subscript.getArgument(0) instanceof IdentifierExpressionNode) {
@@ -117,72 +125,75 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 			} else {
 				assert false : "Unexpected LHS expression";
 			}
+		} else if (isDefinition(s)) {
+			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
+			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
+				return vdn.getEntity();
+			}
 		}
 		return null;
 	}
+	
 	private ExpressionNode getRHS(final ASTNode s) {
 		if (isAssignment(s)) {
-			ExpressionNode rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(1);
+			OperatorNode opn = (OperatorNode) ((ExpressionStatementNode)s).getExpression();
+			ExpressionNode rhs = null;
+			if (opn.getNumberOfArguments() == 1) {
+				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(0);
+			} else if (opn.getNumberOfArguments() == 2) {
+				// This might need refinement for, e.g., PLUSEQ, which has arg 0 on the LHS and RHS
+				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(1);
+			}
 			return rhs;
+		} else if (isDefinition(s)) {
+			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
+			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
+				return (ExpressionNode)vdn.getInitializer();
+			}
 		}
 		return null;
-	}
-
-	private boolean isDefinition(final ASTNode s) {
-		if (s instanceof VariableDeclarationNode) {
-			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
-			return vdn.isDefinition() && vdn.getInitializer() != null;
-		}
-		return false;
 	}
 
 	@Override
-	protected
 	/*
 	 * Generate constants that are assigned from for statements.
 	 */
-	Set<Pair<Entity, MyInterval>> gen(final Set<Pair<Entity,MyInterval>> set, final ASTNode n) {
-		Set<Pair<Entity,MyInterval>> result = new HashSet<Pair<Entity,MyInterval>>();
+	protected Set<Pair<Entity, IntervalValue>> gen(final Set<Pair<Entity,IntervalValue>> set, final ASTNode n) {
 
-		// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-		if (isAssignment(n) || isDefinition(n)) {
-			Entity lhsVar = getLHSVar(n);
-			ExpressionNode rhs = getRHS(n);
+		final Set<Pair<Entity,IntervalValue>> result = new HashSet<Pair<Entity,IntervalValue>>();
+		final Entity lhsVar = getLHSVar(n);
 
-			Map<Entity, MyInterval> map = new HashMap<Entity, MyInterval>();
-			for(Pair<Entity, MyInterval> setElement : set){
-				map.put(setElement.left, setElement.right);
-			}
+//		if(lhsVar != null){
+			if (isAssignment(n) || isDefinition(n)) {
 
-			MyInterval interval = ee.evaluate(rhs,map);
+				ExpressionNode rhs = getRHS(n);
+				
+				assert rhs != null : "not simple assignment!";
 
+				Map<Entity, AbstractValue> map = new HashMap<Entity, AbstractValue>();
+				for(Pair<Entity, IntervalValue> setElement : set){
+					map.put(setElement.left, setElement.right);
+				}
+				
+				
+				IntervalValue interval = (IntervalValue) evaluator.evaluate(rhs, map, new IntervalValue());
 
-			/*if (rhs instanceof ConstantNode) {
-				ConstantNode conNode = (ConstantNode)rhs;
-				Value v = conNode.getConstantValue();
-				long value;
+				assert !interval.isEmpty() : "empty interval?";
+				
+				Pair<Entity, IntervalValue> inEntry = 
+						new Pair<Entity, IntervalValue>(lhsVar, interval);
+				result.add(inEntry);
 
-				if (v.getType().kind() == TypeKind.BASIC) {
-					BasicTypeNode btn = (BasicTypeNode)v.getType();
-					switch (btn.getBasicTypeKind()) {
-					case INT:
-					case LONG:
-					case LONG_LONG:
-					case SHORT:
-						value = (long) ((IntegerValue)v).getIntegerValue().intValue();
-						interval = new Interval(value);
-						break;
-					default:
-						break;
-					}
-				} else
-					assert false : "Expected a basic type for a ConstantNode";
-			}
-			 */
-			Pair<Entity, MyInterval> inEntry = 
-					new Pair<Entity, MyInterval>(lhsVar, interval);
-			result.add(inEntry);
+			}else{
+
+//				assert false : "not assignment or definition.";
+
+//				Pair<Entity, IntervalValue> inEntry = 
+//						new Pair<Entity, IntervalValue>(lhsVar, new IntervalValue());
+//				result.add(inEntry);
+//			}
 		}
+
 		return result;	
 	}
 
@@ -192,18 +203,19 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 	 * MODIFIED
 	 * Kill constants that are assigned into for statements.
 	 */
-	Set<Pair<Entity, MyInterval>> kill( Set<Pair<Entity, MyInterval>> set, final ASTNode n) {
-		Set<Pair<Entity, MyInterval>> result = new HashSet<Pair<Entity, MyInterval>>();
+	Set<Pair<Entity, IntervalValue>> kill( Set<Pair<Entity, IntervalValue>> set, final ASTNode n) {
+		Set<Pair<Entity, IntervalValue>> result = new HashSet<Pair<Entity, IntervalValue>>();
 
 		// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-		if (isAssignment(n)) {
+		if (isAssignment(n) || isDefinition(n)) {
 			Entity lhsVar = getLHSVar(n);
-			for (Pair<Entity, MyInterval> inEntry : set) {
+			for (Pair<Entity, IntervalValue> inEntry : set) {
 				if (inEntry.left.equals(lhsVar)) {
 					result.add(inEntry);
 				}
 			}
 		}
+
 		return result;	
 	}
 
@@ -224,7 +236,6 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 		return n;
 	}
 
-
 	@Override
 	public String getAnalysisName() {
 		return "Interval Analysis";
@@ -232,14 +243,14 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 
 
 	@Override
-	protected Set<Pair<Entity, MyInterval>> merge(Set<Pair<Entity, MyInterval>> s1, Set<Pair<Entity, MyInterval>> s2) {
-		Set<Pair<Entity,MyInterval>> result = new HashSet<Pair<Entity,MyInterval>>();
+	protected Set<Pair<Entity, IntervalValue>> merge(Set<Pair<Entity, IntervalValue>> s1, Set<Pair<Entity, IntervalValue>> s2) {
+		Set<Pair<Entity,IntervalValue>> result = new HashSet<Pair<Entity,IntervalValue>>();
 
 		Set<Entity> idOverlap = new HashSet<Entity>();
 
 		// Compute the set of overlapping identifiers in the incoming sets of CP entries
-		for (Pair<Entity, MyInterval> p1 : s1) {
-			for (Pair<Entity, MyInterval> p2 : s2) {
+		for (Pair<Entity, IntervalValue> p1 : s1) {
+			for (Pair<Entity, IntervalValue> p2 : s2) {
 				if (p1.left.equals(p2.left)) {
 					idOverlap.add(p1.left);
 				}
@@ -247,17 +258,19 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 		}
 
 		// For entries with common identifiers, merge their CP data
-		for (Pair<Entity, MyInterval> p1 : s1) {
+		for (Pair<Entity, IntervalValue> p1 : s1) {
 			if (!idOverlap.contains(p1.left)) continue;
 
-			for (Pair<Entity, MyInterval> p2 : s2) {
+			for (Pair<Entity, IntervalValue> p2 : s2) {
 				if (!idOverlap.contains(p2.left)) continue;
 
 				if (p1.left.equals(p2.left)) {
 
 					//Merge
-					MyInterval interval = new MyInterval(p1.right.getLow(),p2.right.getHigh());
-					Pair<Entity, MyInterval> top = new Pair<Entity, MyInterval>(p1.left, interval);					
+					IntervalValue iv = new IntervalValue();
+					iv = (IntervalValue) iv.union(p1.right,p2.right);
+
+					Pair<Entity, IntervalValue> top = new Pair<Entity, IntervalValue>(p1.left, iv);					
 					result.add(top);
 				}
 			}
@@ -272,79 +285,9 @@ public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>
 	}
 
 	@Override
-	public String toString(Pair<Entity, MyInterval> e) {
+	public String toString(Pair<Entity, IntervalValue> e) {
 		String entry = e.left+"->"+ e.right;
 		return "<"+entry+">";
-	}
-
-
-	
-	private class EvaluateIntervalExpression{
-
-		public MyInterval evaluate(ASTNode expr, Map<Entity, MyInterval> map) {
-
-			//Handles an operator node
-			if (expr instanceof OperatorNode){
-				ASTNode leftNode = expr.child(0);
-				ASTNode rightNode = expr.child(1);
-				MyInterval leftValue = evaluate(leftNode, map);
-				MyInterval rightValue = evaluate(rightNode, map);
-
-				Operator op = ((OperatorNode) expr).getOperator();
-
-				switch(op){
-				
-				case PLUS: leftValue.plus(rightValue); break;
-				case MINUS: leftValue.minus(rightValue); break;
-				case TIMES: leftValue.multiply(rightValue); break;
-				case DIV: leftValue.divide(rightValue); break;
-//				case MOD: leftValue.modulo(rightValue);break;
-
-				default:
-					assert false : "Unsupported operation!";
-				}
-
-				return leftValue;
-			}
-
-			//Handles an identifier node
-			if (expr instanceof IdentifierExpressionNode){
-				Entity e = ((IdentifierExpressionNode) expr).getIdentifier().getEntity();
-				MyInterval i = map.get(e);
-				return i;
-			}
-
-			//Handles a constant node
-			if (expr instanceof ConstantNode){
-
-				ConstantNode conNode = (ConstantNode) expr;
-				Value v = conNode.getConstantValue();
-				MyInterval interval = null;
-				long value;
-
-				if (v.getType().kind() == TypeKind.BASIC) {
-					BasicTypeNode btn = (BasicTypeNode)v.getType();
-					switch (btn.getBasicTypeKind()) {
-					case INT:
-					case LONG:
-					case LONG_LONG:
-					case SHORT:
-						value = (long) ((IntegerValue)v).getIntegerValue().intValue();
-						interval = new MyInterval(value);
-						break;
-					default:
-						assert false : "Expected an integral type for a ConstantNode";
-					}
-				} else
-					assert false : "Expected a basic type for a ConstantNode";
-
-				return interval;
-			}
-			
-			assert false : "Unsupported node type";
-
-			return null;
-		}
 	}
 
 }
