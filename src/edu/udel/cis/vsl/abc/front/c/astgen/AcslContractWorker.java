@@ -1,5 +1,7 @@
 package edu.udel.cis.vsl.abc.front.c.astgen;
 
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.EXPR;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.TYPE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ACCESS_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AMPERSAND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AND;
@@ -129,6 +131,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
@@ -809,17 +813,38 @@ public class AcslContractWorker {
 			case AcslParser.OLD :
 				return translateOld(source, expressionTree, scope);
 			case SIZEOF :
-				// return translateSizeOf(source, expressionTree, scope);
+				return translateSizeOf(source, expressionTree, scope);
 			case CAST :
-				// return nodeFactory.newCastNode(
-				// source,
-				// translateTypeName((CommonTree) expressionTree.getChild(0),
-				// scope),
-				// translateExpression(
-				// (CommonTree) expressionTree.getChild(1), scope));
+				return nodeFactory.newCastNode(source,
+						translateTypeExpr(
+								(CommonTree) expressionTree.getChild(0), scope),
+						translateExpression(
+								(CommonTree) expressionTree.getChild(1),
+								scope));
 			default :
 				throw error("Unknown expression kind", expressionTree);
 		} // end switch
+	}
+
+	/**
+	 * 
+	 * @param expressionTree
+	 * @return
+	 * @throws SyntaxException
+	 */
+	private SizeofNode translateSizeOf(Source source, CommonTree expressionTree,
+			SimpleScope scope) throws SyntaxException {
+		int kind = expressionTree.getChild(0).getType();
+		CommonTree child = (CommonTree) expressionTree.getChild(1);
+		SizeableNode sizeable;
+
+		if (kind == EXPR)
+			sizeable = translateExpression(child, scope);
+		else if (kind == TYPE)
+			sizeable = this.translateTypeExpr(child, scope);
+		else
+			throw error("Unexpected argument to sizeof", expressionTree);
+		return nodeFactory.newSizeofNode(source, sizeable);
 	}
 
 	private ExpressionNode translateOld(Source source, CommonTree old,

@@ -239,11 +239,7 @@ void $mpi_unsnapshot(MPI_Comm comm);
 /* Returns the number of chars of the given MPI_Datatype.
  * equivalent to returns (datatypeSizeof(datatype) / sizeof(char))
  */
-/*@ pure;
-  @ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$state_f $atomic_f  size_t $mpi_extentof(MPI_Datatype);
+$abstract size_t $mpi_extentof(MPI_Datatype);
 
 /* Assigns fresh new symbolic constants to the given mpi region */
 void $mpi_assigns(void * buf, int count, MPI_Datatype datatype);
