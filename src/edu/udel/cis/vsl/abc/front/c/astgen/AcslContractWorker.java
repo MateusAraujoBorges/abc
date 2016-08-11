@@ -1148,20 +1148,11 @@ public class AcslContractWorker {
 	// ////////////////////////////////////
 	private ExpressionNode translateValidNode(CommonTree tree, Source source,
 			SimpleScope scope) throws SyntaxException {
-		CommonTree pointer = (CommonTree) tree.getChild(1);
-		ExpressionNode ptrNode;
-		ExpressionNode rangeNode;
+		CommonTree argumentTree = (CommonTree) tree.getChild(1);
+		ExpressionNode argument;
 
-		ptrNode = translateExpression(pointer, scope);
-		if (tree.getChildCount() > 3) {
-			CommonTree range;
-
-			range = (CommonTree) tree.getChild(3);
-			rangeNode = translateExpression(range, scope);
-			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode,
-					rangeNode);
-		} else
-			return nodeFactory.newOperatorNode(source, Operator.VALID, ptrNode);
+		argument = translateExpression(argumentTree, scope);
+		return nodeFactory.newOperatorNode(source, Operator.VALID, argument);
 	}
 
 	private ExpressionNode translateWriteEvent(Source source,

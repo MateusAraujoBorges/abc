@@ -2607,6 +2607,7 @@ public class ExpressionAnalyzer {
 		int numArgs = node.getNumberOfArguments();
 		ExpressionNode expr = node.getArgument(0);
 
+		processExpression(expr);
 		if (numArgs != 1)
 			throw error("\\valid(tset) expression only takes one argument",
 					node);

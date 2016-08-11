@@ -1248,6 +1248,7 @@ public class SideEffectRemover extends BaseTransformer {
 			case UNARYPLUS :
 			case BIG_O :
 			case BITCOMPLEMENT :
+			case VALID :
 				result = translateGenericUnaryOperator(expression, isVoid);
 				break;
 			case PREINCREMENT :
