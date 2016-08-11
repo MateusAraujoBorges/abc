@@ -75,6 +75,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SpawnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StatementExpressionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ValueAtNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.LabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.SwitchLabelNode;
@@ -3023,11 +3024,33 @@ public class ASTPrettyPrinter {
 				result.append(
 						lambda2Pretty((LambdaNode) expression, maxLength));
 				break;
+			case VALUE_AT :
+				result.append(
+						valueAt2Pretty((ValueAtNode) expression, maxLength));
+				break;
 			default :
 				throw new ABCUnsupportedException(
 						"pretty print of expression node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
+	}
+
+	private static StringBuffer valueAt2Pretty(ValueAtNode valueAt,
+			int maxLength) {
+		if (maxLength == 0)
+			return EMPTY_STRING_BUFFER;
+
+		StringBuffer result = new StringBuffer();
+
+		result.append("$value_at");
+		result.append(" (");
+		result.append(expression2Pretty(valueAt.stateNode(),
+				vacantLength(maxLength, result)));
+		result.append(", ");
+		result.append(expression2Pretty(valueAt.expressionNode(),
+				vacantLength(maxLength, result)));
+		result.append(")");
+		return result;
 	}
 
 	private static StringBuffer lambda2Pretty(LambdaNode lambda,
