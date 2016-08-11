@@ -169,7 +169,7 @@ int $mpi_scatterv(const void*, const int[], const
 		 int, MPI_Datatype, int, int,
 		  MPI_Comm, char *);
 
-void* $mpi_pointer_add(void*, int, MPI_Datatype);
+void* $mpi_pointer_add(const void*, int, MPI_Datatype);
 
 /*@ depends_on \nothing;
   @ executes_when \true;
@@ -202,7 +202,7 @@ $system[mpi] $scope $mpi_proc_scope($comm);
 /*@ depends_on \access(buf);
   @ executes_when \true;
   @*/
-$system[mpi] void $mpi_check_buffer(void * buf, int count, MPI_Datatype datatype);
+$system[mpi] void $mpi_check_buffer(const void * buf, int count, MPI_Datatype datatype);
 
 /* Create a $bundle type object which contains a sequence of entries
    that identify a group of consistent MPI collective routines. MPI

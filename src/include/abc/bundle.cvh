@@ -26,7 +26,7 @@ $system int $bundle_size($bundle b);
 /*@ depends_on \access(ptr);
   @ executes_when \true;
   @*/
-$system $bundle $bundle_pack(void *ptr, int size);
+$system $bundle $bundle_pack(const void *ptr, int size);
 
 /* Copies the data out of the bundle into the region specified */
 /*@ depends_on \access(ptr);
