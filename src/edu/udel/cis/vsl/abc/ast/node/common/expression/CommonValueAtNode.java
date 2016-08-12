@@ -33,7 +33,8 @@ public class CommonValueAtNode extends CommonExpressionNode
 
 	@Override
 	public boolean isSideEffectFree(boolean errorsAreSideEffects) {
-		return true;
+		return stateNode().isSideEffectFree(errorsAreSideEffects)
+				&& pidNode().isSideEffectFree(errorsAreSideEffects);
 	}
 
 	@Override
