@@ -7,6 +7,7 @@ import java.util.HashMap;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.Ignore;
 
 import edu.udel.cis.vsl.abc.analysis.common.CallAnalyzer;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
@@ -24,14 +25,14 @@ import edu.udel.cis.vsl.abc.main.FrontEnd;
  * @author dxu
  * 
  */
-
+@Ignore
 public class IntervalAnalysisSARLTest {
 
 	/**
 	 * Turn on a lot of output for debugging? Set this to true only in your
 	 * local copy. Be sure to set it back to false before committing!
 	 */
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	private static File root = new File(new File("examples"), "c");
 
@@ -76,44 +77,44 @@ public class IntervalAnalysisSARLTest {
 		check("simple");
 	}
 	
-//	@Test
-//	public void nestedblocks() throws ABCException, IOException {
-//		check("nestedblocks");
-//	}
-//
-//	@Test
-//	public void ifthen() throws ABCException, IOException {
-//		check("ifthen");
-//	}
+	@Test
+	public void nestedblocks() throws ABCException, IOException {
+		check("nestedblocks");
+	}
 
-//	@Test
-//	public void loops() throws ABCException, IOException {
-//		check("loops");
-//	}
-//
-//	@Test
-//	public void switches() throws ABCException, IOException {
-//		check("switches");
-//	}
-//
-//	@Test
-//	public void switchloop() throws ABCException, IOException {
-//		check("switchloop");
-//	}
-//
-//	@Test
-//	public void jumps() throws ABCException, IOException {
-//		check("jumps");
-//	}
-//
-//	@Test
-//	public void matprod() throws ABCException, IOException {
-//		check("matprod");
-//	}
-//
-//	@Test
-//	public void branchconst() throws ABCException, IOException {
-//		check("branchconst");
-//	}
+	@Test
+	public void ifthen() throws ABCException, IOException {
+		check("ifthen");
+	}
+
+	@Test
+	public void loops() throws ABCException, IOException {
+		check("loops");
+	}
+
+	@Test
+	public void switches() throws ABCException, IOException {
+		check("switches");
+	}
+
+	@Test
+	public void switchloop() throws ABCException, IOException {
+		check("switchloop");
+	}
+
+	@Test
+	public void jumps() throws ABCException, IOException {
+		check("jumps");
+	}
+
+	@Test
+	public void matprod() throws ABCException, IOException {
+		check("matprod");
+	}
+
+	@Test
+	public void branchconst() throws ABCException, IOException {
+		check("branchconst");
+	}
 
 }
