@@ -716,7 +716,6 @@ unaryExpression
        	| extendedQuantification ->^(QUANTIFIED_EXT extendedQuantification)
        	| object_of_key LPAREN term RPAREN -> ^(OBJECT_OF object_of_key LPAREN term RPAREN)
     	| mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
-    	| remoteExpression
     	| old_key LPAREN term RPAREN 
     	  -> ^(OLD old_key term RPAREN)
 	;
@@ -783,6 +782,7 @@ primaryExpression
        	 	->^(SET_SIMPLE term)
 	| LPAREN term RPAREN 
 	  	-> ^(TERM_PARENTHESIZED term)
+	| remoteExpression
 	;
 
 
