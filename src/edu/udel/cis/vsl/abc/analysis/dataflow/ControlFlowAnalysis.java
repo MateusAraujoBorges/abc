@@ -55,10 +55,9 @@ import edu.udel.cis.vsl.abc.util.IF.Pair;
  * The class implements a singleton pattern which allows the control flow analysis to be performed
  * incrementally on functions as needed.
  * 
- * Extensions:
- *    a) Mark nodes that constitute branching, i.e., boolean isBranch(ASTNode n)
- *    b) Mark control flow edges for branch statements by their outcome, i.e., ASTNode trueBranch(ASTNode n), ...
- *    c) How do we handle switch statements with multi-way branching?   Exploit case disjointness to simplify.
+ * TBD:
+ *    1) Identify library calls and skip their analysis
+ *    2) Inlining for call sensitive analysis
  * 
  * @author dwyer
  * 

@@ -1,13 +1,18 @@
 package edu.udel.cis.vsl.abc.analysis.dataflow;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import edu.udel.cis.vsl.abc.ast.IF.AST;
+import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -18,6 +23,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
+import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
@@ -34,6 +40,8 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 	Function currentFunction;
 	
 	ControlFlowAnalysis cfa;
+	AnalysisUtilities au;
+	ValueFactory vf;
 	
 	/**
 	 * DFAs are singletons.  This allows them to be applied incrementally across a code base.
@@ -52,6 +60,8 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 		super.clear();
 		instance = null;
 		cfa.clear();
+		au = null;
+		vf = null;
 	}
 	
 	@Override
@@ -64,6 +74,9 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 		cfa = ControlFlowAnalysis.getInstance();
 		cfa.analyze(f);
 		
+		au = new AnalysisUtilities(cfa);
+		vf = cfa.entry(f).getOwner().getASTFactory().getNodeFactory().getValueFactory();
+		
 		Set<Pair<Entity, Pair<Boolean, ConstantNode>>> init = 
 				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 		
@@ -74,149 +87,43 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 		computeFixPoint(init, bottom);
 	}
 	
-	/*
-	 *  The next group of methods are stolen from reaching definitions, the OMP simplifier, and then expanded on significantly.
-	 *  	They should be factored out into some utilities.
-	 */
-	private boolean isAssignment(final ASTNode s) {
-		if (s instanceof ExpressionStatementNode) {
-			ExpressionNode e = ((ExpressionStatementNode)s).getExpression();
-			if (e instanceof OperatorNode) {
-				Operator op = ((OperatorNode)e).getOperator();
-				if ( (op == Operator.ASSIGN) || 
-						(op == Operator.POSTINCREMENT) || (op == Operator.POSTDECREMENT) || 
-						(op == Operator.PREINCREMENT) || (op == Operator.PREDECREMENT) || 
-						(op == Operator.BITANDEQ) || (op == Operator.BITOREQ) || (op == Operator.BITXOREQ) ||
-						(op == Operator.DIVEQ) || (op == Operator.TIMESEQ) || (op == Operator.PLUSEQ) || 
-						(op == Operator.MINUSEQ) || (op == Operator.MODEQ) ||
-						(op == Operator.SHIFTLEFTEQ) || (op == Operator.SHIFTRIGHTEQ) ) {
-					return true;
-				}
-			} 
-		} 
-		return false;
-	}
-	
-	private boolean isDefinition(final ASTNode s) {
-		if (s instanceof VariableDeclarationNode) {
-			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
-			return vdn.isDefinition() && vdn.getInitializer() != null;
-		}
-		return false;
-	}
-	
-	private IdentifierExpressionNode baseArray(OperatorNode subscript) {
-		assert subscript.getOperator() == OperatorNode.Operator.SUBSCRIPT : "Expected subscript expression";
-		if (subscript.getArgument(0) instanceof IdentifierExpressionNode) {
-			return (IdentifierExpressionNode) subscript.getArgument(0);
-		}
-		return baseArray((OperatorNode) subscript.getArgument(0));
-	}
-
-	private Entity getLHSVar(final ASTNode s) {
-		if (isAssignment(s)) {
-			ExpressionNode lhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(0);
-			if (lhs instanceof IdentifierExpressionNode) {
-				IdentifierNode id = ((IdentifierExpressionNode)lhs).getIdentifier();
-				return id.getEntity();
-			} else if (lhs instanceof OperatorNode) {
-				OperatorNode opn = (OperatorNode)lhs;
-				if (opn.getOperator() == Operator.SUBSCRIPT) {
-					IdentifierExpressionNode idn = baseArray(opn);
-					return idn.getIdentifier().getEntity();
-				} else {
-					assert false : "Unexpected operator node on LHS";
-				}
-			} else {
-				assert false : "Unexpected LHS expression";
-			}
-		} else if (isDefinition(s)) {
-			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
-			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
-				return vdn.getEntity();
-			}
-		}
-		return null;
-	}
-	
-	private ExpressionNode getRHS(final ASTNode s) {
-		if (isAssignment(s)) {
-			OperatorNode opn = (OperatorNode) ((ExpressionStatementNode)s).getExpression();
-			ExpressionNode rhs = null;
-			if (opn.getNumberOfArguments() == 1) {
-				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(0);
-			} else if (opn.getNumberOfArguments() == 2) {
-				// This might need refinement for, e.g., PLUSEQ, which has arg 0 on the LHS and RHS
-				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(1);
-			}
-			return rhs;
-		} else if (isDefinition(s)) {
-			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
-			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
-				return (ExpressionNode)vdn.getInitializer();
-			}
-		}
-		return null;
-	}
-	
-	private Set<Entity> collectRefs(ASTNode node) {
-		Set<Entity> refs = new HashSet<Entity>();
-		collectRefs(node, refs);
-		return refs;
-	}
-	
-	private void collectRefs(ASTNode node, Set<Entity> refs) {
-		if (node instanceof IdentifierExpressionNode) {
-			Entity idEnt = ((IdentifierExpressionNode) node).getIdentifier()
-					.getEntity();
-			refs.add(idEnt);
-
-		} else if (node instanceof OperatorNode
-				&& ((OperatorNode) node).getOperator() == Operator.SUBSCRIPT) {
-			Entity idEnt = baseArray((OperatorNode) node).getIdentifier()
-					.getEntity();
-			refs.add(idEnt);
-
-		} else if (node != null) {
-			Iterable<ASTNode> children = node.children();
-			for (ASTNode child : children) {
-				collectRefs(child, refs);
-			}
-		}
-	}
-	
 	/**
+	 * Determine if the branch condition is false under the given constant values for variable entities.
 	 * 
-	 * @param expr 
-	 * @param constMap
-	 * @return Value expression under constant map; null if value is undefined
+	 * @param condition 
+	 * @param varConstMap
+	 * @return Answer.YES, Answer.NO, or Answer.MAYBE
 	 */
-	private Answer eval(ExpressionNode expr, Pair<Entity, ConstantNode> constMap) {
+	private Answer isConditionFalse(ExpressionNode condition, Map<Entity, ConstantNode> varConstMap) {
 		Answer result;
-		ValueFactory vf = expr.getOwner().getASTFactory().getNodeFactory().getValueFactory();
-		ExpressionNode freshExpr = expr.copy();
-		replaceIdWithConst(freshExpr, constMap);
+		ExpressionNode freshExpr = au.copyWithAttributes(condition);
+		replaceIdWithConst(freshExpr, varConstMap);
 		try {
 			result = vf.isZero(vf.evaluate(freshExpr));
 		} catch (SyntaxException se) {
-			// If the expression was not made constant by the map then we can't tell the value
+			// If the expression was not made constant by the map then the answer is indeterminate
 			result = Answer.MAYBE;
 		}
 		return result;
 	}
 	
+	
+	/**
+	 * Replaces one AST node with another.
+	 * 
+	 * @param current
+	 * @param replacement
+	 */
 	private void replaceNode(ASTNode current, ASTNode replacement) {
+		assert current!=null && replacement!=null;
+		assert replacement.parent()==null &&  current.parent()!=null;
+
 		ASTNode parent = current.parent();
 		
-		int indexOf = 0;
-		for (;indexOf < parent.numChildren(); indexOf++) {
-			if (parent.child(indexOf) == current) break;
-		}
+		int indexOf = current.childIndex();
+		assert indexOf >= 0 : "current is not in an AST or is the root";
 		
-		// check that current was found
-		assert indexOf < parent.numChildren() : "Node to replace was not found";
-		
-		parent.removeChild(indexOf);
+		current.remove();
 		parent.setChild(indexOf, replacement);
 	}
 
@@ -226,19 +133,20 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 	 * @param expr
 	 * @param map
 	 */
-	private void replaceIdWithConst(ExpressionNode expr, Pair<Entity,ConstantNode> idConst) {
+	private void replaceIdWithConst(ExpressionNode expr, Map<Entity,ConstantNode> varConstMap) {
 		// this is a recursive walk that is the usual huge switch structure with recursion
 		if (expr instanceof IdentifierExpressionNode) {
-			Entity id = ((IdentifierExpressionNode)expr).getIdentifier().getEntity();
-			if (id.equals(idConst.left)) {
-				replaceNode(expr, idConst.right);
+			Entity varEntity = ((IdentifierExpressionNode)expr).getIdentifier().getEntity();
+			ConstantNode newConst = varConstMap.get(varEntity);
+			if (newConst != null) {
+				replaceNode(expr, newConst.copy());
 			}
 		} else {
 			Iterable<ASTNode> children = expr.children();
 			for (ASTNode child : children) {
 				if (child instanceof ExpressionNode) {
 					ExpressionNode childExpr = (ExpressionNode)child;
-					replaceIdWithConst(childExpr, idConst);
+					replaceIdWithConst(childExpr, varConstMap);
 				}
 			}
 		}
@@ -249,39 +157,42 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 	/*
 	 * Kill constants that are assigned into for statements.
 	 * Kill constants that are inconsistent with branch conditions for edges.
+	 * 
+	 * Note that for CP we are using the set of pairs to encode a map, so there is really
+	 * a single abstract value being propagated with a mapping for each previously defined variable.
 	 */
 	Set<Pair<Entity,Pair<Boolean,ConstantNode>>> kill(
 			final Set<Pair<Entity,Pair<Boolean,ConstantNode>>> set, final ASTNode n, final ASTNode s) {
 		Set<Pair<Entity,Pair<Boolean,ConstantNode>>> result = 
 				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 
-		if (isBranch(n)) {
-			ExpressionNode cond = branchCondition(n,s);
-			Set<Entity> refs = collectRefs(cond);
-			
+		if (au.isBranch(n)) {
+			ExpressionNode cond = au.branchCondition(n,s);
+						
 			/*
-			 * Collect the <entry, constant> pairs involving referenced identifiers
-			 * that have a non-top value.  For each such pair, if it leads to the 
-			 * definite falsification of the branch condition, then kill it.
+			 * If the in set falsifies the branch, then kill the entire set.  Here we
+			 * treat variables with "top" values as free in the evaluation by not adding
+			 * them to the constant map.
 			 */
+			Map<Entity, ConstantNode> varConstMap = new HashMap<Entity, ConstantNode>();
 			for (Pair<Entity,Pair<Boolean,ConstantNode>> cpEntry : set) {
-				if (refs.contains(cpEntry.left)) {
-					if (!cpEntry.right.left) {
-						Pair<Entity, ConstantNode> constMap = 
-								new Pair<Entity, ConstantNode>(cpEntry.left, cpEntry.right.right);
-						if (eval(cond, constMap) == Answer.YES) {
-							// the branch condition is definitely false
-							result.add(cpEntry);
-						}
-					}
-				}			
+				// test boolean indicator for top value
+				if (!cpEntry.right.left) {
+					varConstMap.put(cpEntry.left, cpEntry.right.right);		
+				}		
+			}
+		
+			if (isConditionFalse(cond, varConstMap) == Answer.YES) {
+				for (Pair<Entity,Pair<Boolean,ConstantNode>> cpEntry : set) {
+					result.add(cpEntry);
+				}
 			}
 				
 			return result;
 		} else {
 			// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-			if (isAssignment(n) || isDefinition(n)) {
-				Entity lhsVar = getLHSVar(n);
+			if (au.isAssignment(n) || au.isDefinition(n)) {
+				Entity lhsVar = au.getLHSVar(n);
 				for (Pair<Entity,Pair<Boolean,ConstantNode>> cpEntry : set) {
 					if (cpEntry.left.equals(lhsVar)) {
 						result.add(cpEntry);
@@ -303,9 +214,9 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 				new HashSet<Pair<Entity,Pair<Boolean,ConstantNode>>>();
 
 		// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-		if (isAssignment(n) || isDefinition(n)) {
-			Entity lhsVar = getLHSVar(n);
-			ExpressionNode rhs = getRHS(n);
+		if (au.isAssignment(n) || au.isDefinition(n)) {
+			Entity lhsVar = au.getLHSVar(n);
+			ExpressionNode rhs = au.getRHS(n);
 
 			// The constant pair is "top" if the rhs is not a ConstantNode, otherwise we use the rhs
 			Pair<Boolean, ConstantNode> constPair = null;
@@ -334,7 +245,7 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 	 * @see edu.udel.cis.vsl.abc.analysis.dataflow.DataFlowFramework#succs(edu.udel.cis.vsl.abc.ast.node.IF.ASTNode)
 	 */
 	protected Set<ASTNode> succs(ASTNode s) {
-		return cfa.successors(s);
+		return au.succs(s);
 	}
 
 	@Override
@@ -344,7 +255,7 @@ public class ConditionalConstantPropagation extends EdgeDataFlowFramework<Pair<E
 	 * @see edu.udel.cis.vsl.abc.analysis.dataflow.DataFlowFramework#preds(edu.udel.cis.vsl.abc.ast.node.IF.ASTNode)
 	 */
 	protected Set<ASTNode> preds(ASTNode s) {
-		return cfa.predecessors(s);
+		return au.preds(s);
 	}
 
 	@Override

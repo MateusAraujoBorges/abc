@@ -192,6 +192,8 @@ public class CommonValueFactory implements ValueFactory {
 				return ((Enumerator) entity).getValue();
 			}
 			return null;
+		} else if (expr instanceof IdentifierExpressionNode) {
+			throw new UnsourcedException("Variable in constant expression");
 		}
 		return null;
 	}
@@ -591,6 +593,7 @@ public class CommonValueFactory implements ValueFactory {
 				break;
 			case MOD:
 				bigVal = big0.mod(big1);
+				break;
 			default:
 				throw new UnsourcedException(
 						"Unexpected operator: " + operator);
@@ -624,19 +627,59 @@ public class CommonValueFactory implements ValueFactory {
 		case BITXOR: // ^ bit-wise exclusive or
 		case CONDITIONAL: // ?: the conditional operator
 		case DEREFERENCE: // * pointer dereference
-		case EQUALS: // == equality
-		case GT: // > greater than
-		case GTE: // >= greater than or equals
-		case LAND: // && logical and
-		case LOR: // || logical or
-		case LT: // < less than
-		case LTE: // <= less than or equals
-		case NEQ: // != not equals
-		case NOT: // ! logical not
 		case SHIFTLEFT: // << shift left
 		case SHIFTRIGHT: // >> shift right
 		case SUBSCRIPT: // [] array subscript
 			break;
+			
+		case EQUALS: // == equality
+		case GT: // > greater than
+		case GTE: // >= greater than or equals
+		case LT: // < less than
+		case LTE: // <= less than or equals
+		case NEQ: // != not equals
+			if (numArgs == 2)
+				return evalBinaryIntegerOp(operator, args[0], args[1]);
+			else
+				throw new UnsourcedException(
+						"Expected two arguments for operator " + operator);
+			
+		case LAND: // && logical and
+			if (numArgs == 2) {
+				Value lval = evalBinaryIntegerOp(Operator.EQUALS, args[0], SINT_ONE);
+				if (!lval.equals(SINT_ONE)) 
+					return SINT_ZERO;
+				Value rval = evalBinaryIntegerOp(Operator.EQUALS, args[0], SINT_ONE);
+				if (rval.equals(SINT_ONE)) 
+					return SINT_ONE;
+				else
+					return SINT_ZERO;
+
+			} else
+				throw new UnsourcedException(
+						"Expected two arguments for operator " + operator);
+			
+		case LOR: // || logical or
+			if (numArgs == 2) {
+				Value lval = evalBinaryIntegerOp(Operator.EQUALS, args[0], SINT_ONE);
+				if (lval.equals(SINT_ONE)) 
+					return SINT_ONE;
+				Value rval = evalBinaryIntegerOp(Operator.EQUALS, args[0], SINT_ONE);
+				if (rval.equals(SINT_ONE)) 
+					return SINT_ONE;
+				else
+					return SINT_ZERO;
+
+			} else
+				throw new UnsourcedException(
+						"Expected two arguments for operator " + operator);
+			
+		case NOT: // ! logical not
+			if (numArgs == 1)
+				return evalBinaryIntegerOp(Operator.EQUALS, args[0], SINT_ZERO);
+			else
+				throw new UnsourcedException(
+						"Expected one arguments for operator " + operator);
 
 		case PLUS: // + binary addition, numeric or pointer
 		case DIV: // / numerical division
@@ -748,9 +791,7 @@ public class CommonValueFactory implements ValueFactory {
 	 * @param a2
 	 * @return
 	 */
-	@SuppressWarnings("unused")
-	private Value evaluateBinaryIntegerOperator(Operator operator, Value a1,
-			Value a2) {
+	private Value evalBinaryIntegerOp(Operator operator, Value a1, Value a2) {
 		IntegerType type1 = (IntegerType) a1.getType();
 		IntegerType type;
 

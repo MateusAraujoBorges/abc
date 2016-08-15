@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.ControlFlowAnalysis;
+import edu.udel.cis.vsl.abc.analysis.dataflow.AnalysisUtilities;
 import edu.udel.cis.vsl.abc.analysis.dataflow.DominatorAnalysis;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
@@ -24,11 +25,11 @@ import edu.udel.cis.vsl.abc.util.IF.Pair;
  * @author dwyer
  */
 public class GatingExpressionFactory  {
-	ControlFlowUtilities cfu;
+	AnalysisUtilities cfu;
 	Map<ASTNode, Map<ASTNode, GatingExpression>> edgeGExprMap;	
 	
 	public GatingExpressionFactory(ControlFlowAnalysis cfa) {
-		this.cfu = new ControlFlowUtilities(cfa);
+		this.cfu = new AnalysisUtilities(cfa);
 		this.edgeGExprMap = new HashMap<ASTNode, Map<ASTNode, GatingExpression>>();
 	}
 	

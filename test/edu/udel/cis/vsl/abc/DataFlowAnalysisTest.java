@@ -117,7 +117,7 @@ public class DataFlowAnalysisTest {
 		check("jumps");
 	}
 
-	@Test
+	@Ignore
 	public void matprod() throws ABCException, IOException {
 		check("matprod");
 	}

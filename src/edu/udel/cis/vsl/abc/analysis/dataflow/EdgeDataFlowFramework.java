@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
@@ -19,6 +21,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.IfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonOperatorNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
@@ -82,124 +85,6 @@ public abstract class EdgeDataFlowFramework<E> extends DataFlowFramework<E> {
 		return newValues;
 	}
 
-	/**
-	 * A branch has multiple successors
-	 * 
-	 * @param n the node in question
-	 * @return an indication of whether it is a branch node
-	 */
-	protected boolean isBranch(ASTNode n) {
-		return succs(n).size() > 1;
-	}
-	
-	protected boolean isChild(ASTNode n, ASTNode c) {
-		if (n.equals(c)) {
-			return true;
-		} else {
-			Iterable<ASTNode> children = n.children();
-			for (ASTNode child : children) {
-				if (isChild(child, c)) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-	
-	/**
-	 * Access the branch condition for the branch edge.  This is purely an
-	 * operation on {@link ASTNode}s, but it is in this class because it is
-	 * essential for branched data flow analyses.
-	 * 
-	 * The returned expression does not share any structure with the existing
-	 * AST.
-	 * 
-	 * @param n node at the source of the edge
-	 * @param s successor at the destination of the edge
-	 * @return expression encoding branch condition
-	 */
-	protected ExpressionNode branchCondition(ASTNode n, ASTNode s) {
-		NodeFactory nf = n.getOwner().getASTFactory().getNodeFactory();
-		Source source = n.getSource();
-		
-		if (isBranch(n)) {
-			assert n instanceof ExpressionNode : "Expected expression node for branch condition";
-		
-			// Copy the source node since it will be used in building the branch condition
-			ExpressionNode srcNode = (ExpressionNode)n.copy();
-			
-			if (succs(n).size() == 2) {
-				if (n.parent() instanceof IfNode) {
-					IfNode ifn = (IfNode)n.parent();
-					
-					// if the successor is in the true branch somewhere
-					if (isChild(ifn.getTrueBranch(),s)) {
-						// true branch has the original condition
-						return srcNode;
-					} else {
-						// false branch requires wrapping with a negation
-						OperatorNode notCond = nf.newOperatorNode(source, Operator.NOT, srcNode);
-						return notCond;
-					}		
-				} else if (n.parent() instanceof LoopNode) {
-					LoopNode ln = (LoopNode)n.parent();
-
-					// if the successor is in the body
-					if (isChild(ln.getBody(),s)) {
-						// true branch has the original condition
-						return srcNode;
-					} else {
-						// false branch requires wrapping with a negation
-						OperatorNode notCond = nf.newOperatorNode(source, Operator.NOT, srcNode);
-						return notCond;
-					}	
-				} else {
-					assert false : "Unexpected branching node";
-				}
-		
-			} else {
-				// branch is a switch, which means that the condition is the expression that is compared to cases
-				SwitchNode swn = (SwitchNode) n.parent();
-				
-				if (swn.getDefaultCase().equals(s)) {
-					// default condition is the conjunction of the negation of all case label conditions
-					ExpressionNode defaultCondition = nf.newBooleanConstantNode(source, true);
-					for (Iterator<LabeledStatementNode> iter = swn.getCases(); iter.hasNext();) {
-						LabeledStatementNode c = iter.next();
-						if (c.equals(s)) {
-							SwitchLabelNode sln = (SwitchLabelNode) c.getLabel();
-							
-							// Copy the case constant to assemble the switch edge condition
-							ExpressionNode caseConst = sln.getExpression().copy();
-							OperatorNode caseCompare = nf.newOperatorNode(source, Operator.NEQ, srcNode, caseConst);
-							
-							defaultCondition = nf.newOperatorNode(source, Operator.LAND, defaultCondition, caseCompare);	
-						}
-					}
-					return defaultCondition;
-				} else {
-					// match the case label and return its condition
-					for (Iterator<LabeledStatementNode> iter = swn.getCases(); iter.hasNext();) {
-						LabeledStatementNode c = iter.next();
-						if (c.equals(s)) {
-							SwitchLabelNode sln = (SwitchLabelNode) c.getLabel();
-							
-							// Copy the case constant to assemble the switch edge condition
-							ExpressionNode caseConst = sln.getExpression().copy();
-							OperatorNode caseCompare = nf.newOperatorNode(source, Operator.EQUALS, srcNode, caseConst);
-							return caseCompare;	
-						}
-					}
-					assert false : "Expected a matching case label";
-				}
-				
-			}
-		} 
-		
-		// Return a trivial branch condition
-		return nf.newBooleanConstantNode(source, true);	
-	}
-	
 	/*
 	 * Function space definition
 	 */
