@@ -2977,7 +2977,7 @@ public class ASTPrettyPrinter {
 				result.append(expression2Pretty(
 						((RemoteOnExpressionNode) expression)
 								.getProcessExpression(),
-						maxLength - result.length()));
+						vacantLength(maxLength, result)));
 				result.append(" , ");
 				result.append(expression2Pretty(
 						((RemoteOnExpressionNode) expression)
