@@ -1579,7 +1579,9 @@ public class AcslContractWorker {
 	}
 
 	private Source newSource(CommonTree tree) {
-		return parseTree.source(tree);
+		Source result = parseTree.source(tree);
+
+		return result;
 	}
 
 }

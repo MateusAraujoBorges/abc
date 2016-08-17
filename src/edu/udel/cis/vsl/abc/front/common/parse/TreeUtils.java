@@ -100,8 +100,8 @@ public class TreeUtils {
 				int childMin, childMax;
 
 				completePostProcess(child);
-				childMin = child.getTokenStartIndex();
-				childMax = child.getTokenStopIndex();
+				childMin = getSubTreeStartIndex(child);
+				childMax = getSubTreeStopIndex(child);
 				if (childMin >= 0 && (min < 0 || childMin < min))
 					min = childMin;
 				if (childMax >= 0 && (max < 0 || childMax > max))
@@ -110,6 +110,26 @@ public class TreeUtils {
 			tree.setTokenStartIndex(min);
 			tree.setTokenStopIndex(max);
 		}
+	}
+
+	private static int getSubTreeStartIndex(CommonTree tree) {
+		int index = tree.getTokenStartIndex();
+		Token token = tree.getToken();
+
+		if (index == token.getTokenIndex() && !(token instanceof CivlcToken)) {
+			index = -1;
+		}
+		return index;
+	}
+
+	private static int getSubTreeStopIndex(CommonTree tree) {
+		int index = tree.getTokenStopIndex();
+		Token token = tree.getToken();
+
+		if (index == token.getTokenIndex() && !(token instanceof CivlcToken)) {
+			index = -1;
+		}
+		return index;
 	}
 
 }
