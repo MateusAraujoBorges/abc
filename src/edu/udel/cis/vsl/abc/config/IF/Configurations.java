@@ -97,7 +97,8 @@ public class Configurations {
 
 				if (lc.endsWith(".f") || lc.endsWith(".for")
 						|| lc.endsWith(".f77") || lc.endsWith(".f90")
-						|| lc.endsWith(".f95") || lc.endsWith(".f03")) {
+						|| lc.endsWith(".f95") || lc.endsWith(".f03")
+						|| lc.lastIndexOf('.') < 0) {
 					// Fortran code
 					if (result == null)
 						result = Language.FORTRAN77;
