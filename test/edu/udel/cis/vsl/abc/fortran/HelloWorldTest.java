@@ -10,7 +10,7 @@ import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
 
-public class SimpleFortranTest {
+public class HelloWorldTest {
 	/**
 	 * Turn on a lot of output for debugging? Set this to true only in your
 	 * local copy. Be sure to set it back to false before committing!
@@ -18,7 +18,7 @@ public class SimpleFortranTest {
 	private static boolean debug = false;
 
 	private static File root = new File(
-			new File(new File("examples"), "fortran"), "simple-test");
+			new File(new File("examples"), "fortran"), "simple");
 
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
@@ -32,7 +32,7 @@ public class SimpleFortranTest {
 	}
 
 	@Test
-	public void simpleSample() throws ABCException {
-		check("simpleSample");
+	public void fortran_HelloWorld() throws ABCException {
+		check("HelloWorld");
 	}
 }
