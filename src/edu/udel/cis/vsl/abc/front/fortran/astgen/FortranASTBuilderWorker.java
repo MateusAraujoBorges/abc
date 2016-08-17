@@ -43,7 +43,6 @@ import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
-import edu.udel.cis.vsl.abc.front.IF.ASTBuilder;
 import edu.udel.cis.vsl.abc.front.IF.Front;
 import edu.udel.cis.vsl.abc.front.IF.ParseException;
 import edu.udel.cis.vsl.abc.front.IF.Parser;
@@ -98,9 +97,6 @@ public class FortranASTBuilderWorker {
 
 	public FortranASTBuilderWorker(Configuration config, FortranTree parseTree,
 			ASTFactory astFactory, String filePath) {
-		ASTBuilder astBuilder = Front.newASTBuilder(Language.FORTRAN77,
-				configuration, astFactory);
-
 		this.configuration = config;
 		this.parseTree = parseTree;
 		this.filePath = filePath;
@@ -694,6 +690,24 @@ public class FortranASTBuilderWorker {
 						}
 						return nodeFactory.newOperatorNode(source, operator,
 								arguments);
+					}else if (IdStr.matches("^I?OR$")) {
+						Operator operator = Operator.BITOR;
+						List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
+
+						for (int i = 0; i < 2; i++) {
+							ExpressionNode argument = translateExpression(
+									source,
+									refNode.getChildByIndex(1)
+											.getChildByIndex(i)
+											.getChildByIndex(0),
+									scope);
+
+							arguments.add(argument);
+						}
+						return nodeFactory.newOperatorNode(source, operator,
+								arguments);
+					}else{
+						assert false;
 					}
 					return translateOperatorExpression(source, refNode, scope);
 				}
@@ -1154,7 +1168,7 @@ public class FortranASTBuilderWorker {
 			SimpleScope scope) throws SyntaxException {
 		Source source = generateSource(blockItemNode);
 		FortranTree printStatementTree = blockItemNode;
-		FortranTree outputListTree = printStatementTree.getChildByIndex(2);
+		FortranTree outputListTree = printStatementTree.getChildByIndex(3);
 		IdentifierNode printfIdNode = nodeFactory.newIdentifierNode(source,
 				"printf");
 		ExpressionNode functionNode = nodeFactory
@@ -1178,7 +1192,7 @@ public class FortranASTBuilderWorker {
 			argumentList.add(outputExprNode);
 			formatStr += "%s";
 		}
-		formatStr += "\n\"";
+		formatStr += "\"";
 		cToken = tokenFactory.newCivlcToken(0, formatStr,
 				blockItemNode.getChildByIndex(1).cTokens()[0].getFormation());
 		strToken = tokenFactory.newStringToken(cToken);
