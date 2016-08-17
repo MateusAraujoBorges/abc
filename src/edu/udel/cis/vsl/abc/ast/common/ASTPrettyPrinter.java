@@ -2025,6 +2025,7 @@ public class ASTPrettyPrinter {
 		StringBuffer result = new StringBuffer();
 		DeclarationListNode vars = civlFor.getVariables();
 		int numVars = vars.numChildren();
+		StatementNode body = civlFor.getBody();
 
 		result.append(prefix);
 		if (civlFor.isParallel())
@@ -2040,7 +2041,11 @@ public class ASTPrettyPrinter {
 		result.append(": ");
 		result.append(expression2Pretty(civlFor.getDomain(),
 				vacantLength(maxLength, result)));
-		result.append(")\n");
+		result.append(")");
+		if (body.statementKind() == StatementKind.COMPOUND)
+			result.append(" ");
+		else
+			result.append("\n");
 		result.append(statement2Pretty(prefix + indention, civlFor.getBody(),
 				true, false, vacantLength(maxLength, result)));
 		return trimStringBuffer(result, maxLength);

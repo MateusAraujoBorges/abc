@@ -116,7 +116,8 @@ public class TreeUtils {
 		int index = tree.getTokenStartIndex();
 		Token token = tree.getToken();
 
-		if (index == token.getTokenIndex() && !(token instanceof CivlcToken)) {
+		if (token != null && index == token.getTokenIndex()
+				&& !(token instanceof CivlcToken)) {
 			index = -1;
 		}
 		return index;
@@ -126,7 +127,8 @@ public class TreeUtils {
 		int index = tree.getTokenStopIndex();
 		Token token = tree.getToken();
 
-		if (index == token.getTokenIndex() && !(token instanceof CivlcToken)) {
+		if (token != null && index == token.getTokenIndex()
+				&& !(token instanceof CivlcToken)) {
 			index = -1;
 		}
 		return index;
