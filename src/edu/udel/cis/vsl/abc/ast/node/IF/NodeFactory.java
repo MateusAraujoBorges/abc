@@ -69,6 +69,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.OriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
@@ -2642,10 +2643,24 @@ public interface NodeFactory {
 	 *            the source of the expression
 	 * @param state
 	 *            the state to be used for evaluation
+	 * @param pid
+	 *            the process in whose context the expression is to be evaluated
 	 * @param expression
 	 *            the expression to be evaluated
 	 * @return the new <code>$value_at</code> expression node
 	 */
 	ValueAtNode newValueAtNode(Source source, ExpressionNode state,
 			ExpressionNode pid, ExpressionNode expression);
+
+	/**
+	 * Creates a new expression node for <code>$orginal (expr) </code>.
+	 * 
+	 * @param source
+	 *            the source of the new node
+	 * @param expression
+	 *            the expression to be evaluated
+	 * @return the new <code>$original</code> expression node
+	 */
+	OriginalExpressionNode newOriginalExpressionNode(Source source,
+			ExpressionNode expression);
 }

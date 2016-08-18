@@ -118,6 +118,7 @@ INPUT		:	'$input'	;
 INVARIANT	:	'$invariant'	;
 LAMBDA		:	'$lambda'	;
 OUTPUT		:	'$output'	;
+ORIGINAL	:	'$original'	;
 PARFOR		:	'$parfor'	;
 PROCNULL	:	'$proc_null'	;
 PURE		:	'$pure'		;

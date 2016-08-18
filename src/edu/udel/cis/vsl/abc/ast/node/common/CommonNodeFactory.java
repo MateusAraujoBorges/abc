@@ -76,6 +76,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.OriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
@@ -185,6 +186,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIdentifierExpressio
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonLambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonOperatorNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonOriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonProcnullNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonQuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonRegularRangeNode;
@@ -1296,6 +1298,12 @@ public class CommonNodeFactory implements NodeFactory {
 	public ValueAtNode newValueAtNode(Source source, ExpressionNode state,
 			ExpressionNode pid, ExpressionNode expression) {
 		return new CommonValueAtNode(source, state, pid, expression);
+	}
+
+	@Override
+	public OriginalExpressionNode newOriginalExpressionNode(Source source,
+			ExpressionNode expression) {
+		return new CommonOriginalExpressionNode(source, expression);
 	}
 
 }

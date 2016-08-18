@@ -390,6 +390,7 @@ civl_keyword	:	ABSTRACT
 		|	INVARIANT
 		|	LAMBDA
 		|	OUTPUT
+		|	ORIGINAL
 		|	PARFOR
 		|	PROCNULL
 		|	PURE

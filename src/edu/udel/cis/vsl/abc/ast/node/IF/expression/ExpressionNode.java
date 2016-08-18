@@ -137,6 +137,11 @@ public interface ExpressionNode
 		 */
 		OPERATOR,
 		/**
+		 * A CIVL-C <code>$original (expr)</code> expression, can be cast to
+		 * {@link OriginalExpressionNode}
+		 */
+		ORIGINAL,
+		/**
 		 * A CIVL-C expression formed using a quantifier, such as the universal
 		 * quantifier <code>$forall</code> or the existential quantifier
 		 * <code>$exists</code>. Can be cast to {@link QuantifiedExpressionNode}

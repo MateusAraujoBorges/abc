@@ -193,12 +193,14 @@ primaryExpression
 	: constant
 	| IDENTIFIER
 	| STRING_LITERAL
-    | LPAREN compoundStatement RPAREN
-      -> ^(STATEMENT_EXPRESSION LPAREN compoundStatement RPAREN)
+    	| LPAREN compoundStatement RPAREN
+      	  -> ^(STATEMENT_EXPRESSION LPAREN compoundStatement RPAREN)
 	| LPAREN expression RPAREN 
 	  -> ^(PARENTHESIZED_EXPRESSION LPAREN expression RPAREN)
 	| genericSelection
 	| derivativeExpression
+	| ORIGINAL LPAREN expression RPAREN 
+	  -> ^(ORIGINAL LPAREN expression RPAREN)
 	;
 
 /* 6.5.1.1 */

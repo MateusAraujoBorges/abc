@@ -54,6 +54,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.OriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ProcnullNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
@@ -294,6 +295,13 @@ public class ExpressionAnalyzer {
 				case NOTHING :
 					node.setInitialType(this.typeFactory.memoryType());
 					break;
+				case ORIGINAL : {
+					OriginalExpressionNode expr = (OriginalExpressionNode) node;
+
+					processExpression(expr.expression());
+					expr.setInitialType(expr.expression().getConvertedType());
+					break;
+				}
 				case OBJECT_OR_REGION_OF : {
 					ExpressionNode operand = ((ObjectOrRegionOfNode) node)
 							.operand();

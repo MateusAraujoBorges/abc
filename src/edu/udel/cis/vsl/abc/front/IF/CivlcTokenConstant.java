@@ -168,6 +168,7 @@ public interface CivlcTokenConstant {
 	public static final int IFDEF = CivlCParser.IFDEF;
 	public static final int IFNDEF = CivlCParser.IFNDEF;
 	public static final int INCLUDE = CivlCParser.INCLUDE;
+	public static final int ORIGINAL = CivlCParser.ORIGINAL;
 	public static final int PLINE = CivlCParser.LINE;
 	public static final int PLUS = CivlCParser.PLUS;
 	public static final int PLUSEQ = CivlCParser.PLUSEQ;

@@ -806,12 +806,21 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			case VALUE_AT :
 				return translateValueAtExpression(source, expressionTree,
 						scope);
+			case ORIGINAL :
+				return translateOriginalExpression(source, expressionTree,
+						scope);
 			default :
 				throw error("Unknown expression kind", expressionTree);
 		} // end switch
 	}
 
 	// Translation of Declarations and Types...
+
+	private ExpressionNode translateOriginalExpression(Source source,
+			CommonTree valueAt, SimpleScope scope) throws SyntaxException {
+		return nodeFactory.newOriginalExpressionNode(source,
+				translateExpression((CommonTree) valueAt.getChild(1), scope));
+	}
 
 	private ExpressionNode translateValueAtExpression(Source source,
 			CommonTree valueAt, SimpleScope scope) throws SyntaxException {
