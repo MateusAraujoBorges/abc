@@ -234,7 +234,7 @@ void $mpi_coassert(MPI_Comm, _Bool);
 /*********** Section: contract helper functions ***********/
 $collate_state $mpi_snapshot(MPI_Comm comm, $scope scope);
 
-void $mpi_unsnapshot(MPI_Comm comm);
+void $mpi_unsnapshot(MPI_Comm comm, $collate_state cs);
 
 /* Returns the number of chars of the given MPI_Datatype.
  * equivalent to returns (datatypeSizeof(datatype) / sizeof(char))

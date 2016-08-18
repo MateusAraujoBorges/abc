@@ -109,7 +109,7 @@ $atomic_f $collate_state $collate_arrives($collator c, $scope scope);
   @ depends_on \nothing;
   @ executes_when \true;
   @*/
-$atomic_f void $collate_departs($collator c);
+$atomic_f void $collate_departs($collator c, $collate_state cs);
 
 /* Tests if a set of participants defined by a $range have all arrived
  * the specific $collate_entry referenced by cp.
