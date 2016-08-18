@@ -3052,6 +3052,9 @@ public class ASTPrettyPrinter {
 		result.append(expression2Pretty(valueAt.stateNode(),
 				vacantLength(maxLength, result)));
 		result.append(", ");
+		result.append(expression2Pretty(valueAt.pidNode(),
+				vacantLength(maxLength, result)));
+		result.append(", ");
 		result.append(expression2Pretty(valueAt.expressionNode(),
 				vacantLength(maxLength, result)));
 		result.append(")");
