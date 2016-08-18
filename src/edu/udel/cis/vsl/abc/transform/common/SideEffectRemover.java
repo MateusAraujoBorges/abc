@@ -1894,12 +1894,13 @@ public class SideEffectRemover extends BaseTransformer {
 				return translateNonSideEffectExpression(
 						(ArrayLambdaNode) expression);
 			case EXTENDED_QUANTIFIED :
-				return translateNonSideEffectExpression(expression);
+			case ORIGINAL :
 			case LAMBDA :
 				return translateNonSideEffectExpression(expression);
 			case VALUE_AT :
 				return translateValueAtExpression((ValueAtNode) expression,
 						isVoid);
+
 			default :
 				throw new ABCUnsupportedException(
 						"removing side-effects for " + kind + " expression");
