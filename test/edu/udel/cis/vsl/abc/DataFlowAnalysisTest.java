@@ -29,7 +29,7 @@ import edu.udel.cis.vsl.abc.main.FrontEnd;
  * 
  */
 
-
+@Ignore
 public class DataFlowAnalysisTest {
 
 	/**
