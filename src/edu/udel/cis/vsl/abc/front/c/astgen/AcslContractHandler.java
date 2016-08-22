@@ -7,6 +7,7 @@ import org.antlr.runtime.tree.CommonTree;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.front.c.parse.CAcslParser;
 import edu.udel.cis.vsl.abc.front.c.parse.CParser.RuleKind;
@@ -92,8 +93,8 @@ public class AcslContractHandler {
 	 *             if there are any syntax errors.
 	 */
 	public SequenceNode<ContractNode> translateAcslAnnotation(Source source,
-			CivlcTokenSource tokenSource, SimpleScope scope)
-			throws SyntaxException {
+			CivlcTokenSource tokenSource, SimpleScope scope,
+			Configuration config) throws SyntaxException {
 		TokenStream tokens;
 		CommonTree tree;
 
@@ -104,7 +105,7 @@ public class AcslContractHandler {
 		CParseTree parseTree = new CParseTree(Language.CIVL_C,
 				RuleKind.CONTRACT, tokenSource, tree);
 		AcslContractWorker worker = new AcslContractWorker(nodeFactory,
-				tokenFactory, parseTree);
+				tokenFactory, parseTree, config);
 
 		return this.nodeFactory.newSequenceNode(source, "ACSL Annotation",
 				worker.generateContractNodes(scope));

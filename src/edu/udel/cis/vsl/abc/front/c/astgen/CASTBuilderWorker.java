@@ -2858,7 +2858,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 		this.scopeAndContracts.peek().left = newScope;
 		this.scopeAndContracts.peek().right = acslHandler
-				.translateAcslAnnotation(source, tokenSource, newScope);
+				.translateAcslAnnotation(source, tokenSource, newScope, config);
 	}
 
 	/**

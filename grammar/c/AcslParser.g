@@ -18,10 +18,13 @@ options
 }
 
 tokens{
+    ABSENT;
+    ABSTRACT_DECLARATOR;
     ACCESS_ACSL;
     ALLOC;
     ANYACT;
     ARGUMENT_LIST;
+    ARRAY_SUFFIX;
     ASSUMES_ACSL;
     ASSIGNS_ACSL;
     BEHAVIOR;
@@ -43,6 +46,7 @@ tokens{
     COL;
     CONTRACT;
     DEPENDSON;
+    DIRECT_ABSTRACT_DECLARATOR;
     ENSURES_ACSL;
     EVENT_BASE;
     EVENT_PLUS;
@@ -95,6 +99,7 @@ tokens{
     OLD;
     OPERATOR;
     P2P;
+    POINTER;
     PROD;
     PURE;
     QUANTIFIED;
@@ -109,6 +114,7 @@ tokens{
     SET_SIMPLE;
     SIZEOF_EXPR;
     SIZEOF_TYPE;
+    SPECIFIER_QUALIFIER_LIST;
     SUM;
     TERM_PARENTHESIZED;
     TERMINATES;
@@ -255,15 +261,52 @@ binder
 
 type_expr
     : logic_type_expr ->^(LOGIC_TYPE logic_type_expr)
-    | c_type ->^(C_TYPE c_type)
+    | specifierQualifierList abstractDeclarator
+      -> ^(C_TYPE specifierQualifierList abstractDeclarator)
     ;
+
+/* Start of C-like type name syntax */
+specifierQualifierList
+    : c_basic_type+
+      -> ^(SPECIFIER_QUALIFIER_LIST c_basic_type+)
+    ;
+
+abstractDeclarator
+    : pointer
+      -> ^(ABSTRACT_DECLARATOR pointer ABSENT)
+    | directAbstractDeclarator
+      -> ^(ABSTRACT_DECLARATOR ABSENT directAbstractDeclarator)
+    | pointer directAbstractDeclarator
+      -> ^(ABSTRACT_DECLARATOR pointer directAbstractDeclarator)
+    | -> ABSENT
+    ;
+
+directAbstractDeclarator
+    : LPAREN abstractDeclarator RPAREN directAbstractDeclaratorSuffix*
+      -> ^(DIRECT_ABSTRACT_DECLARATOR abstractDeclarator
+           directAbstractDeclaratorSuffix*)
+    | directAbstractDeclaratorSuffix+
+      -> ^(DIRECT_ABSTRACT_DECLARATOR ABSENT directAbstractDeclaratorSuffix+)
+    ;
+
+pointer
+    : STAR+ -> ^(POINTER STAR+)
+    ;
+
+directAbstractDeclaratorSuffix
+    : LSQUARE assignmentExpression_opt RSQUARE
+        -> ^(ARRAY_SUFFIX LSQUARE
+             assignmentExpression_opt RSQUARE)
+    ;
+/* End of C-like type name syntax */
+
 
 logic_type_expr
     : built_in_logic_type ->^(TYPE_BUILTIN built_in_logic_type)
     | IDENTIFIER ->^(TYPE_ID IDENTIFIER)
     ;
 
-c_type
+c_basic_type
     : CHAR | DOUBLE | FLOAT | INT | LONG | SHORT | VOID
     ;
 
@@ -427,6 +470,14 @@ assignmentExpression
 	       ^(ARGUMENT_LIST unaryExpression assignmentExpression))
 	| conditionalExpression
 	;
+
+/*
+ * Tree: assignmentExpression or ABSENT
+ */
+assignmentExpression_opt
+    : -> ABSENT
+    | assignmentExpression
+    ;
 
 /* 6.5.15 *
  * In C11 it is
@@ -711,7 +762,7 @@ unaryExpression
           -> ^(UNION_ACSL union_key argumentExpressionList RPAREN)
     	| inter_key LPAREN argumentExpressionList RPAREN
           -> ^(INTER inter_key argumentExpressionList RPAREN)
-   	| valid_key LPAREN term RPAREN
+   	    | valid_key LPAREN term RPAREN
        	  -> ^(VALID valid_key term RPAREN)
        	| extendedQuantification ->^(QUANTIFIED_EXT extendedQuantification)
        	| object_of_key LPAREN term RPAREN -> ^(OBJECT_OF object_of_key LPAREN term RPAREN)

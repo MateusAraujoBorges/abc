@@ -2,10 +2,13 @@ package edu.udel.cis.vsl.abc.front.c.astgen;
 
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.EXPR;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.TYPE;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ABSENT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ABSTRACT_DECLARATOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ACCESS_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AMPERSAND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.AND;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ANYACT;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARRAY_SUFFIX;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ARROW;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ASSIGN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BEQUIV_ACSL;
@@ -15,14 +18,12 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BITXOR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.BOOLEAN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CALL_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CAST;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.CHARACTER_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.COMMA;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.C_TYPE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DIV;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOTDOT;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.DOUBLE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.ELLIPSIS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EQUALS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EQUIV_ACSL;
@@ -32,7 +33,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PARENTHESIZED;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_PLUS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.EVENT_SUB;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FALSE_ACSL;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOAT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FLOATING_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.FUNC_CALL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GT;
@@ -41,11 +41,9 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.HASH;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IDENTIFIER;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLIES_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INDEX;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER_CONSTANT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LOGIC_TYPE;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LONG;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.LTE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.MOD;
@@ -67,7 +65,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SELF;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SET_BINDERS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHIFTLEFT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHIFTRIGHT;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SHORT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SIZEOF;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STAR;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.STRING_LITERAL;
@@ -82,7 +79,6 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_BASE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_SQUARE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VAR_ID_STAR;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.VOID;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.WRITE_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.XOR_ACSL;
 
@@ -134,12 +130,14 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quan
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType.SignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardUnsignedIntegerType.UnsignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.front.c.parse.AcslParser;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
@@ -194,6 +192,11 @@ public class AcslContractWorker {
 	 */
 	private Formation formation;
 
+	/**
+	 * the configuration of this translation task
+	 */
+	private Configuration config;
+
 	/* ******************** Constants ******************* */
 	private final String MPI_COMM_RANK = "\\mpi_comm_rank";
 	private final String MPI_COMM_SIZE = "\\mpi_comm_size";
@@ -209,11 +212,12 @@ public class AcslContractWorker {
 	 *            the parse tree to be translated
 	 */
 	public AcslContractWorker(NodeFactory factory, TokenFactory tokenFactory,
-			CParseTree parseTree) {
+			CParseTree parseTree, Configuration config) {
 		this.nodeFactory = factory;
 		this.tokenFactory = tokenFactory;
 		this.parseTree = parseTree;
 		this.typeFactory = nodeFactory.typeFactory();
+		this.config = config;
 		formation = tokenFactory.newTransformFormation("ACSL", "contract");
 	}
 
@@ -1035,45 +1039,184 @@ public class AcslContractWorker {
 
 		switch (kind) {
 			case LOGIC_TYPE :
-				return this.translateLogicType((CommonTree) tree.getChild(0),
-						scope);
+				return translateLogicType((CommonTree) tree.getChild(0), scope);
 			case C_TYPE :
-				return this.translateCType((CommonTree) tree.getChild(0),
-						scope);
+				return translateCType((CommonTree) tree.getChild(0),
+						(CommonTree) tree.getChild(1), scope);
 			default :
 				throw this.error("unkown kind of tyep expression", tree);
 		}
 	}
 
-	private TypeNode translateCType(CommonTree tree, SimpleScope scope)
-			throws SyntaxException {
-		int kind = tree.getType();
-		Source source = this.newSource(tree);
+	/**
+	 * ^(C_TYPE specifierList abstractDeclarator)
+	 * 
+	 * @param specifierList
+	 *            Type specifier tree
+	 * @param declarators
+	 *            Abstract declarator tree
+	 * @param scope
+	 * @return
+	 * @throws SyntaxException
+	 */
+	private TypeNode translateCType(CommonTree specifierList,
+			CommonTree declarators, SimpleScope scope) throws SyntaxException {
+		Source specifierSource = newSource(specifierList);
+		SpecifierAnalysis specifierAnalyzer;
+		TypeNode result;
+		DeclaratorData declaratorData;
 
-		switch (kind) {
-			case CHAR :
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.CHAR);
-			case DOUBLE :
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.DOUBLE);
-			case FLOAT :
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.FLOAT);
-			case INT :
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.INT);
-			case LONG :
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.LONG);
-			case SHORT :
-				return this.nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.SHORT);
-			case VOID :
-				return this.nodeFactory.newVoidTypeNode(source);
-			default :
-				throw this.error("unknown C type", tree);
+		specifierAnalyzer = new SpecifierAnalysis(specifierList, parseTree,
+				config);
+		result = nodeFactory.newBasicTypeNode(specifierSource,
+				specifierAnalyzer.getBasicTypeKind());
+		if (declarators.getType() != ABSENT) {
+			declaratorData = processDeclarator(declarators, result, scope);
+			result = declaratorData.type;
 		}
+		return result;
+	}
+
+	/**
+	 * Creates a new DeclaratorData based on given direct declarator tree node
+	 * and base type. The direct declarator may be abstract.
+	 * 
+	 * @param directDeclarator
+	 *            CommonTree node of type DIRECT_DECLARATOR,
+	 *            DIRECT_ABSTRACT_DECLARATOR, or ABSENT
+	 * @param type
+	 *            base type
+	 * @return new DeclaratorData with derived type and identifier
+	 * @throws SyntaxException
+	 */
+	private DeclaratorData processDirectDeclarator(CommonTree directDeclarator,
+			TypeNode type, SimpleScope scope) throws SyntaxException {
+		if (directDeclarator.getType() == ABSENT) {
+			return new DeclaratorData(type, null);
+		} else {
+			int numChildren = directDeclarator.getChildCount();
+			CommonTree prefix = (CommonTree) directDeclarator.getChild(0);
+
+			// need to peel off right-most suffix first. Example:
+			// T prefix [](); : (array of function returning T) prefix;
+			for (int i = numChildren - 1; i >= 1; i--)
+				type = translateDeclaratorSuffix(
+						(CommonTree) directDeclarator.getChild(i), type, scope);
+			switch (prefix.getType()) {
+				case ABSTRACT_DECLARATOR :
+					return processDeclarator(prefix, type, scope);
+				case ABSENT :
+					return new DeclaratorData(type, null);
+				default :
+					throw error("Unexpected node for direct declarator prefix",
+							prefix);
+			}
+		}
+	}
+
+	/**
+	 * Creates new DeclaratorData based on given declarator tree node and base
+	 * type. The declarator may be abstract. The data gives the new type formed
+	 * by applying the type derivation operations of the declarator to the base
+	 * type. The data also gives the identifier being declared, though this may
+	 * be null in the case of an abstract declarator.
+	 * 
+	 * @param declarator
+	 *            CommonTree node of type DECLARATOR, ABSTRACT_DECLARATOR, or
+	 *            ABSENT
+	 * @param type
+	 *            the start type before applying declarator operations
+	 * 
+	 * @return new DeclaratorData with type derived from given type and
+	 *         identifier
+	 * 
+	 * @throws SyntaxException
+	 */
+	private DeclaratorData processDeclarator(CommonTree declarator,
+			TypeNode type, SimpleScope scope) throws SyntaxException {
+		if (declarator.getType() == ABSENT) {
+			return new DeclaratorData(type, null);
+		} else {
+			CommonTree pointerTree = (CommonTree) declarator.getChild(0);
+			CommonTree directDeclarator = (CommonTree) declarator.getChild(1);
+			type = translatePointers(pointerTree, type, scope);
+
+			return processDirectDeclarator(directDeclarator, type, scope);
+		}
+	}
+
+	/**
+	 * Returns the new type obtained by taking the given type and applying the
+	 * pointer operations to it. For example, if the old type is "int" and the
+	 * pointerTree is "*", the result is the type "pointer to int".
+	 * 
+	 * @param pointerTree
+	 *            CommonTree node of type POINTER or ABSENT
+	 * @param type
+	 *            base type
+	 * @return modified type
+	 * @throws SyntaxException
+	 *             if an unknown kind of type qualifier appears
+	 */
+	private TypeNode translatePointers(CommonTree pointerTree, TypeNode type,
+			SimpleScope scope) throws SyntaxException {
+		int numChildren = pointerTree.getChildCount();
+		Source source = type.getSource();
+
+		for (int i = 0; i < numChildren; i++) {
+			CommonTree starNode = (CommonTree) pointerTree.getChild(i);
+
+			source = tokenFactory.join(source, newSource(starNode));
+			type = nodeFactory.newPointerTypeNode(source, type);
+		}
+		return type;
+	}
+
+	/**
+	 * Process declarator suffix, currently it only supports ARRAY_SUFFIX
+	 * 
+	 * @param suffix
+	 *            a CommonTree node of type ARRAY_SUFFIX or FUNCTION_SUFFIX
+	 * @param type
+	 * @return new type
+	 * @throws SyntaxException
+	 *             if the kind of suffix is not function or array
+	 */
+	private TypeNode translateDeclaratorSuffix(CommonTree suffix,
+			TypeNode baseType, SimpleScope scope) throws SyntaxException {
+		int kind = suffix.getType();
+
+		if (kind == ARRAY_SUFFIX)
+			return translateArraySuffix(suffix, baseType, scope);
+		else
+			throw error("Unknown declarator suffix", suffix);
+	}
+
+	/**
+	 * process ARRAY_SUFFIX tree, currently it only supports two subscript
+	 * forms. The form is either specified with extent or not:
+	 * <code>[ ] or [extent]</code>
+	 * 
+	 * @param suffix
+	 * @param baseType
+	 * @return
+	 * @throws SyntaxException
+	 */
+	private ArrayTypeNode translateArraySuffix(CommonTree suffix,
+			TypeNode baseType, SimpleScope scope) throws SyntaxException {
+		CommonTree extentNode = (CommonTree) suffix.getChild(1);
+		int extentNodeType = extentNode.getType();
+		ExpressionNode extent = null;
+		Source source = tokenFactory.join(baseType.getSource(),
+				newSource(suffix));
+
+		switch (extentNodeType) {
+			case ABSENT :
+				break;
+			default :
+				extent = translateExpression(extentNode, scope);
+		}
+		return nodeFactory.newArrayTypeNode(source, baseType, extent);
 	}
 
 	private TypeNode translateLogicType(CommonTree tree, SimpleScope scope)
