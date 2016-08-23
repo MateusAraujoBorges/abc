@@ -4240,7 +4240,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 				|| rule == 914 /* Format */
 		;
 		read_stmt_Node.addChild(1, stack.pop());
-		// Get the format label
+		// Get the label
 		assert !stack.empty();
 		if (stack.peek().rule() == 313) {
 			read_stmt_Node.addChild(0, stack.pop());
@@ -4297,6 +4297,10 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			assert temp.rule() == 916;
 			print_stmt_Node.addChild(temp);
 		}
+		assert !stack.isEmpty();
+		temp = stack.pop();
+		assert temp.rule() == 914;
+		print_stmt_Node.addChild(2, temp);
 		stack.push(print_stmt_Node);
 	}
 
@@ -4349,9 +4353,17 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		stack.push(io_control_spec_list_Node);
 	}
 
+	/**
+	 * R914 Format
+	 */
 	public void format() {
+		FortranTree format_Node = new FortranTree(914, "Format");
 
-	} // TODO: Implement
+		assert !stack.isEmpty();
+		if (isExpression(stack.peek().rule()))
+			format_Node.addChild(stack.pop());
+		stack.push(format_Node);
+	}
 
 	/**
 	 * R915 [Element] Input Item
