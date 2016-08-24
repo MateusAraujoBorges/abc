@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.analysis.entity;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.udel.cis.vsl.abc.analysis.common.ScopeAnalyzer;
 import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.Conversion;
@@ -94,6 +95,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.UnqualifiedObjectType;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 
@@ -166,13 +168,18 @@ public class ExpressionAnalyzer {
 
 	private AttributeKey unknownIdentifier;
 
+	private int inArraySlice = 0;
+
+	private ScopeAnalyzer scopeAnalyzer;
+
 	// private List<IdentifierExpressionNode> unknownIdentifiers = new
 	// LinkedList<>();
 
 	// ************************** Constructors ****************************
 
 	ExpressionAnalyzer(EntityAnalyzer entityAnalyzer,
-			ConversionFactory conversionFactory, TypeFactory typeFactory) {
+			ConversionFactory conversionFactory, TypeFactory typeFactory,
+			ScopeAnalyzer scopeAnalyzer) {
 		this.entityAnalyzer = entityAnalyzer;
 		this.conversionFactory = conversionFactory;
 		this.typeFactory = typeFactory;
@@ -187,6 +194,7 @@ public class ExpressionAnalyzer {
 		this.language = entityAnalyzer.language;
 		unknownIdentifier = this.nodeFactory.newAttribute("unknown_identifier",
 				Boolean.class);
+		this.scopeAnalyzer = scopeAnalyzer;
 	}
 
 	void setStatementAnalyzer(StatementAnalyzer statementAnalyzer) {
@@ -1083,7 +1091,7 @@ public class ExpressionAnalyzer {
 		}
 		identifierNode.setEntity(entity);
 		// only checks external definition for whole-program AST
-		if (node.getOwner().isWholeProgram()) {
+		if (node.getOwner() != null && node.getOwner().isWholeProgram()) {
 			this.checkExternalDefinitionOfIdentifier(node);
 		}
 	}
@@ -2092,6 +2100,53 @@ public class ExpressionAnalyzer {
 		node.setInitialType(intType);
 	}
 
+	private boolean isArrayType(ObjectType type) {
+		TypeKind kind = type.kind();
+
+		switch (kind) {
+			case ARRAY :
+				return true;
+			case QUALIFIED :
+				return isArrayType(((QualifiedObjectType) type).getBaseType());
+			default :
+				return false;
+		}
+	}
+
+	private ArrayType updateArrayType(ArrayType type,
+			ExpressionNode newExtent) {
+		ObjectType elementType = type.getElementType();
+
+		if (isArrayType(elementType)) {
+			elementType = updateArrayType((ArrayType) elementType, newExtent);
+		} else {
+			if (this.isPointerToCompleteObjectType(elementType))
+				elementType = typeFactory.variableLengthArrayType(
+						(ObjectType) ((PointerType) elementType)
+								.referencedType(),
+						newExtent);
+			else
+				return typeFactory.variableLengthArrayType(elementType,
+						newExtent);
+		}
+		if (type.getConstantSize() != null)
+			return typeFactory.arrayType(elementType, type.getConstantSize());
+		else if (type.getVariableSize() != null)
+			return typeFactory.variableLengthArrayType(elementType,
+					type.getVariableSize());
+		else
+			return typeFactory.incompleteArrayType(elementType);
+	}
+
+	private boolean isSubscript(ExpressionNode node) {
+		if (node instanceof OperatorNode) {
+			OperatorNode opNode = (OperatorNode) node;
+
+			return opNode.getOperator() == Operator.SUBSCRIPT;
+		}
+		return false;
+	}
+
 	/**
 	 * 6.5.2.1: "One of the expressions shall have type "pointer to complete
 	 * object type", the other expression shall have integer type, and the
@@ -2103,24 +2158,77 @@ public class ExpressionAnalyzer {
 	private void processSUBSCRIPT(OperatorNode node) throws SyntaxException {
 		ExpressionNode arg0 = node.getArgument(0);
 		ExpressionNode arg1 = node.getArgument(1);
-		Type type0 = addStandardConversions(arg0);
+		Type type0 = arg0.getConvertedType();
 		Type type1 = addStandardConversions(arg1);
+		ObjectType rangeType = typeFactory.rangeType();
 
-		if (!(type1 instanceof IntegerType)
-				&& !(type1.equals(typeFactory.rangeType()))
+		if (inArraySlice > 0)
+			inArraySlice++;
+		else if (arg1 instanceof RegularRangeNode) {
+			inArraySlice++;
+		}
+		if (inArraySlice == 0 || !this.isSubscript(arg0))
+			type0 = addStandardConversions(arg0);
+		if (!(type1 instanceof IntegerType) && !(type1.equals(rangeType))
 				&& !(arg1 instanceof WildcardNode))
 			throw error(
 					"Subscript does not have integer or range type:\n" + type1,
 					arg1);
 		// the following will check pointer in any case
 		// if strict C, must also be pointer to complete object type:
-		if (isPointerToCompleteObjectType(type0))
-			node.setInitialType(((PointerType) type0).referencedType());
-		else
+		if (isPointerToCompleteObjectType(type0)
+				|| isArrayType((ObjectType) type0)) {
+			if (arg1 instanceof RegularRangeNode) {
+				RegularRangeNode rangeNode = (RegularRangeNode) arg1;
+				Source source = arg1.getSource();
+				ExpressionNode sizeOfRange;
+
+				if (this.inArraySlice == 0)
+					inArraySlice++;
+				if (rangeNode.getStep() != null)
+					sizeOfRange = nodeFactory.newOperatorNode(source,
+							Operator.DIV,
+							nodeFactory.newOperatorNode(source, Operator.MINUS,
+									nodeFactory.newOperatorNode(source,
+											Operator.PLUS,
+											rangeNode.getHigh().copy(),
+											nodeFactory.newIntegerConstantNode(
+													source, "1")),
+									rangeNode.getLow().copy()),
+							rangeNode.getStep().copy());
+				else
+					sizeOfRange = nodeFactory
+							.newOperatorNode(source, Operator.MINUS,
+									nodeFactory.newOperatorNode(source,
+											Operator.PLUS,
+											rangeNode.getHigh().copy(),
+											nodeFactory.newIntegerConstantNode(
+													source, "1")),
+									rangeNode.getLow().copy());
+
+				scopeAnalyzer.processNode(sizeOfRange, rangeNode.getScope(),
+						null);
+				processExpression(sizeOfRange);
+				if (this.isArrayType((ObjectType) type0))
+					node.setInitialType(this.updateArrayType((ArrayType) type0,
+							sizeOfRange));
+				else
+					node.setInitialType(typeFactory.variableLengthArrayType(
+							(ObjectType) ((PointerType) type0).referencedType(),
+							sizeOfRange));
+			} else if (this.isArrayType((ObjectType) type0)) {
+				node.setInitialType(this.updateArrayType((ArrayType) type0,
+						nodeFactory.newIntegerConstantNode(arg1.getSource(),
+								"1")));
+			} else
+				node.setInitialType(((PointerType) type0).referencedType());
+		} else
 			throw error(
 					"First argument to subscript operator not pointer to complete object type:\n"
 							+ type0,
 					arg0);
+		if (inArraySlice > 0)
+			inArraySlice--;
 	}
 
 	private void processBitwise(OperatorNode node) throws SyntaxException {

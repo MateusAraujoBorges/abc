@@ -160,8 +160,8 @@ public class ScopeAnalyzer implements Analyzer {
 	 * @throws SyntaxException
 	 *             if AST is malformed in some way
 	 */
-	private void processNode(ASTNode node, Scope parentScope,
-			Scope functionScope) throws SyntaxException {
+	public void processNode(ASTNode node, Scope parentScope, Scope functionScope)
+			throws SyntaxException {
 
 		if (node.getScope() != null)
 			return;
@@ -280,8 +280,8 @@ public class ScopeAnalyzer implements Analyzer {
 	 * @throws SyntaxException
 	 *             if problem in AST
 	 */
-	private void processRecursive(ASTNode node, Scope scope, Scope functionScope)
-			throws SyntaxException {
+	private void processRecursive(ASTNode node, Scope scope,
+			Scope functionScope) throws SyntaxException {
 		Iterable<ASTNode> children = node.children();
 
 		assert scope != null;

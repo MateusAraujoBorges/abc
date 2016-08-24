@@ -30,7 +30,7 @@ public class StandardAnalyzer implements Analyzer {
 			ConversionFactory conversionFactory) {
 		scopeAnalyzer = new ScopeAnalyzer(entityFactory);
 		entityAnalyzer = new EntityAnalyzer(language, configuration,
-				astFactory, entityFactory, conversionFactory);
+				astFactory, entityFactory, conversionFactory, scopeAnalyzer);
 		callAnalyzer = new CallAnalyzer();
 	}
 

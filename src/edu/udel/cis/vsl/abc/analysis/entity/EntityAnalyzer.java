@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.analysis.entity;
 
 import edu.udel.cis.vsl.abc.analysis.IF.Analyzer;
+import edu.udel.cis.vsl.abc.analysis.common.ScopeAnalyzer;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.IF.StandardTypes;
@@ -106,7 +107,7 @@ public class EntityAnalyzer implements Analyzer {
 
 	public EntityAnalyzer(Language language, Configuration configuration,
 			ASTFactory astFactory, EntityFactory entityFactory,
-			ConversionFactory conversionFactory) {
+			ConversionFactory conversionFactory, ScopeAnalyzer scopeAnalyzer) {
 		this.configuration = configuration;
 		this.language = language;
 		this.astFactory = astFactory;
@@ -121,7 +122,7 @@ public class EntityAnalyzer implements Analyzer {
 		declarationAnalyzer.setIgnoredTypes(standardTypes
 				.getStandardTypeNames());
 		this.expressionAnalyzer = new ExpressionAnalyzer(this,
-				conversionFactory, typeFactory);
+				conversionFactory, typeFactory, scopeAnalyzer);
 		this.compoundLiteralAnalyzer = new CompoundLiteralAnalyzer(this);
 		this.statementAnalyzer = new StatementAnalyzer(this,
 				expressionAnalyzer, conversionFactory, typeFactory,
