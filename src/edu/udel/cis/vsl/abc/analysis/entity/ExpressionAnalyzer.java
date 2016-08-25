@@ -2136,6 +2136,24 @@ public class ExpressionAnalyzer {
 			return typeFactory.incompleteArrayType(elementType);
 	}
 
+	private boolean isSubscript(ExpressionNode node) {
+		if (node instanceof OperatorNode) {
+			OperatorNode opNode = (OperatorNode) node;
+
+			if (opNode.getOperator() == Operator.SUBSCRIPT)
+				return true;
+		}
+		return false;
+	}
+
+	private boolean isInArraySlice(ExpressionNode node) {
+		boolean result = isArraySlice(node);
+
+		if (result)
+			return true;
+		return isParentArraySlice(node);
+	}
+
 	private boolean isArraySlice(ExpressionNode node) {
 		if (node instanceof OperatorNode) {
 			OperatorNode opNode = (OperatorNode) node;
@@ -2145,6 +2163,22 @@ public class ExpressionAnalyzer {
 					return true;
 				else
 					return isArraySlice(opNode.getArgument(0));
+		}
+		return false;
+	}
+
+	private boolean isParentArraySlice(ExpressionNode node) {
+		ASTNode parent = node.parent();
+
+		if (parent instanceof OperatorNode) {
+			OperatorNode opNode = (OperatorNode) parent;
+
+			if (opNode.getOperator() == Operator.SUBSCRIPT) {
+				if (opNode.getArgument(1) instanceof RegularRangeNode)
+					return true;
+				else
+					return isParentArraySlice(opNode);
+			}
 		}
 		return false;
 	}
@@ -2163,8 +2197,10 @@ public class ExpressionAnalyzer {
 		Type type0 = arg0.getConvertedType();
 		Type type1 = addStandardConversions(arg1);
 		ObjectType rangeType = typeFactory.rangeType();
+		boolean isInArraySlice = this.isInArraySlice(node);
+		boolean isArg0Subscript = this.isSubscript(arg0);
 
-		if (!this.isArraySlice(arg0))
+		if (!isInArraySlice || !isArg0Subscript)
 			type0 = addStandardConversions(arg0);
 		if (!(type1 instanceof IntegerType) && !(type1.equals(rangeType))
 				&& !(arg1 instanceof WildcardNode))
@@ -2213,6 +2249,11 @@ public class ExpressionAnalyzer {
 							sizeOfRange));
 			} else if (this.isArrayType((ObjectType) type0)) {
 				node.setInitialType(this.updateArrayType((ArrayType) type0,
+						nodeFactory.newIntegerConstantNode(arg1.getSource(),
+								"1")));
+			} else if (isInArraySlice) {
+				node.setInitialType(this.typeFactory.variableLengthArrayType(
+						(ObjectType) ((PointerType) type0).referencedType(),
 						nodeFactory.newIntegerConstantNode(arg1.getSource(),
 								"1")));
 			} else
