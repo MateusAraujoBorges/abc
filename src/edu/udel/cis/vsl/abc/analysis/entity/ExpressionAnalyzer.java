@@ -168,8 +168,6 @@ public class ExpressionAnalyzer {
 
 	private AttributeKey unknownIdentifier;
 
-	private int inArraySlice = 0;
-
 	private ScopeAnalyzer scopeAnalyzer;
 
 	// private List<IdentifierExpressionNode> unknownIdentifiers = new
@@ -2138,11 +2136,15 @@ public class ExpressionAnalyzer {
 			return typeFactory.incompleteArrayType(elementType);
 	}
 
-	private boolean isSubscript(ExpressionNode node) {
+	private boolean isArraySlice(ExpressionNode node) {
 		if (node instanceof OperatorNode) {
 			OperatorNode opNode = (OperatorNode) node;
 
-			return opNode.getOperator() == Operator.SUBSCRIPT;
+			if (opNode.getOperator() == Operator.SUBSCRIPT)
+				if (opNode.getArgument(1) instanceof RegularRangeNode)
+					return true;
+				else
+					return isArraySlice(opNode.getArgument(0));
 		}
 		return false;
 	}
@@ -2162,12 +2164,7 @@ public class ExpressionAnalyzer {
 		Type type1 = addStandardConversions(arg1);
 		ObjectType rangeType = typeFactory.rangeType();
 
-		if (inArraySlice > 0)
-			inArraySlice++;
-		else if (arg1 instanceof RegularRangeNode) {
-			inArraySlice++;
-		}
-		if (inArraySlice == 0 || !this.isSubscript(arg0))
+		if (!this.isArraySlice(arg0))
 			type0 = addStandardConversions(arg0);
 		if (!(type1 instanceof IntegerType) && !(type1.equals(rangeType))
 				&& !(arg1 instanceof WildcardNode))
@@ -2183,8 +2180,6 @@ public class ExpressionAnalyzer {
 				Source source = arg1.getSource();
 				ExpressionNode sizeOfRange;
 
-				if (this.inArraySlice == 0)
-					inArraySlice++;
 				if (rangeNode.getStep() != null)
 					sizeOfRange = nodeFactory.newOperatorNode(source,
 							Operator.DIV,
@@ -2227,8 +2222,6 @@ public class ExpressionAnalyzer {
 					"First argument to subscript operator not pointer to complete object type:\n"
 							+ type0,
 					arg0);
-		if (inArraySlice > 0)
-			inArraySlice--;
 	}
 
 	private void processBitwise(OperatorNode node) throws SyntaxException {
