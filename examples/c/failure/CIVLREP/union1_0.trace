@@ -1,0 +1,27 @@
+Session name....... union1
+Directory.......... CIVLREP
+Date............... Fri Aug 26 12:00:06 EDT 2016
+Trace ID........... 0
+Violation number....... 0
+
+== Begin Violation Message == 
+Violation 0[length=1, file=CIVLREP/union1_0.trace]:
+CIVL execution violation in p0 (kind: DEREFERENCE, certainty: PROVEABLE)
+at union1.c:8.2-10 "u1.s1.val":
+attempt to write to a memory location through the pointer &<d0>u1 which can't be dereferenced
+
+Context:
+  true
+Call stacks:
+process 0:
+  main at union1.c:8.2-10 "u1.s1.val"
+
+== End Violation Message == 
+
+== Begin Configuration ==
+union1.c
+== End Configuration ==
+
+== Begin Trace ==
+LENGTH = 1
+== End Trace ==
