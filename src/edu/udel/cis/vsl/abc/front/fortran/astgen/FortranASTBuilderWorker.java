@@ -748,9 +748,6 @@ public class FortranASTBuilderWorker {
 							IdentifierNode idNode = translateIdentifier(
 									refNode.getChildByIndex(0));
 							String idName = idNode.name();
-							ExpressionNode idExprNode = nodeFactory
-									.newIdentifierExpressionNode(source,
-											idNode);
 
 							if (idName != null
 									&& comm_val_block.containsKey(idName)) {
@@ -1384,7 +1381,6 @@ public class FortranASTBuilderWorker {
 				Source varSource = generateSource(idTreeNode);
 				TypeNode type = nodeFactory.newBasicTypeNode(varSource,
 						BasicTypeKind.INT);
-				VariableDeclarationNode declaration = null;
 				boolean isArray = 1 < commBlockObjTreeNode.numChildren();
 
 				comm_val_block.put(fieldIdNode.name(), blockName);
