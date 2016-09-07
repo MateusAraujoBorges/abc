@@ -8,15 +8,19 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
+import java.util.TreeMap;
 
 import org.antlr.runtime.CommonToken;
 import org.antlr.runtime.Token;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
+import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
@@ -37,6 +41,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
@@ -84,14 +89,22 @@ public class FortranASTBuilderWorker {
 	private SequenceNode<BlockItemNode> rootNode;
 
 	private ArrayList<BlockItemNode> programUnits;
+	private ArrayList<BlockItemNode> commonBlocks;
 
 	private boolean hasSTDIO = false;
 
 	private Map<String, TypeNode> localMap = new HashMap<String, TypeNode>();
+
+	private Map<String, StructureOrUnionTypeNode> commonBlockSet = new TreeMap<String, StructureOrUnionTypeNode>();
+	private Map<String, String> comm_val_block = new TreeMap<String, String>();
+
+	private Stack<IdentifierNode> programUnitTrackStack = new Stack<IdentifierNode>();
 	// private Map<String, VariableDeclarationNode> localMap2 = new
 	// HashMap<String, VariableDeclarationNode>();
 
 	private List<BlockItemNode> tempItems = null;
+
+	private SimpleScope rootScope = null;
 
 	/* Constructor */
 
@@ -104,6 +117,7 @@ public class FortranASTBuilderWorker {
 		this.nodeFactory = astFactory.getNodeFactory();
 		this.tokenFactory = astFactory.getTokenFactory();
 		this.programUnits = new ArrayList<BlockItemNode>();
+		this.commonBlocks = new ArrayList<BlockItemNode>();
 
 		Preprocessor libPreproc = Front.newPreprocessor(Language.C,
 				configuration, tokenFactory.newFileIndexer(), tokenFactory);
@@ -298,27 +312,28 @@ public class FortranASTBuilderWorker {
 		Source source = generateSource(typeSpecifierNode);
 
 		switch (rule) {
-		case 403:
-			int specifierType = typeSpecifierNode.type();
+			case 403 :
+				int specifierType = typeSpecifierNode.type();
 
-			switch (specifierType) {
-			case 400: /* Integer */
-				type = nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT);
+				switch (specifierType) {
+					case 400 : /* Integer */
+						type = nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.INT);
+						break;
+					case 401 : /* REAL */
+						type = nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.DOUBLE);
+						break;
+					case 402 : /* DOUBLE PRECISION */
+						type = nodeFactory.newBasicTypeNode(source,
+								BasicTypeKind.DOUBLE);
+						break;
+					default :
+						assert false;
+				}
 				break;
-			case 401: /* REAL */
-				type = nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.DOUBLE);
-				break;
-			case 402: /* DOUBLE PRECISION */
-				type = nodeFactory.newBasicTypeNode(source,
-						BasicTypeKind.DOUBLE);
-				break;
-			default:
+			default :
 				assert false;
-			}
-			break;
-		default:
-			assert false;
 		}
 		return type;
 	}
@@ -356,14 +371,14 @@ public class FortranASTBuilderWorker {
 				int rule = temp.rule();
 
 				switch (rule) {
-				case 510:
-					isArray = true;
-					break;
-				case 506:
-					hasInit = true;
-					break;
-				default:
-					assert false;
+					case 510 :
+						isArray = true;
+						break;
+					case 506 :
+						hasInit = true;
+						break;
+					default :
+						assert false;
 				}
 			}
 			if (isArray) {
@@ -477,139 +492,199 @@ public class FortranASTBuilderWorker {
 		List<ExpressionNode> arguments = null;
 
 		switch (rule) {
-		case 613: /* PartRef(ArrayUnit) */
-			FortranTree id = exprNode.getChildByIndex(0);
-			FortranTree indexUnitsNode = exprNode.getChildByIndex(1);
-			int arity = indexUnitsNode.numChildren();
-			IdentifierNode idNode = translateIdentifier(id);
-			ExpressionNode idExprNode = nodeFactory
-					.newIdentifierExpressionNode(source, idNode);
-			ExpressionNode indexNode = null;
-			ExpressionNode adjustedIndexNode = null;
+			case 613 : /* PartRef(ArrayUnit) */
+				FortranTree id = exprNode.getChildByIndex(0);
+				FortranTree indexUnitsNode = exprNode.getChildByIndex(1);
+				int arity = indexUnitsNode.numChildren();
+				IdentifierNode idNode = translateIdentifier(id);
+				ExpressionNode idExprNode = nodeFactory
+						.newIdentifierExpressionNode(source, idNode);
+				ExpressionNode indexNode = null;
+				ExpressionNode adjustedIndexNode = null;
 
-			for (int i = 0; i < arity; i++) {
-				FortranTree indexUnitNode = indexUnitsNode.getChildByIndex(i)
-						.getChildByIndex(0);
-				TypeNode arrayType = localMap.get(idNode.name());
-				ExpressionNode startIndexNode = null;
+				for (int i = 0; i < arity; i++) {
+					FortranTree indexUnitNode = indexUnitsNode
+							.getChildByIndex(i).getChildByIndex(0);
+					TypeNode arrayType = localMap.get(idNode.name());
+					ExpressionNode startIndexNode = null;
 
-				for (int j = 1; j <= i; j++) {
-					arrayType = (TypeNode) arrayType.child(0);
-				}
-				startIndexNode = (ExpressionNode) arrayType.child(2);
-				operator = Operator.SUBSCRIPT;
-				arguments = new LinkedList<ExpressionNode>();
-				indexNode = translateExpression(source, indexUnitNode, scope);
-				adjustedIndexNode = adjustIndex(source, indexNode,
-						startIndexNode);
-				arguments.add(idExprNode);
-				arguments.add(adjustedIndexNode);
-				idExprNode = nodeFactory.newOperatorNode(source, operator,
-						arguments);
-			}
-			return (OperatorNode) idExprNode;
-		case 734: /* Assign */
-			ExpressionNode lhsArgExprNode = translateExpression(source,
-					exprNode.getChildByIndex(1), scope);
-			ExpressionNode rhsArgExprNode = translateExpression(source,
-					exprNode.getChildByIndex(2), scope);
-
-			operator = Operator.ASSIGN;
-			arguments = new LinkedList<ExpressionNode>();
-			if (lhsArgExprNode
-					.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
-				IdentifierNode assignedIdNode = (IdentifierNode) lhsArgExprNode
-						.child(0);
-				String assignedIdName = assignedIdNode.name();
-
-				if (!localMap.containsKey(assignedIdName)) {
-					String pattern = "^(I|J|K|L|M|N|i|j|k|l|m|n).*$";
-					TypeNode type = null;
-					VariableDeclarationNode varDeclNode = null;
-
-					if (assignedIdName.matches(pattern)) {
-						type = nodeFactory.newBasicTypeNode(source,
-								BasicTypeKind.INT);
-					} else {
-						type = nodeFactory.newBasicTypeNode(source,
-								BasicTypeKind.DOUBLE);
+					for (int j = 1; j <= i; j++) {
+						arrayType = (TypeNode) arrayType.child(0);
 					}
-					varDeclNode = nodeFactory.newVariableDeclarationNode(source,
-							assignedIdNode.copy(), type);
-					localMap.put(assignedIdName, type);
-					tempItems.add(0, varDeclNode);
-				}
-			}
-			arguments.add(lhsArgExprNode);
-			arguments.add(rhsArgExprNode);
-			return nodeFactory.newOperatorNode(source, operator, arguments);
-		case 710: /* Lv3 Expression */
-			String opStr = exprNode.getChildByIndex(0).cTokens()[0].getText();
+					startIndexNode = (ExpressionNode) arrayType.child(2);
+					operator = Operator.SUBSCRIPT;
+					arguments = new LinkedList<ExpressionNode>();
+					indexNode = translateExpression(source, indexUnitNode,
+							scope);
+					adjustedIndexNode = adjustIndex(source, indexNode,
+							startIndexNode);
+					arguments.add(idExprNode);
+					arguments.add(adjustedIndexNode);
+					idExprNode = nodeFactory.newOperatorNode(source, operator,
+							arguments);
 
-			if (opStr.contains("EQ")) {
-				operator = Operator.EQUALS;
+					String idName = idNode.name();
+
+					if (idName != null && comm_val_block.containsKey(idName)) {
+						IdentifierNode unionIdNode = nodeFactory
+								.newIdentifierNode(source,
+										comm_val_block.get(idName));
+						IdentifierNode structIdNode = nodeFactory
+								.newIdentifierNode(source,
+										programUnitTrackStack.peek().name());
+						IdentifierNode varIdNode = nodeFactory
+								.newIdentifierNode(source, idName);
+
+						ExpressionNode u_lhsArgExprNode = nodeFactory
+								.newIdentifierExpressionNode(source,
+										unionIdNode);
+						ExpressionNode s_lhsArgExprNode = nodeFactory
+								.newDotNode(source, u_lhsArgExprNode,
+										structIdNode);
+						ExpressionNode a_lhsArgExprNode = nodeFactory
+								.newDotNode(source, s_lhsArgExprNode,
+										varIdNode);
+						ExpressionNode temp_indexNode = null;
+						LinkedList<ExpressionNode> temp_args = new LinkedList<ExpressionNode>();
+
+						temp_args.add(a_lhsArgExprNode);
+						temp_indexNode = (ExpressionNode) idExprNode.child(1);
+						temp_indexNode.remove();
+						temp_args.add(temp_indexNode);
+						idExprNode = nodeFactory.newOperatorNode(source,
+								Operator.SUBSCRIPT, temp_args);
+					}
+				}
+				return (OperatorNode) idExprNode;
+			case 734 : /* Assign */
+				ExpressionNode lhsArgExprNode = translateExpression(source,
+						exprNode.getChildByIndex(1), scope);
+				ExpressionNode rhsArgExprNode = translateExpression(source,
+						exprNode.getChildByIndex(2), scope);
+				String assignedIdName = "";
+
+				operator = Operator.ASSIGN;
 				arguments = new LinkedList<ExpressionNode>();
-				for (int i = 1; i < 3; i++) {
-					ExpressionNode argument = translateExpression(source,
-							exprNode.getChildByIndex(i), scope);
-					arguments.add(argument);
+				if (lhsArgExprNode
+						.expressionKind() == ExpressionKind.IDENTIFIER_EXPRESSION) {
+					IdentifierNode assignedIdNode = (IdentifierNode) lhsArgExprNode
+							.child(0);
+					assignedIdName = assignedIdNode.name();
+
+					if (!localMap.containsKey(assignedIdName)) {
+						String pattern = "^(I|J|K|L|M|N|i|j|k|l|m|n).*$";
+						TypeNode type = null;
+						VariableDeclarationNode varDeclNode = null;
+
+						if (assignedIdName.matches(pattern)) {
+							type = nodeFactory.newBasicTypeNode(source,
+									BasicTypeKind.INT);
+						} else {
+							type = nodeFactory.newBasicTypeNode(source,
+									BasicTypeKind.DOUBLE);
+						}
+						varDeclNode = nodeFactory.newVariableDeclarationNode(
+								source, assignedIdNode.copy(), type);
+						localMap.put(assignedIdName, type);
+						tempItems.add(0, varDeclNode);
+					}
+					if (assignedIdName != null
+							&& comm_val_block.containsKey(assignedIdName)) {
+						IdentifierNode unionIdNode = nodeFactory
+								.newIdentifierNode(source,
+										comm_val_block.get(assignedIdName));
+						IdentifierNode structIdNode = nodeFactory
+								.newIdentifierNode(source,
+										programUnitTrackStack.peek().name());
+						IdentifierNode varIdNode = nodeFactory
+								.newIdentifierNode(source, assignedIdName);
+
+						ExpressionNode u_lhsArgExprNode = nodeFactory
+								.newIdentifierExpressionNode(source,
+										unionIdNode);
+						ExpressionNode s_lhsArgExprNode = nodeFactory
+								.newDotNode(source, u_lhsArgExprNode,
+										structIdNode);
+
+						lhsArgExprNode = nodeFactory.newDotNode(source,
+								s_lhsArgExprNode, varIdNode);
+					}
+				}
+				arguments.add(lhsArgExprNode);
+				arguments.add(rhsArgExprNode);
+				return nodeFactory.newOperatorNode(source, operator, arguments);
+			case 710 : /* Lv3 Expression */
+				String opStr = exprNode.getChildByIndex(0).cTokens()[0]
+						.getText();
+
+				if (opStr.contains("EQ")) {
+					operator = Operator.EQUALS;
+					arguments = new LinkedList<ExpressionNode>();
+					for (int i = 1; i < 3; i++) {
+						ExpressionNode argument = translateExpression(source,
+								exprNode.getChildByIndex(i), scope);
+						arguments.add(argument);
+					}
+					return nodeFactory.newOperatorNode(source, operator,
+							arguments);
+				} else if (opStr.contains("NE")) {
+					operator = Operator.NEQ;
+					arguments = new LinkedList<ExpressionNode>();
+					for (int i = 1; i < 3; i++) {
+						ExpressionNode argument = translateExpression(source,
+								exprNode.getChildByIndex(i), scope);
+
+						arguments.add(argument);
+					}
+					return nodeFactory.newOperatorNode(source, operator,
+							arguments);
+				} else {
+					System.out.println(opStr);
+					assert false;
+				}
+
+				break;
+			case 704 : /* MultOperand(s) */
+				for (int i = 0; i < exprNode.numChildren(); i++) {
+					String op_string = exprNode.getChildByIndex(0).cTokens()[0]
+							.getText();
+					ExpressionNode leftNode = null;
+					ExpressionNode rightNode = null;
+
+					operator = op_string.startsWith("*")
+							? Operator.TIMES
+							: Operator.DIV;
+					arguments = new LinkedList<ExpressionNode>();
+					leftNode = translateExpression(source,
+							exprNode.getChildByIndex(1), scope);
+					rightNode = translateExpression(source,
+							exprNode.getChildByIndex(2), scope);
+					arguments.add(leftNode);
+					arguments.add(rightNode);
 				}
 				return nodeFactory.newOperatorNode(source, operator, arguments);
-			} else if (opStr.contains("NE")) {
-				operator = Operator.NEQ;
-				arguments = new LinkedList<ExpressionNode>();
-				for (int i = 1; i < 3; i++) {
-					ExpressionNode argument = translateExpression(source,
-							exprNode.getChildByIndex(i), scope);
+			case 705 : /* AddOperand(s) */
+				for (int i = 0; i < exprNode.numChildren(); i++) {
+					String op_string = exprNode.getChildByIndex(0).cTokens()[0]
+							.getText();
+					ExpressionNode leftNode = null;
+					ExpressionNode rightNode = null;
 
-					arguments.add(argument);
+					operator = op_string.startsWith("+")
+							? Operator.PLUS
+							: Operator.MINUS;
+					arguments = new LinkedList<ExpressionNode>();
+					leftNode = translateExpression(source,
+							exprNode.getChildByIndex(1), scope);
+					rightNode = translateExpression(source,
+							exprNode.getChildByIndex(2), scope);
+					arguments.add(leftNode);
+					arguments.add(rightNode);
 				}
 				return nodeFactory.newOperatorNode(source, operator, arguments);
-			} else {
-				System.out.println(opStr);
+			default :
+				System.out.println(rule);
 				assert false;
-			}
-
-			break;
-		case 704: /* MultOperand(s) */
-			for (int i = 0; i < exprNode.numChildren(); i++) {
-				String op_string = exprNode.getChildByIndex(0).cTokens()[0]
-						.getText();
-				ExpressionNode leftNode = null;
-				ExpressionNode rightNode = null;
-
-				operator = op_string.startsWith("*") ? Operator.TIMES
-						: Operator.DIV;
-				arguments = new LinkedList<ExpressionNode>();
-				leftNode = translateExpression(source,
-						exprNode.getChildByIndex(1), scope);
-				rightNode = translateExpression(source,
-						exprNode.getChildByIndex(2), scope);
-				arguments.add(leftNode);
-				arguments.add(rightNode);
-			}
-			return nodeFactory.newOperatorNode(source, operator, arguments);
-		case 705: /* AddOperand(s) */
-			for (int i = 0; i < exprNode.numChildren(); i++) {
-				String op_string = exprNode.getChildByIndex(0).cTokens()[0]
-						.getText();
-				ExpressionNode leftNode = null;
-				ExpressionNode rightNode = null;
-
-				operator = op_string.startsWith("+") ? Operator.PLUS
-						: Operator.MINUS;
-				arguments = new LinkedList<ExpressionNode>();
-				leftNode = translateExpression(source,
-						exprNode.getChildByIndex(1), scope);
-				rightNode = translateExpression(source,
-						exprNode.getChildByIndex(2), scope);
-				arguments.add(leftNode);
-				arguments.add(rightNode);
-			}
-			return nodeFactory.newOperatorNode(source, operator, arguments);
-		default:
-			System.out.println(rule);
-			assert false;
 		}
 		result = nodeFactory.newOperatorNode(source, operator, arguments);
 		return result;
@@ -639,126 +714,164 @@ public class FortranASTBuilderWorker {
 		int rule = exprNode.rule();
 
 		switch (rule) {
-		case 734: /* Assign */
-			return translateOperatorExpression(source, exprNode, scope);
-		case 601: /* Variable */
-			int var_type = exprNode.getChildByIndex(0).rule();
+			case 734 : /* Assign */
+				return translateOperatorExpression(source, exprNode, scope);
+			case 601 : /* Variable */
+				int var_type = exprNode.getChildByIndex(0).rule();
 
-			switch (var_type) {
-			case 603: /* Designator */
-				FortranTree refNode = exprNode.getChildByIndex(0)
-						.getChildByIndex(0).getChildByIndex(0);
+				switch (var_type) {
+					case 603 : /* Designator */
+						FortranTree refNode = exprNode.getChildByIndex(0)
+								.getChildByIndex(0).getChildByIndex(0);
 
-				if (refNode.numChildren() < 2) {
-					return nodeFactory.newIdentifierExpressionNode(source,
-							translateIdentifier(refNode.getChildByIndex(0)));
-				} else {
-					return translateOperatorExpression(source, refNode, scope);
-				}
-			default:
-				assert false;
-			}
-		case 701: /* PrimaryExpr */
-			FortranTree primExprNode = exprNode.getChildByIndex(0);
-			int expr_type = primExprNode.rule();
-
-			switch (expr_type) {
-			case -3: /* DesignatorOrFunctionRef */
-				FortranTree refNode = primExprNode.getChildByIndex(0)
-						.getChildByIndex(0);
-
-				if (refNode.numChildren() < 2) {
-					return nodeFactory.newIdentifierExpressionNode(source,
-							translateIdentifier(refNode.getChildByIndex(0)));
-				} else {
-					FortranTree refIdNode = refNode.getChildByIndex(0);
-					String IdStr = refIdNode.cTokens()[0].getText();
-
-					if (IdStr.matches("^I?AND$")) {
-						Operator operator = Operator.BITAND;
-						List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
-
-						for (int i = 0; i < 2; i++) {
-							ExpressionNode argument = translateExpression(
-									source,
-									refNode.getChildByIndex(1)
-											.getChildByIndex(i)
-											.getChildByIndex(0),
+						if (refNode.numChildren() < 2) {
+							return nodeFactory.newIdentifierExpressionNode(
+									source, translateIdentifier(
+											refNode.getChildByIndex(0)));
+						} else {
+							return translateOperatorExpression(source, refNode,
 									scope);
-
-							arguments.add(argument);
 						}
-						return nodeFactory.newOperatorNode(source, operator,
-								arguments);
-					}else if (IdStr.matches("^I?OR$")) {
-						Operator operator = Operator.BITOR;
-						List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
-
-						for (int i = 0; i < 2; i++) {
-							ExpressionNode argument = translateExpression(
-									source,
-									refNode.getChildByIndex(1)
-											.getChildByIndex(i)
-											.getChildByIndex(0),
-									scope);
-
-							arguments.add(argument);
-						}
-						return nodeFactory.newOperatorNode(source, operator,
-								arguments);
-					}else if (IdStr.matches("^IEOR|XOR$")) {
-						Operator operator = Operator.BITOR;
-						List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
-
-						for (int i = 0; i < 2; i++) {
-							ExpressionNode argument = translateExpression(
-									source,
-									refNode.getChildByIndex(1)
-											.getChildByIndex(i)
-											.getChildByIndex(0),
-									scope);
-
-							arguments.add(argument);
-						}
-						return nodeFactory.newOperatorNode(source, operator,
-								arguments);
-					}else{
+					default :
 						assert false;
-					}
-					return translateOperatorExpression(source, refNode, scope);
 				}
-			case 306: /* LiteralConst */
-				FortranTree constNode = primExprNode.getChildByIndex(0);
-				int const_type = constNode.rule();
+			case 701 : /* PrimaryExpr */
+				FortranTree primExprNode = exprNode.getChildByIndex(0);
+				int expr_type = primExprNode.rule();
 
-				switch (const_type) {
-				case 406: /* IntLitConst */
-					return translateIntegerConstant(source, constNode);
-				case 417: /* RealLitConst */
-					return translateFloatingConstant(source, constNode);
-				case 427: /* CharLitConst */
-					return translateCharLitConstant(source, constNode);
-				default:
-					System.out.println(const_type);
-					assert false;
+				switch (expr_type) {
+					case -3 : /* DesignatorOrFunctionRef */
+						FortranTree refNode = primExprNode.getChildByIndex(0)
+								.getChildByIndex(0);
+
+						if (refNode.numChildren() < 2) {
+							IdentifierNode idNode = translateIdentifier(
+									refNode.getChildByIndex(0));
+							String idName = idNode.name();
+							ExpressionNode idExprNode = nodeFactory
+									.newIdentifierExpressionNode(source,
+											idNode);
+
+							if (idName != null
+									&& comm_val_block.containsKey(idName)) {
+								IdentifierNode unionIdNode = nodeFactory
+										.newIdentifierNode(source,
+												comm_val_block.get(idName));
+								IdentifierNode structIdNode = nodeFactory
+										.newIdentifierNode(source,
+												programUnitTrackStack.peek()
+														.name());
+								IdentifierNode varIdNode = nodeFactory
+										.newIdentifierNode(source, idName);
+
+								ExpressionNode u_lhsArgExprNode = nodeFactory
+										.newIdentifierExpressionNode(source,
+												unionIdNode);
+								ExpressionNode s_lhsArgExprNode = nodeFactory
+										.newDotNode(source, u_lhsArgExprNode,
+												structIdNode);
+
+								return nodeFactory.newDotNode(source,
+										s_lhsArgExprNode, varIdNode);
+							}
+							return nodeFactory.newIdentifierExpressionNode(
+									source, translateIdentifier(
+											refNode.getChildByIndex(0)));
+						} else {
+							FortranTree refIdNode = refNode.getChildByIndex(0);
+							String IdStr = refIdNode.cTokens()[0].getText();
+
+							if (IdStr.matches("^I?AND$")) {
+								Operator operator = Operator.BITAND;
+								List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
+
+								for (int i = 0; i < 2; i++) {
+									ExpressionNode argument = translateExpression(
+											source,
+											refNode.getChildByIndex(1)
+													.getChildByIndex(i)
+													.getChildByIndex(0),
+											scope);
+
+									arguments.add(argument);
+								}
+								return nodeFactory.newOperatorNode(source,
+										operator, arguments);
+							} else if (IdStr.matches("^I?OR$")) {
+								Operator operator = Operator.BITOR;
+								List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
+
+								for (int i = 0; i < 2; i++) {
+									ExpressionNode argument = translateExpression(
+											source,
+											refNode.getChildByIndex(1)
+													.getChildByIndex(i)
+													.getChildByIndex(0),
+											scope);
+
+									arguments.add(argument);
+								}
+								return nodeFactory.newOperatorNode(source,
+										operator, arguments);
+							} else if (IdStr.matches("^IEOR|XOR$")) {
+								Operator operator = Operator.BITOR;
+								List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
+
+								for (int i = 0; i < 2; i++) {
+									ExpressionNode argument = translateExpression(
+											source,
+											refNode.getChildByIndex(1)
+													.getChildByIndex(i)
+													.getChildByIndex(0),
+											scope);
+
+									arguments.add(argument);
+								}
+								return nodeFactory.newOperatorNode(source,
+										operator, arguments);
+							} else {
+								// Array Read
+							}
+							return translateOperatorExpression(source, refNode,
+									scope);
+						}
+					case 306 : /* LiteralConst */
+						FortranTree constNode = primExprNode.getChildByIndex(0);
+						int const_type = constNode.rule();
+
+						switch (const_type) {
+							case 406 : /* IntLitConst */
+								return translateIntegerConstant(source,
+										constNode);
+							case 417 : /* RealLitConst */
+								return translateFloatingConstant(source,
+										constNode);
+							case 427 : /* CharLitConst */
+								return translateCharLitConstant(source,
+										constNode);
+							default :
+								System.out.println(const_type);
+								assert false;
+						}
+					case 704 : /* MultOperand(s) */
+						return translateOperatorExpression(source, primExprNode,
+								scope);
+					case 705 : /* AddOperand(s) */
+						return translateOperatorExpression(source, primExprNode,
+								scope);
+					default :
+						System.out.print(expr_type);
+						assert false;
 				}
-			case 704: /* MultOperand(s) */
-				return translateOperatorExpression(source, primExprNode, scope);
-			case 705: /* AddOperand(s) */
-				return translateOperatorExpression(source, primExprNode, scope);
-			default:
-				System.out.print(expr_type);
+			case 704 : /* MultOperand(s) */
+				return translateOperatorExpression(source, exprNode, scope);
+			case 705 : /* AddOperand(s) */
+				return translateOperatorExpression(source, exprNode, scope);
+			case 710 : /* Lv3 Expression */
+				return translateOperatorExpression(source, exprNode, scope);
+			default :
+				System.out.println(rule);
 				assert false;
-			}
-		case 704: /* MultOperand(s) */
-			return translateOperatorExpression(source, exprNode, scope);
-		case 705: /* AddOperand(s) */
-			return translateOperatorExpression(source, exprNode, scope);
-		case 710: /* Lv3 Expression */
-			return translateOperatorExpression(source, exprNode, scope);
-		default:
-			System.out.println(rule);
-			assert false;
 		}
 		return result;
 	}
@@ -820,37 +933,37 @@ public class FortranASTBuilderWorker {
 		StatementNode result = null;
 
 		switch (rule) {
-		case 734: /* AssignmentStatement */
-			result = translateExpressionStatement(blockItemNode, scope);
-			break;
-		case 802: /* IfConstruct */
-			result = translateIfStatement(blockItemNode, scope);
-			break;
-		case 827: /* DoStatement */
-			result = translateDoStatement(blockItemNode.parent(), scope);
-			break;
-		case 845: /* GotoStatement */
-			result = translateGoto(blockItemNode);
-			break;
-		case 846: /* ComputedGotoStatement */
-			result = translateComputedGoto(blockItemNode, scope);
-			break;
-		case 1218: /* CallStatement */
-			result = translateCall(generateSource(blockItemNode), blockItemNode,
-					scope);
-			break;
-		case 1236: /* ReaturnStatement */
-			// TODO: Return Statement for Fortran represents a exit for a
-			// subprogram such as subroutines or functions.
-			result = nodeFactory.newReturnNode(generateSource(blockItemNode),
-					null);
-			break;
-		case 801: /* Block */
-			assert false;
-			break;
-		default:
-			System.out.println(rule);
-			assert false;
+			case 734 : /* AssignmentStatement */
+				result = translateExpressionStatement(blockItemNode, scope);
+				break;
+			case 802 : /* IfConstruct */
+				result = translateIfStatement(blockItemNode, scope);
+				break;
+			case 827 : /* DoStatement */
+				result = translateDoStatement(blockItemNode.parent(), scope);
+				break;
+			case 845 : /* GotoStatement */
+				result = translateGoto(blockItemNode);
+				break;
+			case 846 : /* ComputedGotoStatement */
+				result = translateComputedGoto(blockItemNode, scope);
+				break;
+			case 1218 : /* CallStatement */
+				result = translateCall(generateSource(blockItemNode),
+						blockItemNode, scope);
+				break;
+			case 1236 : /* ReaturnStatement */
+				// TODO: Return Statement for Fortran represents a exit for a
+				// subprogram such as subroutines or functions.
+				result = nodeFactory
+						.newReturnNode(generateSource(blockItemNode), null);
+				break;
+			case 801 : /* Block */
+				assert false;
+				break;
+			default :
+				System.out.println(rule);
+				assert false;
 		}
 
 		return result;
@@ -1126,58 +1239,232 @@ public class FortranASTBuilderWorker {
 		int rule = blockItemNode.rule();
 
 		switch (rule) {
-		case 501: /* TypeDeclarationStatement */
-			result = this.translateTypeDeclaration(blockItemNode, scope,
-					argsMap);
-			break;
-		case 538: /* ParameterStatement */
-			result = this.translateParameterStatement(blockItemNode, scope);
-			break;
-		case 734: /* AssignmentStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope));
-			break;
-		case 827: /* DoStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope));
-			break;
-		case 845: /* GotoStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope));
-			break;
-		case 846: /* ComputedGotoStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope));
-			break;
-		case 848: /* ContinueStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this
-					.translateIdentifierLabeledStatement(blockItemNode, scope));
-			break;
-		case 912: /* PrintStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this
-					.translatePrintStatement(blockItemNode, scope));
-			break;
-		case 1218: /* CallStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope));
-			break;
-		case 1236: /* ReturnStatement */
-			result = new ArrayList<BlockItemNode>();
-			result.add((BlockItemNode) this.translateStatement(blockItemNode,
-					scope));
-			break;
-		default:
-			System.out.println(rule);
-			assert false;
+			case 212 : /* Other Specification Statement */
+				result = this.translateSpecificationStatement(blockItemNode,
+						scope);
+				break;
+			case 501 : /* Type Declaration Statement */
+				result = this.translateTypeDeclaration(blockItemNode, scope,
+						argsMap);
+				break;
+			case 538 : /* Parameter Statement */
+				result = this.translateParameterStatement(blockItemNode, scope);
+				break;
+			case 734 : /* Assignment Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translateStatement(blockItemNode, scope));
+				break;
+			case 827 : /* Do Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translateStatement(blockItemNode, scope));
+				break;
+			case 845 : /* Goto Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translateStatement(blockItemNode, scope));
+				break;
+			case 846 : /* ComputedGoto Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translateStatement(blockItemNode, scope));
+				break;
+			case 848 : /* Continue Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translateIdentifierLabeledStatement(blockItemNode,
+								scope));
+				break;
+			case 912 : /* Print Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translatePrintStatement(blockItemNode, scope));
+				break;
+			case 1218 : /* Call Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translateStatement(blockItemNode, scope));
+				break;
+			case 1236 : /* Return Statement */
+				result = new ArrayList<BlockItemNode>();
+				result.add((BlockItemNode) this
+						.translateStatement(blockItemNode, scope));
+				break;
+			default :
+				System.out.println(rule);
+				assert false;
 		}
 		return result;
+	}
+
+	private List<BlockItemNode> translateSpecificationStatement(
+			FortranTree blockItemNode, SimpleScope scope) {
+		List<BlockItemNode> result = null;
+		FortranTree commonBlockTreeNode = blockItemNode.getChildByIndex(0);
+		int rule = commonBlockTreeNode.rule();
+
+		switch (rule) {
+			case 557 : /* Common Statement */
+				result = this.translateCommonStatement(commonBlockTreeNode,
+						new SimpleScope(rootScope, false));
+				break;
+			default :
+				System.out.println(rule);
+				assert false;
+
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<BlockItemNode> translateCommonStatement(
+			FortranTree blockItemNode, SimpleScope simpleScope) {
+		FortranTree idTreeNode = blockItemNode.getChildByIndex(1)
+				.getChildByIndex(0);
+		FortranTree fieldsTreeNode = blockItemNode.getChildByIndex(2);
+		IdentifierNode unionIdNode = this.translateIdentifier(idTreeNode);
+		IdentifierNode unionTypeIdNode = nodeFactory.newIdentifierNode(
+				generateSource(idTreeNode), "u_" + unionIdNode.name());
+		String blockName = unionIdNode.name();
+		FieldDeclarationNode localCommonBlockNode;
+
+		if (commonBlockSet.containsKey(blockName)) {
+			StructureOrUnionTypeNode unionTypeNode = commonBlockSet
+					.get(unionIdNode.name());
+
+			localCommonBlockNode = generateLocalCommonBlockNode(fieldsTreeNode,
+					simpleScope, blockName);
+			for (ASTNode node : unionTypeNode.children()) {
+				if (node instanceof SequenceNode)
+					((SequenceNode<FieldDeclarationNode>) unionTypeNode
+							.child(1)).addSequenceChild(localCommonBlockNode);
+			}
+
+		} else {
+			Source unionSource = generateSource(blockItemNode);
+			List<FieldDeclarationNode> unionFieldDecls = new LinkedList<FieldDeclarationNode>();
+			SequenceNode<FieldDeclarationNode> unionDeclList;
+			StructureOrUnionTypeNode unionTypeNode;
+
+			localCommonBlockNode = generateLocalCommonBlockNode(fieldsTreeNode,
+					simpleScope, blockName);
+			unionFieldDecls.add(localCommonBlockNode);
+			unionDeclList = nodeFactory.newSequenceNode(unionSource,
+					"FieldDeclarations", unionFieldDecls);
+			unionTypeNode = nodeFactory.newStructOrUnionTypeNode(unionSource,
+					false, unionTypeIdNode, unionDeclList);
+			commonBlocks
+					.add((BlockItemNode) nodeFactory.newVariableDeclarationNode(
+							unionSource, unionIdNode.copy(), unionTypeNode));
+			commonBlockSet.put(unionIdNode.name(), unionTypeNode);
+		}
+		return new ArrayList<BlockItemNode>();
+	}
+
+	private FieldDeclarationNode generateLocalCommonBlockNode(
+			FortranTree fieldsTreeNode, SimpleScope simpleScope,
+			String blockName) {
+		Source structSource = generateSource(fieldsTreeNode);
+		IdentifierNode programUnitIdNode = programUnitTrackStack.peek();
+		String structIdStr = programUnitIdNode.name();
+		IdentifierNode structIdNode = nodeFactory
+				.newIdentifierNode(programUnitIdNode.getSource(), structIdStr);
+		IdentifierNode structTypeIdNode = nodeFactory.newIdentifierNode(
+				programUnitIdNode.getSource(), "s_" + structIdStr);
+		List<FieldDeclarationNode> structFieldDecls = new LinkedList<FieldDeclarationNode>();
+
+		try {
+			for (FortranTree commBlockObjTreeNode : fieldsTreeNode.children()) {
+				FortranTree idTreeNode = commBlockObjTreeNode
+						.getChildByIndex(0);
+				IdentifierNode fieldIdNode = this
+						.translateIdentifier(idTreeNode);
+				//
+				Source varSource = generateSource(idTreeNode);
+				TypeNode type = nodeFactory.newBasicTypeNode(varSource,
+						BasicTypeKind.INT);
+				VariableDeclarationNode declaration = null;
+				boolean isArray = 1 < commBlockObjTreeNode.numChildren();
+
+				comm_val_block.put(fieldIdNode.name(), blockName);
+				if (isArray) {
+					FortranTree arrayInfoNode = commBlockObjTreeNode
+							.getChildByIndex(1);
+					int arity = arrayInfoNode.numChildren();
+
+					for (int j = arity - 1; j >= 0; j--) {
+						FortranTree arityInfo = arrayInfoNode
+								.getChildByIndex(j);
+						int numOfIndexes = arityInfo.numChildren();
+						ExpressionNode startIndexExprNode = null; // 1 by
+																	// default.
+
+						if (numOfIndexes == 0) {
+							// For endIndex is '*'
+							startIndexExprNode = nodeFactory
+									.newIntegerConstantNode(varSource, "1");
+							type = nodeFactory.newArrayTypeNode(varSource, type,
+									null, startIndexExprNode);
+							((ArrayTypeNode) type)
+									.setUnspecifiedVariableLength(true);
+							continue;
+						}
+
+						ExpressionNode endIndexExprNode = null;
+						Operator operator = Operator.MINUS;
+						List<ExpressionNode> arguments = new ArrayList<ExpressionNode>();
+						ExpressionNode intOneConstNode = nodeFactory
+								.newIntegerConstantNode(varSource, "1");
+
+						if (numOfIndexes == 1) {
+							// For only single endIndex
+							startIndexExprNode = nodeFactory
+									.newIntegerConstantNode(varSource, "1");
+							endIndexExprNode = translateExpression(varSource,
+									arityInfo.getChildByIndex(0), simpleScope);
+
+						} else if (numOfIndexes == 2) {
+							// For two indexes
+							startIndexExprNode = translateExpression(varSource,
+									arityInfo.getChildByIndex(0), simpleScope);
+							endIndexExprNode = translateExpression(varSource,
+									arityInfo.getChildByIndex(1), simpleScope);
+						} else {
+							System.out.println(numOfIndexes);
+						}
+						arguments.add(endIndexExprNode);
+						arguments.add(startIndexExprNode);
+
+						OperatorNode extentNode = nodeFactory.newOperatorNode(
+								varSource, operator, arguments);
+
+						operator = Operator.PLUS;
+						arguments.clear();
+						arguments.add(extentNode);
+						arguments.add(intOneConstNode);
+						extentNode = nodeFactory.newOperatorNode(varSource,
+								operator, arguments);
+						type = nodeFactory.newArrayTypeNode(varSource, type,
+								extentNode, startIndexExprNode.copy());
+					}
+				}
+				//
+				structFieldDecls.add(nodeFactory
+						.newFieldDeclarationNode(varSource, fieldIdNode, type));
+				localMap.put(fieldIdNode.name(), type);
+			}
+		} catch (SyntaxException e) {
+			e.printStackTrace();
+		}
+		SequenceNode<FieldDeclarationNode> structDeclList = nodeFactory
+				.newSequenceNode(structSource, "FieldDeclarations",
+						structFieldDecls);
+		StructureOrUnionTypeNode structTypeNode = nodeFactory
+				.newStructOrUnionTypeNode(structSource, true, structTypeIdNode,
+						structDeclList);
+		return nodeFactory.newFieldDeclarationNode(structSource,
+				structIdNode.copy(), structTypeNode);
 	}
 
 	private BlockItemNode translatePrintStatement(FortranTree blockItemNode,
@@ -1208,7 +1495,7 @@ public class FortranASTBuilderWorker {
 			argumentList.add(outputExprNode);
 			formatStr += "%s";
 		}
-		formatStr += "\"";
+		formatStr += "\\n\"";
 		cToken = tokenFactory.newCivlcToken(0, formatStr,
 				blockItemNode.getChildByIndex(1).cTokens()[0].getFormation());
 		strToken = tokenFactory.newStringToken(cToken);
@@ -1304,17 +1591,17 @@ public class FortranASTBuilderWorker {
 						.getChildByIndex(i);
 				int rule = specificationNode.rule();
 				switch (rule) {
-				case 207: /* DeclarationConstruct */
-					FortranTree declarationNode = specificationNode
-							.getChildByIndex(0);
-					List<BlockItemNode> blockItemNodes = this
-							.translateBlockItem(declarationNode, newScope,
-									argsMap);
+					case 207 : /* DeclarationConstruct */
+						FortranTree declarationNode = specificationNode
+								.getChildByIndex(0);
+						List<BlockItemNode> blockItemNodes = this
+								.translateBlockItem(declarationNode, newScope,
+										argsMap);
 
-					items.addAll(blockItemNodes);
-					break;
-				default:
-					assert false;
+						items.addAll(blockItemNodes);
+						break;
+					default :
+						assert false;
 				}
 			}
 		}
@@ -1333,36 +1620,41 @@ public class FortranASTBuilderWorker {
 				int rule = execConstNode.rule();
 
 				switch (rule) {
-				case 213: /* ExecutableConstruct */
-					FortranTree stmtTypeNode = execConstNode.getChildByIndex(0);
+					case 213 : /* ExecutableConstruct */
+						FortranTree stmtTypeNode = execConstNode
+								.getChildByIndex(0);
 
-					rule = stmtTypeNode.rule();
-					switch (rule) {
-					case 214: /* Assignment */
-						FortranTree stmtNode = stmtTypeNode.getChildByIndex(0);
-						List<BlockItemNode> blockItemNodes = this
-								.translateBlockItem(stmtNode, newScope, null);
-						items.addAll(blockItemNodes);
-						if (execConstNode.getChildByIndex(0).getChildByIndex(0)
-								.rule() == 848) {
-							i++;
+						rule = stmtTypeNode.rule();
+						switch (rule) {
+							case 214 : /* Assignment */
+								FortranTree stmtNode = stmtTypeNode
+										.getChildByIndex(0);
+								List<BlockItemNode> blockItemNodes = this
+										.translateBlockItem(stmtNode, newScope,
+												null);
+								items.addAll(blockItemNodes);
+								if (execConstNode.getChildByIndex(0)
+										.getChildByIndex(0).rule() == 848) {
+									i++;
+								}
+								break;
+							case 802 : /* If Construct */
+								items.add(translateStatement(stmtTypeNode,
+										scope));
+								break;
+							case 825 : /* Do Construct */
+								items.add(translateStatement(
+										stmtTypeNode.getChildByIndex(0),
+										scope));
+								break;
+							default :
+								System.out.println(rule);
+								assert false;
 						}
 						break;
-					case 802: /* If Construct */
-						items.add(translateStatement(stmtTypeNode, scope));
-						break;
-					case 825: /* Do Construct */
-						items.add(translateStatement(
-								stmtTypeNode.getChildByIndex(0), scope));
-						break;
-					default:
+					default :
 						System.out.println(rule);
 						assert false;
-					}
-					break;
-				default:
-					System.out.println(rule);
-					assert false;
 				}
 			}
 		}
@@ -1379,7 +1671,8 @@ public class FortranASTBuilderWorker {
 		FortranTree argsNode = null;
 		FortranTree specificationPartNode = programUnitNode.getChildByIndex(1);
 		FortranTree executionPartNode = numChildren > 3
-				? programUnitNode.getChildByIndex(2) : null;
+				? programUnitNode.getChildByIndex(2)
+				: null;
 		/*
 		 * FortranTree endProgramStatementNode = programUnitNode
 		 * .getChildByIndex(numChildren - 1);
@@ -1393,6 +1686,7 @@ public class FortranASTBuilderWorker {
 
 		source = generateSource(programUnitNode);
 		name = this.translateIdentifier(identifierNode);
+		programUnitTrackStack.push(name);
 		if (unitType == 0)
 			name = nodeFactory.newIdentifierNode(source, "main");
 		if (programStatementNode.numChildren() > 3) {
@@ -1415,10 +1709,12 @@ public class FortranASTBuilderWorker {
 		boolean hasArgs = subroutineStatementTree.numChildren() > 3;
 		FortranTree idTree = subroutineStatementTree.getChildByIndex(2);
 		FortranTree argsNode = hasArgs
-				? subroutineStatementTree.getChildByIndex(3) : null;
+				? subroutineStatementTree.getChildByIndex(3)
+				: null;
 		FortranTree specificationPartNode = subroutineTree.getChildByIndex(1);
 		FortranTree executionPartNode = numChildren > 3
-				? subroutineTree.getChildByIndex(2) : null;
+				? subroutineTree.getChildByIndex(2)
+				: null;
 		/*
 		 * FortranTree endSubroutineStatementNode = subroutineTree
 		 * .getChildByIndex(numChildren - 1);
@@ -1432,6 +1728,7 @@ public class FortranASTBuilderWorker {
 
 		source = generateSource(subroutineTree);
 		name = this.translateIdentifier(idTree);
+		programUnitTrackStack.push(name);
 		functionType = this.translateFunctionType(null, argsNode, false,
 				argsMap);
 		body = translateBody(specificationPartNode, executionPartNode, newScope,
@@ -1457,21 +1754,22 @@ public class FortranASTBuilderWorker {
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
 
 		switch (rule) {
-		case 1101: /* MainProgramUnit */
-			items.add((BlockItemNode) translateMainProgramUnit(programUnitNode,
-					scope, 0));
-			break;
-		case 1231: /* Subroutine */
-			items.add((BlockItemNode) translateSubroutine(programUnitNode,
-					scope, 1));
-			break;
-		case 1223: /* Function */
-			items.add((BlockItemNode) translateMainProgramUnit(programUnitNode,
-					scope, 2));
-			break;
-		default:
-			assert false;
+			case 1101 : /* MainProgramUnit */
+				items.add((BlockItemNode) translateMainProgramUnit(
+						programUnitNode, scope, 0));
+				break;
+			case 1231 : /* Subroutine */
+				items.add((BlockItemNode) translateSubroutine(programUnitNode,
+						scope, 1));
+				break;
+			case 1223 : /* Function */
+				items.add((BlockItemNode) translateMainProgramUnit(
+						programUnitNode, scope, 2));
+				break;
+			default :
+				assert false;
 		}
+		programUnitTrackStack.pop();
 		return items;
 	}
 
@@ -1479,13 +1777,13 @@ public class FortranASTBuilderWorker {
 
 	public SequenceNode<BlockItemNode> generateRoot() throws SyntaxException {
 		int numOfProgramUnit = parseTree.numChildren();
-		SimpleScope scope = new SimpleScope(null);
+		this.rootScope = new SimpleScope(null);
 		Source source;
 
 		assert numOfProgramUnit >= 0;
 		for (int i = 0; i < numOfProgramUnit; i++) {
-			programUnits.addAll(this
-					.translateProgramUnit(parseTree.getChildByIndex(i), scope));
+			programUnits.addAll(this.translateProgramUnit(
+					parseTree.getChildByIndex(i), rootScope));
 		}
 		source = generateSource(parseTree);
 		return nodeFactory.newTranslationUnitNode(source, programUnits);
@@ -1498,10 +1796,14 @@ public class FortranASTBuilderWorker {
 		sourceFiles.add(new SourceFile(new File(filePath), 0));
 		try {
 			rootNode = this.generateRoot();
+			rootNode.insertChildren(0, commonBlocks);
 			ast = addLib(rootNode, sourceFiles);
 		} catch (SyntaxException | PreprocessorException | ParseException e) {
 			e.printStackTrace();
 		}
+		// TODO:
+		// ast.print(System.out);
+		// ast.prettyPrint(System.out, true);
 		return ast;
 	}
 
