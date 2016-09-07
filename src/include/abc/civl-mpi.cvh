@@ -244,6 +244,10 @@ $abstract size_t $mpi_extentof(MPI_Datatype);
 /* Assigns fresh new symbolic constants to the given mpi region */
 void $mpi_assigns(void * buf, int count, MPI_Datatype datatype);
 
+/* Allocating memory space based on the MPI type signiture, returns a
+   pointer to the alloated memory space. */
+void * $mpi_malloc(int count, MPI_Datatype datatype);
+
 /*@ 
   @ depends_on \nothing;
   @ executes_when \true;
