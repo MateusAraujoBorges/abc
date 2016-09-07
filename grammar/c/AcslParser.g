@@ -303,7 +303,7 @@ directAbstractDeclaratorSuffix
 
 logic_type_expr
     : built_in_logic_type ->^(TYPE_BUILTIN built_in_logic_type)
-    | IDENTIFIER ->^(TYPE_ID IDENTIFIER)
+    //| IDENTIFIER ->^(TYPE_ID IDENTIFIER)
     ;
 
 c_basic_type

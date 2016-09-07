@@ -64,7 +64,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode.ConstantKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ContractVerifyNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.EnumerationConstantNode;
@@ -175,7 +174,6 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCastNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonCompoundLiteralNode;
-import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonContractVerifyNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonDerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonDotNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonEnumerationConstantNode;
@@ -1183,17 +1181,6 @@ public class CommonNodeFactory implements NodeFactory {
 	public ArrayTypeNode newArrayTypeNode(Source source, TypeNode elementType,
 			ExpressionNode extent, ExpressionNode startIndex) {
 		return new CommonArrayTypeNode(source, elementType, extent, startIndex);
-	}
-
-	@Override
-	public ContractVerifyNode newContractVerifyNode(Source source,
-			ExpressionNode function, List<ExpressionNode> arguments,
-			SequenceNode<ExpressionNode> scopeList) {
-		SequenceNode<ExpressionNode> argumentSequenceNode = newSequenceNode(
-				source, "ActualParameterList", arguments);
-
-		return new CommonContractVerifyNode(source, function, null,
-				argumentSequenceNode, scopeList);
 	}
 
 	@Override

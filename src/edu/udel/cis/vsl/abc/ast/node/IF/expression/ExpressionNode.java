@@ -86,7 +86,7 @@ public interface ExpressionNode
 		 * A constant node; can be cast to {@link ConstantNode}. Note there are
 		 * many subtypes.
 		 */
-		CONSTANT, CONTRACT_VERIFY,
+		CONSTANT,
 		/**
 		 * A CIVL-C derivative expression; can be cast to
 		 * {@link DerivativeExpressionNode}.

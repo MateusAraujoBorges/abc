@@ -56,7 +56,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CastNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CompoundLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ContractVerifyNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DerivativeExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -1550,10 +1549,13 @@ public class ASTPrettyPrinter {
 				return run2Pretty(prefix, (RunNode) statement, maxLength);
 			case SWITCH :
 				return switch2Pretty(prefix, (SwitchNode) statement, maxLength);
+			case UPDATE :
+				return update2Pretty(prefix, (UpdateNode) statement, maxLength);
 			case WHEN :
 				return when2Pretty(prefix, (WhenNode) statement, maxLength);
 			case WITH :
 				return with2Pretty(prefix, (WithNode) statement, maxLength);
+
 			default :
 				throw new ABCUnsupportedException(
 						"pretty print of statement node of " + kind + " kind");
@@ -2621,6 +2623,21 @@ public class ASTPrettyPrinter {
 
 	}
 
+	private static StringBuffer update2Pretty(String prefix, UpdateNode update,
+			int maxLength) {
+		ExpressionNode call;
+		StringBuffer result = new StringBuffer();
+
+		result.append(prefix);
+		result.append("$update(");
+		result.append(expression2Pretty(update.getCollator(),
+				vacantLength(maxLength, result)));
+		result.append(") ");
+		call = update.getFunctionCall();
+		result.append(expression2Pretty(call, vacantLength(maxLength, result)));
+		return result;
+	}
+
 	/**
 	 * Pretty printing for {@link WithNode}
 	 * 
@@ -2640,7 +2657,8 @@ public class ASTPrettyPrinter {
 
 		result.append(prefix);
 		result.append("$with(");
-		result.append(expression2Pretty(withNode.getStateReference(), -1));
+		result.append(expression2Pretty(withNode.getStateReference(),
+				vacantLength(maxLength, result)));
 		result.append(") ");
 		stmt = withNode.getBodyNode();
 		result.append(statement2Pretty(myIndent, stmt, true, false,
@@ -2963,20 +2981,6 @@ public class ASTPrettyPrinter {
 				result.append(
 						functionCall2Pretty(((SpawnNode) expression).getCall(),
 								vacantLength(maxLength, result)));
-				break;
-			// case CALLS:
-			// result.append("$calls(");
-			// result.append(functionCall2Pretty(
-			// ((CallsNode) expression).getCall(),
-			// vacantLength(maxLength, result)));
-			// result.append(")");
-			// break;
-			case CONTRACT_VERIFY :
-				result.append("$contractVerify ");
-				result.append(
-						contractVerify2Pretty(((ContractVerifyNode) expression),
-								vacantLength(maxLength, result)));
-				result.append(")");
 				break;
 			case REMOTE_REFERENCE :
 				result.append("$on(");
@@ -3358,37 +3362,6 @@ public class ASTPrettyPrinter {
 	}
 
 	private static StringBuffer functionCall2Pretty(FunctionCallNode call,
-			int maxLength) {
-		if (maxLength == 0)
-			return EMPTY_STRING_BUFFER;
-
-		int argNum = call.getNumberOfArguments();
-		StringBuffer result = new StringBuffer();
-
-		result.append(expression2Pretty(call.getFunction(),
-				vacantLength(maxLength, result)));
-		if (call.getNumberOfContextArguments() > 0) {
-			result.append("<<<");
-			for (int i = 0; i < call.getNumberOfContextArguments(); i++) {
-				if (i > 0)
-					result.append(", ");
-				result.append(expression2Pretty(call.getContextArgument(i),
-						vacantLength(maxLength, result)));
-			}
-			result.append(">>>");
-		}
-		result.append("(");
-		for (int i = 0; i < argNum; i++) {
-			if (i > 0)
-				result.append(", ");
-			result.append(expression2Pretty(call.getArgument(i),
-					vacantLength(maxLength, result)));
-		}
-		result.append(")");
-		return trimStringBuffer(result, maxLength);
-	}
-
-	private static StringBuffer contractVerify2Pretty(ContractVerifyNode call,
 			int maxLength) {
 		if (maxLength == 0)
 			return EMPTY_STRING_BUFFER;
