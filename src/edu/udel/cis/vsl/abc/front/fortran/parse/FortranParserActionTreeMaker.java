@@ -1379,7 +1379,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			assert !stack.isEmpty();
 			temp = stack.pop();
 			assert temp.rule() == 502; /* AttrSpec */
-			type_declaration_stmt_Node.addChild(1, temp);
+			type_declaration_stmt_Node.addChild(2, temp);
 			counter--;
 		}
 		assert !stack.isEmpty();
@@ -1435,11 +1435,20 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	} // Test
 
 	/**
-	 * R502 (503_03)
+	 * R503 Attribute Specification
 	 */
 	public void attr_spec(Token attrKeyword, int attr) {
+		FortranTree attr_spec_Node = new FortranTree(503, "AttrSpec");
+		FortranTree attr_type_Node = new FortranTree("AttrType",
+				getCToken(attrKeyword));
 
-	} // TODO: Implement
+		assert !stack.isEmpty();
+		assert stack.peek().rule() == 571 /* INTENT */
+		;
+		attr_spec_Node.addChild(attr_type_Node);
+		attr_spec_Node.addChild(stack.pop());
+		stack.push(attr_spec_Node);
+	} // Test
 
 	/**
 	 * R503 [Element] Entity Declaration
@@ -1694,12 +1703,15 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	}
 
 	/**
-	 * R517
+	 * R517 Intent Specification
 	 */
 	public void intent_spec(Token intentKeyword1, Token intentKeyword2,
 			int intent) {
-
-	} // TODO: Implement
+		//600 in, 601 out, 602 inout
+		FortranTree intent_spec_Node = new FortranTree(517, "Intent", intent);
+		
+		stack.push(intent_spec_Node);
+	}
 
 	/**
 	 * R518
@@ -2388,8 +2400,8 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 		FortranTree common_stmt_Node = new FortranTree(557,
 				"CommStmt[" + counter + "]");
 		FortranTree label_Node = new FortranTree("LabelDef", getCToken(label));
-		FortranTree commonKeyword_Node = new FortranTree("ID",
-				getCToken(commonKeyword));
+		// FortranTree commonKeyword_Node = new FortranTree("Keyword",
+		// (commonKeyword));
 
 		while (counter > 0) {
 			assert !stack.empty();
@@ -2402,7 +2414,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 			common_stmt_Node.addChild(0, temp);
 			counter--;
 		}
-		common_stmt_Node.addChild(0, commonKeyword_Node);
+		// common_stmt_Node.addChild(0, commonKeyword_Node);
 		common_stmt_Node.addChild(0, label_Node);
 		stack.push(common_stmt_Node);
 	}
@@ -5553,7 +5565,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 
 	@Override
 	public FortranTree getFortranParseTree() {
-		//System.out.println(root);
+		// System.out.println(root);
 		return this.root;
 	}
 }
