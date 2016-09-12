@@ -3271,6 +3271,8 @@ public class SideEffectRemover extends BaseTransformer {
 							this.nodeFactory
 									.newExpressionStatementNode(falseAssign));
 					operator.parent().setChild(operator.childIndex(), tmpId);
+					expression = tmpId;
+					expression.setInitialType(rhsType);
 				}
 			}
 		}
