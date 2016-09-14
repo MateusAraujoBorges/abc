@@ -531,7 +531,7 @@ public class ASTPrettyPrinter {
 			result.append("union ");
 		if (strOrUnion.getName() != null)
 			result.append(strOrUnion.getName());
-		if (isTypeDeclaration && fields != null) {
+		if (/*isTypeDeclaration && */fields != null) {
 			int numFields = fields.numChildren();
 
 			result.append("{");
