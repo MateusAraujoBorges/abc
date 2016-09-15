@@ -8,12 +8,9 @@ import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.Conversion;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.ConversionFactory;
-import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity.EntityKind;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
-import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity.LinkageKind;
-import edu.udel.cis.vsl.abc.ast.entity.IF.Variable;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
@@ -986,74 +983,6 @@ public class ExpressionAnalyzer {
 						node);
 		}
 		identifierNode.setEntity(entity);
-		// only checks external definition for whole-program AST
-		if (node.getOwner() != null && node.getOwner().isWholeProgram()) {
-			this.checkExternalDefinitionOfIdentifier(node);
-		}
-	}
-
-	/**
-	 * When an identifier is used in an expression except for
-	 * <code>sizeof</code> or <code>_Alignof</code>, if its declaration is a
-	 * variable with external linkage, then report an error if the external
-	 * definition is missing.
-	 * 
-	 * @param identifierExpression
-	 *            the identifier expression node being checked
-	 * @throws SyntaxException
-	 */
-	private void checkExternalDefinitionOfIdentifier(
-			IdentifierExpressionNode identifierExpression)
-			throws SyntaxException {
-		ASTNode parent = identifierExpression.parent();
-
-		if (parent instanceof ExpressionNode) {
-			ExpressionNode expression = (ExpressionNode) parent;
-			ExpressionKind kind = expression.expressionKind();
-
-			if (kind != ExpressionKind.ALIGNOF
-					&& kind != ExpressionKind.SIZEOF) {
-				Entity entity = identifierExpression.getIdentifier()
-						.getEntity();
-
-				if (entity.getEntityKind() == EntityKind.VARIABLE) {
-					Variable variable = (Variable) entity;
-					VariableDeclarationNode definition = variable
-							.getDefinition();
-
-					// don't check $input variables
-					if (variable.getDeclaration(0).getTypeNode()
-							.isInputQualified())
-						return;
-
-					// tentative definitions are OK
-					boolean noStorage = true;
-
-					for (DeclarationNode declaration : variable
-							.getDeclarations()) {
-						VariableDeclarationNode varDeclaration = (VariableDeclarationNode) declaration;
-
-						if (varDeclaration.hasAutoStorage()
-								|| varDeclaration.hasRegisterStorage()
-								|| varDeclaration.hasThreadLocalStorage()
-								|| varDeclaration.hasExternStorage()) {
-							noStorage = false;
-							break;
-						}
-					}
-					if (noStorage)
-						return;
-
-					if (variable.getLinkage() == LinkageKind.EXTERNAL) {
-						if (definition == null)
-							throw this.error("the definition for the variable "
-									+ variable.getName() + " which is declared"
-									+ " with external linkage is missing",
-									identifierExpression);
-					}
-				}
-			}
-		}
 	}
 
 	private void processOperator(OperatorNode node) throws SyntaxException {

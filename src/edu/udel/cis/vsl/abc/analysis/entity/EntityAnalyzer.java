@@ -1,13 +1,20 @@
 package edu.udel.cis.vsl.abc.analysis.entity;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import edu.udel.cis.vsl.abc.analysis.IF.Analyzer;
 import edu.udel.cis.vsl.abc.analysis.common.ScopeAnalyzer;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.IF.StandardTypes;
 import edu.udel.cis.vsl.abc.ast.conversion.IF.ConversionFactory;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Entity.EntityKind;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
+import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
+import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity.LinkageKind;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope.ScopeKind;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Variable;
@@ -61,7 +68,8 @@ import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
  * sets it in each identifier.</li>
  * <li>types: every TypeNode and ExpressionNode will have an associated Type
  * object associated to it</li>
- * <li>linkage: each entity has a kind of linkage which is determined and set</li>
+ * <li>linkage: each entity has a kind of linkage which is determined and
+ * set</li>
  * </ul>
  * 
  * @author siegel
@@ -99,6 +107,8 @@ public class EntityAnalyzer implements Analyzer {
 
 	Configuration configuration;
 
+	private Set<String> externVariablesAllowedWoDef = new HashSet<>();
+
 	// Private fields...
 
 	private TokenFactory sourceFactory;
@@ -119,16 +129,18 @@ public class EntityAnalyzer implements Analyzer {
 		this.standardTypes = new StandardTypes(entityFactory, typeFactory);
 		this.conversionFactory = conversionFactory;
 		this.declarationAnalyzer = new DeclarationAnalyzer(this);
-		declarationAnalyzer.setIgnoredTypes(standardTypes
-				.getStandardTypeNames());
+		declarationAnalyzer
+				.setIgnoredTypes(standardTypes.getStandardTypeNames());
 		this.expressionAnalyzer = new ExpressionAnalyzer(this,
 				conversionFactory, typeFactory, scopeAnalyzer);
 		this.compoundLiteralAnalyzer = new CompoundLiteralAnalyzer(this);
-		this.statementAnalyzer = new StatementAnalyzer(this,
-				expressionAnalyzer, conversionFactory, typeFactory,
-				configuration);
+		this.statementAnalyzer = new StatementAnalyzer(this, expressionAnalyzer,
+				conversionFactory, typeFactory, configuration);
 		this.expressionAnalyzer.setStatementAnalyzer(statementAnalyzer);
 		this.typeAnalyzer = new TypeAnalyzer(this, typeFactory);
+		// externVariablesAllowedWoDef.add("stdin");
+		// externVariablesAllowedWoDef.add("stdout");
+		// externVariablesAllowedWoDef.add("stderr");
 	}
 
 	// Public methods...
@@ -153,6 +165,64 @@ public class EntityAnalyzer implements Analyzer {
 		}
 		findTentativeDefinitions(rootScope);
 		this.expressionAnalyzer.processUnknownIdentifiers(root);
+		// // only checks external definition for whole-program AST
+		// if (ast.isWholeProgram()) {
+		// this.checkDefinitionForExternVariables(rootScope);
+		// }
+	}
+
+	public void checkDefinitionForExternVariables(Scope root)
+			throws SyntaxException {
+		Iterator<Scope> children = root.getChildrenScopes();
+
+		checkExternalDefinitionOfIdentifierWork(root);
+		while (children.hasNext()) {
+			checkExternalDefinitionOfIdentifierWork(children.next());
+		}
+	}
+
+	public void checkExternalDefinitionOfIdentifierWork(Scope scope)
+			throws SyntaxException {
+		Iterable<OrdinaryEntity> entities = scope.getOrdinaryEntities();
+
+		for (OrdinaryEntity entity : entities) {
+			if (entity.getEntityKind() == EntityKind.VARIABLE
+					&& !this.externVariablesAllowedWoDef
+							.contains(entity.getName())) {
+				Variable variable = (Variable) entity;
+				VariableDeclarationNode definition = variable.getDefinition();
+
+				// don't check $input variables
+				if (variable.getDeclaration(0).getTypeNode().isInputQualified())
+					return;
+
+				// tentative definitions are OK
+				boolean noStorage = true;
+
+				for (DeclarationNode declaration : variable.getDeclarations()) {
+					VariableDeclarationNode varDeclaration = (VariableDeclarationNode) declaration;
+
+					if (varDeclaration.hasAutoStorage()
+							|| varDeclaration.hasRegisterStorage()
+							|| varDeclaration.hasThreadLocalStorage()
+							|| varDeclaration.hasExternStorage()) {
+						noStorage = false;
+						break;
+					}
+				}
+				if (noStorage)
+					return;
+
+				if (variable.getLinkage() == LinkageKind.EXTERNAL) {
+					if (definition == null)
+						throw this.error("the definition for the variable "
+								+ variable.getName() + " which is declared"
+								+ " with external linkage is missing",
+								variable.getFirstDeclaration());
+				}
+			}
+
+		}
 	}
 
 	// Package private methods...
@@ -182,13 +252,13 @@ public class EntityAnalyzer implements Analyzer {
 			throw error("Expression in static assertion not constant",
 					expression);
 		switch (valueFactory.isZero(value)) {
-		case YES:
-			throw error("Static assertion violation: "
-					+ node.getMessage().getConstantValue(), node);
-		case MAYBE:
-			throw error("Possible static assertion violation: "
-					+ node.getMessage().getConstantValue(), node);
-		default:
+			case YES :
+				throw error("Static assertion violation: "
+						+ node.getMessage().getConstantValue(), node);
+			case MAYBE :
+				throw error("Possible static assertion violation: "
+						+ node.getMessage().getConstantValue(), node);
+			default :
 		}
 	}
 
@@ -215,37 +285,38 @@ public class EntityAnalyzer implements Analyzer {
 		BlockItemKind kind = node.blockItemKind();
 
 		switch (kind) {
-		case ENUMERATION:
-			((EnumerationTypeNode) node).setType(typeAnalyzer
-					.processEnumerationType((EnumerationTypeNode) node));
-			break;
-		case OMP_DECLARATIVE:
-			processOmpDeclarativeNode((OmpDeclarativeNode) node);
-			break;
-		case ORDINARY_DECLARATION:
-			processOrdinaryDeclaration((OrdinaryDeclarationNode) node);
-			break;
-		case PRAGMA:
-			processPragma((PragmaNode) node);
-			break;
-		case STATEMENT:
-			statementAnalyzer.processStatement((StatementNode) node);
-			break;
-		case STATIC_ASSERTION:
-			processStaticAssertion((StaticAssertionNode) node);
-			break;
-		case STRUCT_OR_UNION:
-			((StructureOrUnionTypeNode) node)
-					.setType(typeAnalyzer
-							.processStructureOrUnionType((StructureOrUnionTypeNode) node));
-			break;
-		case TYPEDEF:
-			declarationAnalyzer
-					.processTypedefDeclaration((TypedefDeclarationNode) node);
-			break;
-		default:
-			throw new ABCUnsupportedException(
-					"Entity analysis for block item node of " + kind + " kind");
+			case ENUMERATION :
+				((EnumerationTypeNode) node).setType(typeAnalyzer
+						.processEnumerationType((EnumerationTypeNode) node));
+				break;
+			case OMP_DECLARATIVE :
+				processOmpDeclarativeNode((OmpDeclarativeNode) node);
+				break;
+			case ORDINARY_DECLARATION :
+				processOrdinaryDeclaration((OrdinaryDeclarationNode) node);
+				break;
+			case PRAGMA :
+				processPragma((PragmaNode) node);
+				break;
+			case STATEMENT :
+				statementAnalyzer.processStatement((StatementNode) node);
+				break;
+			case STATIC_ASSERTION :
+				processStaticAssertion((StaticAssertionNode) node);
+				break;
+			case STRUCT_OR_UNION :
+				((StructureOrUnionTypeNode) node)
+						.setType(typeAnalyzer.processStructureOrUnionType(
+								(StructureOrUnionTypeNode) node));
+				break;
+			case TYPEDEF :
+				declarationAnalyzer.processTypedefDeclaration(
+						(TypedefDeclarationNode) node);
+				break;
+			default :
+				throw new ABCUnsupportedException(
+						"Entity analysis for block item node of " + kind
+								+ " kind");
 		}
 	}
 
@@ -254,20 +325,20 @@ public class EntityAnalyzer implements Analyzer {
 		OrdinaryDeclarationKind kind = node.ordinaryDeclarationKind();
 
 		switch (kind) {
-		case VARIABLE_DECLARATION:
-			declarationAnalyzer
-					.processVariableDeclaration((VariableDeclarationNode) node);
-			break;
-		case FUNCTION_DECLARATION:
-		case FUNCTION_DEFINITION:
-		case ABSTRACT_FUNCTION_DEFINITION:
-			declarationAnalyzer
-					.processFunctionDeclaration((FunctionDeclarationNode) node);
-			break;
-		default:
-			throw new ABCUnsupportedException(
-					"Entity analysis for ordinary declaration of " + kind
-							+ " kind");
+			case VARIABLE_DECLARATION :
+				declarationAnalyzer.processVariableDeclaration(
+						(VariableDeclarationNode) node);
+				break;
+			case FUNCTION_DECLARATION :
+			case FUNCTION_DEFINITION :
+			case ABSTRACT_FUNCTION_DEFINITION :
+				declarationAnalyzer.processFunctionDeclaration(
+						(FunctionDeclarationNode) node);
+				break;
+			default :
+				throw new ABCUnsupportedException(
+						"Entity analysis for ordinary declaration of " + kind
+								+ " kind");
 		}
 	}
 
@@ -277,8 +348,8 @@ public class EntityAnalyzer implements Analyzer {
 		int count = variables.numChildren();
 
 		for (int i = 0; i < count; i++) {
-			this.expressionAnalyzer.processExpression(variables
-					.getSequenceChild(i));
+			this.expressionAnalyzer
+					.processExpression(variables.getSequenceChild(i));
 		}
 	}
 
@@ -320,8 +391,8 @@ public class EntityAnalyzer implements Analyzer {
 					if (declaration.getInitializer() == null
 							&& !(declaration.hasAutoStorage()
 									|| declaration.hasRegisterStorage()
-									|| declaration.hasThreadLocalStorage() || declaration
-										.hasExternStorage())) {
+									|| declaration.hasThreadLocalStorage()
+									|| declaration.hasExternStorage())) {
 						variable.setDefinition(declaration);
 						declaration.setIsDefinition(true);
 						break;

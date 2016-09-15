@@ -42,7 +42,7 @@ typedef struct _lldiv_t {
 
 /* Functions defined */
 
-double atof(const char *nptr);
+$system double atof(const char *nptr);
 
 int atoi(const char *nptr);
 

@@ -87,7 +87,7 @@ $system int printf(const char * restrict format, ...);
 $system int scanf(const char * restrict format, ...);
 int snprintf(char * restrict s, size_t n,
      const char * restrict format, ...);
-int sprintf(char * restrict s,
+$system int sprintf(char * restrict s,
      const char * restrict format, ...);
 /*@ depends_on \access(s, format);
   @ executes_when \true;
@@ -107,7 +107,7 @@ int vsprintf(char * restrict s,
 int vsscanf(const char * restrict s,
      const char * restrict format, va_list arg);
 int fgetc(FILE *stream);
-char *fgets(char * restrict s, int n,
+$system char *fgets(char * restrict s, int n,
      FILE * restrict stream);
 int fputc(int c, FILE *stream);
 int fputs(const char * restrict s,

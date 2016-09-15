@@ -41,7 +41,7 @@ $system char *strcpy(char * restrict s1, const char * restrict s2);
 char *strncpy(char *dest, const char *src, size_t n);
 
 /* Append SRC onto DEST.  */
-char *strcat (char *dest, const char *src);
+$system char *strcat (char *dest, const char *src);
 
 /* Append no more than N characters from SRC onto DEST.  */
 char *strncat (char *dest, const char *src, size_t n);
@@ -79,7 +79,7 @@ size_t strspn (const char *s, const char *accept);
 char *strpbrk (const char *s, const char *accept);
 
 /* Find the first occurrence of S2 in S1.  */
-char * strstr (const char *s1, const char *s2);
+$system char * strstr (const char *s1, const char *s2);
 
 /* Divide S into tokens separated by characters in DELIM.  */
 char * strtok (char *s, const char *delim);

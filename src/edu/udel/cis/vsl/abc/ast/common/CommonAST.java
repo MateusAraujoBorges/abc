@@ -51,12 +51,7 @@ public class CommonAST implements AST {
 	public CommonAST(ASTFactory astFactory, SequenceNode<BlockItemNode> root,
 			boolean hasOmpPragma, Collection<SourceFile> sourceFiles)
 			throws SyntaxException {
-		this.root = root;
-		this.astFactory = astFactory;
-		this.sourceFiles = sourceFiles;
-		this.isWholeprogram = false;
-		clearEntities();
-		initialize();
+		this(astFactory, root, hasOmpPragma, sourceFiles, false);
 	}
 
 	public CommonAST(ASTFactory astFactory, SequenceNode<BlockItemNode> root,
