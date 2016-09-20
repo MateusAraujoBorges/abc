@@ -29,9 +29,10 @@ import edu.udel.cis.vsl.abc.main.FrontEnd;
  * 
  */
 
+@Ignore
 public class EvaluationCommonTest {
 
-	private static boolean debug = true;
+	private static boolean debug = false;
 
 	private static File root = new File(new File("examples"), "c");
 

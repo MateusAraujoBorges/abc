@@ -10,16 +10,17 @@ import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.common.CommonIdentifierNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
+import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue.IntervalRelation;
+import edu.udel.cis.vsl.abc.analysis.dataflow.DataflowUtilities;
 
 public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, IntervalValue>>{
 	private static IntervalAnalysisSARL instance = null;
@@ -28,7 +29,11 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 
 	ControlFlowAnalysis cfa;
 
+	DataflowUtilities utilities;
+
 	private EvaluationCommon evaluator;
+
+	private boolean debug = false;
 
 	/**
 	 * DFAs are singletons.  This allows them to be applied incrementally across a code base.
@@ -61,7 +66,10 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 		cfa = ControlFlowAnalysis.getInstance();
 		cfa.analyze(f);
 
-		Set<Pair<Entity, IntervalValue>> init = new HashSet<Pair<Entity,IntervalValue>>();
+		//
+		utilities = new DataflowUtilities(cfa);
+
+		Set<Pair<Entity, IntervalValue>> init = new HashSet<Pair<Entity,IntervalValue>>(); 
 
 		// Unprocessed nodes are assigned an empty set
 		Set<Pair<Entity, IntervalValue>> bottom = new HashSet<Pair<Entity, IntervalValue>>();
@@ -70,89 +78,15 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 	}
 
 	/*
-	 *  The next group of methods are stolen from reaching definitions, the OMP simplifier, and then expanded on significantly.
-	 *  	They should be factored out into some utilities.
-	 */
-	private boolean isAssignment(final ASTNode s) {
-		if (s instanceof ExpressionStatementNode) {
-			ExpressionNode e = ((ExpressionStatementNode)s).getExpression();
-			if (e instanceof OperatorNode) {
-				Operator op = ((OperatorNode)e).getOperator();
-				if ( (op == Operator.ASSIGN) || 
-						(op == Operator.POSTINCREMENT) || (op == Operator.POSTDECREMENT) || 
-						(op == Operator.PREINCREMENT) || (op == Operator.PREDECREMENT) || 
-						(op == Operator.BITANDEQ) || (op == Operator.BITOREQ) || (op == Operator.BITXOREQ) ||
-						(op == Operator.DIVEQ) || (op == Operator.TIMESEQ) || (op == Operator.PLUSEQ) || 
-						(op == Operator.MINUSEQ) || (op == Operator.MODEQ) ||
-						(op == Operator.SHIFTLEFTEQ) || (op == Operator.SHIFTRIGHTEQ) ) {
-					return true;
-				}
-			} 
-		} 
-		return false;
-	}
-	
-	private boolean isDefinition(final ASTNode s) {
-		if (s instanceof VariableDeclarationNode) {
-			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
-			return vdn.isDefinition() && vdn.getInitializer() != null;
-		}
-		return false;
-	}
-	
-	private IdentifierExpressionNode baseArray(OperatorNode subscript) {
-		assert subscript.getOperator() == OperatorNode.Operator.SUBSCRIPT : "Expected subscript expression";
-		if (subscript.getArgument(0) instanceof IdentifierExpressionNode) {
-			return (IdentifierExpressionNode) subscript.getArgument(0);
-		}
-		return baseArray((OperatorNode) subscript.getArgument(0));
-	}
+	 * New implementation of the set update function.
+	 * Satisfiable???
 
-	private Entity getLHSVar(final ASTNode s) {
-		if (isAssignment(s)) {
-			ExpressionNode lhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(0);
-			if (lhs instanceof IdentifierExpressionNode) {
-				IdentifierNode id = ((IdentifierExpressionNode)lhs).getIdentifier();
-				return id.getEntity();
-			} else if (lhs instanceof OperatorNode) {
-				OperatorNode opn = (OperatorNode)lhs;
-				if (opn.getOperator() == Operator.SUBSCRIPT) {
-					IdentifierExpressionNode idn = baseArray(opn);
-					return idn.getIdentifier().getEntity();
-				} else {
-					assert false : "Unexpected operator node on LHS";
-				}
-			} else {
-				assert false : "Unexpected LHS expression";
-			}
-		} else if (isDefinition(s)) {
-			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
-			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
-				return vdn.getEntity();
-			}
-		}
-		return null;
+	@Override
+	protected Set<Pair<Entity, IntervalValue>> update(Set<Pair<Entity, IntervalValue>> inSet, ASTNode n) {
+		inSet = gen(inSet, n);
+		return inSet;  
 	}
-	
-	private ExpressionNode getRHS(final ASTNode s) {
-		if (isAssignment(s)) {
-			OperatorNode opn = (OperatorNode) ((ExpressionStatementNode)s).getExpression();
-			ExpressionNode rhs = null;
-			if (opn.getNumberOfArguments() == 1) {
-				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(0);
-			} else if (opn.getNumberOfArguments() == 2) {
-				// This might need refinement for, e.g., PLUSEQ, which has arg 0 on the LHS and RHS
-				rhs = ((OperatorNode)((ExpressionStatementNode)s).getExpression()).getArgument(1);
-			}
-			return rhs;
-		} else if (isDefinition(s)) {
-			VariableDeclarationNode vdn = (VariableDeclarationNode)s;
-			if ( vdn.isDefinition() && vdn.getInitializer() != null ) {
-				return (ExpressionNode)vdn.getInitializer();
-			}
-		}
-		return null;
-	}
+	 */
 
 	@Override
 	/*
@@ -161,39 +95,102 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 	protected Set<Pair<Entity, IntervalValue>> gen(final Set<Pair<Entity,IntervalValue>> set, final ASTNode n) {
 
 		final Set<Pair<Entity,IntervalValue>> result = new HashSet<Pair<Entity,IntervalValue>>();
-		final Entity lhsVar = getLHSVar(n);
 
-//		if(lhsVar != null){
-			if (isAssignment(n) || isDefinition(n)) {
+		final Entity lhsVar = utilities.getLHSVar(n);
 
-				ExpressionNode rhs = getRHS(n);
+		if(debug) System.out.println("\nGen\n"+n);
+
+		if (utilities.isAssignment(n) || utilities.isDefinition(n)) {
+			assert lhsVar != null;
+
+			ExpressionNode rhs = utilities.getRHS(n);
+
+			assert rhs != null : "not simple assignment!";
+
+			Map<Entity, AbstractValue> map = new HashMap<Entity, AbstractValue>();
+			for(Pair<Entity, IntervalValue> setElement : set){
+				map.put(setElement.left, setElement.right);
+			}
+
+			AbstractValue abValue = evaluator.evaluate(rhs, map, new IntervalValue());
+
+			//if(debug) System.out.println("RS\t"+abValue);
+
+			IntervalValue interval = (IntervalValue) abValue;
+
+			assert !interval.isEmpty() : "empty interval?";
+
+			Pair<Entity, IntervalValue> inEntry = new Pair<Entity, IntervalValue>(lhsVar, interval);
+
+			if(debug) System.out.println("Before\t"+set);
+
+			//			for(Pair<Entity, IntervalValue> a : set){
+			//				if(!a.left.equals(inEntry.left)){
+			//					result.add(a);
+			//				}
+			//			}
+
+			if(debug) System.out.println("After\t"+result);
+
+			result.add(inEntry);
+
+		}
+
+		// Handles branch???
+		else if(utilities.isBranch(n)){
+
+			// defines lhs is an id
+			if(n.child(0) instanceof CommonIdentifierExpressionNode){
+				Entity lhs = ((CommonIdentifierExpressionNode) n.child(0)).getIdentifier().getEntity();
+				ExpressionNode rhs = (ExpressionNode) n.child(1);
 				
-				assert rhs != null : "not simple assignment!";
+				System.out.println("not simple assignment!" + lhs +" " + rhs);
 
 				Map<Entity, AbstractValue> map = new HashMap<Entity, AbstractValue>();
 				for(Pair<Entity, IntervalValue> setElement : set){
 					map.put(setElement.left, setElement.right);
 				}
+
+				AbstractValue abValue = evaluator.evaluate(rhs, map, new IntervalValue());
+				IntervalValue rhsInterval = (IntervalValue) abValue;
+
+				IntervalValue intersect = new IntervalValue();
+				IntervalValue lhsInterval = (IntervalValue) map.get(lhs);
+				intersect = (IntervalValue) intersect.intersection(lhsInterval, rhsInterval);
+
+				IntervalRelation interRelation = null;
 				
-				
-				IntervalValue interval = (IntervalValue) evaluator.evaluate(rhs, map, new IntervalValue());
+				Operator op = ((OperatorNode) n).getOperator();
+				switch(op){
+					case GT:
+						switch(interRelation){
+							case LT: ;break;
+							default: ;
+						}; break;
+					case GTE: ; break;
+					case LT: ; break;
+					case LTE: ; break;
+					case EQUALS: ; break;
+					case NEQ: ; break;
+					default:
+						assert false: "Unsupported operation of condition. " + op;
+				}
+			}
+			else{
+				assert false: "Unsupported complicated lhs condition. " + n;
+			}
 
-				assert !interval.isEmpty() : "empty interval?";
-				
-				Pair<Entity, IntervalValue> inEntry = 
-						new Pair<Entity, IntervalValue>(lhsVar, interval);
-				result.add(inEntry);
 
-			}else{
-
-//				assert false : "not assignment or definition.";
-
-//				Pair<Entity, IntervalValue> inEntry = 
-//						new Pair<Entity, IntervalValue>(lhsVar, new IntervalValue());
-//				result.add(inEntry);
-//			}
+			result.addAll(set);
 		}
 
+		else{
+
+			System.out.println("Warning! Not assignment or definition.");
+			result.addAll(set);
+		}
+
+		if(debug) System.out.println("result:\t"+result);
 		return result;	
 	}
 
@@ -207,8 +204,8 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 		Set<Pair<Entity, IntervalValue>> result = new HashSet<Pair<Entity, IntervalValue>>();
 
 		// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-		if (isAssignment(n) || isDefinition(n)) {
-			Entity lhsVar = getLHSVar(n);
+		if (utilities.isAssignment(n) || utilities.isDefinition(n)) {
+			Entity lhsVar = utilities.getLHSVar(n);
 			for (Pair<Entity, IntervalValue> inEntry : set) {
 				if (inEntry.left.equals(lhsVar)) {
 					result.add(inEntry);
@@ -216,7 +213,7 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 			}
 		}
 
-		return result;	
+		return result;
 	}
 
 	@Override

@@ -159,8 +159,19 @@ public abstract class DataFlowFramework<E> {
 	 * (still need to define {@link #gen()} and {@link #kill()} but they can be trivial)
 	 */
 	protected Set<E> update(Set<E> inSet, ASTNode n) {
-		inSet.removeAll(kill(inSet, n));
-		inSet.addAll(gen(inSet, n));
+		System.out.println(n);
+//		System.out.println("Before\t" + inSet);
+
+		Set<E> killSet = kill(inSet, n);
+		Set<E> genSet = gen(inSet, n);		
+		inSet.removeAll(killSet);
+		inSet.addAll(genSet);
+
+//		System.out.println("kill\t" + killSet);
+//		System.out.println("Gen\t" + genSet);
+		System.out.println("After\t" + inSet);
+		System.out.println();
+		
 		return inSet;  
 	}
 

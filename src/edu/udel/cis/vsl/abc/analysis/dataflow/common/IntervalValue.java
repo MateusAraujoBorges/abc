@@ -4,6 +4,7 @@ import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 import edu.udel.cis.vsl.sarl.IF.number.IntegerNumber;
 import edu.udel.cis.vsl.sarl.IF.number.Interval;
+import edu.udel.cis.vsl.sarl.IF.number.Number;
 import edu.udel.cis.vsl.sarl.IF.number.NumberFactory;
 import edu.udel.cis.vsl.sarl.number.IF.Numbers;
 
@@ -19,6 +20,16 @@ import edu.udel.cis.vsl.sarl.number.IF.Numbers;
 
 public class IntervalValue extends AbstractValue {
 
+	public enum IntervalRelation{
+		GT,		//strictly greater than
+		GTI,	//greater than with intersection
+		LT,		//strictly less than
+		LTI,	//less than with intersection
+		CT,		//A contains B
+		CTED,	//A is contained by B
+		EQ;		//strictly equal
+	}	
+
 	private static NumberFactory numFactory = Numbers.REAL_FACTORY;
 	Interval interval;
 
@@ -29,11 +40,11 @@ public class IntervalValue extends AbstractValue {
 	public IntervalValue(Interval interval){
 		this.interval = interval;
 	}
-	
+
 	public boolean isEmpty(){
 		return this.interval.isEmpty();
 	}
-	
+
 	public Interval getInterval(){
 		return this.interval;
 	}
@@ -108,9 +119,16 @@ public class IntervalValue extends AbstractValue {
 	@Override
 	public AbstractValue setValue(long value) {
 		IntegerNumber intNum = numFactory.integer(value);
-//		Interval a = numFactory.newInterval(true, intNum, false, intNum, false);
+		//		Interval a = numFactory.newInterval(true, intNum, false, intNum, false);
 		IntervalValue res = new IntervalValue(numFactory.newInterval(true, intNum, false, intNum, false));
-//		res.interval = a;
+		//		res.interval = a;
+		return res;
+	}
+
+	public AbstractValue setValue(boolean isIntegral, Long lower, boolean strictLower, Long upper, boolean strictUpper) {
+		IntegerNumber lowerNum = numFactory.integer(lower);
+		IntegerNumber upperNum = numFactory.integer(upper);
+		IntervalValue res = new IntervalValue(numFactory.newInterval(true, lowerNum, false, upperNum, false));
 		return res;
 	}
 
@@ -118,7 +136,7 @@ public class IntervalValue extends AbstractValue {
 	public AbstractValue top() {
 		return new IntervalValue(numFactory.universalIntegerInterval());
 	}
-	
+
 	public boolean isTop(){
 		return this.equals(numFactory.universalIntegerInterval());
 	}
@@ -132,7 +150,41 @@ public class IntervalValue extends AbstractValue {
 		return res;
 	}
 
- 	@Override
+
+	public AbstractValue intersection(AbstractValue leftValue, AbstractValue rightValue){
+		IntervalValue lv = (IntervalValue) leftValue;
+		IntervalValue rv = (IntervalValue) rightValue;
+		IntervalValue res = new IntervalValue(numFactory.intersection(lv.interval, rv.interval));
+
+		return res;
+	}
+
+
+	public IntervalRelation relation(IntervalValue a, IntervalValue b){
+		IntervalRelation ir;
+		if(numFactory.compare(a.interval.upper(), b.interval.upper()) > 0)
+			if(numFactory.compare(a.interval.lower(), b.interval.upper()) < 0)
+				if(numFactory.compare(a.interval.lower(), b.interval.lower()) < 0)
+					ir = IntervalRelation.CT;
+				else
+					ir = IntervalRelation.GTI;
+			else
+				ir = IntervalRelation.GT;
+		else if(numFactory.compare(b.interval.upper(), a.interval.upper()) > 0)
+			if(numFactory.compare(b.interval.lower(), a.interval.upper()) < 0)
+				if(numFactory.compare(b.interval.lower(), a.interval.lower()) < 0)
+					ir = IntervalRelation.CTED;
+				else
+					ir = IntervalRelation.LTI;
+			else
+				ir = IntervalRelation.LT;
+		else
+			ir = IntervalRelation.EQ;
+		
+		return ir;
+	}
+
+	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof IntervalValue){
 			return this.interval.equals(((IntervalValue) obj).interval);
@@ -147,7 +199,7 @@ public class IntervalValue extends AbstractValue {
 		co.right = this.interval.lower().hashCode();
 		return co.hashCode();
 	}
-	
+
 	@Override
 	public String toString(){
 		return this.interval.toString();

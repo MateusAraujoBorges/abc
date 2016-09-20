@@ -4,7 +4,6 @@ import java.util.Map;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
 import edu.udel.cis.vsl.abc.analysis.dataflow.IF.Evaluation;
-import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -27,47 +26,69 @@ import edu.udel.cis.vsl.abc.ast.value.IF.Value;
  */
 
 public class EvaluationCommon implements Evaluation<AbstractValue>{
+	boolean debug = false;
+	DataflowUtilities untilities = new DataflowUtilities(null);
+	
+	public AbstractValue evaluate(ASTNode expr, Map<Entity, AbstractValue> map, AbstractValue returnValue) {
+	
+		returnValue = evaluateIterator(expr,map,returnValue);
+		
+		ASTNode assignedVar = expr.parent().child(0);
+		if(assignedVar instanceof OperatorNode){
+			Operator op = ((OperatorNode) assignedVar).getOperator();
+			if(op == Operator.SUBSCRIPT){
+				System.out.println("AssignVar\t" + assignedVar);
+				
+//				Entity e = ((IdentifierExpressionNode) assignedVar.child(0)).getIdentifier().getEntity();
+//				AbstractValue originalValue = map.get(e);
+				AbstractValue originalValue = evaluateIterator(assignedVar, map, returnValue);
+				if(originalValue != null)
+					returnValue = returnValue.union(returnValue, originalValue);
+			}
+		}
+		
+		return returnValue;
+	}
+	
 
-	public AbstractValue evaluate(ASTNode expr, Map<Entity, AbstractValue> map, AbstractValue top) {
-		AbstractValue returnValue = top;
 
+	public AbstractValue evaluateIterator(ASTNode expr, Map<Entity, AbstractValue> map, AbstractValue returnValue) {
 		//Handles an operator node
 		if (expr instanceof OperatorNode){
 			ASTNode leftNode = expr.child(0);
 			ASTNode rightNode = expr.child(1);
-			AbstractValue leftValue = evaluate(leftNode, map, returnValue);
-			AbstractValue rightValue = evaluate(rightNode, map, returnValue);
+			AbstractValue leftValue = evaluateIterator(leftNode, map, returnValue);
+			AbstractValue rightValue = evaluateIterator(rightNode, map, returnValue);
 
 			Operator op = ((OperatorNode) expr).getOperator();
 
 			switch(op){
+				case PLUS: returnValue = returnValue.plus(leftValue,rightValue); break;
+				case MINUS: returnValue = returnValue.minus(leftValue,rightValue); break;
+				case TIMES: returnValue = returnValue.multiply(leftValue,rightValue); break;
+				case DIV: returnValue = returnValue.divide(leftValue,rightValue); break;
+				case SUBSCRIPT:
+					
+					IdentifierExpressionNode arrayID = untilities.baseArray((OperatorNode)expr);
+					Entity e = arrayID.getIdentifier().getEntity();
 
-			case PLUS: returnValue = returnValue.plus(leftValue,rightValue); break;
-			case MINUS: returnValue = returnValue.minus(leftValue,rightValue); break;
-			case TIMES: returnValue = returnValue.multiply(leftValue,rightValue); break;
-			case DIV: returnValue = returnValue.divide(leftValue,rightValue); break;
+					returnValue = map.get(e);
+					break;
 
-			default:
-				assert false : "Unsupported operation!";
+				default:
+					assert false : "Unsupported operation: " + op;
 			}
-			
-			IntervalValue iv = (IntervalValue)returnValue;
-			assert iv.getInterval() != null;
 
-			return returnValue;
+			if (debug) System.out.println("OP\t"+returnValue);
 		}
 
 		//Handles an identifier node
 		else if (expr instanceof IdentifierExpressionNode){
+
 			Entity e = ((IdentifierExpressionNode) expr).getIdentifier().getEntity();
-			AbstractValue i = map.get(e);
+			returnValue = map.get(e);
 			
-			if(i == null){
-				i = returnValue.top();
-				map.put(e, i);
-			}
-			assert i!=null : "i!=null";
-			return i;
+			if (debug) System.out.println("ID\t"+returnValue);
 		}
 
 		//Handles a constant node
@@ -79,31 +100,30 @@ public class EvaluationCommon implements Evaluation<AbstractValue>{
 
 			if (v.getType().kind() == TypeKind.BASIC) {
 				StandardBasicType btn = (StandardBasicType)v.getType();
-				
-				switch (btn.getBasicTypeKind()) {
-				case INT:
-				case LONG:
-				case LONG_LONG:
-				case SHORT:
-					value = (long) ((IntegerValue)v).getIntegerValue().intValue();
-					returnValue = returnValue.setValue(value);
-					break;
 
-				default:
-					assert false : "Expected an integral type for a ConstantNode";
+				switch (btn.getBasicTypeKind()) {
+					case INT:
+					case LONG:
+					case LONG_LONG:
+					case SHORT:
+						value = (long) ((IntegerValue)v).getIntegerValue().intValue();
+						returnValue = returnValue.setValue(value);
+						break;
+
+					default:
+						assert false : "Expected an integral type for a ConstantNode";
 				}
 			} else{
 				assert false : "Expected a basic type for a ConstantNode";
 			}
 			
-			IntervalValue iv = (IntervalValue)returnValue;
-			assert iv.getInterval() != null;
-			
-			return returnValue;
+			if(debug) System.out.println("CO\t"+returnValue);
 		}
 		else{
-			assert false : "Unsupported node type";
-			return null;
+			assert false : "Unsupported node type" + expr;
+		return null;
 		}
+		
+		return returnValue;
 	}
 }
