@@ -90,6 +90,22 @@ public interface Configuration {
 	boolean getSVCOMP();
 
 	/**
+	 * Should comments beginning with "@" be interpreted as ACSL annotations?
+	 * 
+	 * @return the value of the ACSL annotation flag
+	 */
+	boolean getACSL();
+
+	/**
+	 * Specifies whether comments beginning with "@" should be interpreted as
+	 * ACSL annotations
+	 * 
+	 * @param value
+	 *            the new value for the ACSL annotation flag
+	 */
+	void setACSL(boolean value);
+
+	/**
 	 * Sets the SVCOMP flag, which specifies whether this configuration is being
 	 * used to solve an SV-COMP problem.
 	 * 

@@ -60,6 +60,11 @@ public class UnitTask {
 	private boolean gnuc = false;
 
 	/**
+	 * Should comments beginning with @ be interpreted as ACSL annotations?
+	 */
+	private boolean acsl = false;
+
+	/**
 	 * Records for the transformations to apply to the translation unit after
 	 * analysis. Default is empty list.
 	 */
@@ -245,6 +250,26 @@ public class UnitTask {
 	 */
 	public boolean getGNUC() {
 		return gnuc;
+	}
+
+	/**
+	 * Should comments beginning with "@" be interpreted as ACSL annotations?
+	 * 
+	 * @return the value of the ACSL annotation flag
+	 */
+	public boolean getACSL() {
+		return acsl;
+	}
+
+	/**
+	 * Specifies whether comments beginning with "@" should be interpreted as
+	 * ACSL annotations
+	 * 
+	 * @param value
+	 *            the new value for the ACSL annotation flag
+	 */
+	public void setACSL(boolean value) {
+		acsl = value;
 	}
 
 	/**

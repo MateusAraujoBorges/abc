@@ -150,6 +150,9 @@ public class ABC {
 				"  print functions that are used in the program but no definition is given");
 		out.println("-lang=[c|civlc|f77]");
 		out.println("  set language (default determined by file suffix)");
+		out.println("-acsl");
+		out.println(
+				"  interpret comments beginning with @ as ACSL annotations");
 		out.println("-arch=[i386|amd64|unknown]");
 		out.println("  set the architecture, unknown by default");
 		for (String code : Transform.getCodes()) {
@@ -191,6 +194,7 @@ public class ABC {
 		boolean silent = false;
 		boolean showUndefinedFunctions = false;
 		boolean svcomp = false;
+		boolean acsl = false;
 		Architecture architecture = Architecture.UNKNOWN;
 		List<String> transformCodes = new LinkedList<>();
 		Language language = null, linkLang = null;
@@ -278,6 +282,8 @@ public class ABC {
 				showUndefinedFunctions = true;
 			} else if (arg.equals("-svcomp")) {
 				svcomp = true;
+			} else if (arg.equals("-acsl")) {
+				acsl = true;
 			} else if (arg.startsWith("-lang")) {
 				if (arg.equals("-lang=c"))
 					language = Language.C;
@@ -330,6 +336,7 @@ public class ABC {
 					language = getLanguageFromName(arg);
 				unitTask.setLanguage(language);
 				unitTask.setGNUC(gnuc);
+				unitTask.setACSL(acsl);
 				unitTask.setMacros(new HashMap<String, String>(macros));
 				unitTask.setSystemIncludes(
 						systemIncludeList.toArray(new File[0]));

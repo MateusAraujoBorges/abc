@@ -94,10 +94,7 @@ import edu.udel.cis.vsl.abc.util.IF.Pair;
 /**
  * Builds an AST from an ANTLR tree.
  * 
- * TODO: standardize token names across grammar and classes.
- * 
  * @author siegel
- * 
  */
 public class CASTBuilderWorker extends ASTBuilderWorker {
 
@@ -190,25 +187,25 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		TypeNodeKind kind = type.kind();
 
 		switch (kind) {
-			case FUNCTION :
-				return true;
-			case TYPEDEF_NAME : {
-				String typeName = ((TypedefNameNode) type).getName().name();
-				TypeNode referencedNode = scope.getReferencedType(typeName);
+		case FUNCTION:
+			return true;
+		case TYPEDEF_NAME: {
+			String typeName = ((TypedefNameNode) type).getName().name();
+			TypeNode referencedNode = scope.getReferencedType(typeName);
 
-				if (seenNames.contains(typeName))
-					throw error("Cycle in typedefs", type);
-				while (referencedNode == null) {
-					scope = scope.getParent();
-					if (scope == null)
-						throw error("Could not resolve typedef name", type);
-					referencedNode = scope.getReferencedType(typeName);
-				}
-				seenNames.add(typeName);
-				return isFunction(referencedNode, scope, seenNames);
+			if (seenNames.contains(typeName))
+				throw error("Cycle in typedefs", type);
+			while (referencedNode == null) {
+				scope = scope.getParent();
+				if (scope == null)
+					throw error("Could not resolve typedef name", type);
+				referencedNode = scope.getReferencedType(typeName);
 			}
-			default :
-				return false;
+			seenNames.add(typeName);
+			return isFunction(referencedNode, scope, seenNames);
+		}
+		default:
+			return false;
 		}
 	}
 
@@ -339,7 +336,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private ExpressionNode translateRegularRange(Source source,
 			CommonTree expressionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		{// regular range expression lo..hi or lo..hi#step
 			ExpressionNode loNode = translateExpression(
 					(CommonTree) expressionTree.getChild(0), scope);
@@ -362,7 +359,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private ExpressionNode translateScopeOf(Source source,
 			CommonTree expressionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		ExpressionNode expression = this.translateExpression(
 				(CommonTree) expressionTree.getChild(0), scope);
 
@@ -472,7 +469,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private CompoundLiteralNode translateCompoundLiteral(Source source,
 			CommonTree compoundLiteralTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		// tree has form:
 		// ^(COMPOUND_LITERAL LPAREN typeName initializerList RCURLY)
 		TypeNode typeNode = translateTypeName(
@@ -492,7 +489,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private ExpressionNode translateDotOrArrow(Source source,
 			CommonTree expressionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		int kind = expressionTree.getType();
 		CommonTree argumentNode = (CommonTree) expressionTree.getChild(0);
 		CommonTree fieldNode = (CommonTree) expressionTree.getChild(1);
@@ -513,7 +510,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private OperatorNode translateOperatorExpression(Source source,
 			CommonTree expressionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		CommonTree operatorTree = (CommonTree) expressionTree.getChild(0);
 		int operatorKind = operatorTree.getType();
 		CommonTree argumentList = (CommonTree) expressionTree.getChild(1);
@@ -528,131 +525,131 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			arguments.add(argument);
 		}
 		switch (operatorKind) {
-			case AMPERSAND :
-				operator = numArgs == 1 ? Operator.ADDRESSOF : Operator.BITAND;
-				break;
-			case ASSIGN :
-				operator = Operator.ASSIGN;
-				break;
-			case BIG_O :
-				operator = Operator.BIG_O;
-				break;
-			case BITANDEQ :
-				operator = Operator.BITANDEQ;
-				break;
-			case TILDE :
-				operator = Operator.BITCOMPLEMENT;
-				break;
-			case BITOR :
-				operator = Operator.BITOR;
-				break;
-			case BITOREQ :
-				operator = Operator.BITOREQ;
-				break;
-			case BITXOR :
-				operator = Operator.BITXOR;
-				break;
-			case BITXOREQ :
-				operator = Operator.BITXOREQ;
-				break;
-			case COMMA :
-				operator = Operator.COMMA;
-				break;
-			case QMARK :
-				operator = Operator.CONDITIONAL;
-				break;
-			case STAR :
-				operator = numArgs == 1 ? Operator.DEREFERENCE : Operator.TIMES;
-				break;
-			case DIV :
-				operator = Operator.DIV;
-				break;
-			case DIVEQ :
-				operator = Operator.DIVEQ;
-				break;
-			case EQUALS :
-				operator = Operator.EQUALS;
-				break;
-			case GT :
-				operator = Operator.GT;
-				break;
-			case GTE :
-				operator = Operator.GTE;
-				break;
-			case AND :
-				operator = Operator.LAND;
-				break;
-			case OR :
-				operator = Operator.LOR;
-				break;
-			case IMPLIES :
-				operator = Operator.IMPLIES;
-				break;
-			case LT :
-				operator = Operator.LT;
-				break;
-			case LTE :
-				operator = Operator.LTE;
-				break;
-			case SUB :
-				operator = numArgs == 1 ? Operator.UNARYMINUS : Operator.MINUS;
-				break;
-			case SUBEQ :
-				operator = Operator.MINUSEQ;
-				break;
-			case MOD :
-				operator = Operator.MOD;
-				break;
-			case MODEQ :
-				operator = Operator.MODEQ;
-				break;
-			case NEQ :
-				operator = Operator.NEQ;
-				break;
-			case NOT :
-				operator = Operator.NOT;
-				break;
-			case PLUS :
-				operator = numArgs == 1 ? Operator.UNARYPLUS : Operator.PLUS;
-				break;
-			case PLUSEQ :
-				operator = Operator.PLUSEQ;
-				break;
-			case POST_DECREMENT :
-				operator = Operator.POSTDECREMENT;
-				break;
-			case POST_INCREMENT :
-				operator = Operator.POSTINCREMENT;
-				break;
-			case PRE_DECREMENT :
-				operator = Operator.PREDECREMENT;
-				break;
-			case PRE_INCREMENT :
-				operator = Operator.PREINCREMENT;
-				break;
-			case SHIFTLEFT :
-				operator = Operator.SHIFTLEFT;
-				break;
-			case SHIFTLEFTEQ :
-				operator = Operator.SHIFTLEFTEQ;
-				break;
-			case SHIFTRIGHT :
-				operator = Operator.SHIFTRIGHT;
-				break;
-			case SHIFTRIGHTEQ :
-				operator = Operator.SHIFTRIGHTEQ;
-				break;
-			case INDEX :
-				operator = Operator.SUBSCRIPT;
-				break;
-			case STAREQ :
-				operator = Operator.TIMESEQ;
-				break;
-			case HASH :
-				operator = Operator.HASH;
-				break;
-			default :
-				throw error("Unknown operator :", operatorTree);
+		case AMPERSAND:
+			operator = numArgs == 1 ? Operator.ADDRESSOF : Operator.BITAND;
+			break;
+		case ASSIGN:
+			operator = Operator.ASSIGN;
+			break;
+		case BIG_O:
+			operator = Operator.BIG_O;
+			break;
+		case BITANDEQ:
+			operator = Operator.BITANDEQ;
+			break;
+		case TILDE:
+			operator = Operator.BITCOMPLEMENT;
+			break;
+		case BITOR:
+			operator = Operator.BITOR;
+			break;
+		case BITOREQ:
+			operator = Operator.BITOREQ;
+			break;
+		case BITXOR:
+			operator = Operator.BITXOR;
+			break;
+		case BITXOREQ:
+			operator = Operator.BITXOREQ;
+			break;
+		case COMMA:
+			operator = Operator.COMMA;
+			break;
+		case QMARK:
+			operator = Operator.CONDITIONAL;
+			break;
+		case STAR:
+			operator = numArgs == 1 ? Operator.DEREFERENCE : Operator.TIMES;
+			break;
+		case DIV:
+			operator = Operator.DIV;
+			break;
+		case DIVEQ:
+			operator = Operator.DIVEQ;
+			break;
+		case EQUALS:
+			operator = Operator.EQUALS;
+			break;
+		case GT:
+			operator = Operator.GT;
+			break;
+		case GTE:
+			operator = Operator.GTE;
+			break;
+		case AND:
+			operator = Operator.LAND;
+			break;
+		case OR:
+			operator = Operator.LOR;
+			break;
+		case IMPLIES:
+			operator = Operator.IMPLIES;
+			break;
+		case LT:
+			operator = Operator.LT;
+			break;
+		case LTE:
+			operator = Operator.LTE;
+			break;
+		case SUB:
+			operator = numArgs == 1 ? Operator.UNARYMINUS : Operator.MINUS;
+			break;
+		case SUBEQ:
+			operator = Operator.MINUSEQ;
+			break;
+		case MOD:
+			operator = Operator.MOD;
+			break;
+		case MODEQ:
+			operator = Operator.MODEQ;
+			break;
+		case NEQ:
+			operator = Operator.NEQ;
+			break;
+		case NOT:
+			operator = Operator.NOT;
+			break;
+		case PLUS:
+			operator = numArgs == 1 ? Operator.UNARYPLUS : Operator.PLUS;
+			break;
+		case PLUSEQ:
+			operator = Operator.PLUSEQ;
+			break;
+		case POST_DECREMENT:
+			operator = Operator.POSTDECREMENT;
+			break;
+		case POST_INCREMENT:
+			operator = Operator.POSTINCREMENT;
+			break;
+		case PRE_DECREMENT:
+			operator = Operator.PREDECREMENT;
+			break;
+		case PRE_INCREMENT:
+			operator = Operator.PREINCREMENT;
+			break;
+		case SHIFTLEFT:
+			operator = Operator.SHIFTLEFT;
+			break;
+		case SHIFTLEFTEQ:
+			operator = Operator.SHIFTLEFTEQ;
+			break;
+		case SHIFTRIGHT:
+			operator = Operator.SHIFTRIGHT;
+			break;
+		case SHIFTRIGHTEQ:
+			operator = Operator.SHIFTRIGHTEQ;
+			break;
+		case INDEX:
+			operator = Operator.SUBSCRIPT;
+			break;
+		case STAREQ:
+			operator = Operator.TIMESEQ;
+			break;
+		case HASH:
+			operator = Operator.HASH;
+			break;
+		default:
+			throw error("Unknown operator :", operatorTree);
 		}
 		return nodeFactory.newOperatorNode(source, operator, arguments);
 	}
@@ -689,7 +686,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private StatementExpressionNode translateStatementExpression(Source source,
 			CommonTree expressionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		CompoundStatementNode statement = this.translateCompoundStatement(
 				(CommonTree) expressionTree.getChild(1), scope);
 		BlockItemNode last = statement
@@ -714,103 +711,97 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private ExpressionNode translateExpression(Source source,
 			CommonTree expressionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		int kind = expressionTree.getType();
 
 		switch (kind) {
-			case INTEGER_CONSTANT :
-				return translateIntegerConstant(source, expressionTree);
-			case FLOATING_CONSTANT :
-				return translateFloatingConstant(source, expressionTree);
-			case ENUMERATION_CONSTANT :
-				return nodeFactory
-						.newEnumerationConstantNode(translateIdentifier(
-								(CommonTree) expressionTree.getChild(0)));
-			case CHARACTER_CONSTANT :
-				return translateCharacterConstant(source, expressionTree);
-			case STRING_LITERAL :
-				return translateStringLiteral(source, expressionTree);
-			case IDENTIFIER :
-				return nodeFactory.newIdentifierExpressionNode(source,
-						translateIdentifier(expressionTree));
-			case LAMBDA :
-				return translateArrayLambdaExpression(source, expressionTree,
-						scope);
-			case PARENTHESIZED_EXPRESSION :
-				return translateExpression(source,
-						(CommonTree) expressionTree.getChild(1), scope);
-			case GENERIC : // TODO: genericSelection
-				throw new UnsupportedOperationException(
-						"Generic selections not yet implemented");
-			case CALL :
-				return translateCall(source, expressionTree, scope);
-			case DOT :
-			case ARROW :
-				return translateDotOrArrow(source, expressionTree, scope);
-			case COMPOUND_LITERAL :
-				return translateCompoundLiteral(source, expressionTree, scope);
-			case OPERATOR :
-				return translateOperatorExpression(source, expressionTree,
-						scope);
-			case SIZEOF :
-				return translateSizeOf(source, expressionTree, scope);
-			case SCOPEOF :
-				return translateScopeOf(source, expressionTree, scope);
-			case ALIGNOF :
-				return nodeFactory.newAlignOfNode(source, translateTypeName(
-						(CommonTree) expressionTree.getChild(0), scope));
-			case CAST :
-				return nodeFactory.newCastNode(source,
-						translateTypeName(
-								(CommonTree) expressionTree.getChild(0), scope),
-						translateExpression(
-								(CommonTree) expressionTree.getChild(1),
-								scope));
-			case SELF :
-				return nodeFactory.newSelfNode(source);
-			case PROCNULL :
-				return nodeFactory.newProcnullNode(source);
-			case STATENULL :
-				return nodeFactory.newStatenullNode(source);
-			case HERE :
-				return nodeFactory.newHereNode(source);
-			case SPAWN :
-				return nodeFactory.newSpawnNode(source,
-						translateCall(source, expressionTree, scope));
-			// case TRUE:
-			// return translateTrue(source);
-			// case FALSE:
-			// return translateFalse(source);
-			case RESULT :
-				return nodeFactory.newResultNode(source);
-			case AT :
-				return translateAt(source, expressionTree, scope);
-			// case FORALL:
-			// return translateForall(source, expressionTree, scope);
-			// case UNIFORM:
-			// return translateUniform(source, expressionTree, scope);
-			// case EXISTS:
-			// return translateExists(source, expressionTree, scope);
-			case QUANTIFIED :
-				return translateQuantifiedExpressionNew(source, expressionTree,
-						scope);
-			case DERIVATIVE_EXPRESSION :
-				return translateDeriv(source, expressionTree, scope);
-			case DOTDOT :
-				return translateRegularRange(source, expressionTree, scope);
-			case ELLIPSIS :
-				return translateWildcard(source, expressionTree, scope);
-			case STATEMENT_EXPRESSION :
-				return translateStatementExpression(source, expressionTree,
-						scope);
-			case VALUE_AT :
-				return translateValueAtExpression(source, expressionTree,
-						scope);
-			case ORIGINAL :
-				return translateOriginalExpression(source, expressionTree,
-						scope);
-			default :
-				throw error("Unknown expression kind", expressionTree);
+		case INTEGER_CONSTANT:
+			return translateIntegerConstant(source, expressionTree);
+		case FLOATING_CONSTANT:
+			return translateFloatingConstant(source, expressionTree);
+		case ENUMERATION_CONSTANT:
+			return nodeFactory.newEnumerationConstantNode(translateIdentifier(
+					(CommonTree) expressionTree.getChild(0)));
+		case CHARACTER_CONSTANT:
+			return translateCharacterConstant(source, expressionTree);
+		case STRING_LITERAL:
+			return translateStringLiteral(source, expressionTree);
+		case IDENTIFIER:
+			return nodeFactory.newIdentifierExpressionNode(source,
+					translateIdentifier(expressionTree));
+		case LAMBDA:
+			return translateArrayLambdaExpression(source, expressionTree,
+					scope);
+		case PARENTHESIZED_EXPRESSION:
+			return translateExpression(source,
+					(CommonTree) expressionTree.getChild(1), scope);
+		case GENERIC: // TODO: genericSelection
+			throw new UnsupportedOperationException(
+					"Generic selections not yet implemented");
+		case CALL:
+			return translateCall(source, expressionTree, scope);
+		case DOT:
+		case ARROW:
+			return translateDotOrArrow(source, expressionTree, scope);
+		case COMPOUND_LITERAL:
+			return translateCompoundLiteral(source, expressionTree, scope);
+		case OPERATOR:
+			return translateOperatorExpression(source, expressionTree, scope);
+		case SIZEOF:
+			return translateSizeOf(source, expressionTree, scope);
+		case SCOPEOF:
+			return translateScopeOf(source, expressionTree, scope);
+		case ALIGNOF:
+			return nodeFactory.newAlignOfNode(source, translateTypeName(
+					(CommonTree) expressionTree.getChild(0), scope));
+		case CAST:
+			return nodeFactory.newCastNode(source,
+					translateTypeName((CommonTree) expressionTree.getChild(0),
+							scope),
+					translateExpression((CommonTree) expressionTree.getChild(1),
+							scope));
+		case SELF:
+			return nodeFactory.newSelfNode(source);
+		case PROCNULL:
+			return nodeFactory.newProcnullNode(source);
+		case STATENULL:
+			return nodeFactory.newStatenullNode(source);
+		case HERE:
+			return nodeFactory.newHereNode(source);
+		case SPAWN:
+			return nodeFactory.newSpawnNode(source,
+					translateCall(source, expressionTree, scope));
+		// case TRUE:
+		// return translateTrue(source);
+		// case FALSE:
+		// return translateFalse(source);
+		case RESULT:
+			return nodeFactory.newResultNode(source);
+		case AT:
+			return translateAt(source, expressionTree, scope);
+		// case FORALL:
+		// return translateForall(source, expressionTree, scope);
+		// case UNIFORM:
+		// return translateUniform(source, expressionTree, scope);
+		// case EXISTS:
+		// return translateExists(source, expressionTree, scope);
+		case QUANTIFIED:
+			return translateQuantifiedExpressionNew(source, expressionTree,
+					scope);
+		case DERIVATIVE_EXPRESSION:
+			return translateDeriv(source, expressionTree, scope);
+		case DOTDOT:
+			return translateRegularRange(source, expressionTree, scope);
+		case ELLIPSIS:
+			return translateWildcard(source, expressionTree, scope);
+		case STATEMENT_EXPRESSION:
+			return translateStatementExpression(source, expressionTree, scope);
+		case VALUE_AT:
+			return translateValueAtExpression(source, expressionTree, scope);
+		case ORIGINAL:
+			return translateOriginalExpression(source, expressionTree, scope);
+		default:
+			throw error("Unknown expression kind", expressionTree);
 		} // end switch
 	}
 
@@ -836,7 +827,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private ArrayLambdaNode translateArrayLambdaExpression(Source source,
 			CommonTree arrayLambdaTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree typeTree = (CommonTree) arrayLambdaTree.getChild(0);
 		CommonTree boundVariableDeclListTree = (CommonTree) arrayLambdaTree
@@ -873,7 +864,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private QuantifiedExpressionNode translateQuantifiedExpressionNew(
 			Source source, CommonTree quantifiedTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree quantifierTree = (CommonTree) quantifiedTree.getChild(0);
 		CommonTree boundVariableDeclListTree = (CommonTree) quantifiedTree
@@ -896,7 +887,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> translateBoundVariableDeclarationSubList(
 			Source source, CommonTree boundVariableListTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		CommonTree typeTree = (CommonTree) boundVariableListTree.getChild(0);
 		CommonTree namesTree = (CommonTree) boundVariableListTree.getChild(1);
 		CommonTree domainTree = (CommonTree) boundVariableListTree.getChild(2);
@@ -922,20 +913,20 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	private Quantifier translateQuantifier(CommonTree quantifierTree)
 			throws SyntaxException {
 		switch (quantifierTree.getType()) {
-			case FORALL :
-				return Quantifier.FORALL;
-			case EXISTS :
-				return Quantifier.EXISTS;
-			case UNIFORM :
-				return Quantifier.UNIFORM;
-			default :
-				throw this.error("unknown quantifier", quantifierTree);
+		case FORALL:
+			return Quantifier.FORALL;
+		case EXISTS:
+			return Quantifier.EXISTS;
+		case UNIFORM:
+			return Quantifier.UNIFORM;
+		default:
+			throw this.error("unknown quantifier", quantifierTree);
 		}
 	}
 
 	private ExpressionNode translateWildcard(Source source,
 			CommonTree expressionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		return nodeFactory.newWildcardNode(source);
 	}
 
@@ -1038,8 +1029,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			// with same name. Linker will have to recognize this and
 			// perhaps change names of anonymous things. At least in file scope.
 
-			TypeNode baseType = i == 0
-					? newSpecifierType(analysis, scope)
+			TypeNode baseType = i == 0 ? newSpecifierType(analysis, scope)
 					: makeIncomplete(newSpecifierType(analysis, scope));
 			DeclaratorData data = processDeclarator(declaratorTree, baseType,
 					scope);
@@ -1125,12 +1115,46 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		TypeNode result;
 
 		switch (analysis.typeNameKind) {
-			case VOID :
-				result = nodeFactory
-						.newVoidTypeNode(newSource(analysis.typeSpecifierNode));
-				break;
-			case BASIC : {
+		case VOID:
+			result = nodeFactory
+					.newVoidTypeNode(newSource(analysis.typeSpecifierNode));
+			break;
+		case BASIC: {
+			Source source;
+
+			if (analysis.specifierListNode.getChildCount() == 0)
+				source = this.tokenFactory.newSource(tokenFactory.newCivlcToken(
+						IDENTIFIER, analysis.basicTypeKind.toString(),
+						tokenFactory.newSystemFormation("system")));
+			else
+				source = newSource(analysis.specifierListNode);
+			result = nodeFactory.newBasicTypeNode(source,
+					analysis.basicTypeKind);
+			break;
+		}
+		case TYPEDEF_NAME: {
+			CommonTree typedefNameTree = (CommonTree) analysis.typeSpecifierNode;
+			CommonTree identifierTree = (CommonTree) typedefNameTree
+					.getChild(0);
+			// CommonTree scopeListTree = (CommonTree)
+			// typedefNameTree.getChild(1);
+			IdentifierNode identifierNode = translateIdentifier(identifierTree);
+			// SequenceNode<ExpressionNode> scopeListNode =
+			// translateScopeListUse(scopeListTree);
+
+			result = nodeFactory.newTypedefNameNode(identifierNode, null);
+			break;
+		}
+		case TYPEOF: {
+			CommonTree typeofTree = (CommonTree) analysis.typeSpecifierNode;
+			CommonTree operandTree = (CommonTree) typeofTree.getChild(1);
+
+			if (typeofTree.getType() == TYPEOF_TYPE) {
+				result = this.translateTypeName(operandTree, scope);
+			} else {
 				Source source;
+				ExpressionNode expression = this
+						.translateExpression(operandTree, scope);
 
 				if (analysis.specifierListNode.getChildCount() == 0)
 					source = this.tokenFactory
@@ -1139,83 +1163,46 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 									tokenFactory.newSystemFormation("system")));
 				else
 					source = newSource(analysis.specifierListNode);
-				result = nodeFactory.newBasicTypeNode(source,
-						analysis.basicTypeKind);
-				break;
+				result = this.nodeFactory.newTypeofNode(source, expression);
 			}
-			case TYPEDEF_NAME : {
-				CommonTree typedefNameTree = (CommonTree) analysis.typeSpecifierNode;
-				CommonTree identifierTree = (CommonTree) typedefNameTree
-						.getChild(0);
-				// CommonTree scopeListTree = (CommonTree)
-				// typedefNameTree.getChild(1);
-				IdentifierNode identifierNode = translateIdentifier(
-						identifierTree);
-				// SequenceNode<ExpressionNode> scopeListNode =
-				// translateScopeListUse(scopeListTree);
+			break;
+		}
+		case STRUCTURE_OR_UNION:
+			result = translateStructOrUnionType(analysis.typeSpecifierNode,
+					scope);
+			break;
+		case ENUMERATION:
+			result = translateEnumerationType(analysis.typeSpecifierNode,
+					scope);
+			break;
+		case ATOMIC:
+			result = translateAtomicType(analysis.typeSpecifierNode, scope);
+			break;
+		case DOMAIN: {
+			CommonTree node = analysis.typeSpecifierNode;
+			Source source = newSource(node);
 
-				result = nodeFactory.newTypedefNameNode(identifierNode, null);
-				break;
-			}
-			case TYPEOF : {
-				CommonTree typeofTree = (CommonTree) analysis.typeSpecifierNode;
-				CommonTree operandTree = (CommonTree) typeofTree.getChild(1);
+			if (node.getChildCount() != 0) {
+				CommonTree child = (CommonTree) node.getChild(0);
 
-				if (typeofTree.getType() == TYPEOF_TYPE) {
-					result = this.translateTypeName(operandTree, scope);
-				} else {
-					Source source;
-					ExpressionNode expression = this
-							.translateExpression(operandTree, scope);
+				if (child.getToken().getType() != ABSENT) {
+					ExpressionNode dimensionNode = translateExpression(child,
+							scope);
 
-					if (analysis.specifierListNode.getChildCount() == 0)
-						source = this.tokenFactory.newSource(
-								tokenFactory.newCivlcToken(IDENTIFIER,
-										analysis.basicTypeKind.toString(),
-										tokenFactory
-												.newSystemFormation("system")));
-					else
-						source = newSource(analysis.specifierListNode);
-					result = this.nodeFactory.newTypeofNode(source, expression);
+					result = nodeFactory.newDomainTypeNode(source,
+							dimensionNode);
+					break;
 				}
-				break;
 			}
-			case STRUCTURE_OR_UNION :
-				result = translateStructOrUnionType(analysis.typeSpecifierNode,
-						scope);
-				break;
-			case ENUMERATION :
-				result = translateEnumerationType(analysis.typeSpecifierNode,
-						scope);
-				break;
-			case ATOMIC :
-				result = translateAtomicType(analysis.typeSpecifierNode, scope);
-				break;
-			case DOMAIN : {
-				CommonTree node = analysis.typeSpecifierNode;
-				Source source = newSource(node);
-
-				if (node.getChildCount() != 0) {
-					CommonTree child = (CommonTree) node.getChild(0);
-
-					if (child.getToken().getType() != ABSENT) {
-						ExpressionNode dimensionNode = translateExpression(
-								child, scope);
-
-						result = nodeFactory.newDomainTypeNode(source,
-								dimensionNode);
-						break;
-					}
-				}
-				result = nodeFactory.newDomainTypeNode(source);
-				break;
-			}
-			case RANGE :
-				result = nodeFactory.newRangeTypeNode(
-						newSource(analysis.typeSpecifierNode));
-				break;
-			default :
-				throw new RuntimeException("Should not happen.");
+			result = nodeFactory.newDomainTypeNode(source);
+			break;
+		}
+		case RANGE:
+			result = nodeFactory
+					.newRangeTypeNode(newSource(analysis.typeSpecifierNode));
+			break;
+		default:
+			throw new RuntimeException("Should not happen.");
 		}
 		if (analysis.constQualifier)
 			result.setConstQualified(true);
@@ -1285,7 +1272,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private List<FieldDeclarationNode> translateFieldDeclaration(
 			CommonTree declarationTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		CommonTree declarationSpecifiers = (CommonTree) declarationTree
 				.getChild(0); // may
 								// be
@@ -1308,8 +1295,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					baseType, null));
 		} else {
 			for (int i = 0; i < numDeclarators; i++) {
-				TypeNode baseType = i == 0
-						? newSpecifierType(analysis, scope)
+				TypeNode baseType = i == 0 ? newSpecifierType(analysis, scope)
 						: makeIncomplete(newSpecifierType(analysis, scope));
 				CommonTree structDeclarator = (CommonTree) structDeclaratorList
 						.getChild(i);
@@ -1348,7 +1334,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private EnumerationTypeNode translateEnumerationType(
 			CommonTree enumerationTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		Source wholeSource = newSource(enumerationTree);
 		// tagTree may be ABSENT:
 		CommonTree tagTree = (CommonTree) enumerationTree.getChild(0);
@@ -1455,7 +1441,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private void setAlignmentSpecifiers(VariableDeclarationNode declaration,
 			SpecifierAnalysis analysis, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		if (!analysis.alignmentTypeNodes.isEmpty()) {
 			List<TypeNode> typeAlignmentSpecifiers = new ArrayList<TypeNode>();
 
@@ -1511,7 +1497,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private void setStorageSpecifiers(FunctionDeclarationNode declaration,
 			SpecifierAnalysis analysis, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 
 		if (analysis.externCount > 0)
 			declaration.setExternStorage(true);
@@ -1590,17 +1576,16 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				type = translateDeclaratorSuffix(
 						(CommonTree) directDeclarator.getChild(i), type, scope);
 			switch (prefix.getType()) {
-				case IDENTIFIER :
-					return new DeclaratorData(type,
-							translateIdentifier(prefix));
-				case DECLARATOR :
-				case ABSTRACT_DECLARATOR :
-					return processDeclarator(prefix, type, scope);
-				case ABSENT :
-					return new DeclaratorData(type, null);
-				default :
-					throw error("Unexpected node for direct declarator prefix",
-							prefix);
+			case IDENTIFIER:
+				return new DeclaratorData(type, translateIdentifier(prefix));
+			case DECLARATOR:
+			case ABSTRACT_DECLARATOR:
+				return processDeclarator(prefix, type, scope);
+			case ABSENT:
+				return new DeclaratorData(type, null);
+			default:
+				throw error("Unexpected node for direct declarator prefix",
+						prefix);
 			}
 		}
 	}
@@ -1752,20 +1737,20 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			CommonTree qualifier = (CommonTree) qualifierList.getChild(i);
 
 			switch (qualifier.getType()) {
-				case CONST :
-					type.setConstQualified(true);
-					break;
-				case VOLATILE :
-					type.setVolatileQualified(true);
-					break;
-				case RESTRICT :
-					type.setRestrictQualified(true);
-					break;
-				case ATOMIC :
-					type.setAtomicQualified(true);
-					break;
-				default :
-					throw error("Unknown type qualifier", qualifier);
+			case CONST:
+				type.setConstQualified(true);
+				break;
+			case VOLATILE:
+				type.setVolatileQualified(true);
+				break;
+			case RESTRICT:
+				type.setRestrictQualified(true);
+				break;
+			case ATOMIC:
+				type.setAtomicQualified(true);
+				break;
+			default:
+				throw error("Unknown type qualifier", qualifier);
 			}
 		}
 	}
@@ -1778,20 +1763,20 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			CommonTree qualifier = (CommonTree) qualifierList.getChild(i);
 
 			switch (qualifier.getType()) {
-				case CONST :
-					type.setConstInBrackets(true);
-					break;
-				case VOLATILE :
-					type.setVolatileInBrackets(true);
-					break;
-				case RESTRICT :
-					type.setRestrictInBrackets(true);
-					break;
-				case ATOMIC :
-					type.setAtomicInBrackets(true);
-					break;
-				default :
-					throw error("Unknown type qualifier", qualifier);
+			case CONST:
+				type.setConstInBrackets(true);
+				break;
+			case VOLATILE:
+				type.setVolatileInBrackets(true);
+				break;
+			case RESTRICT:
+				type.setRestrictInBrackets(true);
+				break;
+			case ATOMIC:
+				type.setAtomicInBrackets(true);
+				break;
+			default:
+				throw error("Unknown type qualifier", qualifier);
 			}
 		}
 	}
@@ -1816,13 +1801,13 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				newSource(suffix));
 
 		switch (extentNodeType) {
-			case ABSENT :
-				break;
-			case STAR :
-				unspecifiedVariableLength = true;
-				break;
-			default :
-				extent = translateExpression(extentNode, scope);
+		case ABSENT:
+			break;
+		case STAR:
+			unspecifiedVariableLength = true;
+			break;
+		default:
+			extent = translateExpression(extentNode, scope);
 		}
 		result = nodeFactory.newArrayTypeNode(source, baseType, extent);
 		if (unspecifiedVariableLength)
@@ -1923,7 +1908,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					.newFunctionTypeNode(source, baseType,
 							nodeFactory.newSequenceNode(source,
 									"IdentifierList", parameterDeclarations),
-							true);
+					true);
 		} else {
 			throw error("Unexpected kind of function suffix", child);
 		}
@@ -1952,7 +1937,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private LabeledStatementNode translateIdentifierLabeledStatement(
 			CommonTree statementTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		IdentifierNode labelName = translateIdentifier(
 				(CommonTree) statementTree.getChild(0));
@@ -1968,7 +1953,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private LabeledStatementNode translateCaseLabeledStatement(
 			CommonTree statementTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		CivlcToken caseToken = (CivlcToken) ((CommonTree) statementTree
 				.getChild(0)).getToken();
@@ -1987,7 +1972,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private LabeledStatementNode translateDefaultLabeledStatement(
 			CommonTree statementTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		Source statementSource = newSource(statementTree);
 		CivlcToken defaultToken = (CivlcToken) ((CommonTree) statementTree
 				.getChild(0)).getToken();
@@ -2279,7 +2264,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private CompoundStatementNode translateCompoundStatement(
 			CommonTree compoundStatementTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		Source source = newSource(compoundStatementTree);
 		CommonTree blockItems = (CommonTree) compoundStatementTree.getChild(1);
@@ -2379,7 +2364,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private ChooseStatementNode translateChooseStatement(
 			CommonTree chooseStatementTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		int numChildren = chooseStatementTree.getChildCount();
 		List<StatementNode> statements = new LinkedList<StatementNode>();
 
@@ -2411,75 +2396,74 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 		kind = statementTree.getType();
 		switch (kind) {
-			case BREAK :
-				return nodeFactory.newBreakNode(newSource(statementTree));
-			case CASE_LABELED_STATEMENT :
-				return translateCaseLabeledStatement(statementTree, scope);
-			case CHOOSE :
-				return translateChooseStatement(statementTree, scope);
-			case CIVLATOM :
-				return translateAtom(statementTree, scope);
-			case CIVLATOMIC :
-				return translateAtomic(statementTree, scope);
-			case CIVLFOR :
-			case PARFOR :
-				return translateCivlFor(statementTree, scope);
-			case COMPOUND_STATEMENT : {
-				CompoundStatementNode compound = translateCompoundStatement(
-						statementTree, scope);
+		case BREAK:
+			return nodeFactory.newBreakNode(newSource(statementTree));
+		case CASE_LABELED_STATEMENT:
+			return translateCaseLabeledStatement(statementTree, scope);
+		case CHOOSE:
+			return translateChooseStatement(statementTree, scope);
+		case CIVLATOM:
+			return translateAtom(statementTree, scope);
+		case CIVLATOMIC:
+			return translateAtomic(statementTree, scope);
+		case CIVLFOR:
+		case PARFOR:
+			return translateCivlFor(statementTree, scope);
+		case COMPOUND_STATEMENT: {
+			CompoundStatementNode compound = translateCompoundStatement(
+					statementTree, scope);
 
-				return compound;
-			}
-			case CONTINUE :
-				return nodeFactory.newContinueNode(newSource(statementTree));
-			case DEFAULT_LABELED_STATEMENT :
-				return translateDefaultLabeledStatement(statementTree, scope);
-			case DO :
-				return translateDo(statementTree, scope);
-			case EXPRESSION_STATEMENT :
-				return translateExpressionStatement(statementTree, scope);
-			case FOR :
-				return translateFor(statementTree, scope);
-			case GOTO :
-				return translateGoto(statementTree);
-			case IDENTIFIER_LABELED_STATEMENT :
-				return translateIdentifierLabeledStatement(statementTree,
-						scope);
-			case IF :
-				return translateIf(statementTree, scope);
-			case PPRAGMA : {
-				ASTNode newNode = translatePragma(statementTree, scope);
+			return compound;
+		}
+		case CONTINUE:
+			return nodeFactory.newContinueNode(newSource(statementTree));
+		case DEFAULT_LABELED_STATEMENT:
+			return translateDefaultLabeledStatement(statementTree, scope);
+		case DO:
+			return translateDo(statementTree, scope);
+		case EXPRESSION_STATEMENT:
+			return translateExpressionStatement(statementTree, scope);
+		case FOR:
+			return translateFor(statementTree, scope);
+		case GOTO:
+			return translateGoto(statementTree);
+		case IDENTIFIER_LABELED_STATEMENT:
+			return translateIdentifierLabeledStatement(statementTree, scope);
+		case IF:
+			return translateIf(statementTree, scope);
+		case PPRAGMA: {
+			ASTNode newNode = translatePragma(statementTree, scope);
 
-				if (newNode instanceof StatementNode)
-					return (StatementNode) newNode;
-				else
-					throw error("This pragma cannot be used as a statement",
-							newNode);
-			}
-			case RETURN :
-				return nodeFactory.newReturnNode(newSource(statementTree),
-						translateExpression(
-								(CommonTree) statementTree.getChild(0), scope));
-			case RUN :
-				return nodeFactory.newRunNode(newSource(statementTree),
-						translateStatement(
-								(CommonTree) statementTree.getChild(0), scope));
-			case SWITCH :
-				return translateSwitch(statementTree, scope);
-			case WHEN :
-				return nodeFactory.newWhenNode(newSource(statementTree),
-						translateExpression(
-								(CommonTree) statementTree.getChild(0), scope),
-						translateStatement(
-								(CommonTree) statementTree.getChild(1), scope));
-			case WHILE :
-				return translateWhile(statementTree, scope);
-			case WITH :
-				return translateWith(statementTree, scope);
-			case UPDATE :
-				return translateUpdate(statementTree, scope);
-			default :
-				throw error("Unknown statement type " + kind, statementTree);
+			if (newNode instanceof StatementNode)
+				return (StatementNode) newNode;
+			else
+				throw error("This pragma cannot be used as a statement",
+						newNode);
+		}
+		case RETURN:
+			return nodeFactory.newReturnNode(newSource(statementTree),
+					translateExpression((CommonTree) statementTree.getChild(0),
+							scope));
+		case RUN:
+			return nodeFactory.newRunNode(newSource(statementTree),
+					translateStatement((CommonTree) statementTree.getChild(0),
+							scope));
+		case SWITCH:
+			return translateSwitch(statementTree, scope);
+		case WHEN:
+			return nodeFactory.newWhenNode(newSource(statementTree),
+					translateExpression((CommonTree) statementTree.getChild(0),
+							scope),
+					translateStatement((CommonTree) statementTree.getChild(1),
+							scope));
+		case WHILE:
+			return translateWhile(statementTree, scope);
+		case WITH:
+			return translateWith(statementTree, scope);
+		case UPDATE:
+			return translateUpdate(statementTree, scope);
+		default:
+			throw error("Unknown statement type " + kind, statementTree);
 		}
 	}
 
@@ -2493,7 +2477,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private StaticAssertionNode translateStaticAssertion(
 			CommonTree staticAssertTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		CommonTree stringLiteral = (CommonTree) staticAssertTree.getChild(1);
 		Source stringLiteralSource = newSource(stringLiteral);
 
@@ -2512,7 +2496,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private FunctionDefinitionNode translateFunctionDefinition(
 			CommonTree functionDefinitionTree, SimpleScope scope)
-			throws SyntaxException {
+					throws SyntaxException {
 		// two different ways of declaring parameters:
 		// (1) parameter-type list and no declarations
 		// (2) identifier list and declarations
@@ -2706,23 +2690,21 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 									scope);
 
 							switch (itemKind) {
-								case ENSURES :
-									contractNode = nodeFactory
-											.newEnsuresNode(source, expr);
-									break;
-								case REQUIRES :
-									contractNode = nodeFactory
-											.newRequiresNode(source, expr);
-									break;
-								case GUARD :
-									contractNode = nodeFactory
-											.newGuardNode(source, expr);
-									break;
-								default :
-									throw error(
-											"Unknown kind of contract item: "
-													+ itemTree,
-											itemTree);
+							case ENSURES:
+								contractNode = nodeFactory
+										.newEnsuresNode(source, expr);
+								break;
+							case REQUIRES:
+								contractNode = nodeFactory
+										.newRequiresNode(source, expr);
+								break;
+							case GUARD:
+								contractNode = nodeFactory.newGuardNode(source,
+										expr);
+								break;
+							default:
+								throw error("Unknown kind of contract item: "
+										+ itemTree, itemTree);
 							}
 						}
 						items.add(contractNode);
@@ -2805,60 +2787,76 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 */
 	private List<BlockItemNode> translateBlockItemNode(CommonTree blockItemTree,
 			SimpleScope scope, boolean checkCExternalDefs)
-			throws SyntaxException {
+					throws SyntaxException {
 		int kind = blockItemTree.getType();
 		List<BlockItemNode> items = new LinkedList<BlockItemNode>();
 
 		switch (kind) {
-			case DECLARATION :
-				for (BlockItemNode declaration : translateDeclaration(
-						blockItemTree, scope))
-					items.add(declaration);
-				clearScopeAndContract();
-				break;
-			case FUNCTION_DEFINITION :
-				items.add(translateFunctionDefinition(blockItemTree, scope));
-				clearScopeAndContract();
-				break;
-			case PPRAGMA :
-				items.add((BlockItemNode) this.translatePragma(blockItemTree,
-						scope));
-				break;
-			case STATEMENT :
-				if (checkCExternalDefs) {
-					throw new SyntaxException(
-							"statement is not allowed in file scope", null);
-				}
-				items.add((BlockItemNode) this.translateStatement(blockItemTree,
-						scope));
-				clearScopeAndContract();
-				break;
-			case STATICASSERT :
-				items.add(translateStaticAssertion(blockItemTree, scope));
-				break;
-			case ANNOTATION :
-				translateAnnotation(blockItemTree, scope);
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"translating block item node of " + kind + " kind");
+		case DECLARATION:
+			for (BlockItemNode declaration : translateDeclaration(blockItemTree,
+					scope))
+				items.add(declaration);
+			clearScopeAndContract();
+			break;
+		case FUNCTION_DEFINITION:
+			items.add(translateFunctionDefinition(blockItemTree, scope));
+			clearScopeAndContract();
+			break;
+		case PPRAGMA:
+			items.add(
+					(BlockItemNode) this.translatePragma(blockItemTree, scope));
+			break;
+		case STATEMENT:
+			if (checkCExternalDefs) {
+				throw new SyntaxException(
+						"statement is not allowed in file scope", null);
+			}
+			items.add((BlockItemNode) this.translateStatement(blockItemTree,
+					scope));
+			clearScopeAndContract();
+			break;
+		case STATICASSERT:
+			items.add(translateStaticAssertion(blockItemTree, scope));
+			break;
+		case ANNOTATION:
+			translateAnnotation(blockItemTree, scope);
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"translating block item node of " + kind + " kind");
 		}
 		return items;
 	}
 
 	/* ********************* ASTBuilderWorker Methods ********************* */
 
+	/**
+	 * Translates a code annotation, which is a comment that begins with an "@"
+	 * character. If the configuration's acsl flag is false, this will do
+	 * nothing. Else will interprete it as an ACSL annotation.
+	 * 
+	 * @param annotationTree
+	 *            the ANTLR tree node representing the annotation; it is a flat
+	 *            list of tokens
+	 * @param scope
+	 *            the scope in which this construct occurs
+	 * @throws SyntaxException
+	 *             if something goes wrong in translating the annotation
+	 */
 	private void translateAnnotation(CommonTree annotationTree,
 			SimpleScope scope) throws SyntaxException {
-		CommonTree bodyTree = (CommonTree) annotationTree.getChild(1);
-		CivlcTokenSource tokenSource = parseTree
-				.getTokenSourceProducer(bodyTree).newSource();
-		Source source = this.newSource(annotationTree);
-		SimpleScope newScope = new SimpleScope(scope);
+		if (config.getACSL()) {
+			CommonTree bodyTree = (CommonTree) annotationTree.getChild(1);
+			CivlcTokenSource tokenSource = parseTree
+					.getTokenSourceProducer(bodyTree).newSource();
+			Source source = this.newSource(annotationTree);
+			SimpleScope newScope = new SimpleScope(scope);
 
-		this.scopeAndContracts.peek().left = newScope;
-		this.scopeAndContracts.peek().right = acslHandler
-				.translateAcslAnnotation(source, tokenSource, newScope, config);
+			this.scopeAndContracts.peek().left = newScope;
+			this.scopeAndContracts.peek().right = acslHandler
+					.translateAcslAnnotation(source, tokenSource, newScope,
+							config);
+		}
 	}
 
 	/**
