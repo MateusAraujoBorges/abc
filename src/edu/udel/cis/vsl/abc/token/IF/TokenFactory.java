@@ -50,6 +50,18 @@ public interface TokenFactory {
 			int index);
 
 	/**
+	 * Returns a new built-in macro expansion formation object. This represents
+	 * a token formed by expanding one of the predefined object macros such as
+	 * "__FILE__" or "__LINE__".
+	 * 
+	 * @param macroToken
+	 *            the original token, such as "__FILE__" or "__LINE__" that is
+	 *            being expanded
+	 * @return a new Formation object representing the expansion of such a macro
+	 */
+	Formation newBuiltinMacroExpansion(CivlcToken macroToken);
+
+	/**
 	 * Formation of a string literal token through the use of the preprocessor
 	 * "#" operator during the application of a function-like macro.
 	 * 

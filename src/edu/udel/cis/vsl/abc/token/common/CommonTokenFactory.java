@@ -220,6 +220,11 @@ public class CommonTokenFactory implements TokenFactory {
 	}
 
 	@Override
+	public Formation newBuiltinMacroExpansion(CivlcToken macroToken) {
+		return new BuiltinMacroExpansion(macroToken);
+	}
+
+	@Override
 	public CivlcTokenSequence getTokenSubsequence(CivlcTokenSource fullSource,
 			CivlcToken startToken, CivlcToken stopToken) {
 		return new CivlcTokenSubSequence(fullSource, startToken.getIndex(),

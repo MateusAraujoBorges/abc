@@ -56,7 +56,7 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
  * The tokens produced are instances of {@link CivlcToken}.
  * </p>
  * 
- * TODO: deal with #line.
+ * TODO: deal with #line, __FILE__, and __LINE__
  * 
  * @author Stephen F. Siegel
  */
@@ -561,6 +561,18 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	}
 
 	/**
+	 * Is this one of the special macros __LINE__ or __FILE__, predefined macros
+	 * whose values change automatically.
+	 * 
+	 * @param name
+	 *            an identifier string
+	 * @return <code>true</code> iff name is one of the special macro names
+	 */
+	private boolean isSpecialMacro(String name) {
+		return "__LINE__".equals(name) || "__FILE__".equals(name);
+	}
+
+	/**
 	 * If the identifier is a macro, do macro expansion. Else, it's just a
 	 * regular token that gets shifted to output.
 	 * 
@@ -574,6 +586,9 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		if (macro != null && (macro instanceof ObjectMacro
 				|| peekAheadSkipWSHasType(PreprocessorLexer.LPAREN))) {
 			processInvocation(macro, identifierNode);
+		} else if (isSpecialMacro(name)) {
+			addOutput(processSpecialInvocation(identifierNode));
+			incrementNextNode();
 		} else {
 			shiftToOutput(identifierNode);
 			incrementNextNode();
@@ -631,6 +646,48 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					argumentIter);
 		}
 		addOutputList(result);
+	}
+
+	/**
+	 * Processes the invocation of a "special" macro, one of the built-ins, such
+	 * as "__LINE__" or "__FILE__".
+	 * 
+	 * @param invocationNode
+	 *            the parse tree node corresponding to the use of the macro name
+	 * @throws PreprocessorException
+	 *             if something goes wrong adding the new string or integer
+	 *             constant token to the current output buffer
+	 */
+	private CivlcToken processSpecialInvocation(Tree invocationNode)
+			throws PreprocessorException {
+		Token token = ((CommonTree) invocationNode).getToken();
+		CivlcToken cToken = tokenFactory.newCivlcToken(token,
+				getIncludeHistory());
+
+		return expandSpecial(cToken);
+	}
+
+	private CivlcToken expandSpecial(CivlcToken origin) {
+		String name = origin.getText();
+		Formation formation = tokenFactory.newBuiltinMacroExpansion(origin);
+		CivlcToken newToken;
+
+		switch (name) {
+		case "__LINE__":
+			newToken = tokenFactory.newCivlcToken(
+					PreprocessorLexer.INTEGER_CONSTANT, "" + origin.getLine(),
+					formation);
+			break;
+		case "__FILE__":
+			newToken = tokenFactory.newCivlcToken(
+					PreprocessorLexer.STRING_LITERAL,
+					'"' + getCurrentSource().getFile().getAbsolutePath() + '"',
+					formation);
+			break;
+		default:
+			throw new PreprocessorRuntimeException("unreachable");
+		}
+		return newToken;
 	}
 
 	/**
@@ -876,12 +933,14 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 			Macro macro = null;
 			boolean isInvocation = false;
+			boolean isSpecial = false;
 
 			if (PreprocessorUtils.isIdentifier(current)) {
 				macro = macroMap.get(current.getText());
 
 				if (macro == null) {
-					isInvocation = false;
+					isInvocation = isSpecialMacro(current.getText());
+					isSpecial = isInvocation;
 				} else if (macro instanceof ObjectMacro) {
 					isInvocation = true;
 				} else {
@@ -893,6 +952,17 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			}
 			if (!isInvocation) { // ignore it
 				previous = current;
+				current = current.getNext();
+				continue;
+			}
+			if (isSpecial) {
+				CivlcToken newToken = expandSpecial(current);
+
+				newToken.setNext(current.getNext());
+				if (previous == null)
+					first = newToken;
+				else
+					previous.setNext(newToken);
 				current = current.getNext();
 				continue;
 			}
@@ -1442,7 +1512,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private void processLine(Tree lineNode) {
 		// TODO
-		
+
 		// strategy: get the real line number from the "line" token.
 		// let delta = new line number - real line number
 		// when creating new CivlcTokens: add delta to line number.
@@ -1450,21 +1520,21 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		// setting the file also affects the entry on include stack
 		//
 		// macro definition: when processing the macro definition, common
-		// tokens from the preprocessor parse tree are used.  These will
-		// have original (unadjusted) line numbers.  And filenames.
+		// tokens from the preprocessor parse tree are used. These will
+		// have original (unadjusted) line numbers. And filenames.
 		// could pass arguments to CommonMacro to adjust these things.
 		// or do it before calling CommonMacro.
-		
+
 		// macro expansion: creates new tokens by copying replacement
-		// tokens and argument tokens.  The replacement token copy already
+		// tokens and argument tokens. The replacement token copy already
 		// has the right line number and should not be further modified.
 		// The argument tokens should be adjusted when they are created
 		// the first time and not further changed.
-		
+
 		// Moral: tokens should have the correct (adjusted) line/file
 		// information when they are created, not just before
 		// being shifted to output stream.
-		
+
 		// alternatively: if all line/file info ultimately comes from
 		// common tokens, adjust them first before using them
 		// to create CivlcTokens.
