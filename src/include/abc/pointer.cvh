@@ -122,7 +122,7 @@ $system void * $pointer_add(const void *ptr,  int offset, int type_size);
 /*
   Reallocating a memory space, pointed by 'ptr' with a new size
   'new_size'. 
-  Requires 'new_size' >= 0;
+  Requires 'new_size' > 0;
   Requires 'ptr' points to a memory heap
   If 'new_size' >= the original size s, objects in the first s-sized
   memory space are unchanged;
@@ -134,6 +134,9 @@ $system void * $pointer_add(const void *ptr,  int offset, int type_size);
   If realloc with new_size = 7,  ptr -> {0, 1, 2, 3, 4, 5, UNDEFINED};
   If realloc with new_size = 4,  ptr -> {0, 1, 2, 3}
 */
-$system void * $pointer_realloc(void * const ptr, int new_size);
+/*@ depends_on \access(ptr);
+  @ executes_when \true;
+  @*/
+$system void $pointer_realloc(void * const ptr, int new_size);
 
 #endif
