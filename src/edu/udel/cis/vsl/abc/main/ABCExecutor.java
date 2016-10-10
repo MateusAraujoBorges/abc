@@ -644,28 +644,35 @@ public class ABCExecutor {
 			out.println(bar + " Program " + bar);
 			timer.markTime("print linked program");
 		}
-		if (task.getStage() == TranslationStage.LINK)
-			return;
-		for (TransformRecord record : task.getTransformRecords()) {
-			Transformer transformer = record.create(frontEnd.getASTFactory());
+		if (task.getStage() == TranslationStage.LINK) {
+			// nothing more to do
+		} else { // apply post-linking transformations...
+			for (TransformRecord record : task.getTransformRecords()) {
+				Transformer transformer = record
+						.create(frontEnd.getASTFactory());
 
-			if (verbose) {
-				printProgram();
-				out.println();
-				out.println(bar + " Program after " + transformer + " " + bar);
-				out.flush();
+				if (verbose) {
+					printProgram();
+					out.println();
+					out.println(
+							bar + " Program after " + transformer + " " + bar);
+					out.flush();
+				}
+				program.apply(transformer);
+				timer.markTime("apply transformer "
+						+ transformer.getShortDescription());
 			}
-			program.apply(transformer);
-			timer.markTime(
-					"apply transformer " + transformer.getShortDescription());
+			if (!showTime && !task.isSilent())
+				printProgram();
+			if (task.getShowUndefinedFunctions())
+				printUnknownFunctions(out, program);
+			if (!task.isSilent())
+				frontEnd.getFileIndexer().print(out);
+			out.flush();
 		}
-		if (!showTime && !task.isSilent())
-			printProgram();
-		if (task.getShowUndefinedFunctions())
-			printUnknownFunctions(out, program);
-		if (!task.isSilent())
-			frontEnd.getFileIndexer().print(out);
-		out.flush();
+		if (task.getSummarize()) {
+			new Summarizer(program.getAST()).print(out);
+		}
 	}
 
 	/**

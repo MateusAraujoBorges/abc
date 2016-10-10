@@ -143,6 +143,11 @@ public class TranslationTask {
 	private boolean showUndefinedFunctions = false;
 
 	/**
+	 * Summarize files and external entities.
+	 */
+	private boolean summarize = false;
+
+	/**
 	 * Is this an SV-COMP problem?
 	 */
 	private boolean svcomp = false;
@@ -595,6 +600,14 @@ public class TranslationTask {
 			this.gnuc = true;
 	}
 
+	public boolean getSummarize() {
+		return summarize;
+	}
+
+	public void setSummarize(boolean value) {
+		this.summarize = value;
+	}
+
 	/**
 	 * Gets the architecture type for this translation task. Default is
 	 * {@link Architecture#UNKNOWN}.
@@ -644,5 +657,4 @@ public class TranslationTask {
 	public void setDynamicTask(DynamicTask dtask) {
 		this.dynamicTask = dtask;
 	}
-
 }

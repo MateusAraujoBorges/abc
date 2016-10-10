@@ -9,7 +9,7 @@ import java.io.File;
  * 
  * @author siegel
  */
-public class SourceFile {
+public class SourceFile implements Comparable<SourceFile> {
 
 	private File file;
 
@@ -58,6 +58,18 @@ public class SourceFile {
 	@Override
 	public int hashCode() {
 		return file.hashCode() ^ index * 37;
+	}
+
+	@Override
+	public int compareTo(SourceFile o) {
+		int result = index - o.index;
+
+		if (result != 0)
+			return result;
+
+		result = file.compareTo(o.file);
+
+		return result;
 	}
 
 }

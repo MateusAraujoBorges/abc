@@ -15,6 +15,7 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
 
 /**
+ * <p>
  * Prunes unreachable objects from an AST. Starting from the "main" function,
  * this transformer performs a search of the nodes that can be reached by
  * following children other than ordinary declarations and typedef declarations.
@@ -22,19 +23,28 @@ import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
  * entity to which it refers is also searched. Hence only those
  * declarations/definitions that are actually used will be encountered in the
  * search.
+ * </p>
  * 
+ * <p>
  * Once the reachable nodes have been determined, the set of reachable nodes is
  * "closed" by marking all ancestors of reachable nodes reachable.
+ * </p>
  * 
+ * <p>
  * This transformer assumes the given AST is a closed program. It also assumes
  * that the standard analysis has been performed, so that identifiers have
  * entities associated to them.
+ * </p>
  * 
+ * <p>
  * The AST nodes are modified and re-used. If you want to keep the original AST
  * intact, you should clone it before performing this transformation.
+ * </p>
  * 
+ * <p>
  * The AST returned will be pruned, but will not have the standard analyses
  * encoded in it. If you want them, they should be invoked on the new AST.
+ * </p>
  * 
  * @author siegel
  * 

@@ -14,7 +14,7 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
  * Simple factory class providing static methods for creating new instances of
- * {@link Analyzer}. This is the prefered way to construct such instances.
+ * {@link Analyzer}. This is the preferred way to construct such instances.
  * 
  * @author siegel
  * 

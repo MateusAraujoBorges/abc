@@ -148,6 +148,8 @@ public class ABC {
 		out.println("-unknownFunc");
 		out.println(
 				"  print functions that are used in the program but no definition is given");
+		out.println("-summarize");
+		out.println("  print summary of source files and entities");
 		out.println("-lang=[c|civlc|f77]");
 		out.println("  set language (default determined by file suffix)");
 		out.println("-acsl");
@@ -195,6 +197,7 @@ public class ABC {
 		boolean showUndefinedFunctions = false;
 		boolean svcomp = false;
 		boolean acsl = false;
+		boolean summarize = false;
 		Architecture architecture = Architecture.UNKNOWN;
 		List<String> transformCodes = new LinkedList<>();
 		Language language = null, linkLang = null;
@@ -284,6 +287,8 @@ public class ABC {
 				svcomp = true;
 			} else if (arg.equals("-acsl")) {
 				acsl = true;
+			} else if (arg.equals("-summarize")) {
+				summarize = true;
 			} else if (arg.startsWith("-lang")) {
 				if (arg.equals("-lang=c"))
 					language = Language.C;
@@ -366,6 +371,7 @@ public class ABC {
 			task.setStage(TranslationStage.PREPROCESS_CONSUME);
 		task.setPreprocTokens(ppt);
 		task.setShowDiff(showDiff);
+		task.setSummarize(summarize);
 		task.setSilent(silent);
 		task.setShowUndefinedFunctions(showUndefinedFunctions);
 		task.setSVCOMP(svcomp);
