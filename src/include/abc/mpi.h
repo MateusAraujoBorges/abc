@@ -212,6 +212,9 @@ typedef struct MPI_Status{
   int size;
 } MPI_Status;
 
+// Implementation should define their own MPI_COMM_NULL:
+extern const MPI_Comm MPI_COMM_NULL;
+
 #define MPI_ANY_SOURCE 	(-1)
 #define MPI_ANY_TAG     (-2)
 #define MPI_PROC_NULL   (-3)
@@ -219,7 +222,6 @@ typedef struct MPI_Status{
 #define MPI_REQUEST_NULL    NULL
 #define MPI_STATUS_IGNORE   NULL
 #define MPI_STATUSES_IGNORE NULL
-#define MPI_COMM_NULL       NULL
 #define MPI_LOCK_EXCLUSIVE  234
 #define MPI_LOCK_SHARED     235
 
