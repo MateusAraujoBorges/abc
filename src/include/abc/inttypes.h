@@ -231,6 +231,9 @@ typedef struct imaxdiv_t imaxdiv_t;
 #define SCNXMAX   "llX"
 #define SCNXPTR   "llX"
 
+//Signed integral type large enough to hold any pointer:
+#define intptr_t int
+
 /* Functions */
 intmax_t  imaxabs(intmax_t);
 imaxdiv_t imaxdiv(intmax_t, intmax_t);
