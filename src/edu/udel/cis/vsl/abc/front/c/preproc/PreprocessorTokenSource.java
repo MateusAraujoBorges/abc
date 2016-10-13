@@ -56,8 +56,6 @@ import edu.udel.cis.vsl.abc.util.IF.StringPredicate;
  * The tokens produced are instances of {@link CivlcToken}.
  * </p>
  * 
- * TODO: deal with #line, __FILE__, and __LINE__
- * 
  * @author Stephen F. Siegel
  */
 public class PreprocessorTokenSource implements CivlcTokenSource {
@@ -945,6 +943,10 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 					isInvocation = true;
 				} else {
 					CivlcToken next = current.getNext();
+
+					// skip all white space
+					while (next != null && PreprocessorUtils.isWhiteSpace(next))
+						next = next.getNext();
 
 					isInvocation = (next != null
 							&& next.getType() == PreprocessorLexer.LPAREN);
