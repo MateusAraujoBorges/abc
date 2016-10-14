@@ -10,6 +10,7 @@ import java.util.TreeMap;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
+import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -103,6 +104,16 @@ public class Summarizer {
 			if (itemNode instanceof DeclarationNode) {
 				DeclarationNode decl = (DeclarationNode) itemNode;
 				Entity entity = decl.getEntity();
+
+				if (entity instanceof ProgramEntity) {
+					DeclarationNode defnNode = ((ProgramEntity) entity)
+							.getDefinition();
+
+					// don't list declarations that are not defns
+					if (defnNode != null && defnNode != itemNode)
+						continue;
+				}
+
 				IdentifierNode idNode = decl.getIdentifier();
 
 				allEntities.add(entity);
@@ -111,11 +122,14 @@ public class Summarizer {
 					CivlcToken token = source.getFirstToken();
 
 					if (token != null) {
-						Collection<SourceFile> sourceFiles = getFilesOf(token);
+						SourceFile sf = token.getSourceFile();
 
-						for (SourceFile sf : sourceFiles) {
-							add(sf, entity);
-						}
+						add(sf, entity);
+						/*
+						 * Collection<SourceFile> sourceFiles =
+						 * getFilesOf(token); for (SourceFile sf : sourceFiles)
+						 * { add(sf, entity); }
+						 */
 					}
 				}
 			}
