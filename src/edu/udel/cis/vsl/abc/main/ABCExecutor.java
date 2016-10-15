@@ -149,9 +149,9 @@ public class ABCExecutor {
 
 	/**
 	 * Computes a name for a source unit. The name is the concatenation of the
-	 * names of the files comprising the unit, separated with "+". A
-	 * "source unit" is a sequence of files which will be preprocessed as a
-	 * single translation unit.
+	 * names of the files comprising the unit, separated with "+". A "source
+	 * unit" is a sequence of files which will be preprocessed as a single
+	 * translation unit.
 	 * 
 	 * @param sourceUnit
 	 *            sequence of files which will be preprocessed to create a
@@ -390,7 +390,8 @@ public class ABCExecutor {
 	 */
 	private void initialize(TranslationTask task) {
 		this.task = task;
-		this.timer = task.getShowTables() ? new Timer(task.getOut())
+		this.timer = task.getShowTables()
+				? new Timer(task.getOut())
 				: new Timer();
 		this.out = task.getOut();
 		this.verbose = task.getVerbose();
