@@ -4,7 +4,6 @@ import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 import edu.udel.cis.vsl.sarl.IF.number.IntegerNumber;
 import edu.udel.cis.vsl.sarl.IF.number.Interval;
-import edu.udel.cis.vsl.sarl.IF.number.Number;
 import edu.udel.cis.vsl.sarl.IF.number.NumberFactory;
 import edu.udel.cis.vsl.sarl.number.IF.Numbers;
 
@@ -18,13 +17,13 @@ import edu.udel.cis.vsl.sarl.number.IF.Numbers;
  * @author dxu
  */
 
-public class IntervalValue extends AbstractValue {
+public class IntervalValue extends AbstractValue{
 
 	public enum IntervalRelation{
 		GT,		//strictly greater than
-		GTI,	//greater than with intersection
+		GTE,	//greater than with intersection
 		LT,		//strictly less than
-		LTI,	//less than with intersection
+		LTE,	//less than with intersection
 		CT,		//A contains B
 		CTED,	//A is contained by B
 		EQ;		//strictly equal
@@ -151,37 +150,48 @@ public class IntervalValue extends AbstractValue {
 	}
 
 
-	public AbstractValue intersection(AbstractValue leftValue, AbstractValue rightValue){
-		IntervalValue lv = (IntervalValue) leftValue;
-		IntervalValue rv = (IntervalValue) rightValue;
-		IntervalValue res = new IntervalValue(numFactory.intersection(lv.interval, rv.interval));
-
-		return res;
+	public IntervalValue intersection(IntervalValue i){
+		return new IntervalValue(numFactory.intersection(this.interval, i.interval));
+	}
+	
+	public boolean intersects(IntervalValue i){
+		if(!numFactory.intersection(this.interval, i.interval).isEmpty())
+			return true;
+		else
+			return false;
 	}
 
-
-	public IntervalRelation relation(IntervalValue a, IntervalValue b){
+	public IntervalRelation relation(IntervalValue b){
 		IntervalRelation ir;
-		if(numFactory.compare(a.interval.upper(), b.interval.upper()) > 0)
-			if(numFactory.compare(a.interval.lower(), b.interval.upper()) < 0)
-				if(numFactory.compare(a.interval.lower(), b.interval.lower()) < 0)
+		if(numFactory.compare(this.interval.lower(), b.interval.lower()) == 0
+				&& numFactory.compare(this.interval.upper(), b.interval.upper()) == 0)
+		return IntervalRelation.EQ;
+
+
+		if(numFactory.compare(this.interval.upper(), b.interval.upper()) >= 0)
+			if(numFactory.compare(this.interval.lower(), b.interval.upper()) <= 0)
+				if(numFactory.compare(this.interval.lower(), b.interval.lower()) <= 0)
 					ir = IntervalRelation.CT;
 				else
-					ir = IntervalRelation.GTI;
+					ir = IntervalRelation.GTE;
 			else
 				ir = IntervalRelation.GT;
-		else if(numFactory.compare(b.interval.upper(), a.interval.upper()) > 0)
-			if(numFactory.compare(b.interval.lower(), a.interval.upper()) < 0)
-				if(numFactory.compare(b.interval.lower(), a.interval.lower()) < 0)
+		else if(numFactory.compare(b.interval.upper(), this.interval.upper()) >= 0)
+			if(numFactory.compare(b.interval.lower(), this.interval.upper()) <= 0)
+				if(numFactory.compare(b.interval.lower(), this.interval.lower()) <= 0)
 					ir = IntervalRelation.CTED;
 				else
-					ir = IntervalRelation.LTI;
+					ir = IntervalRelation.LTE;
 			else
 				ir = IntervalRelation.LT;
 		else
 			ir = IntervalRelation.EQ;
 		
 		return ir;
+	}
+	
+	public boolean isBottom(){
+		return this.isEmpty();
 	}
 
 	@Override

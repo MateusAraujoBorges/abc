@@ -10,24 +10,28 @@ import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIdentifierExpressionNode;
+import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
+import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
+import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
 import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue.IntervalRelation;
 import edu.udel.cis.vsl.abc.analysis.dataflow.DataflowUtilities;
 
-public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, IntervalValue>>{
-	private static IntervalAnalysisSARL instance = null;
-
+public class ConditionalIntervalAnalysis extends EdgeDataFlowFramework<Pair<Entity, IntervalValue>>{
+	private static ConditionalIntervalAnalysis instance = null;
 	Function currentFunction;
-
+	
 	ControlFlowAnalysis cfa;
-
-	DataflowUtilities utilities;
+	AnalysisUtilities au;
+	ValueFactory vf;
+	
 
 	private EvaluationCommon evaluator;
 
@@ -36,13 +40,13 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 	/**
 	 * DFAs are singletons.  This allows them to be applied incrementally across a code base.
 	 */
-	protected IntervalAnalysisSARL() {
+	protected ConditionalIntervalAnalysis() {
 		evaluator = new EvaluationCommon();
 	}
 
-	public static IntervalAnalysisSARL getInstance() {
+	public static ConditionalIntervalAnalysis getInstance() {
 		if (instance == null) {
-			instance = new IntervalAnalysisSARL();
+			instance = new ConditionalIntervalAnalysis();
 		}
 		return instance;
 	}
@@ -65,7 +69,7 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 		cfa.analyze(f);
 
 		//
-		utilities = new DataflowUtilities(cfa);
+		au = new AnalysisUtilities(cfa);
 
 		Set<Pair<Entity, IntervalValue>> init = new HashSet<Pair<Entity,IntervalValue>>(); 
 
@@ -74,6 +78,7 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 
 		computeFixPoint(init, bottom);
 	}
+	
 
 	/*
 	 * New implementation of the set update function.
@@ -94,14 +99,14 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 
 		final Set<Pair<Entity,IntervalValue>> result = new HashSet<Pair<Entity,IntervalValue>>();
 
-		final Entity lhsVar = utilities.getLHSVar(n);
+		final Entity lhsVar = au.getLHSVar(n);
 
 		if(debug) System.out.println("\nGen\n"+n);
 
-		if (utilities.isAssignment(n) || utilities.isDefinition(n)) {
+		if (au.isAssignment(n) || au.isDefinition(n)) {
 			assert lhsVar != null;
 
-			ExpressionNode rhs = utilities.getRHS(n);
+			ExpressionNode rhs = au.getRHS(n);
 
 			assert rhs != null : "not simple assignment!";
 
@@ -135,7 +140,7 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 		}
 
 		// Handles branch???
-		else if(utilities.isBranch(n)){
+		else if(au.isBranch(n)){
 			System.out.println("BRANCH");
 
 			// defines lhs is an id
@@ -222,8 +227,8 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 		Set<Pair<Entity, IntervalValue>> result = new HashSet<Pair<Entity, IntervalValue>>();
 
 		// Extremely simple interpretation of assignment.  No constant folding, no copy propagation, etc.
-		if (utilities.isAssignment(n) || utilities.isDefinition(n)) {
-			Entity lhsVar = utilities.getLHSVar(n);
+		if (au.isAssignment(n) || au.isDefinition(n)) {
+			Entity lhsVar = au.getLHSVar(n);
 			assert lhsVar != null: "null?";
 			for (Pair<Entity, IntervalValue> inEntry : set) {
 				if (inEntry.left.equals(lhsVar)) {
