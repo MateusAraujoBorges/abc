@@ -6,7 +6,7 @@
 #define _CIVLC_
 
 #include<op.h>
-
+#pragma PARSE_ACSL 
 /* *********************  Standard Constants and Types ********************* */
 #define $true 1
 

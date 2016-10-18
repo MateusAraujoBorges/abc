@@ -3,7 +3,7 @@
 
 #ifndef _TIME_
 #define _TIME_
-
+#pragma PARSE_ACSL 
 typedef unsigned long int size_t;
 
 typedef double time_t;

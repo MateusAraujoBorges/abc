@@ -1,7 +1,7 @@
 #ifndef _CIVL_IO_
 #define _CIVL_IO_
 #include<civlc.cvh>
-
+#pragma PARSE_ACSL 
 /* ******************************* Types ******************************* */
 
 /* There are 16 modes, and they must appear in this order to be

@@ -4,7 +4,7 @@
 
 #ifndef _SEQ_
 #define _SEQ_
-
+#pragma PARSE_ACSL
 /* ******************************* Functions ******************************* */
 
 /* Given a pointer to an object of type "array-of-T", returns the

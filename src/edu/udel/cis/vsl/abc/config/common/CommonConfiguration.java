@@ -17,11 +17,6 @@ public class CommonConfiguration implements Configuration {
 	private boolean gnuc = false;
 
 	/**
-	 * Should comments beginning with "@" be interpreted as ACSL annotations?
-	 */
-	private boolean acsl = false;
-
-	/**
 	 * The targeted machine architecture.
 	 */
 	private Architecture architecture = Architecture.UNKNOWN;
@@ -245,15 +240,4 @@ public class CommonConfiguration implements Configuration {
 	public Architecture getArchitecture() {
 		return this.architecture;
 	}
-
-	@Override
-	public boolean getACSL() {
-		return acsl;
-	}
-
-	@Override
-	public void setACSL(boolean value) {
-		this.acsl = value;
-	}
-
 }

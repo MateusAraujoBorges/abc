@@ -7,7 +7,7 @@
 
 /* includes civlc.cvh because this library references $scope */
 #include <civlc.cvh>
-
+#pragma PARSE_ACSL 
 /* ******************************* Functions ******************************* */
 
 /* Returns the parent scope of the given scope */

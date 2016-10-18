@@ -4,7 +4,7 @@
 
 #ifndef _MATH_
 #define _MATH_
-
+#pragma PARSE_ACSL 
 /* Types */
 #define float_t float      // floating-point type at least 
                            //as wide as 'float' used to evaluate 

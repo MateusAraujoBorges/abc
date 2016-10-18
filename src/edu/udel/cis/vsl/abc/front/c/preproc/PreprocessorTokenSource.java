@@ -169,6 +169,16 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	private boolean inTextBlock = false;
 
 	/**
+	 * A stack of "PARSE_ACSL" pragmas. A "PARSE_ACSL" pragma denotes that all
+	 * the annotations, in the same source file and coming after this pragma,
+	 * will be parsed and a part of the final AST if they are written in ACSL
+	 * syntax. A {@link #pushStream(CharStream, Formation)} will cause a push of
+	 * a default PARSE_PRAGMA value (false); A "EOF" will cause a pop on the
+	 * stack.
+	 */
+	private Stack<Boolean> parseACSLPragmaStack = new Stack<>();
+
+	/**
 	 * Is the current node inside a pragma line? We need to know this because
 	 * then closing NEWLINE that terminates the pragma must be made VISIBLE
 	 * (usually all white space is rendered invisible).
@@ -242,7 +252,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			CharStream[] streams, Formation[] formations,
 			File[] systemIncludePaths, File[] userIncludePaths,
 			Map<String, Macro> macroMap, TokenFactory tokenFactory)
-					throws PreprocessorException {
+			throws PreprocessorException {
 		int numStreams = streams.length;
 
 		assert systemIncludePaths != null;
@@ -349,6 +359,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			Tree tree = (Tree) fileReturn.getTree();
 
 			sourceStack.push(new PreprocessorSourceFileInfo(formation, tree));
+			parseACSLPragmaStack.push(false);
 			incrementNextNode(); // skip root "FILE" node
 		} catch (RecognitionException e) {
 			throw new PreprocessorException(
@@ -390,45 +401,45 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			int type = token.getType();
 
 			switch (type) {
-			case PreprocessorParser.EOF:
-				processEOF(node);
-				break;
-			case PreprocessorParser.TEXT_BLOCK:
-				processTextBlock(node);
-				break;
-			case PreprocessorParser.DEFINE:
-				processMacroDefinition(node);
-				break;
-			case PreprocessorParser.ERROR:
-				processError(node);
-				break;
-			case PreprocessorParser.ELIF:
-			case PreprocessorParser.PIF:
-				processIf(node);
-				break;
-			case PreprocessorParser.IFDEF:
-				processIfdef(node);
-				break;
-			case PreprocessorParser.IFNDEF:
-				processIfndef(node);
-				break;
-			case PreprocessorParser.INCLUDE:
-				processInclude(node);
-				break;
-			case PreprocessorParser.PPRAGMA:
-				processPragma(node);
-				break;
-			case PreprocessorParser.UNDEF:
-				processUndef(node);
-				break;
-			case PreprocessorParser.HASH:
-				processNondirective(node);
-				break;
-			case PreprocessorParser.LINE:
-				processLine(node);
-				break;
-			default:
-				processText(node);
+				case PreprocessorParser.EOF :
+					processEOF(node);
+					break;
+				case PreprocessorParser.TEXT_BLOCK :
+					processTextBlock(node);
+					break;
+				case PreprocessorParser.DEFINE :
+					processMacroDefinition(node);
+					break;
+				case PreprocessorParser.ERROR :
+					processError(node);
+					break;
+				case PreprocessorParser.ELIF :
+				case PreprocessorParser.PIF :
+					processIf(node);
+					break;
+				case PreprocessorParser.IFDEF :
+					processIfdef(node);
+					break;
+				case PreprocessorParser.IFNDEF :
+					processIfndef(node);
+					break;
+				case PreprocessorParser.INCLUDE :
+					processInclude(node);
+					break;
+				case PreprocessorParser.PPRAGMA :
+					processPragma(node);
+					break;
+				case PreprocessorParser.UNDEF :
+					processUndef(node);
+					break;
+				case PreprocessorParser.HASH :
+					processNondirective(node);
+					break;
+				case PreprocessorParser.LINE :
+					processLine(node);
+					break;
+				default :
+					processText(node);
 			}
 		}
 	}
@@ -472,26 +483,38 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		if (PreprocessorUtils.isIdentifier(token)) {
 			processIdentifier(textNode);
 		} else {
+			// Wether parse ACSL annotation or not:
+			boolean parseACSL = parseACSLPragmaStack.peek();
+
 			switch (token.getType()) {
-			case PreprocessorLexer.INLINE_ANNOTATION_START:
-				assert (inTextBlock);
-				inInlineAnnotation = true;
-				// will be set to false at next NEWLINE
-				break;
-			case PreprocessorLexer.ANNOTATION_START:
-				assert (inTextBlock);
-				inBlockAnnotation = true;
-				break;
-			case PreprocessorLexer.ANNOTATION_END:
-				assert (inTextBlock);
-				inBlockAnnotation = false;
-				break;
-			case PreprocessorLexer.PP_NUMBER:
-				processPPNumber(token);
-				return;
-			default:
+				case PreprocessorLexer.INLINE_ANNOTATION_START :
+					assert (inTextBlock);
+					inInlineAnnotation = true;
+					// will be set to false at next NEWLINE
+					break;
+				case PreprocessorLexer.ANNOTATION_START :
+					assert (inTextBlock);
+					inBlockAnnotation = true;
+					break;
+				case PreprocessorLexer.ANNOTATION_END :
+					assert (inTextBlock);
+					inBlockAnnotation = false;
+					// Quick return: if not parsing ACSL
+					if (!parseACSL) {
+						incrementNextNode();
+						return;
+					} else
+						break;
+				case PreprocessorLexer.PP_NUMBER :
+					processPPNumber(token);
+					return;
+				default :
 			}
-			shiftToOutput(textNode);
+			// If current control is NOT in block annotation and line
+			// annotation, or ACSL will be parsed anyway, put the node to
+			// output:
+			if ((!inBlockAnnotation && !inInlineAnnotation) || parseACSL)
+				shiftToOutput(textNode);
 			incrementNextNode();
 		}
 	}
@@ -581,7 +604,12 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		String name = identifierNode.getText();
 		Macro macro = macroMap.get(name);
 
-		if (macro != null && (macro instanceof ObjectMacro
+		// If the control is in block annotation or inline annotation but ACSL
+		// shall not be parsed, skip:
+		if ((inBlockAnnotation || inInlineAnnotation)
+				&& !parseACSLPragmaStack.peek()) {
+			incrementNextNode();
+		} else if (macro != null && (macro instanceof ObjectMacro
 				|| peekAheadSkipWSHasType(PreprocessorLexer.LPAREN))) {
 			processInvocation(macro, identifierNode);
 		} else if (isSpecialMacro(name)) {
@@ -671,19 +699,20 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		CivlcToken newToken;
 
 		switch (name) {
-		case "__LINE__":
-			newToken = tokenFactory.newCivlcToken(
-					PreprocessorLexer.INTEGER_CONSTANT, "" + origin.getLine(),
-					formation);
-			break;
-		case "__FILE__":
-			newToken = tokenFactory.newCivlcToken(
-					PreprocessorLexer.STRING_LITERAL,
-					'"' + getCurrentSource().getFile().getAbsolutePath() + '"',
-					formation);
-			break;
-		default:
-			throw new PreprocessorRuntimeException("unreachable");
+			case "__LINE__" :
+				newToken = tokenFactory.newCivlcToken(
+						PreprocessorLexer.INTEGER_CONSTANT,
+						"" + origin.getLine(), formation);
+				break;
+			case "__FILE__" :
+				newToken = tokenFactory.newCivlcToken(
+						PreprocessorLexer.STRING_LITERAL,
+						'"' + getCurrentSource().getFile().getAbsolutePath()
+								+ '"',
+						formation);
+				break;
+			default :
+				throw new PreprocessorRuntimeException("unreachable");
 		}
 		return newToken;
 	}
@@ -795,7 +824,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private Pair<CivlcToken, CivlcToken> processInvocation(FunctionMacro macro,
 			CivlcToken origin, Iterator<CivlcToken> argumentIter)
-					throws PreprocessorException {
+			throws PreprocessorException {
 		return performSecondExpansion(instantiate(macro, origin, argumentIter),
 				macro);
 	}
@@ -820,7 +849,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 */
 	private Pair<CivlcToken, CivlcToken> performSecondExpansion(
 			Pair<CivlcToken, CivlcToken> tokenList, Macro macro)
-					throws PreprocessorException {
+			throws PreprocessorException {
 		String name = macro.getName();
 
 		// mark all occurrences of identifier M as "do not expand"...
@@ -835,7 +864,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 
 	private Pair<CivlcToken, CivlcToken> instantiate(FunctionMacro macro,
 			CivlcToken origin, Iterator<CivlcToken> argumentIter)
-					throws PreprocessorException {
+			throws PreprocessorException {
 		MacroExpander expander = new MacroExpander(this, macro, origin,
 				argumentIter);
 		Pair<CivlcToken, CivlcToken> result = expander.expand();
@@ -1096,6 +1125,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		Token eof = ((CommonTree) node).getToken();
 		PreprocessorSourceFileInfo o = sourceStack.pop();
 
+		parseACSLPragmaStack.pop();
+		assert parseACSLPragmaStack.size() == sourceStack.size();
 		if (sourceStack.isEmpty()) {
 			if (currentSource == theStreams.length - 1) {
 				CivlcToken myEof = tokenFactory.newCivlcToken(eof,
@@ -1468,10 +1499,16 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		Token token = ((CommonTree) pragmaNode).getToken();
 		CivlcToken pragmaToken = tokenFactory.newCivlcToken(token,
 				getIncludeHistory());
+		Token pragmaTag = ((CommonTree) pragmaNode.getChild(1)).getToken();
 
+		// Assign the top ACSL parse mark to true:
+		if (pragmaTag.getText().equals("PARSE_ACSL")) {
+			parseACSLPragmaStack.pop();
+			parseACSLPragmaStack.push(true);
+		}
 		addOutput(pragmaToken);
-		inTextBlock = true;
 		inPragma = true;
+		inTextBlock = true;
 		incrementNextNode();
 	}
 

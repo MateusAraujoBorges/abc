@@ -8,6 +8,7 @@
 /* includes civlc.cvh because this library references $scope */
 #include <civlc.cvh>
 #include <bundle.cvh>
+#pragma PARSE_ACSL
 /* *********************** Constants *********************** */
 
 /* Like MPI_ANY_SOURCE, can be used in probe, seek, dequeue
@@ -53,7 +54,7 @@ typedef struct _comm * $comm;
 
 /* creates a new message, copying data from the specified buffer */
 /*@ pure;
-  @ depends_on \nothing;
+  @ depends_on \access(data);
   @ executes_when \true;
   @*/
 $atomic_f $message $message_pack(int source, int dest, int tag, const void *data, int size);
@@ -135,6 +136,10 @@ $atomic_f void $gcomm_dup($comm comm, $comm newcomm);
  * processes will be viewed as occupying the same place.
  * Only one call to $comm_create may occur for each gcomm-place pair.
  * The new object will be allocated in the given scope. */
+/*@ depends_on \nothing;
+  @ reads gcomm;
+  @ assigns gcomm;
+  @*/
 $atomic_f $comm $comm_create($scope scope, $gcomm gcomm, int place);
 
 /* De-allocation a __comm__ object */

@@ -1,4 +1,6 @@
+#pragma PARSE_ACSL
 //======================== assert.h ========================
+/*@ depends_on \nothing; */
 $atomic_f void assert(_Bool expr);
 //================== abstractFunctions.cvl =================
 $abstract int f(int);
