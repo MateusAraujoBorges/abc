@@ -1,4 +1,4 @@
-
+#pragma PARSE_ACSL
 
 /*@ requires (a^^b) && (b==>c) && (a <--> c) && (b --> c);
   @ ensures (a<==>b+c);

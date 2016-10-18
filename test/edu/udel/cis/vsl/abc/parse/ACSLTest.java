@@ -40,7 +40,7 @@ public class ACSLTest {
 
 		// tokens = preprocessor.outputTokenSource(systemIncludes, userIncludes,
 		// implicitMacros, file);
-		result = frontEnd.compile(new File[] { file }, Language.CIVL_C);
+		result = frontEnd.compile(new File[]{file}, Language.CIVL_C);
 		if (debug) {
 			// result.print(out);
 			result.prettyPrint(out, false);
@@ -139,6 +139,12 @@ public class ACSLTest {
 	public void extendQuant()
 			throws PreprocessorException, SyntaxException, ParseException {
 		parse("extendQuant.c");
+	}
+
+	@Test
+	public void notParseACSL()
+			throws PreprocessorException, SyntaxException, ParseException {
+		parse("notParseACSL.c");
 	}
 
 }

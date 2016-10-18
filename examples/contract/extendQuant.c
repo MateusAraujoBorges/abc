@@ -1,4 +1,4 @@
-
+#pragma PARSE_ACSL
 /*@ ensures \result == x-1; */
 int g(int x);
 

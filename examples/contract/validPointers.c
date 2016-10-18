@@ -1,3 +1,4 @@
+#pragma PARSE_ACSL
 /*@ 
   @ requires x >= 0;
   @ ensures \result == x + 1;

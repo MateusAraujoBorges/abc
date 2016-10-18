@@ -2,6 +2,8 @@
    every other process using a wildcard receive. This program has a
    data race-condition. */
 #include <mpi.h>
+#pragma PARSE_ACSL
+
 int size, rank, x;
 int root = 0;
 MPI_Comm comm = MPI_COMM_WORLD;

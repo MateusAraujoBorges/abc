@@ -2,6 +2,7 @@
 #include<mpi.h>
 #include<civl-mpi.cvh>
 #include<stdio.h>
+#pragma PARSE_ACSL
 
 $input int in;
 $input int _mpi_nprocs = 2;

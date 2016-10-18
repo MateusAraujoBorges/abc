@@ -1,4 +1,5 @@
 #include<mpi.h>
+#pragma PARSE_ACSL
 int shared;
 /*@
   @ requires x == \mpi_comm_rank;

@@ -1,3 +1,4 @@
+#pragma PARSE_ACSL
 /*@ requires \valid(t + (0 .. n-1));
   @ assigns t[0 .. n-1];
   @ assigns *(t + (0 .. n-1));

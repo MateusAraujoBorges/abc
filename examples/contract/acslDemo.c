@@ -1,4 +1,4 @@
-
+#pragma PARSE_ACSL
 enum t{RED, BLUE};
 
 /*@ requires *a==BLUE;
