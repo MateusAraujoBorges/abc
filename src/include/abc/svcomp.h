@@ -13,6 +13,8 @@ extern $system[asserts] void assert(_Bool);
 */
 void __VERIFIER_error(void);
 void __VERIFIER_assume(int);
+extern void __VERIFIER_atomic_begin();
+extern void __VERIFIER_atomic_end();
 extern $system void assume(_Bool);
 int __VERIFIER_nondet_int(void);
 unsigned int __VERIFIER_nondet_uint(void);
