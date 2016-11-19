@@ -15,6 +15,12 @@
 #define __PRETTY_FUNCTION__ (void*)0
 #define alloca(size) __builtin_alloca (size)
 
+// Common pre-defined macros;
+// see https://gcc.gnu.org/onlinedocs/cpp/Common-Predefined-Macros.html
+
+#define __SIZE_TYPE__ size_t
+
+
 /**************************** types *****************************/
 typedef struct {int id;} __builtin_va_list;
 typedef unsigned long int size_t;
