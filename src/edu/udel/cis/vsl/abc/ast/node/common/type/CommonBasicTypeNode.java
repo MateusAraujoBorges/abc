@@ -9,13 +9,17 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonBasicTypeNode extends CommonTypeNode implements
-		BasicTypeNode {
+public class CommonBasicTypeNode extends CommonTypeNode
+		implements BasicTypeNode {
 
 	private BasicTypeKind basicTypeKind;
 
 	public CommonBasicTypeNode(Source source, BasicTypeKind basicTypeKind) {
 		super(source, TypeNodeKind.BASIC);
+
+		if (basicTypeKind == null)
+			throw new IllegalArgumentException(
+					"null basicTypeKind specified for a basic type node");
 		this.basicTypeKind = basicTypeKind;
 	}
 
