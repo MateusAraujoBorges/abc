@@ -4,6 +4,7 @@
 #define _CIVLC_OMP_
 
 #include <civlc.cvh>
+#include <op.h>
 #include <domain.cvh>
 #pragma PARSE_ACSL 
 /** Important notes:

@@ -6,6 +6,7 @@
 #define _POINTER_
 #pragma PARSE_ACSL
 #include<civlc.cvh>
+#include<op.h>
 
 /* ******************************* Functions ******************************* */
 

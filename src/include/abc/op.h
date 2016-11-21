@@ -19,4 +19,7 @@ typedef enum Operation{
   _MAXLOC, // max value and location
   _REPLACE // replace ? TODO: Find definition for this operation
 }Operation;
+
+typedef enum Operation $operation;
+
 #endif
