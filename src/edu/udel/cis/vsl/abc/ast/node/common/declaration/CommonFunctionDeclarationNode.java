@@ -11,6 +11,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonFunctionDeclarationNode extends CommonOrdinaryDeclarationNode
@@ -29,7 +30,7 @@ public class CommonFunctionDeclarationNode extends CommonOrdinaryDeclarationNode
 	private String systemLibrary = null;
 
 	public CommonFunctionDeclarationNode(Source source,
-			IdentifierNode identifier, FunctionTypeNode type,
+			IdentifierNode identifier, TypeNode type,
 			SequenceNode<ContractNode> contract) {
 		super(source, identifier, type);
 		addChild(contract); // child 2

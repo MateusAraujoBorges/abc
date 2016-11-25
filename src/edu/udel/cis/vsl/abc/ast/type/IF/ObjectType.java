@@ -1,5 +1,13 @@
 package edu.udel.cis.vsl.abc.ast.type.IF;
 
+import edu.udel.cis.vsl.abc.ast.entity.IF.Variable;
+
+/**
+ * A type of a {@link Variable}, also known as an "object" in C.
+ * 
+ * @author siegel
+ *
+ */
 public interface ObjectType extends Type {
 
 	/**

@@ -18,8 +18,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
  * @author siegel
  * 
  */
-public interface OrdinaryDeclarationNode extends BlockItemNode,
-		DeclarationNode {
+public interface OrdinaryDeclarationNode
+		extends BlockItemNode, DeclarationNode {
 
 	/**
 	 * The different kinds of ordinary declarations.

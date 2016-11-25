@@ -11,8 +11,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonFunctionTypeNode extends CommonTypeNode implements
-		FunctionTypeNode {
+public class CommonFunctionTypeNode extends CommonTypeNode
+		implements FunctionTypeNode {
 
 	private boolean hasIdentifierList;
 
@@ -57,7 +57,8 @@ public class CommonFunctionTypeNode extends CommonTypeNode implements
 	}
 
 	@Override
-	public void setParameters(SequenceNode<VariableDeclarationNode> parameters) {
+	public void setParameters(
+			SequenceNode<VariableDeclarationNode> parameters) {
 		setChild(1, parameters);
 	}
 

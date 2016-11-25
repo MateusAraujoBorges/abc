@@ -3,7 +3,6 @@ package edu.udel.cis.vsl.abc.ast.node.IF.declaration;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 
 /**
  * <p>
@@ -13,9 +12,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
  * 
  * <p>
  * The children include: (0) an identifier node, the name of the function; (1) a
- * type node which is the type of the function (necessarily a function type),
- * and (2) a contract node for the function contract, which may be
- * <code>null</code>.
+ * type node which is the type of the function (not necessarily a function type
+ * node; e.g., it could be a {@link TypedefNameNode}), and (2) a contract node
+ * for the function contract, which may be <code>null</code>.
  * </p>
  * 
  * <p>
@@ -25,7 +24,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
  * </p>
  * 
  * @author siegel
- * 
  */
 public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 
@@ -72,7 +70,7 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	void setNoreturnFunctionSpecifier(boolean value);
 
 	/**
-	 * Does the declaration include the <code>__global__</code> Cuda function
+	 * Does the declaration include the <code>__global__</code> CUDA function
 	 * specifier?
 	 * 
 	 * @return <code>true</code> iff declaration contains
@@ -208,8 +206,5 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 
 	@Override
 	FunctionDeclarationNode copy();
-
-	@Override
-	FunctionTypeNode getTypeNode();
 
 }

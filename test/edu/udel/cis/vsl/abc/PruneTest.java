@@ -21,7 +21,7 @@ public class PruneTest {
 
 	public final static PrintStream out = System.out;
 
-	public final static boolean debug = false;
+	public final static boolean debug = true;
 
 	private File root = new File("examples/prune");
 
@@ -38,7 +38,7 @@ public class PruneTest {
 		ABCExecutor executor = ABCExecutor.execute(fe, task);
 		Program program = executor.getProgram();
 		AST actual = program.getAST();
-		AST expected = fe.compile(new File[]{oracle}, Language.C);
+		AST expected = fe.compile(new File[] { oracle }, Language.C);
 		if (actual.getRootNode().equiv(expected.getRootNode())) {
 			// OK
 		} else {
@@ -67,29 +67,29 @@ public class PruneTest {
 
 	@Test
 	public void structs1() throws ABCException {
-		check(new String[]{"structs1.c"}, "structs1_pruned.c");
+		check(new String[] { "structs1.c" }, "structs1_pruned.c");
 	}
 
 	@Test
 	public void function() throws ABCException {
-		check(new String[]{"func.c"}, "func_pruned.c");
+		check(new String[] { "func.c" }, "func_pruned.c");
 	}
 
 	@Test
 	public void structsInFunction() throws ABCException {
-		check(new String[]{"structsInFunction.cvl"},
+		check(new String[] { "structsInFunction.cvl" },
 				"structsInFunction_pruned.cvl");
 	}
 
 	@Test
 	public void structsInFunction1() throws ABCException {
-		check(new String[]{"structsInFunction1.cvl"},
+		check(new String[] { "structsInFunction1.cvl" },
 				"structsInFunction_pruned.cvl");
 	}
 
 	@Test
 	public void functionDef() throws ABCException {
-		check(new String[]{"functionDef.c"}, "functionDef_pruned.c");
+		check(new String[] { "functionDef.c" }, "functionDef_pruned.c");
 	}
 
 }

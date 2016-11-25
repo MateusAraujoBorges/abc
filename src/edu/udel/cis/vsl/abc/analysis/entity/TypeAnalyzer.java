@@ -665,7 +665,7 @@ public class TypeAnalyzer {
 	 * 
 	 * <p>
 	 * This method may also entail the creation and/or modification of entities.
-	 * For example, if the type node defines a strucuture or union type, or
+	 * For example, if the type node defines a structure or union type, or
 	 * enumeration type, then the corresponding entities may be created or
 	 * completed.
 	 * </p>

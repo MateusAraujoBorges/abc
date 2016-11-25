@@ -4,7 +4,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 /**
@@ -18,8 +18,9 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
  * @author zirkel
  *
  */
-public class CommonAbstractFunctionDefinitionNode extends
-		CommonFunctionDeclarationNode implements AbstractFunctionDefinitionNode {
+public class CommonAbstractFunctionDefinitionNode
+		extends CommonFunctionDeclarationNode
+		implements AbstractFunctionDefinitionNode {
 
 	/**
 	 * The number of partial derivatives (in total, of any parameters) that may
@@ -28,7 +29,7 @@ public class CommonAbstractFunctionDefinitionNode extends
 	private int continuity;
 
 	public CommonAbstractFunctionDefinitionNode(Source source,
-			IdentifierNode identifier, FunctionTypeNode type,
+			IdentifierNode identifier, TypeNode type,
 			SequenceNode<ContractNode> contract, int continuity) {
 		super(source, identifier, type, contract);
 		this.continuity = continuity;
@@ -50,7 +51,7 @@ public class CommonAbstractFunctionDefinitionNode extends
 	public int continuity() {
 		return continuity;
 	}
-	
+
 	@Override
 	public OrdinaryDeclarationKind ordinaryDeclarationKind() {
 		return OrdinaryDeclarationKind.ABSTRACT_FUNCTION_DEFINITION;

@@ -2,6 +2,7 @@ package edu.udel.cis.vsl.abc.ast.entity.IF;
 
 import java.io.PrintStream;
 import java.util.Iterator;
+import java.util.Set;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
@@ -25,7 +26,7 @@ import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
  * parameters as well as the outermost local parameters. The only entities with
  * FUNCTION scope are (standard) labels---the labels that can be used as a
  * target of a "goto" statement. A FUNCTION_PROTOTYPE scope occurs only in a
- * function prototype, i.e., a function delcaration without body; such a scope
+ * function prototype, i.e., a function declaration without body; such a scope
  * extends to the end of the declarator for the function prototype.
  * </p>
  * 
@@ -173,6 +174,24 @@ public interface Scope {
 	int getScopeDepth();
 
 	// Ordinary entities...
+
+	/**
+	 * Returns the set of names of functions defined in this scope. This is
+	 * computed BEFORE the complete information on this scope is formed.
+	 * 
+	 * @return the set of names of functions defined in this scope.
+	 */
+	Set<String> getFunctionNames();
+
+	/**
+	 * Adds the name of a function defined in this scope.
+	 * 
+	 * @param name
+	 *            the name of the function
+	 * @return <code>true</code> iff that name was not already used to define a
+	 *         function in this scope
+	 */
+	boolean addFunctionName(String name);
 
 	/**
 	 * Gets the set of all ordinary entities declared in this scope, represented

@@ -1061,7 +1061,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				name = data.identifier.name();
 				scope.putMapping(name, data.type);
 			} else if (isFunction(data.type, scope)) {
-				FunctionTypeNode typeNode = (FunctionTypeNode) data.type;
+				TypeNode typeNode = (FunctionTypeNode) data.type;
 				FunctionDeclarationNode declaration;
 
 				if (analysis.abstractSpecifier) {

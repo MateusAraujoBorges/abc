@@ -1204,7 +1204,7 @@ public interface NodeFactory {
 	 * @return the new function declaration node formed from given children
 	 */
 	FunctionDeclarationNode newFunctionDeclarationNode(Source source,
-			IdentifierNode name, FunctionTypeNode type,
+			IdentifierNode name, TypeNode type,
 			SequenceNode<ContractNode> contract);
 
 	/**
@@ -1957,7 +1957,7 @@ public interface NodeFactory {
 	 * an unspecified mathematical function. In particular, if x1=y1 and ... and
 	 * xn=yn then f(x1,...,xn)=f(y1,...,yn). In other words, the value
 	 * "returned" by f is a deterministic function of its inputs. In cannot
-	 * depent on any other variables values in the program, or other parts of
+	 * depend on any other variables values in the program, or other parts of
 	 * the state. As a special case, note that if n=0, then f() is essentially a
 	 * constant. In fact, the case n=0 is not allowed: if you want a constant,
 	 * create instead an input variable (<code>$input</code>).
@@ -1977,7 +1977,7 @@ public interface NodeFactory {
 	 * @return An abstract function definition with the specified properties.
 	 */
 	AbstractFunctionDefinitionNode newAbstractFunctionDefinitionNode(
-			Source source, IdentifierNode name, FunctionTypeNode type,
+			Source source, IdentifierNode name, TypeNode type,
 			SequenceNode<ContractNode> contract, int continuity);
 
 	/**

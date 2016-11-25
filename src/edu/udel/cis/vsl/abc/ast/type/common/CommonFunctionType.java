@@ -357,6 +357,11 @@ public class CommonFunctionType extends CommonType implements FunctionType {
 					result += ", ";
 				result += parameterType.toString();
 			}
+		if (hasVariableArgs) {
+			if (!isFirst)
+				result += ", ";
+			result += "...";
+		}
 		result += ")";
 		return result;
 	}

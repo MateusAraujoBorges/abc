@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.declaration;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 
 /**
  * Represents a function definition, i.e., a function declaration which includes
@@ -29,5 +30,8 @@ public interface FunctionDefinitionNode extends FunctionDeclarationNode {
 
 	@Override
 	FunctionDefinitionNode copy();
+	
+	@Override
+	FunctionTypeNode getTypeNode();
 
 }

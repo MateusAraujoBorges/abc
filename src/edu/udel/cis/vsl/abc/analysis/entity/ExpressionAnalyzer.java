@@ -66,7 +66,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.StatementExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ValueAtNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.WildcardNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.ArithmeticType;
 import edu.udel.cis.vsl.abc.ast.type.IF.ArrayType;
@@ -342,7 +341,7 @@ public class ExpressionAnalyzer {
 
 	private void processExtendedQuantifiedExpression(
 			ExtendedQuantifiedExpressionNode extQuantified)
-					throws SyntaxException {
+			throws SyntaxException {
 		ExpressionNode lo = extQuantified.lower(), hi = extQuantified.higher(),
 				function = extQuantified.function();
 		ExtendedQuantifier extQuant = extQuantified.extQuantifier();
@@ -432,7 +431,7 @@ public class ExpressionAnalyzer {
 	 */
 	private void processStatementExpression(
 			StatementExpressionNode statementExpression)
-					throws SyntaxException {
+			throws SyntaxException {
 		this.statementAnalyzer.processCompoundStatement(
 				statementExpression.getCompoundStatement());
 		statementExpression
@@ -923,9 +922,9 @@ public class ExpressionAnalyzer {
 		} else {
 			for (DeclarationNode dn : function.getDeclarations()) {
 				FunctionDeclarationNode decl = (FunctionDeclarationNode) dn;
-				FunctionTypeNode typeNode = decl.getTypeNode();
 
-				if (!typeNode.hasIdentifierList()) {
+				if (!((FunctionType) decl.getTypeNode().getType())
+						.fromIdentifierList()) {
 					result = functionType;
 					break;
 				}
@@ -2052,7 +2051,7 @@ public class ExpressionAnalyzer {
 											rangeNode.getHigh().copy(),
 											nodeFactory.newIntegerConstantNode(
 													source, "1")),
-							rangeNode.getLow().copy());
+									rangeNode.getLow().copy());
 
 				scopeAnalyzer.processNode(sizeOfRange, rangeNode.getScope(),
 						null);

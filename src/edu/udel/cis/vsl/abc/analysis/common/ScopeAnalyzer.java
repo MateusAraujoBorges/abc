@@ -25,6 +25,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.IfNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 
 /**
@@ -96,7 +97,8 @@ public class ScopeAnalyzer implements Analyzer {
 	private void processFunctionDefinitionNode(FunctionDefinitionNode funcNode,
 			Scope parentScope) throws SyntaxException {
 		// children: identifier, type, contract (optional), body
-		FunctionTypeNode typeNode = funcNode.getTypeNode();
+		String name = funcNode.getName();
+		FunctionTypeNode typeNode = (FunctionTypeNode) funcNode.getTypeNode();
 		SequenceNode<ContractNode> contract = funcNode.getContract();
 		CompoundStatementNode body = funcNode.getBody();
 		SequenceNode<VariableDeclarationNode> paramsNode = typeNode
@@ -106,6 +108,15 @@ public class ScopeAnalyzer implements Analyzer {
 		Scope parameterScope = scopeFactory.newScope(ScopeKind.BLOCK,
 				newFunctionScope, paramsNode);
 
+		if (name == null)
+			throw new SyntaxException(
+					"Encountered a function definition with no name",
+					funcNode.getSource());
+		if (!parentScope.addFunctionName(name)) {
+			throw new SyntaxException(
+					"Second definition of function " + name + " in same scope",
+					funcNode.getSource());
+		}
 		if (paramsNode != null)
 			processRecursive(paramsNode, parameterScope, null);
 		if (contract != null) {
@@ -122,20 +133,25 @@ public class ScopeAnalyzer implements Analyzer {
 			FunctionDeclarationNode funcNode, Scope parentScope)
 			throws SyntaxException {
 		// children: ident, type, contract.
-		FunctionTypeNode typeNode = funcNode.getTypeNode();
-		SequenceNode<ContractNode> contract = funcNode.getContract();
-		SequenceNode<VariableDeclarationNode> paramsNode = typeNode
-				.getParameters();
-		Scope parameterScope = scopeFactory.newScope(ScopeKind.BLOCK,
-				parentScope, paramsNode);
+		TypeNode typeNode = funcNode.getTypeNode();
 
-		if (paramsNode != null)
-			processRecursive(paramsNode, parameterScope, null);
-		if (contract != null) {
-			Scope contractScope = scopeFactory.newScope(ScopeKind.CONTRACT,
-					parameterScope, contract);
+		if (typeNode instanceof FunctionTypeNode) {
+			FunctionTypeNode functionTypeNode = (FunctionTypeNode) typeNode;
 
-			processRecursive(contract, contractScope, null);
+			SequenceNode<ContractNode> contract = funcNode.getContract();
+			SequenceNode<VariableDeclarationNode> paramsNode = functionTypeNode
+					.getParameters();
+			Scope parameterScope = scopeFactory.newScope(ScopeKind.BLOCK,
+					parentScope, paramsNode);
+
+			if (paramsNode != null)
+				processRecursive(paramsNode, parameterScope, null);
+			if (contract != null) {
+				Scope contractScope = scopeFactory.newScope(ScopeKind.CONTRACT,
+						parameterScope, contract);
+
+				processRecursive(contract, contractScope, null);
+			}
 		}
 		processRecursive(funcNode, parentScope, null);
 	}
@@ -160,8 +176,8 @@ public class ScopeAnalyzer implements Analyzer {
 	 * @throws SyntaxException
 	 *             if AST is malformed in some way
 	 */
-	public void processNode(ASTNode node, Scope parentScope, Scope functionScope)
-			throws SyntaxException {
+	public void processNode(ASTNode node, Scope parentScope,
+			Scope functionScope) throws SyntaxException {
 
 		if (node.getScope() != null)
 			return;

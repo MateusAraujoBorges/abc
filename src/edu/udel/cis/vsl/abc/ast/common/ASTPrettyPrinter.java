@@ -178,61 +178,60 @@ public class ASTPrettyPrinter {
 		NodeKind kind = node.nodeKind();
 
 		switch (kind) {
-			case DECLARATION_LIST :
-				return declarationList2Pretty((DeclarationListNode) node,
-						maxLength);
-			case ENUMERATOR_DECLARATION :
-				return enumeratorDeclaration2Pretty(
-						(EnumeratorDeclarationNode) node, maxLength);
-			case EXPRESSION :
-				return expression2Pretty((ExpressionNode) node, maxLength);
-			case FIELD_DECLARATION :
-				return fieldDeclaration2Pretty("", (FieldDeclarationNode) node,
-						maxLength);
-			case FUNCTION_DECLARATION :
-				return functionDeclaration2Pretty("",
-						(FunctionDeclarationNode) node, maxLength);
-			case FUNCTION_DEFINITION :
-				return functionDeclaration2Pretty("",
-						(FunctionDeclarationNode) node, maxLength);
-			case IDENTIFIER :
-				return new StringBuffer(((IdentifierNode) node).name());
-			case OMP_NODE :
-				return ompNode2Pretty("", (OmpNode) node, maxLength);
-			case OMP_REDUCTION_OPERATOR :
-				return ompReduction2Pretty((OmpReductionNode) node, maxLength);
-			case ORDINARY_LABEL :
-			case SWITCH_LABEL :
-				return labelNode2Pretty((LabelNode) node, maxLength);
-			case PRAGMA :
-				return pragma2Pretty("", (PragmaNode) node, maxLength);
-			case STATEMENT :
-				return statement2Pretty("", (StatementNode) node, true, false,
-						maxLength);
-			case STATIC_ASSERTION :
-				return staticAssertion2Pretty("", (StaticAssertionNode) node,
-						maxLength);
-			case TYPE :
-				return type2Pretty("", (TypeNode) node, true, maxLength);
-			case TYPEDEF :
-				return typedefDeclaration2Pretty("",
-						(TypedefDeclarationNode) node, maxLength);
-			case VARIABLE_DECLARATION :
-				return variableDeclaration2Pretty("",
-						(VariableDeclarationNode) node, maxLength);
-			case SEQUENCE :
-				return sequenceNode2Pretty((SequenceNode<ASTNode>) node,
-						maxLength);
-			case PAIR :
-				return pairNode2Pretty((PairNode<ASTNode, ASTNode>) node,
-						maxLength);
-			case CONTRACT :
-				return contractNode2Pretty("", (ContractNode) node, maxLength);
-			default :
-				throw new ABCUnsupportedException(
-						"the pretty printing of AST node of " + kind
-								+ " kind is not supported yet.",
-						node.getSource().getLocation(false));
+		case DECLARATION_LIST:
+			return declarationList2Pretty((DeclarationListNode) node,
+					maxLength);
+		case ENUMERATOR_DECLARATION:
+			return enumeratorDeclaration2Pretty(
+					(EnumeratorDeclarationNode) node, maxLength);
+		case EXPRESSION:
+			return expression2Pretty((ExpressionNode) node, maxLength);
+		case FIELD_DECLARATION:
+			return fieldDeclaration2Pretty("", (FieldDeclarationNode) node,
+					maxLength);
+		case FUNCTION_DECLARATION:
+			return functionDeclaration2Pretty("",
+					(FunctionDeclarationNode) node, maxLength);
+		case FUNCTION_DEFINITION:
+			return functionDeclaration2Pretty("",
+					(FunctionDeclarationNode) node, maxLength);
+		case IDENTIFIER:
+			return new StringBuffer(((IdentifierNode) node).name());
+		case OMP_NODE:
+			return ompNode2Pretty("", (OmpNode) node, maxLength);
+		case OMP_REDUCTION_OPERATOR:
+			return ompReduction2Pretty((OmpReductionNode) node, maxLength);
+		case ORDINARY_LABEL:
+		case SWITCH_LABEL:
+			return labelNode2Pretty((LabelNode) node, maxLength);
+		case PRAGMA:
+			return pragma2Pretty("", (PragmaNode) node, maxLength);
+		case STATEMENT:
+			return statement2Pretty("", (StatementNode) node, true, false,
+					maxLength);
+		case STATIC_ASSERTION:
+			return staticAssertion2Pretty("", (StaticAssertionNode) node,
+					maxLength);
+		case TYPE:
+			return type2Pretty("", (TypeNode) node, true, maxLength);
+		case TYPEDEF:
+			return typedefDeclaration2Pretty("", (TypedefDeclarationNode) node,
+					maxLength);
+		case VARIABLE_DECLARATION:
+			return variableDeclaration2Pretty("",
+					(VariableDeclarationNode) node, maxLength);
+		case SEQUENCE:
+			return sequenceNode2Pretty((SequenceNode<ASTNode>) node, maxLength);
+		case PAIR:
+			return pairNode2Pretty((PairNode<ASTNode, ASTNode>) node,
+					maxLength);
+		case CONTRACT:
+			return contractNode2Pretty("", (ContractNode) node, maxLength);
+		default:
+			throw new ABCUnsupportedException(
+					"the pretty printing of AST node of " + kind
+							+ " kind is not supported yet.",
+					node.getSource().getLocation(false));
 		}
 	}
 
@@ -251,73 +250,69 @@ public class ASTPrettyPrinter {
 		NodeKind kind = node.nodeKind();
 
 		switch (kind) {
-			case DECLARATION_LIST :
-				out.print(
-						declarationList2Pretty((DeclarationListNode) node, -1));
-				break;
-			case ENUMERATOR_DECLARATION :
-				out.print(enumeratorDeclaration2Pretty(
-						(EnumeratorDeclarationNode) node, -1));
-				break;
-			case EXPRESSION :
-				out.print(expression2Pretty((ExpressionNode) node, -1));
-				break;
-			case FIELD_DECLARATION :
-				out.print(fieldDeclaration2Pretty("",
-						(FieldDeclarationNode) node, -1));
-				break;
-			case FUNCTION_DECLARATION :
-				pPrintFunctionDeclaration(out, "",
-						(FunctionDeclarationNode) node);
-				break;
-			case FUNCTION_DEFINITION :
-				pPrintFunctionDeclaration(out, "",
-						(FunctionDeclarationNode) node);
-				break;
-			case IDENTIFIER :
-				out.print(((IdentifierNode) node).name());
-				break;
-			case OMP_NODE :
-				pPrintOmpNode(out, "", (OmpNode) node);
-				break;
-			case OMP_REDUCTION_OPERATOR :
-				out.print(ompReduction2Pretty((OmpReductionNode) node, -1));
-				break;
-			case ORDINARY_LABEL :
-			case SWITCH_LABEL :
-				out.print(labelNode2Pretty((LabelNode) node, -1));
-				break;
-			case PRAGMA :
-				pPrintPragma(out, "", (PragmaNode) node);
-				break;
-			case STATEMENT :
-				pPrintStatement(out, "", (StatementNode) node, true, false);
-				break;
-			case STATIC_ASSERTION :
-				pPrintStaticAssertion(out, "", (StaticAssertionNode) node);
-				break;
-			case TYPE :
-				out.print(type2Pretty("", (TypeNode) node, true, -1));
-				break;
-			case TYPEDEF :
-				pPrintTypedefDeclaration(out, "",
-						(TypedefDeclarationNode) node);
-				break;
-			case VARIABLE_DECLARATION :
-				out.print(variableDeclaration2Pretty("",
-						(VariableDeclarationNode) node, -1));
-				break;
-			case SEQUENCE :
-				pPrintSequenceNode((SequenceNode<ASTNode>) node, out);
-				break;
-			case PAIR :
-				pPrintPairNode((PairNode<ASTNode, ASTNode>) node, out);
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"the pretty printing of AST node of " + kind
-								+ " kind is not supported yet.",
-						node.getSource().getLocation(false));
+		case DECLARATION_LIST:
+			out.print(declarationList2Pretty((DeclarationListNode) node, -1));
+			break;
+		case ENUMERATOR_DECLARATION:
+			out.print(enumeratorDeclaration2Pretty(
+					(EnumeratorDeclarationNode) node, -1));
+			break;
+		case EXPRESSION:
+			out.print(expression2Pretty((ExpressionNode) node, -1));
+			break;
+		case FIELD_DECLARATION:
+			out.print(fieldDeclaration2Pretty("", (FieldDeclarationNode) node,
+					-1));
+			break;
+		case FUNCTION_DECLARATION:
+			pPrintFunctionDeclaration(out, "", (FunctionDeclarationNode) node);
+			break;
+		case FUNCTION_DEFINITION:
+			pPrintFunctionDeclaration(out, "", (FunctionDeclarationNode) node);
+			break;
+		case IDENTIFIER:
+			out.print(((IdentifierNode) node).name());
+			break;
+		case OMP_NODE:
+			pPrintOmpNode(out, "", (OmpNode) node);
+			break;
+		case OMP_REDUCTION_OPERATOR:
+			out.print(ompReduction2Pretty((OmpReductionNode) node, -1));
+			break;
+		case ORDINARY_LABEL:
+		case SWITCH_LABEL:
+			out.print(labelNode2Pretty((LabelNode) node, -1));
+			break;
+		case PRAGMA:
+			pPrintPragma(out, "", (PragmaNode) node);
+			break;
+		case STATEMENT:
+			pPrintStatement(out, "", (StatementNode) node, true, false);
+			break;
+		case STATIC_ASSERTION:
+			pPrintStaticAssertion(out, "", (StaticAssertionNode) node);
+			break;
+		case TYPE:
+			out.print(type2Pretty("", (TypeNode) node, true, -1));
+			break;
+		case TYPEDEF:
+			pPrintTypedefDeclaration(out, "", (TypedefDeclarationNode) node);
+			break;
+		case VARIABLE_DECLARATION:
+			out.print(variableDeclaration2Pretty("",
+					(VariableDeclarationNode) node, -1));
+			break;
+		case SEQUENCE:
+			pPrintSequenceNode((SequenceNode<ASTNode>) node, out);
+			break;
+		case PAIR:
+			pPrintPairNode((PairNode<ASTNode, ASTNode>) node, out);
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"the pretty printing of AST node of " + kind
+							+ " kind is not supported yet.",
+					node.getSource().getLocation(false));
 		}
 	}
 
@@ -406,48 +401,48 @@ public class ASTPrettyPrinter {
 
 				if (ignoreStdLibs)
 					switch (sourceFile) {
-						case "assert.h" :
-						case "cuda.h" :
-						case "civlc.cvh" :
-						case "bundle.cvh" :
-						case "comm.cvh" :
-						case "concurrency.cvh" :
-						case "pointer.cvh" :
-						case "scope.cvh" :
-						case "seq.cvh" :
-						case "float.h" :
-						case "math.h" :
-						case "mpi.h" :
-						case "omp.h" :
-						case "op.h" :
-						case "pthread.h" :
-						case "stdarg.h" :
-						case "stdbool.h" :
-						case "stddef.h" :
-						case "stdio.h" :
-						case "stdlib.h" :
-						case "string.h" :
-						case "time.h" :
-						case "civl-omp.cvh" :
-						case "civl-mpi.cvh" :
-						case "civl-cuda.cvh" :
-						case "civl-omp.cvl" :
-						case "civl-mpi.cvl" :
-						case "civl-cuda.cvl" :
-						case "civlc.cvl" :
-						case "concurrency.cvl" :
-						case "stdio-c.cvl" :
-						case "stdio.cvl" :
-						case "omp.cvl" :
-						case "cuda.cvl" :
-						case "mpi.cvl" :
-						case "pthread-c.cvl" :
-						case "pthread.cvl" :
-						case "math.cvl" :
-						case "seq.cvl" :
-						case "string.cvl" :
-							continue;
-						default :
+					case "assert.h":
+					case "cuda.h":
+					case "civlc.cvh":
+					case "bundle.cvh":
+					case "comm.cvh":
+					case "concurrency.cvh":
+					case "pointer.cvh":
+					case "scope.cvh":
+					case "seq.cvh":
+					case "float.h":
+					case "math.h":
+					case "mpi.h":
+					case "omp.h":
+					case "op.h":
+					case "pthread.h":
+					case "stdarg.h":
+					case "stdbool.h":
+					case "stddef.h":
+					case "stdio.h":
+					case "stdlib.h":
+					case "string.h":
+					case "time.h":
+					case "civl-omp.cvh":
+					case "civl-mpi.cvh":
+					case "civl-cuda.cvh":
+					case "civl-omp.cvl":
+					case "civl-mpi.cvl":
+					case "civl-cuda.cvl":
+					case "civlc.cvl":
+					case "concurrency.cvl":
+					case "stdio-c.cvl":
+					case "stdio.cvl":
+					case "omp.cvl":
+					case "cuda.cvl":
+					case "mpi.cvl":
+					case "pthread-c.cvl":
+					case "pthread.cvl":
+					case "math.cvl":
+					case "seq.cvl":
+					case "string.cvl":
+						continue;
+					default:
 					}
 				if (currentFile == null || !currentFile.equals(sourceFile)) {
 					int fileLength = sourceFile.length();
@@ -484,11 +479,11 @@ public class ASTPrettyPrinter {
 		OmpNodeKind kind = ompNode.ompNodeKind();
 
 		switch (kind) {
-			case DECLARATIVE :
-				out.print(ompDeclarative2Pretty(prefix,
-						(OmpDeclarativeNode) ompNode, -1));
-			default :// EXECUTABLE
-				pPrintOmpStatement(out, prefix, (OmpExecutableNode) ompNode);
+		case DECLARATIVE:
+			out.print(ompDeclarative2Pretty(prefix,
+					(OmpDeclarativeNode) ompNode, -1));
+		default:// EXECUTABLE
+			pPrintOmpStatement(out, prefix, (OmpExecutableNode) ompNode);
 		}
 	}
 
@@ -501,14 +496,14 @@ public class ASTPrettyPrinter {
 		OmpNodeKind kind = ompNode.ompNodeKind();
 
 		switch (kind) {
-			case DECLARATIVE :
-				result.append(ompDeclarative2Pretty(prefix,
-						(OmpDeclarativeNode) ompNode,
-						vacantLength(maxLength, result)));
-			default :// EXECUTABLE
-				result.append(
-						ompStatement2Pretty(prefix, (OmpExecutableNode) ompNode,
-								vacantLength(maxLength, result)));
+		case DECLARATIVE:
+			result.append(
+					ompDeclarative2Pretty(prefix, (OmpDeclarativeNode) ompNode,
+							vacantLength(maxLength, result)));
+		default:// EXECUTABLE
+			result.append(
+					ompStatement2Pretty(prefix, (OmpExecutableNode) ompNode,
+							vacantLength(maxLength, result)));
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -531,7 +526,7 @@ public class ASTPrettyPrinter {
 			result.append("union ");
 		if (strOrUnion.getName() != null)
 			result.append(strOrUnion.getName());
-		if (/*isTypeDeclaration && */fields != null) {
+		if (/* isTypeDeclaration && */fields != null) {
 			int numFields = fields.numChildren();
 
 			result.append("{");
@@ -715,17 +710,17 @@ public class ASTPrettyPrinter {
 
 		result.append("#pragma omp ");
 		switch (kind) {
-			case REDUCTION :
-				result.append("reduction");
-				break;
-			case THREADPRIVATE :
-				result.append("threadprivate");
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"The OpenMP declarative directive " + kind
-								+ " is not supported yet.",
-						ompDeclarative.getSource().getLocation(false));
+		case REDUCTION:
+			result.append("reduction");
+			break;
+		case THREADPRIVATE:
+			result.append("threadprivate");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"The OpenMP declarative directive " + kind
+							+ " is not supported yet.",
+					ompDeclarative.getSource().getLocation(false));
 		}
 		result.append("(");
 		result.append(sequenceExpression2Pretty(ompDeclarative.variables(),
@@ -736,10 +731,7 @@ public class ASTPrettyPrinter {
 
 	private static void pPrintFunctionDeclaration(PrintStream out,
 			String prefix, FunctionDeclarationNode function) {
-		FunctionTypeNode typeNode = function.getTypeNode();
-		TypeNode returnType = typeNode.getReturnType();
-		SequenceNode<VariableDeclarationNode> paras = typeNode.getParameters();
-		int numOfParas = paras.numChildren();
+		TypeNode typeNode = function.getTypeNode();
 		SequenceNode<ContractNode> contracts = function.getContract();
 
 		if (contracts != null && contracts.numChildren() > 0)
@@ -776,19 +768,33 @@ public class ASTPrettyPrinter {
 			out.print("inline ");
 		if (function.hasNoreturnFunctionSpecifier())
 			out.print("_Noreturn ");
-		out.print(type2Pretty("", returnType, false, -1));
-		out.print(" ");
-		out.print(function.getName());
-		out.print("(");
-		for (int i = 0; i < numOfParas; i++) {
-			if (i != 0)
-				out.print(", ");
-			out.print(variableDeclaration2Pretty("", paras.getSequenceChild(i),
-					-1));
+
+		if (typeNode instanceof FunctionTypeNode) {
+			FunctionTypeNode functionTypeNode = (FunctionTypeNode) typeNode;
+
+			TypeNode returnType = functionTypeNode.getReturnType();
+			SequenceNode<VariableDeclarationNode> paras = functionTypeNode
+					.getParameters();
+			int numOfParas = paras.numChildren();
+
+			out.print(type2Pretty("", returnType, false, -1));
+			out.print(" ");
+			out.print(function.getName());
+			out.print("(");
+			for (int i = 0; i < numOfParas; i++) {
+				if (i != 0)
+					out.print(", ");
+				out.print(variableDeclaration2Pretty("",
+						paras.getSequenceChild(i), -1));
+			}
+			if (functionTypeNode.hasVariableArgs())
+				out.print(", ...");
+			out.print(")");
+		} else {
+			out.print(type2Pretty("", typeNode, false, -1));
+			out.print(" ");
+			out.print(function.getName());
 		}
-		if (typeNode.hasVariableArgs())
-			out.print(", ...");
-		out.print(")");
 		if (function instanceof FunctionDefinitionNode) {
 			CompoundStatementNode body = ((FunctionDefinitionNode) function)
 					.getBody();
@@ -806,10 +812,7 @@ public class ASTPrettyPrinter {
 			return EMPTY_STRING_BUFFER;
 
 		StringBuffer result = new StringBuffer();
-		FunctionTypeNode typeNode = function.getTypeNode();
-		TypeNode returnType = typeNode.getReturnType();
-		SequenceNode<VariableDeclarationNode> paras = typeNode.getParameters();
-		int numOfParas = paras.numChildren();
+
 		SequenceNode<ContractNode> contracts = function.getContract();
 
 		if (contracts != null && contracts.numChildren() > 0) {
@@ -849,21 +852,37 @@ public class ASTPrettyPrinter {
 			result.append("inline ");
 		if (function.hasNoreturnFunctionSpecifier())
 			result.append("_Noreturn ");
-		result.append(type2Pretty("", returnType, false,
-				vacantLength(maxLength, result)));
-		result.append(" ");
-		result.append(function.getName());
-		result.append("(");
-		for (int i = 0; i < numOfParas; i++) {
-			if (i != 0)
-				result.append(", ");
-			result.append(
-					variableDeclaration2Pretty("", paras.getSequenceChild(i),
-							vacantLength(maxLength, result)));
+
+		TypeNode typeNode = function.getTypeNode();
+
+		if (typeNode instanceof FunctionTypeNode) {
+			FunctionTypeNode functionTypeNode = (FunctionTypeNode) typeNode;
+			TypeNode returnType = functionTypeNode.getReturnType();
+			SequenceNode<VariableDeclarationNode> paras = functionTypeNode
+					.getParameters();
+			int numOfParas = paras.numChildren();
+
+			result.append(type2Pretty("", returnType, false,
+					vacantLength(maxLength, result)));
+			result.append(" ");
+			result.append(function.getName());
+			result.append("(");
+			for (int i = 0; i < numOfParas; i++) {
+				if (i != 0)
+					result.append(", ");
+				result.append(variableDeclaration2Pretty("",
+						paras.getSequenceChild(i),
+						vacantLength(maxLength, result)));
+			}
+			if (functionTypeNode.hasVariableArgs())
+				result.append(", ...");
+			result.append(")");
+		} else {
+			result.append(type2Pretty("", typeNode, false,
+					vacantLength(maxLength, result)));
+			result.append(" ");
+			result.append(function.getName());
 		}
-		if (typeNode.hasVariableArgs())
-			result.append(", ...");
-		result.append(")");
 		if (function instanceof FunctionDefinitionNode) {
 			CompoundStatementNode body = ((FunctionDefinitionNode) function)
 					.getBody();
@@ -937,135 +956,133 @@ public class ASTPrettyPrinter {
 		ContractKind kind = contract.contractKind();
 
 		switch (kind) {
-			case ALLOCATES_OR_FREES : {
-				AllocationNode allocation = (AllocationNode) contract;
+		case ALLOCATES_OR_FREES: {
+			AllocationNode allocation = (AllocationNode) contract;
 
-				if (allocation.isAllocates())
-					result.append("allocates ");
-				else
-					result.append("frees ");
-				result.append(sequenceExpression2Pretty(allocation.memoryList(),
+			if (allocation.isAllocates())
+				result.append("allocates ");
+			else
+				result.append("frees ");
+			result.append(sequenceExpression2Pretty(allocation.memoryList(),
+					vacantLength(maxLength, result)));
+			break;
+		}
+		case ASSUMES: {
+			AssumesNode assumes = (AssumesNode) contract;
+
+			result.append("assumes ");
+			result.append(expression2Pretty(assumes.getPredicate(),
+					vacantLength(maxLength, result)));
+			result.append(";");
+			break;
+		}
+		case ASSIGNS_READS: {
+			AssignsOrReadsNode assignsOrReads = (AssignsOrReadsNode) contract;
+			// ExpressionNode condition = assignsOrReads.getCondition();
+
+			if (assignsOrReads.isAssigns())
+				result.append("assigns ");
+			else
+				result.append("reads ");
+			result.append(sequenceNode2Pretty(assignsOrReads.getMemoryList(),
+					vacantLength(maxLength, result)));
+			result.append(";");
+			break;
+		}
+		case DEPENDS: {
+			DependsNode depends = (DependsNode) contract;
+
+			result.append("depends_on ");
+			result.append(sequenceDependsEvent2Pretty(depends.getEventList(),
+					vacantLength(maxLength, result)));
+			result.append(";");
+			break;
+		}
+		case ENSURES: {
+			EnsuresNode ensures = (EnsuresNode) contract;
+
+			result.append("ensures ");
+			result.append(expression2Pretty(ensures.getExpression(),
+					vacantLength(maxLength, result)));
+			result.append(";");
+			break;
+		}
+		case GUARDS: {
+			GuardsNode guard = (GuardsNode) contract;
+
+			result.append("executes_when ");
+			result.append(expression2Pretty(guard.getExpression(),
+					vacantLength(maxLength, result)));
+			result.append(";");
+			break;
+		}
+		case MPI_COLLECTIVE: {
+			MPICollectiveBlockNode colBlock = (MPICollectiveBlockNode) contract;
+			String indentedNewLinePrefix = prefix + "  ";
+
+			result.append("\\mpi_collective(");
+			result.append(expression2Pretty(colBlock.getMPIComm(),
+					vacantLength(maxLength, result)));
+			result.append("," + colBlock.getCollectiveKind());
+			result.append(")");
+			for (ContractNode clause : colBlock.getBody()) {
+				result.append(indentedNewLinePrefix);
+				result.append(contractNode2Pretty(indentedNewLinePrefix, clause,
 						vacantLength(maxLength, result)));
-				break;
 			}
-			case ASSUMES : {
-				AssumesNode assumes = (AssumesNode) contract;
+			break;
+		}
+		case REQUIRES: {
+			RequiresNode requires = (RequiresNode) contract;
 
-				result.append("assumes ");
-				result.append(expression2Pretty(assumes.getPredicate(),
+			result.append("requires ");
+			result.append(expression2Pretty(requires.getExpression(),
+					vacantLength(maxLength, result)));
+			result.append(";");
+			break;
+		}
+		case BEHAVIOR: {
+			BehaviorNode behavior = (BehaviorNode) contract;
+			SequenceNode<ContractNode> body = behavior.getBody();
+			String indentedNewLinePrefix = prefix + "  ";
+
+			result.append("behavior ");
+			result.append(behavior.getName().name());
+			result.append(":");
+			for (ContractNode clause : body) {
+				// result.append("\n");
+				result.append(indentedNewLinePrefix);
+				result.append(contractNode2Pretty(indentedNewLinePrefix, clause,
 						vacantLength(maxLength, result)));
-				result.append(";");
-				break;
 			}
-			case ASSIGNS_READS : {
-				AssignsOrReadsNode assignsOrReads = (AssignsOrReadsNode) contract;
-				// ExpressionNode condition = assignsOrReads.getCondition();
+			break;
+		}
+		case INVARIANT: {
+			InvariantNode invariant = (InvariantNode) contract;
 
-				if (assignsOrReads.isAssigns())
-					result.append("assigns ");
-				else
-					result.append("reads ");
-				result.append(
-						sequenceNode2Pretty(assignsOrReads.getMemoryList(),
-								vacantLength(maxLength, result)));
-				result.append(";");
-				break;
-			}
-			case DEPENDS : {
-				DependsNode depends = (DependsNode) contract;
+			if (invariant.isLoopInvariant())
+				result.append("loop ");
+			result.append("invariant ");
+			result.append(expression2Pretty(invariant.getExpression(),
+					vacantLength(maxLength, result)));
+			result.append(";");
+			break;
+		}
+		case PURE: {
+			result.append("pure;");
+			break;
+		}
+		case WAITSFOR: {
+			WaitsforNode waitsforNode = (WaitsforNode) contract;
 
-				result.append("depends_on ");
-				result.append(
-						sequenceDependsEvent2Pretty(depends.getEventList(),
-								vacantLength(maxLength, result)));
-				result.append(";");
-				break;
-			}
-			case ENSURES : {
-				EnsuresNode ensures = (EnsuresNode) contract;
-
-				result.append("ensures ");
-				result.append(expression2Pretty(ensures.getExpression(),
-						vacantLength(maxLength, result)));
-				result.append(";");
-				break;
-			}
-			case GUARDS : {
-				GuardsNode guard = (GuardsNode) contract;
-
-				result.append("executes_when ");
-				result.append(expression2Pretty(guard.getExpression(),
-						vacantLength(maxLength, result)));
-				result.append(";");
-				break;
-			}
-			case MPI_COLLECTIVE : {
-				MPICollectiveBlockNode colBlock = (MPICollectiveBlockNode) contract;
-				String indentedNewLinePrefix = prefix + "  ";
-
-				result.append("\\mpi_collective(");
-				result.append(expression2Pretty(colBlock.getMPIComm(),
-						vacantLength(maxLength, result)));
-				result.append("," + colBlock.getCollectiveKind());
-				result.append(")");
-				for (ContractNode clause : colBlock.getBody()) {
-					result.append(indentedNewLinePrefix);
-					result.append(contractNode2Pretty(indentedNewLinePrefix,
-							clause, vacantLength(maxLength, result)));
-				}
-				break;
-			}
-			case REQUIRES : {
-				RequiresNode requires = (RequiresNode) contract;
-
-				result.append("requires ");
-				result.append(expression2Pretty(requires.getExpression(),
-						vacantLength(maxLength, result)));
-				result.append(";");
-				break;
-			}
-			case BEHAVIOR : {
-				BehaviorNode behavior = (BehaviorNode) contract;
-				SequenceNode<ContractNode> body = behavior.getBody();
-				String indentedNewLinePrefix = prefix + "  ";
-
-				result.append("behavior ");
-				result.append(behavior.getName().name());
-				result.append(":");
-				for (ContractNode clause : body) {
-					// result.append("\n");
-					result.append(indentedNewLinePrefix);
-					result.append(contractNode2Pretty(indentedNewLinePrefix,
-							clause, vacantLength(maxLength, result)));
-				}
-				break;
-			}
-			case INVARIANT : {
-				InvariantNode invariant = (InvariantNode) contract;
-
-				if (invariant.isLoopInvariant())
-					result.append("loop ");
-				result.append("invariant ");
-				result.append(expression2Pretty(invariant.getExpression(),
-						vacantLength(maxLength, result)));
-				result.append(";");
-				break;
-			}
-			case PURE : {
-				result.append("pure;");
-				break;
-			}
-			case WAITSFOR : {
-				WaitsforNode waitsforNode = (WaitsforNode) contract;
-
-				result.append("waitsfor ");
-				result.append(sequenceNode2Pretty(waitsforNode.getArguments(),
-						vacantLength(maxLength, result)));
-				break;
-			}
-			default :
-				throw new ABCUnsupportedException(
-						"pretty printing contract node of " + kind + " kind");
+			result.append("waitsfor ");
+			result.append(sequenceNode2Pretty(waitsforNode.getArguments(),
+					vacantLength(maxLength, result)));
+			break;
+		}
+		default:
+			throw new ABCUnsupportedException(
+					"pretty printing contract node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -1098,73 +1115,72 @@ public class ASTPrettyPrinter {
 		StringBuffer result = new StringBuffer();
 
 		switch (kind) {
-			case MEMORY : {
-				MemoryEventNode rwEvent = (MemoryEventNode) event;
+		case MEMORY: {
+			MemoryEventNode rwEvent = (MemoryEventNode) event;
 
-				if (rwEvent.isRead())
-					result.append("\\read");
-				else if (rwEvent.isWrite())
-					result.append("\\write");
-				else
-					result.append("\\access");
-				result.append("(");
-				result.append(sequenceExpression2Pretty(rwEvent.getMemoryList(),
-						vacantLength(maxLength, result)));
-				result.append(")");
-				break;
-			}
-			case COMPOSITE : {
-				CompositeEventNode opEvent = (CompositeEventNode) event;
-				EventOperator op = opEvent.eventOperator();
+			if (rwEvent.isRead())
+				result.append("\\read");
+			else if (rwEvent.isWrite())
+				result.append("\\write");
+			else
+				result.append("\\access");
+			result.append("(");
+			result.append(sequenceExpression2Pretty(rwEvent.getMemoryList(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		}
+		case COMPOSITE: {
+			CompositeEventNode opEvent = (CompositeEventNode) event;
+			EventOperator op = opEvent.eventOperator();
 
-				result.append("(");
-				result.append(dependsEvent2Pretty(opEvent.getLeft(),
-						vacantLength(maxLength, result)));
-				result.append(")");
-				switch (op) {
-					case UNION :
-						result.append(" + ");
-						break;
-					case DIFFERENCE :
-						result.append(" - ");
-						break;
-					case INTERSECT :
-						result.append(" & ");
-						break;
-					default :
-						throw new ABCUnsupportedException(
-								"pretty printing depends event node with "
-										+ kind + " operator");
-				}
-				result.append("(");
-				result.append(dependsEvent2Pretty(opEvent.getRight(),
-						vacantLength(maxLength, result)));
-				result.append(")");
+			result.append("(");
+			result.append(dependsEvent2Pretty(opEvent.getLeft(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			switch (op) {
+			case UNION:
+				result.append(" + ");
 				break;
-			}
-			case CALL : {
-				CallEventNode callEvent = (CallEventNode) event;
-				SequenceNode<ExpressionNode> args = callEvent.arguments();
-
-				result.append("\\call(");
-				result.append(callEvent.getFunction().getIdentifier().name());
-				if (args.numChildren() > 0)
-					result.append(", ");
-				result.append(sequenceExpression2Pretty(callEvent.arguments(),
-						vacantLength(maxLength, result)));
-				result.append(")");
+			case DIFFERENCE:
+				result.append(" - ");
 				break;
-			}
-			case NOACT :
-				result.append("\\nothing");
+			case INTERSECT:
+				result.append(" & ");
 				break;
-			case ANYACT :
-				result.append("\\anyact");
-				break;
-			default :
+			default:
 				throw new ABCUnsupportedException(
-						"pretty printing depends event node of " + kind
-								+ " kind");
+						"pretty printing depends event node with " + kind
+								+ " operator");
+			}
+			result.append("(");
+			result.append(dependsEvent2Pretty(opEvent.getRight(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		}
+		case CALL: {
+			CallEventNode callEvent = (CallEventNode) event;
+			SequenceNode<ExpressionNode> args = callEvent.arguments();
+
+			result.append("\\call(");
+			result.append(callEvent.getFunction().getIdentifier().name());
+			if (args.numChildren() > 0)
+				result.append(", ");
+			result.append(sequenceExpression2Pretty(callEvent.arguments(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		}
+		case NOACT:
+			result.append("\\nothing");
+			break;
+		case ANYACT:
+			result.append("\\anyact");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty printing depends event node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -1176,69 +1192,69 @@ public class ASTPrettyPrinter {
 
 		out.print(prefix);
 		switch (kind) {
-			case ASSIGNS_READS : {
-				AssignsOrReadsNode assignsOrReads = (AssignsOrReadsNode) contract;
-				// ExpressionNode condition = assignsOrReads.getCondition();
+		case ASSIGNS_READS: {
+			AssignsOrReadsNode assignsOrReads = (AssignsOrReadsNode) contract;
+			// ExpressionNode condition = assignsOrReads.getCondition();
 
-				if (assignsOrReads.isAssigns())
-					out.print("$assigns");
-				else
-					out.print("$reads");
-				// if (condition != null) {
-				// out.print(" [");
-				// out.print(expression2Pretty(condition));
-				// out.print("] ");
-				// }
-				out.print("{");
-				pPrintSequenceNode(assignsOrReads.getMemoryList(), out);
-				out.print("}");
-				break;
-			}
-			case DEPENDS : {
-				DependsNode depends = (DependsNode) contract;
-				// ExpressionNode condition = depends.getCondition();
+			if (assignsOrReads.isAssigns())
+				out.print("$assigns");
+			else
+				out.print("$reads");
+			// if (condition != null) {
+			// out.print(" [");
+			// out.print(expression2Pretty(condition));
+			// out.print("] ");
+			// }
+			out.print("{");
+			pPrintSequenceNode(assignsOrReads.getMemoryList(), out);
+			out.print("}");
+			break;
+		}
+		case DEPENDS: {
+			DependsNode depends = (DependsNode) contract;
+			// ExpressionNode condition = depends.getCondition();
 
-				out.print("depends");
-				// if (condition != null) {
-				// out.print(" [");
-				// out.print(expression2Pretty(condition));
-				// out.print("] ");
-				// }
-				out.print("{");
-				// out.print(sequenceExpression2Pretty(depends.getEventList()));
-				out.print("}");
-				break;
-			}
-			case ENSURES : {
-				EnsuresNode ensures = (EnsuresNode) contract;
+			out.print("depends");
+			// if (condition != null) {
+			// out.print(" [");
+			// out.print(expression2Pretty(condition));
+			// out.print("] ");
+			// }
+			out.print("{");
+			// out.print(sequenceExpression2Pretty(depends.getEventList()));
+			out.print("}");
+			break;
+		}
+		case ENSURES: {
+			EnsuresNode ensures = (EnsuresNode) contract;
 
-				out.print("$ensures");
-				out.print("{");
-				out.print(expression2Pretty(ensures.getExpression(), -1));
-				out.print("}");
-				break;
-			}
-			case GUARDS : {
-				GuardsNode guard = (GuardsNode) contract;
+			out.print("$ensures");
+			out.print("{");
+			out.print(expression2Pretty(ensures.getExpression(), -1));
+			out.print("}");
+			break;
+		}
+		case GUARDS: {
+			GuardsNode guard = (GuardsNode) contract;
 
-				out.print("$guard");
-				out.print("{");
-				out.print(expression2Pretty(guard.getExpression(), -1));
-				out.print("}");
-				break;
-			}
-			case REQUIRES : {
-				RequiresNode requires = (RequiresNode) contract;
+			out.print("$guard");
+			out.print("{");
+			out.print(expression2Pretty(guard.getExpression(), -1));
+			out.print("}");
+			break;
+		}
+		case REQUIRES: {
+			RequiresNode requires = (RequiresNode) contract;
 
-				out.print("$requires");
-				out.print("{");
-				out.print(expression2Pretty(requires.getExpression(), -1));
-				out.print("}");
-				break;
-			}
-			default :
-				throw new ABCUnsupportedException(
-						"pretty printing contract node of " + kind + " kind");
+			out.print("$requires");
+			out.print("{");
+			out.print(expression2Pretty(requires.getExpression(), -1));
+			out.print("}");
+			break;
+		}
+		default:
+			throw new ABCUnsupportedException(
+					"pretty printing contract node of " + kind + " kind");
 		}
 	}
 
@@ -1315,45 +1331,43 @@ public class ASTPrettyPrinter {
 		BlockItemKind kind = block.blockItemKind();
 
 		switch (kind) {
-			case STATEMENT :
-				pPrintStatement(out, prefix, (StatementNode) block, false,
-						false);
-				break;
-			case ORDINARY_DECLARATION :
-				if (block instanceof VariableDeclarationNode) {
-					out.print(variableDeclaration2Pretty(prefix,
-							(VariableDeclarationNode) block, -1));
+		case STATEMENT:
+			pPrintStatement(out, prefix, (StatementNode) block, false, false);
+			break;
+		case ORDINARY_DECLARATION:
+			if (block instanceof VariableDeclarationNode) {
+				out.print(variableDeclaration2Pretty(prefix,
+						(VariableDeclarationNode) block, -1));
 
-					out.print(";");
-				} else if (block instanceof FunctionDeclarationNode)
-					pPrintFunctionDeclaration(out, prefix,
-							(FunctionDeclarationNode) block);
-				break;
-			case TYPEDEF :
-				pPrintTypedefDeclaration(out, prefix,
-						(TypedefDeclarationNode) block);
 				out.print(";");
-				break;
-			case ENUMERATION :
-				out.print(
-						enumType2Pretty(prefix, (EnumerationTypeNode) block, -1)
-								+ ";");
-				break;
-			case OMP_DECLARATIVE :
-				out.print(ompDeclarative2Pretty(prefix,
-						(OmpDeclarativeNode) block, -1));
-				break;
-			case PRAGMA :
-				pPrintPragma(out, prefix, (PragmaNode) block);
-				break;
-			case STRUCT_OR_UNION :
-				out.print(structOrUnion2Pretty(prefix,
-						(StructureOrUnionTypeNode) block, true, -1));
-				out.print(";");
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of block item node of " + kind + " kind");
+			} else if (block instanceof FunctionDeclarationNode)
+				pPrintFunctionDeclaration(out, prefix,
+						(FunctionDeclarationNode) block);
+			break;
+		case TYPEDEF:
+			pPrintTypedefDeclaration(out, prefix,
+					(TypedefDeclarationNode) block);
+			out.print(";");
+			break;
+		case ENUMERATION:
+			out.print(enumType2Pretty(prefix, (EnumerationTypeNode) block, -1)
+					+ ";");
+			break;
+		case OMP_DECLARATIVE:
+			out.print(ompDeclarative2Pretty(prefix, (OmpDeclarativeNode) block,
+					-1));
+			break;
+		case PRAGMA:
+			pPrintPragma(out, prefix, (PragmaNode) block);
+			break;
+		case STRUCT_OR_UNION:
+			out.print(structOrUnion2Pretty(prefix,
+					(StructureOrUnionTypeNode) block, true, -1));
+			out.print(";");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of block item node of " + kind + " kind");
 		}
 	}
 
@@ -1366,42 +1380,42 @@ public class ASTPrettyPrinter {
 		BlockItemKind kind = block.blockItemKind();
 
 		switch (kind) {
-			case STATEMENT :
-				return statement2Pretty(prefix, (StatementNode) block, false,
-						false, maxLength);
-			case ORDINARY_DECLARATION :
-				if (block instanceof VariableDeclarationNode) {
-					result.append(variableDeclaration2Pretty(prefix,
-							(VariableDeclarationNode) block,
-							vacantLength(maxLength, result)));
-					result.append(";");
-				} else if (block instanceof FunctionDeclarationNode)
-					return functionDeclaration2Pretty(prefix,
-							(FunctionDeclarationNode) block, maxLength);
-				break;
-			case TYPEDEF :
-				result.append(typedefDeclaration2Pretty(prefix,
-						(TypedefDeclarationNode) block, maxLength));
+		case STATEMENT:
+			return statement2Pretty(prefix, (StatementNode) block, false, false,
+					maxLength);
+		case ORDINARY_DECLARATION:
+			if (block instanceof VariableDeclarationNode) {
+				result.append(variableDeclaration2Pretty(prefix,
+						(VariableDeclarationNode) block,
+						vacantLength(maxLength, result)));
 				result.append(";");
-				break;
-			case ENUMERATION :
-				result.append(enumType2Pretty(prefix,
-						(EnumerationTypeNode) block, maxLength));
-				result.append(";");
-				break;
-			case OMP_DECLARATIVE :
-				return ompDeclarative2Pretty(prefix, (OmpDeclarativeNode) block,
-						maxLength);
-			case PRAGMA :
-				return pragma2Pretty(prefix, (PragmaNode) block, maxLength);
-			case STRUCT_OR_UNION :
-				result.append(structOrUnion2Pretty(prefix,
-						(StructureOrUnionTypeNode) block, true, maxLength));
-				result.append(";");
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of block item node of " + kind + " kind");
+			} else if (block instanceof FunctionDeclarationNode)
+				return functionDeclaration2Pretty(prefix,
+						(FunctionDeclarationNode) block, maxLength);
+			break;
+		case TYPEDEF:
+			result.append(typedefDeclaration2Pretty(prefix,
+					(TypedefDeclarationNode) block, maxLength));
+			result.append(";");
+			break;
+		case ENUMERATION:
+			result.append(enumType2Pretty(prefix, (EnumerationTypeNode) block,
+					maxLength));
+			result.append(";");
+			break;
+		case OMP_DECLARATIVE:
+			return ompDeclarative2Pretty(prefix, (OmpDeclarativeNode) block,
+					maxLength);
+		case PRAGMA:
+			return pragma2Pretty(prefix, (PragmaNode) block, maxLength);
+		case STRUCT_OR_UNION:
+			result.append(structOrUnion2Pretty(prefix,
+					(StructureOrUnionTypeNode) block, true, maxLength));
+			result.append(";");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of block item node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -1437,68 +1451,66 @@ public class ASTPrettyPrinter {
 		StatementKind kind = statement.statementKind();
 
 		switch (kind) {
-			// case ASSUME:
-			// pPrintAssume(out, prefix, (AssumeNode) statement);
-			// break;
-			// case ASSERT:
-			// pPrintAssert(out, prefix, (AssertNode) statement);
-			// break;
-			case ATOMIC :
-				pPrintAtomic(out, prefix, (AtomicNode) statement);
-				break;
-			case COMPOUND :
-				pPrintCompoundStatement(out, prefix,
-						(CompoundStatementNode) statement, isBody,
-						isSwitchBody);
-				break;
-			case EXPRESSION :
-				pPrintExpressionStatement(out, prefix,
-						(ExpressionStatementNode) statement);
-				break;
-			case CHOOSE :
-				pPrintChooseStatement(out, prefix,
-						(ChooseStatementNode) statement);
-				break;
-			case CIVL_FOR :
-				pPrintCivlForStatement(out, prefix, (CivlForNode) statement);
-				break;
-			case IF :
-				pPrintIf(out, prefix, (IfNode) statement);
-				break;
-			case JUMP :
-				pPrintJump(out, prefix, (JumpNode) statement);
-				break;
-			case LABELED :
-				pPrintLabeled(out, prefix, (LabeledStatementNode) statement);
-				break;
-			case LOOP :
-				pPrintLoop(out, prefix, (LoopNode) statement);
-				break;
-			case NULL :
-				out.print(prefix);
-				out.print(";");
-				break;
-			case OMP :
-				pPrintOmpStatement(out, prefix, (OmpExecutableNode) statement);
-				break;
-			case RUN :
-				out.print(run2Pretty(prefix, (RunNode) statement, -1));
-				break;
-			case SWITCH :
-				pPrintSwitch(out, prefix, (SwitchNode) statement);
-				break;
-			case UPDATE :
-				pPrintUpdate(out, prefix, (UpdateNode) statement);
-				break;
-			case WHEN :
-				pPrintWhen(out, prefix, (WhenNode) statement);
-				break;
-			case WITH :
-				out.print(with2Pretty(prefix, (WithNode) statement, -1));
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of statement node of " + kind + " kind");
+		// case ASSUME:
+		// pPrintAssume(out, prefix, (AssumeNode) statement);
+		// break;
+		// case ASSERT:
+		// pPrintAssert(out, prefix, (AssertNode) statement);
+		// break;
+		case ATOMIC:
+			pPrintAtomic(out, prefix, (AtomicNode) statement);
+			break;
+		case COMPOUND:
+			pPrintCompoundStatement(out, prefix,
+					(CompoundStatementNode) statement, isBody, isSwitchBody);
+			break;
+		case EXPRESSION:
+			pPrintExpressionStatement(out, prefix,
+					(ExpressionStatementNode) statement);
+			break;
+		case CHOOSE:
+			pPrintChooseStatement(out, prefix, (ChooseStatementNode) statement);
+			break;
+		case CIVL_FOR:
+			pPrintCivlForStatement(out, prefix, (CivlForNode) statement);
+			break;
+		case IF:
+			pPrintIf(out, prefix, (IfNode) statement);
+			break;
+		case JUMP:
+			pPrintJump(out, prefix, (JumpNode) statement);
+			break;
+		case LABELED:
+			pPrintLabeled(out, prefix, (LabeledStatementNode) statement);
+			break;
+		case LOOP:
+			pPrintLoop(out, prefix, (LoopNode) statement);
+			break;
+		case NULL:
+			out.print(prefix);
+			out.print(";");
+			break;
+		case OMP:
+			pPrintOmpStatement(out, prefix, (OmpExecutableNode) statement);
+			break;
+		case RUN:
+			out.print(run2Pretty(prefix, (RunNode) statement, -1));
+			break;
+		case SWITCH:
+			pPrintSwitch(out, prefix, (SwitchNode) statement);
+			break;
+		case UPDATE:
+			pPrintUpdate(out, prefix, (UpdateNode) statement);
+			break;
+		case WHEN:
+			pPrintWhen(out, prefix, (WhenNode) statement);
+			break;
+		case WITH:
+			out.print(with2Pretty(prefix, (WithNode) statement, -1));
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of statement node of " + kind + " kind");
 		}
 	}
 
@@ -1511,54 +1523,54 @@ public class ASTPrettyPrinter {
 		StatementKind kind = statement.statementKind();
 
 		switch (kind) {
-			case ATOMIC :
-				return atomic2Pretty(prefix, (AtomicNode) statement, maxLength);
-			case COMPOUND :
-				return compoundStatement2Pretty(prefix,
-						(CompoundStatementNode) statement, isBody, isSwitchBody,
-						maxLength);
-			case EXPRESSION :
-				return expressionStatement2Pretty(prefix,
-						(ExpressionStatementNode) statement, maxLength);
-			case CHOOSE :
-				return chooseStatement2Pretty(prefix,
-						(ChooseStatementNode) statement, maxLength);
-			case CIVL_FOR :
-				return civlForStatement2Pretty(prefix, (CivlForNode) statement,
-						maxLength);
-			case IF :
-				return if2Pretty(prefix, (IfNode) statement, maxLength);
-			case JUMP :
-				return jump2Pretty(prefix, (JumpNode) statement, maxLength);
-			case LABELED :
-				return labeled2Pretty(prefix, (LabeledStatementNode) statement,
-						maxLength);
-			case LOOP :
-				return loop2Pretty(prefix, (LoopNode) statement, maxLength);
-			case NULL : {
-				StringBuffer result = new StringBuffer();
+		case ATOMIC:
+			return atomic2Pretty(prefix, (AtomicNode) statement, maxLength);
+		case COMPOUND:
+			return compoundStatement2Pretty(prefix,
+					(CompoundStatementNode) statement, isBody, isSwitchBody,
+					maxLength);
+		case EXPRESSION:
+			return expressionStatement2Pretty(prefix,
+					(ExpressionStatementNode) statement, maxLength);
+		case CHOOSE:
+			return chooseStatement2Pretty(prefix,
+					(ChooseStatementNode) statement, maxLength);
+		case CIVL_FOR:
+			return civlForStatement2Pretty(prefix, (CivlForNode) statement,
+					maxLength);
+		case IF:
+			return if2Pretty(prefix, (IfNode) statement, maxLength);
+		case JUMP:
+			return jump2Pretty(prefix, (JumpNode) statement, maxLength);
+		case LABELED:
+			return labeled2Pretty(prefix, (LabeledStatementNode) statement,
+					maxLength);
+		case LOOP:
+			return loop2Pretty(prefix, (LoopNode) statement, maxLength);
+		case NULL: {
+			StringBuffer result = new StringBuffer();
 
-				result.append(prefix);
-				result.append(";");
-				return trimStringBuffer(result, maxLength);
-			}
-			case OMP :
-				return ompStatement2Pretty(prefix,
-						(OmpExecutableNode) statement, maxLength);
-			case RUN :
-				return run2Pretty(prefix, (RunNode) statement, maxLength);
-			case SWITCH :
-				return switch2Pretty(prefix, (SwitchNode) statement, maxLength);
-			case UPDATE :
-				return update2Pretty(prefix, (UpdateNode) statement, maxLength);
-			case WHEN :
-				return when2Pretty(prefix, (WhenNode) statement, maxLength);
-			case WITH :
-				return with2Pretty(prefix, (WithNode) statement, maxLength);
+			result.append(prefix);
+			result.append(";");
+			return trimStringBuffer(result, maxLength);
+		}
+		case OMP:
+			return ompStatement2Pretty(prefix, (OmpExecutableNode) statement,
+					maxLength);
+		case RUN:
+			return run2Pretty(prefix, (RunNode) statement, maxLength);
+		case SWITCH:
+			return switch2Pretty(prefix, (SwitchNode) statement, maxLength);
+		case UPDATE:
+			return update2Pretty(prefix, (UpdateNode) statement, maxLength);
+		case WHEN:
+			return when2Pretty(prefix, (WhenNode) statement, maxLength);
+		case WITH:
+			return with2Pretty(prefix, (WithNode) statement, maxLength);
 
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of statement node of " + kind + " kind");
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of statement node of " + kind + " kind");
 		}
 	}
 
@@ -1620,17 +1632,17 @@ public class ASTPrettyPrinter {
 		out.print(prefix);
 		out.print("#pragma omp ");
 		switch (kind) {
-			case PARALLEL :
-				out.print(ompParallel2Pretty(prefix, (OmpParallelNode) ompStmt,
-						-1));
-				break;
-			case SYNCHRONIZATION :
-				out.print(ompSync2Pretty(prefix, (OmpSyncNode) ompStmt, -1));
-				break;
-			default : // case WORKSHARING:
-				out.print(ompWorksharing2Pretty(prefix,
-						(OmpWorksharingNode) ompStmt, -1));
-				break;
+		case PARALLEL:
+			out.print(
+					ompParallel2Pretty(prefix, (OmpParallelNode) ompStmt, -1));
+			break;
+		case SYNCHRONIZATION:
+			out.print(ompSync2Pretty(prefix, (OmpSyncNode) ompStmt, -1));
+			break;
+		default: // case WORKSHARING:
+			out.print(ompWorksharing2Pretty(prefix,
+					(OmpWorksharingNode) ompStmt, -1));
+			break;
 		}
 		if (nowait)
 			out.print("nowait");
@@ -1695,20 +1707,19 @@ public class ASTPrettyPrinter {
 		result.append(prefix);
 		result.append("#pragma omp ");
 		switch (kind) {
-			case PARALLEL :
-				result.append(
-						ompParallel2Pretty(prefix, (OmpParallelNode) ompStmt,
-								vacantLength(maxLength, result)));
-				break;
-			case SYNCHRONIZATION :
-				result.append(ompSync2Pretty(prefix, (OmpSyncNode) ompStmt,
-						vacantLength(maxLength, result)));
-				break;
-			default : // case WORKSHARING:
-				result.append(ompWorksharing2Pretty(prefix,
-						(OmpWorksharingNode) ompStmt,
-						vacantLength(maxLength, result)));
-				break;
+		case PARALLEL:
+			result.append(ompParallel2Pretty(prefix, (OmpParallelNode) ompStmt,
+					vacantLength(maxLength, result)));
+			break;
+		case SYNCHRONIZATION:
+			result.append(ompSync2Pretty(prefix, (OmpSyncNode) ompStmt,
+					vacantLength(maxLength, result)));
+			break;
+		default: // case WORKSHARING:
+			result.append(
+					ompWorksharing2Pretty(prefix, (OmpWorksharingNode) ompStmt,
+							vacantLength(maxLength, result)));
+			break;
 		}
 		if (nowait)
 			result.append("nowait");
@@ -1769,55 +1780,55 @@ public class ASTPrettyPrinter {
 		OmpWorksharingNodeKind kind = ompWs.ompWorkshareNodeKind();
 
 		switch (kind) {
-			case FOR : {
-				OmpForNode forNode = (OmpForNode) ompWs;
-				int collapse = forNode.collapse();
-				OmpScheduleKind schedule = forNode.schedule();
+		case FOR: {
+			OmpForNode forNode = (OmpForNode) ompWs;
+			int collapse = forNode.collapse();
+			OmpScheduleKind schedule = forNode.schedule();
 
-				result.append("for ");
-				if (schedule != OmpScheduleKind.NONE) {
-					result.append("schedule(");
-					switch (forNode.schedule()) {
-						case AUTO :
-							result.append("auto");
-							break;
-						case DYNAMIC :
-							result.append("dynamic");
-							break;
-						case GUIDED :
-							result.append("guided");
-							break;
-						case RUNTIME :
-							result.append("runtime");
-							break;
-						default :// STATIC
-							result.append("static");
-							break;
-					}
-					if (forNode.chunkSize() != null) {
-						result.append(", ");
-						result.append(expression2Pretty(forNode.chunkSize(),
-								vacantLength(maxLength, result)));
-					}
-					result.append(") ");
+			result.append("for ");
+			if (schedule != OmpScheduleKind.NONE) {
+				result.append("schedule(");
+				switch (forNode.schedule()) {
+				case AUTO:
+					result.append("auto");
+					break;
+				case DYNAMIC:
+					result.append("dynamic");
+					break;
+				case GUIDED:
+					result.append("guided");
+					break;
+				case RUNTIME:
+					result.append("runtime");
+					break;
+				default:// STATIC
+					result.append("static");
+					break;
 				}
-				if (collapse > 1) {
-					result.append("collapse(");
-					result.append(collapse);
-					result.append(") ");
+				if (forNode.chunkSize() != null) {
+					result.append(", ");
+					result.append(expression2Pretty(forNode.chunkSize(),
+							vacantLength(maxLength, result)));
 				}
-				if (forNode.ordered())
-					result.append("ordered ");
-				break;
+				result.append(") ");
 			}
-			case SECTIONS :
-				result.append("sections ");
-				break;
-			case SINGLE :
-				result.append("single ");
-				break;
-			default : // case SECTION:
-				result.append("section ");
+			if (collapse > 1) {
+				result.append("collapse(");
+				result.append(collapse);
+				result.append(") ");
+			}
+			if (forNode.ordered())
+				result.append("ordered ");
+			break;
+		}
+		case SECTIONS:
+			result.append("sections ");
+			break;
+		case SINGLE:
+			result.append("single ");
+			break;
+		default: // case SECTION:
+			result.append("section ");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -1831,36 +1842,35 @@ public class ASTPrettyPrinter {
 		OmpSyncNodeKind kind = ompSync.ompSyncNodeKind();
 
 		switch (kind) {
-			case MASTER :
-				result.append("master ");
-				break;
-			case CRITICAL :
-				result.append("critical");
-				if (ompSync.criticalName() != null) {
-					result.append("(");
-					result.append(ompSync.criticalName().name());
-					result.append(")");
-				}
-				result.append(" ");
-				break;
-			case BARRIER :
-				result.append("barrier ");
-				break;
-			case FLUSH :
-				result.append("flush ");
-				if (ompSync.flushedList() != null) {
-					result.append("(");
-					result.append(
-							sequenceExpression2Pretty(ompSync.flushedList(),
-									vacantLength(maxLength, result)));
-					result.append(")");
-				}
-				break;
-			case OMPATOMIC :
-				result.append("atomic ");
-				break;
-			default :// ORDERED
-				result.append("ordered ");
+		case MASTER:
+			result.append("master ");
+			break;
+		case CRITICAL:
+			result.append("critical");
+			if (ompSync.criticalName() != null) {
+				result.append("(");
+				result.append(ompSync.criticalName().name());
+				result.append(")");
+			}
+			result.append(" ");
+			break;
+		case BARRIER:
+			result.append("barrier ");
+			break;
+		case FLUSH:
+			result.append("flush ");
+			if (ompSync.flushedList() != null) {
+				result.append("(");
+				result.append(sequenceExpression2Pretty(ompSync.flushedList(),
+						vacantLength(maxLength, result)));
+				result.append(")");
+			}
+			break;
+		case OMPATOMIC:
+			result.append("atomic ");
+			break;
+		default:// ORDERED
+			result.append("ordered ");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -1923,49 +1933,48 @@ public class ASTPrettyPrinter {
 
 		result.append("reduction(");
 		switch (reduction.ompReductionOperatorNodeKind()) {
-			case FUNCTION : {
-				OmpFunctionReductionNode funcNode = (OmpFunctionReductionNode) reduction;
+		case FUNCTION: {
+			OmpFunctionReductionNode funcNode = (OmpFunctionReductionNode) reduction;
 
-				result.append(
-						expression2Pretty(funcNode.function(), maxLength));
+			result.append(expression2Pretty(funcNode.function(), maxLength));
+			break;
+		}
+		default: // operator
+		{
+			OmpSymbolReductionNode symbol = (OmpSymbolReductionNode) reduction;
+
+			switch (symbol.operator()) {
+			case PLUSEQ:
+				result.append("+");
 				break;
+			case MINUSEQ:
+				result.append("-");
+				break;
+			case TIMESEQ:
+				result.append("*");
+				break;
+			case BITANDEQ:
+				result.append("&");
+				break;
+			case BITOREQ:
+				result.append("|");
+				break;
+			case BITXOREQ:
+				result.append("^");
+				break;
+			case LAND:
+				result.append("&&");
+				break;
+			case LOR:
+				result.append("||");
+				break;
+			default:
+				throw new ABCRuntimeException(
+						"Invalid operator for OpenMP reduction: "
+								+ symbol.operator(),
+						reduction.getSource().getLocation(false));
 			}
-			default : // operator
-			{
-				OmpSymbolReductionNode symbol = (OmpSymbolReductionNode) reduction;
-
-				switch (symbol.operator()) {
-					case PLUSEQ :
-						result.append("+");
-						break;
-					case MINUSEQ :
-						result.append("-");
-						break;
-					case TIMESEQ :
-						result.append("*");
-						break;
-					case BITANDEQ :
-						result.append("&");
-						break;
-					case BITOREQ :
-						result.append("|");
-						break;
-					case BITXOREQ :
-						result.append("^");
-						break;
-					case LAND :
-						result.append("&&");
-						break;
-					case LOR :
-						result.append("||");
-						break;
-					default :
-						throw new ABCRuntimeException(
-								"Invalid operator for OpenMP reduction: "
-										+ symbol.operator(),
-								reduction.getSource().getLocation(false));
-				}
-			}
+		}
 		}
 		result.append(": ");
 		result.append(sequenceExpression2Pretty(reduction.variables(),
@@ -2067,45 +2076,45 @@ public class ASTPrettyPrinter {
 		if (loop.getCondition() != null)
 			condition = expression2Pretty(loop.getCondition(), -1);
 		switch (loopKind) {
-			case WHILE :
-				out.print(prefix);
-				out.print("while (");
-				out.print(condition);
-				out.print(")");
-				if (bodyNode == null)
-					out.print(";");
-				else {
-					if (bodyNode.statementKind() == StatementKind.COMPOUND)
-						out.print(" ");
-					else
-						out.println();
-					pPrintStatement(out, myIndent, bodyNode, true, false);
+		case WHILE:
+			out.print(prefix);
+			out.print("while (");
+			out.print(condition);
+			out.print(")");
+			if (bodyNode == null)
+				out.print(";");
+			else {
+				if (bodyNode.statementKind() == StatementKind.COMPOUND)
+					out.print(" ");
+				else
+					out.println();
+				pPrintStatement(out, myIndent, bodyNode, true, false);
 
-				}
-				break;
-			case DO_WHILE :
+			}
+			break;
+		case DO_WHILE:
+			out.print(prefix);
+			out.print("do");
+			if (bodyNode == null)
+				out.print(";");
+			else {
+				if (bodyNode.statementKind() == StatementKind.COMPOUND)
+					out.print(" ");
+				else
+					out.println();
+				pPrintStatement(out, myIndent, bodyNode, true, false);
+			}
+			if (bodyNode != null
+					&& !(bodyNode instanceof CompoundStatementNode)) {
+				out.print("\n");
 				out.print(prefix);
-				out.print("do");
-				if (bodyNode == null)
-					out.print(";");
-				else {
-					if (bodyNode.statementKind() == StatementKind.COMPOUND)
-						out.print(" ");
-					else
-						out.println();
-					pPrintStatement(out, myIndent, bodyNode, true, false);
-				}
-				if (bodyNode != null
-						&& !(bodyNode instanceof CompoundStatementNode)) {
-					out.print("\n");
-					out.print(prefix);
-				}
-				out.print("while (");
-				out.print(condition);
-				out.print(");");
-				break;
-			default : // case FOR:
-				pPrintFor(out, prefix, (ForLoopNode) loop);
+			}
+			out.print("while (");
+			out.print(condition);
+			out.print(");");
+			break;
+		default: // case FOR:
+			pPrintFor(out, prefix, (ForLoopNode) loop);
 		}
 	}
 
@@ -2127,41 +2136,41 @@ public class ASTPrettyPrinter {
 			condition = expression2Pretty(loop.getCondition(),
 					vacantLength(maxLength, result));
 		switch (loopKind) {
-			case WHILE :
-				result.append(prefix);
-				result.append("while (");
-				result.append(condition);
-				result.append(")");
-				if (bodyNode == null)
-					result.append(";");
-				else {
-					result.append("\n");
-					result.append(statement2Pretty(myIndent, bodyNode, true,
-							false, vacantLength(maxLength, result)));
-				}
-				break;
-			case DO_WHILE :
-				result.append(prefix);
-				result.append("do");
-				if (bodyNode == null)
-					result.append(";");
-				else {
-					result.append("\n");
-					result.append(statement2Pretty(myIndent, bodyNode, true,
-							false, vacantLength(maxLength, result)));
-				}
-				if (bodyNode != null
-						&& !(bodyNode instanceof CompoundStatementNode)) {
-					result.append("\n");
-					result.append(prefix);
-				}
-				result.append("while (");
-				result.append(condition);
-				result.append(");");
-				break;
-			default : // case FOR:
-				result.append(for2Pretty(prefix, (ForLoopNode) loop,
+		case WHILE:
+			result.append(prefix);
+			result.append("while (");
+			result.append(condition);
+			result.append(")");
+			if (bodyNode == null)
+				result.append(";");
+			else {
+				result.append("\n");
+				result.append(statement2Pretty(myIndent, bodyNode, true, false,
 						vacantLength(maxLength, result)));
+			}
+			break;
+		case DO_WHILE:
+			result.append(prefix);
+			result.append("do");
+			if (bodyNode == null)
+				result.append(";");
+			else {
+				result.append("\n");
+				result.append(statement2Pretty(myIndent, bodyNode, true, false,
+						vacantLength(maxLength, result)));
+			}
+			if (bodyNode != null
+					&& !(bodyNode instanceof CompoundStatementNode)) {
+				result.append("\n");
+				result.append(prefix);
+			}
+			result.append("while (");
+			result.append(condition);
+			result.append(");");
+			break;
+		default: // case FOR:
+			result.append(for2Pretty(prefix, (ForLoopNode) loop,
+					vacantLength(maxLength, result)));
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -2302,19 +2311,19 @@ public class ASTPrettyPrinter {
 		JumpKind kind = jump.getKind();
 
 		switch (kind) {
-			case GOTO :
-				out.print(goto2Pretty(prefix, (GotoNode) jump, -1));
-				break;
-			case CONTINUE :
-				out.print(prefix);
-				out.print("continue;");
-				break;
-			case BREAK :
-				out.print(prefix);
-				out.print("break;");
-				break;
-			default : // case RETURN:
-				pPrintReturn(out, prefix, (ReturnNode) jump);
+		case GOTO:
+			out.print(goto2Pretty(prefix, (GotoNode) jump, -1));
+			break;
+		case CONTINUE:
+			out.print(prefix);
+			out.print("continue;");
+			break;
+		case BREAK:
+			out.print(prefix);
+			out.print("break;");
+			break;
+		default: // case RETURN:
+			pPrintReturn(out, prefix, (ReturnNode) jump);
 		}
 	}
 
@@ -2327,18 +2336,18 @@ public class ASTPrettyPrinter {
 		JumpKind kind = jump.getKind();
 
 		switch (kind) {
-			case GOTO :
-				return goto2Pretty(prefix, (GotoNode) jump, maxLength);
-			case CONTINUE :
-				result.append(prefix);
-				result.append("continue;");
-				break;
-			case BREAK :
-				result.append(prefix);
-				result.append("break;");
-				break;
-			default : // case RETURN:
-				return return2Pretty(prefix, (ReturnNode) jump, maxLength);
+		case GOTO:
+			return goto2Pretty(prefix, (GotoNode) jump, maxLength);
+		case CONTINUE:
+			result.append(prefix);
+			result.append("continue;");
+			break;
+		case BREAK:
+			result.append(prefix);
+			result.append("break;");
+			break;
+		default: // case RETURN:
+			return return2Pretty(prefix, (ReturnNode) jump, maxLength);
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -2866,185 +2875,182 @@ public class ASTPrettyPrinter {
 		ExpressionKind kind = expression.expressionKind();
 
 		switch (kind) {
-			case ALIGNOF : {
-				AlignOfNode align = (AlignOfNode) expression;
+		case ALIGNOF: {
+			AlignOfNode align = (AlignOfNode) expression;
 
-				result.append("_Alignof(");
-				result.append(type2Pretty("", align.getArgument(), false,
-						vacantLength(maxLength, result)));
-				result.append(")");
-				break;
-			}
-			case ARRAY_LAMBDA :
-				result.append(arrayLambda2Pretty((ArrayLambdaNode) expression,
-						maxLength));
-				break;
-			case ARROW : {
-				ArrowNode arrow = (ArrowNode) expression;
+			result.append("_Alignof(");
+			result.append(type2Pretty("", align.getArgument(), false,
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		}
+		case ARRAY_LAMBDA:
+			result.append(arrayLambda2Pretty((ArrayLambdaNode) expression,
+					maxLength));
+			break;
+		case ARROW: {
+			ArrowNode arrow = (ArrowNode) expression;
 
+			result.append("(");
+			result.append(expression2Pretty(arrow.getStructurePointer(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			result.append("->");
+			result.append(arrow.getFieldName().name());
+			break;
+		}
+		case CAST: {
+			CastNode cast = (CastNode) expression;
+			ExpressionNode arg = cast.getArgument();
+			ExpressionKind argKind = arg.expressionKind();
+			boolean parenNeeded = true;
+
+			result.append("(");
+			result.append(type2Pretty("", cast.getCastType(), false,
+					vacantLength(maxLength, result)));
+			result.append(")");
+			if (argKind == ExpressionKind.IDENTIFIER_EXPRESSION
+					|| argKind == ExpressionKind.CONSTANT
+					|| argKind == ExpressionKind.COMPOUND_LITERAL)
+				parenNeeded = false;
+			if (parenNeeded)
 				result.append("(");
-				result.append(expression2Pretty(arrow.getStructurePointer(),
-						vacantLength(maxLength, result)));
+			result.append(
+					expression2Pretty(arg, vacantLength(maxLength, result)));
+			if (parenNeeded)
 				result.append(")");
-				result.append("->");
-				result.append(arrow.getFieldName().name());
-				break;
-			}
-			case CAST : {
-				CastNode cast = (CastNode) expression;
-				ExpressionNode arg = cast.getArgument();
-				ExpressionKind argKind = arg.expressionKind();
-				boolean parenNeeded = true;
+			break;
+		}
+		case COMPOUND_LITERAL:
+			return compoundLiteral2Pretty((CompoundLiteralNode) expression,
+					maxLength);
+		case CONSTANT: {
+			String constant = ((ConstantNode) expression)
+					.getStringRepresentation();
 
-				result.append("(");
-				result.append(type2Pretty("", cast.getCastType(), false,
-						vacantLength(maxLength, result)));
-				result.append(")");
-				if (argKind == ExpressionKind.IDENTIFIER_EXPRESSION
-						|| argKind == ExpressionKind.CONSTANT
-						|| argKind == ExpressionKind.COMPOUND_LITERAL)
-					parenNeeded = false;
-				if (parenNeeded)
-					result.append("(");
-				result.append(expression2Pretty(arg,
-						vacantLength(maxLength, result)));
-				if (parenNeeded)
-					result.append(")");
-				break;
-			}
-			case COMPOUND_LITERAL :
-				return compoundLiteral2Pretty((CompoundLiteralNode) expression,
-						maxLength);
-			case CONSTANT : {
-				String constant = ((ConstantNode) expression)
-						.getStringRepresentation();
+			if (constant.equals("\\false"))
+				constant = "$false";
+			else if (constant.equals("\\true"))
+				constant = "$true";
+			result.append(constant);
+			break;
+		}
+		case DERIVATIVE_EXPRESSION:
+			return derivative2Pretty((DerivativeExpressionNode) expression,
+					maxLength);
+		case DOT: {
+			DotNode dot = (DotNode) expression;
 
-				if (constant.equals("\\false"))
-					constant = "$false";
-				else if (constant.equals("\\true"))
-					constant = "$true";
-				result.append(constant);
-				break;
-			}
-			case DERIVATIVE_EXPRESSION :
-				return derivative2Pretty((DerivativeExpressionNode) expression,
-						maxLength);
-			case DOT : {
-				DotNode dot = (DotNode) expression;
+			result.append(expression2Pretty(dot.getStructure(), maxLength));
+			result.append(".");
+			result.append(dot.getFieldName().name());
+			break;
+		}
+		case FUNCTION_CALL:
+			return functionCall2Pretty((FunctionCallNode) expression,
+					maxLength);
+		// TODO
+		// case GENERIC_SELECTION:
+		// break;
+		case IDENTIFIER_EXPRESSION:
+			result.append(((IdentifierExpressionNode) expression)
+					.getIdentifier().name());
+			break;
+		case MPI_CONTRACT_EXPRESSION:
+			result.append(mpiContractExpression2Pretty(
+					(MPIContractExpressionNode) expression, maxLength));
+			break;
+		case OPERATOR:
+			return operator2Pretty((OperatorNode) expression, maxLength);
+		case QUANTIFIED_EXPRESSION:
+			return quantifiedExpression2Pretty(
+					(QuantifiedExpressionNode) expression, maxLength);
+		case REGULAR_RANGE:
+			return regularRange2Pretty((RegularRangeNode) expression,
+					maxLength);
+		// TODO
+		// case REMOTE_REFERENCE:
+		// break;
+		case SCOPEOF:
+			result.append("$scopeof(");
+			result.append(
+					expression2Pretty(((ScopeOfNode) expression).expression(),
+							vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		case SIZEOF:
+			result.append("sizeof(");
+			result.append(
+					sizeable2Pretty(((SizeofNode) expression).getArgument(),
+							vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		case SPAWN:
+			result.append("$spawn ");
+			result.append(
+					functionCall2Pretty(((SpawnNode) expression).getCall(),
+							vacantLength(maxLength, result)));
+			break;
+		case REMOTE_REFERENCE:
+			result.append("$on(");
+			result.append(expression2Pretty(
+					((RemoteOnExpressionNode) expression)
+							.getProcessExpression(),
+					vacantLength(maxLength, result)));
+			result.append(" , ");
+			result.append(expression2Pretty(
+					((RemoteOnExpressionNode) expression)
+							.getForeignExpressionNode(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		case RESULT:
+			result.append("\\result");
+			break;
+		case STATEMENT_EXPRESSION:
+			return statementExpression2Pretty(
+					(StatementExpressionNode) expression, maxLength);
+		case NOTHING:
+			result.append("\\nothing");
+			break;
+		case WILDCARD:
+			result.append("...");
+			break;
+		case MEMORY_SET:
+			result.append(
+					memorySet2Pretty((MemorySetNode) expression, maxLength));
+			// result.append("MEMORY_SET in progress...");
+			break;
+		case OBJECT_OR_REGION_OF: {
+			ObjectOrRegionOfNode objectRegion = (ObjectOrRegionOfNode) expression;
 
-				result.append(expression2Pretty(dot.getStructure(), maxLength));
-				result.append(".");
-				result.append(dot.getFieldName().name());
-				break;
-			}
-			case FUNCTION_CALL :
-				return functionCall2Pretty((FunctionCallNode) expression,
-						maxLength);
-			// TODO
-			// case GENERIC_SELECTION:
-			// break;
-			case IDENTIFIER_EXPRESSION :
-				result.append(((IdentifierExpressionNode) expression)
-						.getIdentifier().name());
-				break;
-			case MPI_CONTRACT_EXPRESSION :
-				result.append(mpiContractExpression2Pretty(
-						(MPIContractExpressionNode) expression, maxLength));
-				break;
-			case OPERATOR :
-				return operator2Pretty((OperatorNode) expression, maxLength);
-			case QUANTIFIED_EXPRESSION :
-				return quantifiedExpression2Pretty(
-						(QuantifiedExpressionNode) expression, maxLength);
-			case REGULAR_RANGE :
-				return regularRange2Pretty((RegularRangeNode) expression,
-						maxLength);
-			// TODO
-			// case REMOTE_REFERENCE:
-			// break;
-			case SCOPEOF :
-				result.append("$scopeof(");
-				result.append(expression2Pretty(
-						((ScopeOfNode) expression).expression(),
-						vacantLength(maxLength, result)));
-				result.append(")");
-				break;
-			case SIZEOF :
-				result.append("sizeof(");
-				result.append(
-						sizeable2Pretty(((SizeofNode) expression).getArgument(),
-								vacantLength(maxLength, result)));
-				result.append(")");
-				break;
-			case SPAWN :
-				result.append("$spawn ");
-				result.append(
-						functionCall2Pretty(((SpawnNode) expression).getCall(),
-								vacantLength(maxLength, result)));
-				break;
-			case REMOTE_REFERENCE :
-				result.append("$on(");
-				result.append(expression2Pretty(
-						((RemoteOnExpressionNode) expression)
-								.getProcessExpression(),
-						vacantLength(maxLength, result)));
-				result.append(" , ");
-				result.append(expression2Pretty(
-						((RemoteOnExpressionNode) expression)
-								.getForeignExpressionNode(),
-						vacantLength(maxLength, result)));
-				result.append(")");
-				break;
-			case RESULT :
-				result.append("\\result");
-				break;
-			case STATEMENT_EXPRESSION :
-				return statementExpression2Pretty(
-						(StatementExpressionNode) expression, maxLength);
-			case NOTHING :
-				result.append("\\nothing");
-				break;
-			case WILDCARD :
-				result.append("...");
-				break;
-			case MEMORY_SET :
-				result.append(memorySet2Pretty((MemorySetNode) expression,
-						maxLength));
-				// result.append("MEMORY_SET in progress...");
-				break;
-			case OBJECT_OR_REGION_OF : {
-				ObjectOrRegionOfNode objectRegion = (ObjectOrRegionOfNode) expression;
-
-				if (objectRegion.isObjectOf())
-					result.append("$object_of");
-				else
-					result.append("$region_of");
-				result.append("(");
-				result.append(expression2Pretty(objectRegion.operand(),
-						vacantLength(maxLength, result)));
-				result.append(")");
-				break;
-			}
-			case EXTENDED_QUANTIFIED :
-				result.append(extendedQuantifiedExpression2Pretty(
-						(ExtendedQuantifiedExpressionNode) expression,
-						maxLength));
-				break;
-			case LAMBDA :
-				result.append(
-						lambda2Pretty((LambdaNode) expression, maxLength));
-				break;
-			case VALUE_AT :
-				result.append(
-						valueAt2Pretty((ValueAtNode) expression, maxLength));
-				break;
-			case ORIGINAL :
-				result.append(original2Pretty(
-						(OriginalExpressionNode) expression, maxLength));
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of expression node of " + kind + " kind");
+			if (objectRegion.isObjectOf())
+				result.append("$object_of");
+			else
+				result.append("$region_of");
+			result.append("(");
+			result.append(expression2Pretty(objectRegion.operand(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		}
+		case EXTENDED_QUANTIFIED:
+			result.append(extendedQuantifiedExpression2Pretty(
+					(ExtendedQuantifiedExpressionNode) expression, maxLength));
+			break;
+		case LAMBDA:
+			result.append(lambda2Pretty((LambdaNode) expression, maxLength));
+			break;
+		case VALUE_AT:
+			result.append(valueAt2Pretty((ValueAtNode) expression, maxLength));
+			break;
+		case ORIGINAL:
+			result.append(original2Pretty((OriginalExpressionNode) expression,
+					maxLength));
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of expression node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -3219,14 +3225,14 @@ public class ASTPrettyPrinter {
 		String quantifier;
 
 		switch (quantified.quantifier()) {
-			case FORALL :
-				quantifier = "$forall";
-				break;
-			case EXISTS :
-				quantifier = "$exists";
-				break;
-			default :// UNIFORM
-				quantifier = "$uniform";
+		case FORALL:
+			quantifier = "$forall";
+			break;
+		case EXISTS:
+			quantifier = "$exists";
+			break;
+		default:// UNIFORM
+			quantifier = "$uniform";
 		}
 		result.append(quantifier);
 		result.append(" (");
@@ -3401,8 +3407,7 @@ public class ASTPrettyPrinter {
 		Operator op = operator.getOperator();
 		ExpressionNode argNode0 = operator.getArgument(0);
 		ExpressionNode argNode1 = operator.numChildren() > 1
-				? operator.getArgument(1)
-				: null;
+				? operator.getArgument(1) : null;
 		StringBuffer arg0Buf = expression2Pretty(argNode0, maxLength);
 		String arg0 = arg0Buf.toString();
 		String arg1 = argNode1 != null
@@ -3417,259 +3422,259 @@ public class ASTPrettyPrinter {
 				&& argNode1.expressionKind() == ExpressionKind.OPERATOR)
 			argWtP1 = "(" + arg1 + ")";
 		switch (op) {
-			case ADDRESSOF :
-				result.append("&(");
-				result.append(arg0);
-				result.append(")");
-				break;
-			case ASSIGN :
-				result.append(arg0);
-				result.append(" = ");
-				result.append(arg1);
-				break;
-			case HASH :
-				result.append(arg0);
-				result.append("#");
-				result.append(arg1);
-				break;
-			case BIG_O :
-				result.append("$O(");
-				result.append(arg0);
-				result.append(")");
-				break;
-			case BITAND :
-				result.append(argWtP0);
-				result.append(" & ");
-				result.append(argWtP1);
-				break;
-			case BITANDEQ :
-				result.append(argWtP0);
-				result.append(" &= ");
-				result.append(argWtP1);
-				break;
-			case BITCOMPLEMENT :
-				result.append("~");
-				result.append(argWtP0);
-				break;
-			case BITEQUIV :
-				result.append(argWtP0);
-				result.append("<-->");
-				result.append(argWtP1);
-				break;
-			case BITIMPLIES :
-				result.append(argWtP0);
-				result.append("-->");
-				result.append(argWtP1);
-				break;
-			case BITOR :
-				result.append(argWtP0);
-				result.append(" | ");
-				result.append(argWtP1);
-				break;
-			case BITOREQ :
-				result.append(argWtP0);
-				result.append(" |= ");
-				result.append(argWtP1);
-				break;
-			case BITXOR :
-				result.append(argWtP0);
-				result.append(" ^ ");
-				result.append(argWtP1);
-				break;
-			case BITXOREQ :
-				result.append(argWtP0);
-				result.append(" ^= ");
-				result.append(argWtP1);
-				break;
-			case COMMA :
-				result.append(arg0);
-				result.append(", ");
-				result.append(arg1);
-				break;
-			case CONDITIONAL :
-				result.append(arg0);
-				result.append(" ? ");
-				result.append(arg1);
-				result.append(" : ");
-				result.append(expression2Pretty(operator.getArgument(2),
-						vacantLength(maxLength, result)));
-				break;
-			case DEREFERENCE :
-				result.append("*");
-				result.append(arg0);
-				break;
-			case DIV :
-				result.append(argWtP0);
-				result.append(" / ");
-				result.append(argWtP1);
-				break;
-			case DIVEQ :
-				result.append(argWtP0);
-				result.append(" /= ");
-				result.append(argWtP1);
-				break;
-			case EQUALS :
-				result.append(argWtP0);
-				result.append(" == ");
-				result.append(argWtP1);
-				break;
-			case GT :
-				result.append(argWtP0);
-				result.append(" > ");
-				result.append(argWtP1);
-				break;
-			case GTE :
-				result.append(argWtP0);
-				result.append(" >= ");
-				result.append(argWtP1);
-				break;
-			case IMPLIES :
-				result.append(argWtP0);
-				result.append(" => ");
-				result.append(argWtP1);
-				break;
-			case LAND :
-				result.append(argWtP0);
-				result.append(" && ");
-				result.append(argWtP1);
-				break;
-			case LOR :
-				result.append(argWtP0);
-				result.append(" || ");
-				result.append(argWtP1);
-				break;
-			case LXOR :
-				result.append(argWtP0);
-				result.append(" ^^ ");
-				result.append(argWtP1);
-				break;
-			case LEQ :
-				result.append(argWtP0);
-				result.append(" <==> ");
-				result.append(argWtP1);
-				break;
-			case LT :
-				result.append(argWtP0);
-				result.append(" < ");
-				result.append(argWtP1);
-				break;
-			case LTE :
-				result.append(argWtP0);
-				result.append(" <= ");
-				result.append(argWtP1);
-				break;
-			case MINUS :
-				result.append(argWtP0);
-				result.append(" - ");
-				result.append(argWtP1);
-				break;
-			case MINUSEQ :
-				result.append(argWtP0);
-				result.append(" -= ");
-				result.append(argWtP1);
-				break;
-			case MOD :
-				result.append(argWtP0);
-				result.append(" % ");
-				result.append(argWtP1);
-				break;
-			case MODEQ :
-				result.append(argWtP0);
-				result.append(" %= ");
-				result.append(argWtP1);
-				break;
-			case NEQ :
-				result.append(argWtP0);
-				result.append(" != ");
-				result.append(argWtP1);
-				break;
-			case NOT :
-				result.append("!");
-				result.append(argWtP0);
-				break;
-			case OLD :
-				result.append("\\old(");
-				result.append(arg0);
-				result.append(")");
-				break;
-			case PLUS :
-				result.append(argWtP0);
-				result.append(" + ");
-				result.append(argWtP1);
-				break;
-			case PLUSEQ :
-				result.append(arg0);
-				result.append(" += ");
-				result.append(arg1);
-				break;
-			case POSTDECREMENT :
-				result.append(arg0);
-				result.append("--");
-				break;
-			case POSTINCREMENT :
-				result.append(arg0);
-				result.append("++");
-				break;
-			case PREDECREMENT :
-				result.append("--");
-				result.append(arg0);
-				break;
-			case PREINCREMENT :
-				result.append("++");
-				result.append(arg0);
-				break;
-			case SHIFTLEFT :
-				result.append(argWtP0);
-				result.append(" << ");
-				result.append(argWtP1);
-				break;
-			case SHIFTLEFTEQ :
-				result.append(argWtP0);
-				result.append(" <<= ");
-				result.append(argWtP1);
-				break;
-			case SHIFTRIGHT :
-				result.append(argWtP0);
-				result.append(" >> ");
-				result.append(argWtP1);
-				break;
-			case SHIFTRIGHTEQ :
-				result.append(argWtP0);
-				result.append(" >>= ");
-				result.append(argWtP1);
-				break;
-			case SUBSCRIPT :
-				result.append(arg0);
-				result.append("[");
-				result.append(arg1);
-				result.append("]");
-				break;
-			case TIMES :
-				result.append(argWtP0);
-				result.append(" * ");
-				result.append(argWtP1);
-				break;
-			case TIMESEQ :
-				result.append(argWtP0);
-				result.append(" -= ");
-				result.append(argWtP1);
-				break;
-			case UNARYMINUS :
-				result.append("-");
-				result.append(argWtP0);
-				break;
-			case UNARYPLUS :
-				result.append("+");
-				result.append(argWtP0);
-				break;
-			case VALID :
-				result.append("\\valid(");
-				result.append(arg0);
-				result.append(")");
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of operator node of " + op + " kind");
+		case ADDRESSOF:
+			result.append("&(");
+			result.append(arg0);
+			result.append(")");
+			break;
+		case ASSIGN:
+			result.append(arg0);
+			result.append(" = ");
+			result.append(arg1);
+			break;
+		case HASH:
+			result.append(arg0);
+			result.append("#");
+			result.append(arg1);
+			break;
+		case BIG_O:
+			result.append("$O(");
+			result.append(arg0);
+			result.append(")");
+			break;
+		case BITAND:
+			result.append(argWtP0);
+			result.append(" & ");
+			result.append(argWtP1);
+			break;
+		case BITANDEQ:
+			result.append(argWtP0);
+			result.append(" &= ");
+			result.append(argWtP1);
+			break;
+		case BITCOMPLEMENT:
+			result.append("~");
+			result.append(argWtP0);
+			break;
+		case BITEQUIV:
+			result.append(argWtP0);
+			result.append("<-->");
+			result.append(argWtP1);
+			break;
+		case BITIMPLIES:
+			result.append(argWtP0);
+			result.append("-->");
+			result.append(argWtP1);
+			break;
+		case BITOR:
+			result.append(argWtP0);
+			result.append(" | ");
+			result.append(argWtP1);
+			break;
+		case BITOREQ:
+			result.append(argWtP0);
+			result.append(" |= ");
+			result.append(argWtP1);
+			break;
+		case BITXOR:
+			result.append(argWtP0);
+			result.append(" ^ ");
+			result.append(argWtP1);
+			break;
+		case BITXOREQ:
+			result.append(argWtP0);
+			result.append(" ^= ");
+			result.append(argWtP1);
+			break;
+		case COMMA:
+			result.append(arg0);
+			result.append(", ");
+			result.append(arg1);
+			break;
+		case CONDITIONAL:
+			result.append(arg0);
+			result.append(" ? ");
+			result.append(arg1);
+			result.append(" : ");
+			result.append(expression2Pretty(operator.getArgument(2),
+					vacantLength(maxLength, result)));
+			break;
+		case DEREFERENCE:
+			result.append("*");
+			result.append(arg0);
+			break;
+		case DIV:
+			result.append(argWtP0);
+			result.append(" / ");
+			result.append(argWtP1);
+			break;
+		case DIVEQ:
+			result.append(argWtP0);
+			result.append(" /= ");
+			result.append(argWtP1);
+			break;
+		case EQUALS:
+			result.append(argWtP0);
+			result.append(" == ");
+			result.append(argWtP1);
+			break;
+		case GT:
+			result.append(argWtP0);
+			result.append(" > ");
+			result.append(argWtP1);
+			break;
+		case GTE:
+			result.append(argWtP0);
+			result.append(" >= ");
+			result.append(argWtP1);
+			break;
+		case IMPLIES:
+			result.append(argWtP0);
+			result.append(" => ");
+			result.append(argWtP1);
+			break;
+		case LAND:
+			result.append(argWtP0);
+			result.append(" && ");
+			result.append(argWtP1);
+			break;
+		case LOR:
+			result.append(argWtP0);
+			result.append(" || ");
+			result.append(argWtP1);
+			break;
+		case LXOR:
+			result.append(argWtP0);
+			result.append(" ^^ ");
+			result.append(argWtP1);
+			break;
+		case LEQ:
+			result.append(argWtP0);
+			result.append(" <==> ");
+			result.append(argWtP1);
+			break;
+		case LT:
+			result.append(argWtP0);
+			result.append(" < ");
+			result.append(argWtP1);
+			break;
+		case LTE:
+			result.append(argWtP0);
+			result.append(" <= ");
+			result.append(argWtP1);
+			break;
+		case MINUS:
+			result.append(argWtP0);
+			result.append(" - ");
+			result.append(argWtP1);
+			break;
+		case MINUSEQ:
+			result.append(argWtP0);
+			result.append(" -= ");
+			result.append(argWtP1);
+			break;
+		case MOD:
+			result.append(argWtP0);
+			result.append(" % ");
+			result.append(argWtP1);
+			break;
+		case MODEQ:
+			result.append(argWtP0);
+			result.append(" %= ");
+			result.append(argWtP1);
+			break;
+		case NEQ:
+			result.append(argWtP0);
+			result.append(" != ");
+			result.append(argWtP1);
+			break;
+		case NOT:
+			result.append("!");
+			result.append(argWtP0);
+			break;
+		case OLD:
+			result.append("\\old(");
+			result.append(arg0);
+			result.append(")");
+			break;
+		case PLUS:
+			result.append(argWtP0);
+			result.append(" + ");
+			result.append(argWtP1);
+			break;
+		case PLUSEQ:
+			result.append(arg0);
+			result.append(" += ");
+			result.append(arg1);
+			break;
+		case POSTDECREMENT:
+			result.append(arg0);
+			result.append("--");
+			break;
+		case POSTINCREMENT:
+			result.append(arg0);
+			result.append("++");
+			break;
+		case PREDECREMENT:
+			result.append("--");
+			result.append(arg0);
+			break;
+		case PREINCREMENT:
+			result.append("++");
+			result.append(arg0);
+			break;
+		case SHIFTLEFT:
+			result.append(argWtP0);
+			result.append(" << ");
+			result.append(argWtP1);
+			break;
+		case SHIFTLEFTEQ:
+			result.append(argWtP0);
+			result.append(" <<= ");
+			result.append(argWtP1);
+			break;
+		case SHIFTRIGHT:
+			result.append(argWtP0);
+			result.append(" >> ");
+			result.append(argWtP1);
+			break;
+		case SHIFTRIGHTEQ:
+			result.append(argWtP0);
+			result.append(" >>= ");
+			result.append(argWtP1);
+			break;
+		case SUBSCRIPT:
+			result.append(arg0);
+			result.append("[");
+			result.append(arg1);
+			result.append("]");
+			break;
+		case TIMES:
+			result.append(argWtP0);
+			result.append(" * ");
+			result.append(argWtP1);
+			break;
+		case TIMESEQ:
+			result.append(argWtP0);
+			result.append(" -= ");
+			result.append(argWtP1);
+			break;
+		case UNARYMINUS:
+			result.append("-");
+			result.append(argWtP0);
+			break;
+		case UNARYPLUS:
+			result.append("+");
+			result.append(argWtP0);
+			break;
+		case VALID:
+			result.append("\\valid(");
+			result.append(arg0);
+			result.append(")");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of operator node of " + op + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -3684,100 +3689,99 @@ public class ASTPrettyPrinter {
 
 		result.append(prefix);
 		switch (kind) {
-			case ARRAY : {
-				ArrayTypeNode arrayType = (ArrayTypeNode) type;
-				ExpressionNode extent = arrayType.getExtent();
+		case ARRAY: {
+			ArrayTypeNode arrayType = (ArrayTypeNode) type;
+			ExpressionNode extent = arrayType.getExtent();
 
-				// result.append("(");
-				result.append(type2Pretty("", arrayType.getElementType(),
-						isTypeDeclaration, maxLength));
-				// result.append(")");
-				result.append("[");
-				if (extent != null)
-					result.append(expression2Pretty(extent,
-							vacantLength(maxLength, result)));
-				result.append("]");
-			}
-				break;
-			case DOMAIN : {
-				DomainTypeNode domainType = (DomainTypeNode) type;
-				ExpressionNode dim = domainType.getDimension();
+			// result.append("(");
+			result.append(type2Pretty("", arrayType.getElementType(),
+					isTypeDeclaration, maxLength));
+			// result.append(")");
+			result.append("[");
+			if (extent != null)
+				result.append(expression2Pretty(extent,
+						vacantLength(maxLength, result)));
+			result.append("]");
+		}
+			break;
+		case DOMAIN: {
+			DomainTypeNode domainType = (DomainTypeNode) type;
+			ExpressionNode dim = domainType.getDimension();
 
-				result.append("$domain");
-				if (dim != null) {
-					result.append("(");
-					result.append(expression2Pretty(dim,
-							vacantLength(maxLength, result)));
-					result.append(")");
-				}
-				break;
-			}
-			case VOID :
-				result.append("void");
-				break;
-			case BASIC :
-				result.append(
-						basicType2Pretty((BasicTypeNode) type, maxLength));
-				break;
-			case ENUMERATION :
-				EnumerationTypeNode enumType = (EnumerationTypeNode) type;
-
-				return enumType2Pretty(prefix, enumType, maxLength);
-			case STRUCTURE_OR_UNION : {
-				StructureOrUnionTypeNode strOrUnion = (StructureOrUnionTypeNode) type;
-
-				return structOrUnion2Pretty(prefix, strOrUnion,
-						isTypeDeclaration, maxLength);
-			}
-			case POINTER :
-				result.append(type2Pretty("",
-						((PointerTypeNode) type).referencedType(),
-						isTypeDeclaration, maxLength));
-				result.append("*");
-				break;
-			case TYPEDEF_NAME :
-				result.append(((TypedefNameNode) type).getName().name());
-				break;
-			case SCOPE :
-				result.append("$scope");
-				break;
-			case FUNCTION : {
-				FunctionTypeNode funcType = (FunctionTypeNode) type;
-				SequenceNode<VariableDeclarationNode> paras = funcType
-						.getParameters();
-				int i = 0;
-
-				result.append(" (");
-				result.append(type2Pretty(prefix, funcType.getReturnType(),
-						false, maxLength - 1));
-				result.append(" (");
-				for (VariableDeclarationNode para : paras) {
-					if (i != 0)
-						result.append(", ");
-					result.append(variableDeclaration2Pretty("", para,
-							vacantLength(maxLength, result)));
-					i++;
-				}
-				result.append(")");
-				result.append(")");
-				break;
-			}
-			case RANGE :
-				result.append("$range");
-				break;
-			case TYPEOF :
-				result.append("typeof(");
-				result.append(expression2Pretty(
-						((TypeofNode) type).getExpressionOperand(),
+			result.append("$domain");
+			if (dim != null) {
+				result.append("(");
+				result.append(expression2Pretty(dim,
 						vacantLength(maxLength, result)));
 				result.append(")");
-				break;
-			case STATE :
-				result.append("$state");
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of type node of " + kind + " kind");
+			}
+			break;
+		}
+		case VOID:
+			result.append("void");
+			break;
+		case BASIC:
+			result.append(basicType2Pretty((BasicTypeNode) type, maxLength));
+			break;
+		case ENUMERATION:
+			EnumerationTypeNode enumType = (EnumerationTypeNode) type;
+
+			return enumType2Pretty(prefix, enumType, maxLength);
+		case STRUCTURE_OR_UNION: {
+			StructureOrUnionTypeNode strOrUnion = (StructureOrUnionTypeNode) type;
+
+			return structOrUnion2Pretty(prefix, strOrUnion, isTypeDeclaration,
+					maxLength);
+		}
+		case POINTER:
+			result.append(
+					type2Pretty("", ((PointerTypeNode) type).referencedType(),
+							isTypeDeclaration, maxLength));
+			result.append("*");
+			break;
+		case TYPEDEF_NAME:
+			result.append(((TypedefNameNode) type).getName().name());
+			break;
+		case SCOPE:
+			result.append("$scope");
+			break;
+		case FUNCTION: {
+			FunctionTypeNode funcType = (FunctionTypeNode) type;
+			SequenceNode<VariableDeclarationNode> paras = funcType
+					.getParameters();
+			int i = 0;
+
+			result.append(" (");
+			result.append(type2Pretty(prefix, funcType.getReturnType(), false,
+					maxLength - 1));
+			result.append(" (");
+			for (VariableDeclarationNode para : paras) {
+				if (i != 0)
+					result.append(", ");
+				result.append(variableDeclaration2Pretty("", para,
+						vacantLength(maxLength, result)));
+				i++;
+			}
+			result.append(")");
+			result.append(")");
+			break;
+		}
+		case RANGE:
+			result.append("$range");
+			break;
+		case TYPEOF:
+			result.append("typeof(");
+			result.append(expression2Pretty(
+					((TypeofNode) type).getExpressionOperand(),
+					vacantLength(maxLength, result)));
+			result.append(")");
+			break;
+		case STATE:
+			result.append("$state");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of type node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
 	}
@@ -3798,47 +3802,46 @@ public class ASTPrettyPrinter {
 		String prettyName;
 
 		switch (kind) {
-			case MPI_AGREE :
-				numArgs = 1;
-				prettyName = "$mpi_agree(";
-				break;
-			case MPI_EMPTY_IN :
-				numArgs = 1;
-				prettyName = "$mpi_empty_in(";
-				break;
-			case MPI_EMPTY_OUT :
-				numArgs = 1;
-				prettyName = "$mpi_empty_out(";
-				break;
-			case MPI_EQUALS :
-				numArgs = 4;
-				prettyName = "$mpi_equals(";
-				break;
-			case MPI_EXTENT :
-				numArgs = 1;
-				prettyName = "$mpi_extent(";
-				break;
-			case MPI_INTEGER_CONSTANT :
-				result.append((((MPIContractConstantNode) node)
-						.getMPIConstantKind() == MPIConstantKind.MPI_COMM_SIZE)
-								? "$mpi_comm_size"
-								: "$mpi_comm_rank");
-				return result;
-			case MPI_OFFSET :
-				numArgs = 3;
-				prettyName = "$mpi_offset(";
-				break;
-			case MPI_REGION :
-				numArgs = 3;
-				prettyName = "$mpi_region(";
-				break;
-			case MPI_VALID :
-				numArgs = 3;
-				prettyName = "$mpi_valid(";
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"Unknown MPI contract expression kind : " + kind);
+		case MPI_AGREE:
+			numArgs = 1;
+			prettyName = "$mpi_agree(";
+			break;
+		case MPI_EMPTY_IN:
+			numArgs = 1;
+			prettyName = "$mpi_empty_in(";
+			break;
+		case MPI_EMPTY_OUT:
+			numArgs = 1;
+			prettyName = "$mpi_empty_out(";
+			break;
+		case MPI_EQUALS:
+			numArgs = 4;
+			prettyName = "$mpi_equals(";
+			break;
+		case MPI_EXTENT:
+			numArgs = 1;
+			prettyName = "$mpi_extent(";
+			break;
+		case MPI_INTEGER_CONSTANT:
+			result.append((((MPIContractConstantNode) node)
+					.getMPIConstantKind() == MPIConstantKind.MPI_COMM_SIZE)
+							? "$mpi_comm_size" : "$mpi_comm_rank");
+			return result;
+		case MPI_OFFSET:
+			numArgs = 3;
+			prettyName = "$mpi_offset(";
+			break;
+		case MPI_REGION:
+			numArgs = 3;
+			prettyName = "$mpi_region(";
+			break;
+		case MPI_VALID:
+			numArgs = 3;
+			prettyName = "$mpi_valid(";
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"Unknown MPI contract expression kind : " + kind);
 		}
 		result.append(prettyName);
 		result.append(expression2Pretty(node.getArgument(0), maxLength));
@@ -3858,67 +3861,67 @@ public class ASTPrettyPrinter {
 		BasicTypeKind basicKind = type.getBasicTypeKind();
 
 		switch (basicKind) {
-			case BOOL :
-				result.append("_Bool");
-				break;
-			case CHAR :
-				result.append("char");
-				break;
-			case DOUBLE :
-				result.append("double");
-				break;
-			case DOUBLE_COMPLEX :
-				result.append("double _Complex");
-				break;
-			case FLOAT :
-				result.append("float");
-				break;
-			case FLOAT_COMPLEX :
-				result.append("float _Complex");
-				break;
-			case INT :
-				result.append("int");
-				break;
-			case LONG :
-				result.append("long");
-				break;
-			case LONG_DOUBLE :
-				result.append("long double");
-				break;
-			case LONG_DOUBLE_COMPLEX :
-				result.append("long double _Complex");
-				break;
-			case LONG_LONG :
-				result.append("long long");
-				break;
-			case REAL :
-				result.append("real");
-				break;
-			case SHORT :
-				result.append("short");
-				break;
-			case SIGNED_CHAR :
-				result.append("signed char");
-				break;
-			case UNSIGNED :
-				result.append("unsigned");
-				break;
-			case UNSIGNED_CHAR :
-				result.append("unsigned char");
-				break;
-			case UNSIGNED_LONG :
-				result.append("unsigned long");
-				break;
-			case UNSIGNED_LONG_LONG :
-				result.append("unsigned long long");
-				break;
-			case UNSIGNED_SHORT :
-				result.append("unsigned short");
-				break;
-			default :
-				throw new ABCUnsupportedException(
-						"pretty print of basic type node of " + basicKind
-								+ " kind");
+		case BOOL:
+			result.append("_Bool");
+			break;
+		case CHAR:
+			result.append("char");
+			break;
+		case DOUBLE:
+			result.append("double");
+			break;
+		case DOUBLE_COMPLEX:
+			result.append("double _Complex");
+			break;
+		case FLOAT:
+			result.append("float");
+			break;
+		case FLOAT_COMPLEX:
+			result.append("float _Complex");
+			break;
+		case INT:
+			result.append("int");
+			break;
+		case LONG:
+			result.append("long");
+			break;
+		case LONG_DOUBLE:
+			result.append("long double");
+			break;
+		case LONG_DOUBLE_COMPLEX:
+			result.append("long double _Complex");
+			break;
+		case LONG_LONG:
+			result.append("long long");
+			break;
+		case REAL:
+			result.append("real");
+			break;
+		case SHORT:
+			result.append("short");
+			break;
+		case SIGNED_CHAR:
+			result.append("signed char");
+			break;
+		case UNSIGNED:
+			result.append("unsigned");
+			break;
+		case UNSIGNED_CHAR:
+			result.append("unsigned char");
+			break;
+		case UNSIGNED_LONG:
+			result.append("unsigned long");
+			break;
+		case UNSIGNED_LONG_LONG:
+			result.append("unsigned long long");
+			break;
+		case UNSIGNED_SHORT:
+			result.append("unsigned short");
+			break;
+		default:
+			throw new ABCUnsupportedException(
+					"pretty print of basic type node of " + basicKind
+							+ " kind");
 		}
 		return trimStringBuffer(result, maxLength);
 	}

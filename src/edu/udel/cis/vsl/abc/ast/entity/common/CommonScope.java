@@ -2,9 +2,11 @@ package edu.udel.cis.vsl.abc.ast.entity.common;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
@@ -36,6 +38,8 @@ public class CommonScope implements Scope {
 	private CommonScope parentScope;
 
 	private ArrayList<Scope> children = new ArrayList<Scope>();
+
+	private Set<String> functionNames = new HashSet<>();
 
 	/**
 	 * Contains an entry for each ordinary entity declared in this scope that is
@@ -161,8 +165,10 @@ public class CommonScope implements Scope {
 	}
 
 	@Override
-	public OrdinaryEntity getLexicalOrdinaryEntity(boolean isType, String name) {
-		for (Scope scope = this; scope != null; scope = scope.getParentScope()) {
+	public OrdinaryEntity getLexicalOrdinaryEntity(boolean isType,
+			String name) {
+		for (Scope scope = this; scope != null; scope = scope
+				.getParentScope()) {
 			OrdinaryEntity result = scope.getOrdinaryEntity(isType, name);
 
 			if (result != null)
@@ -210,10 +216,11 @@ public class CommonScope implements Scope {
 			TaggedEntity oldEntity = taggedEntityMap.get(name);
 
 			if (oldEntity != null)
-				throw new SyntaxException("Tagged entity with name " + name
-						+ " already exists " + "in this scope: "
-						+ oldEntity.getDeclaration(0).getSource(), entity
-						.getDeclaration(0).getSource());
+				throw new SyntaxException(
+						"Tagged entity with name " + name + " already exists "
+								+ "in this scope: "
+								+ oldEntity.getDeclaration(0).getSource(),
+						entity.getDeclaration(0).getSource());
 			taggedEntityMap.put(name, entity);
 		}
 		taggedEntityList.add(entity);
@@ -227,7 +234,8 @@ public class CommonScope implements Scope {
 
 	@Override
 	public TaggedEntity getLexicalTaggedEntity(String tag) {
-		for (Scope scope = this; scope != null; scope = scope.getParentScope()) {
+		for (Scope scope = this; scope != null; scope = scope
+				.getParentScope()) {
 			TaggedEntity result = scope.getTaggedEntity(tag);
 
 			if (result != null)
@@ -264,7 +272,8 @@ public class CommonScope implements Scope {
 
 	@Override
 	public Label getLexicalLabel(String name) {
-		for (Scope scope = this; scope != null; scope = scope.getParentScope()) {
+		for (Scope scope = this; scope != null; scope = scope
+				.getParentScope()) {
 			Label result = scope.getLabel(name);
 
 			if (result != null)
@@ -364,6 +373,16 @@ public class CommonScope implements Scope {
 	@Override
 	public Iterable<TaggedEntity> getTaggedEntities() {
 		return taggedEntityList;
+	}
+
+	@Override
+	public Set<String> getFunctionNames() {
+		return functionNames;
+	}
+
+	@Override
+	public boolean addFunctionName(String name) {
+		return functionNames.add(name);
 	}
 
 }
