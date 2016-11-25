@@ -66,27 +66,27 @@ public class CIVLTranslationTest {
 	}
 
 	@Test
-	public void assertForall() throws ABCException, IOException {
+	public void assertForall() throws ABCException {
 		check("forall");
 	}
 
 	@Test
-	public void spawn() throws ABCException, IOException {
+	public void spawn() throws ABCException {
 		check("spawn");
 	}
 
 	@Test
-	public void choose() throws ABCException, IOException {
+	public void choose() throws ABCException {
 		check("choose");
 	}
 
 	@Test
-	public void duffs() throws ABCException, IOException {
+	public void duffs() throws ABCException {
 		check("duffs");
 	}
 
 	@Test
-	public void sideEffects() throws ABCException, IOException {
+	public void sideEffects() throws ABCException {
 		check("sideEffects");
 	}
 
@@ -98,98 +98,103 @@ public class CIVLTranslationTest {
 	// Ignoring because scope-qualified pointers are going away
 	@Ignore
 	@Test
-	public void pointerScopes() throws ABCException, IOException {
+	public void pointerScopes() throws ABCException {
 		check("pointerScopes");
 	}
 
 	@Test
-	public void atomicBlock() throws ABCException, IOException {
+	public void atomicBlock() throws ABCException {
 		check("atomicStatement");
 	}
 
 	@Test
-	public void potentialBug() throws ABCException, IOException {
+	public void potentialBug() throws ABCException {
 		check("potentialBug");
 	}
 
 	@Test
-	public void nestedFunctions() throws ABCException, IOException {
+	public void nestedFunctions() throws ABCException {
 		check("nestedFunctions");
 	}
 
 	@Test
-	public void domain() throws ABCException, IOException {
+	public void domain() throws ABCException {
 		check("domain");
 	}
 
 	@Test
-	public void dollarFor() throws ABCException, IOException {
+	public void dollarFor() throws ABCException {
 		check("dollarFor");
 	}
 
 	@Test
-	public void parfor() throws ABCException, IOException {
+	public void parfor() throws ABCException {
 		check("parfor");
 	}
 
 	@Test(expected = SyntaxException.class)
-	public void parfor_bad() throws ABCException, IOException {
+	public void parfor_bad() throws ABCException {
 		check("parfor_bad");
 	}
 
 	@Test(expected = SyntaxException.class)
-	public void parfor_bad2() throws ABCException, IOException {
+	public void parfor_bad2() throws ABCException {
 		check("parfor_bad2");
 	}
 
 	@Test
-	public void domainDecomp() throws ABCException, IOException {
+	public void domainDecomp() throws ABCException {
 		check("domainDecomposition");
 	}
 
 	@Test
-	public void cond() throws ABCException, IOException {
+	public void cond() throws ABCException {
 		check("cond");
 	}
 
 	@Test
-	public void externalDefs() throws ABCException, IOException {
+	public void externalDefs() throws ABCException {
 		check("externaldefs");
 	}
 
 	@Test
-	public void systemFunction() throws ABCException, IOException {
+	public void systemFunction() throws ABCException {
 		check("systemFunction");
 	}
 
 	@Test(expected = SyntaxException.class)
-	public void sysLibraryBad() throws ABCException, IOException {
+	public void sysLibraryBad() throws ABCException {
 		check("sysLibraryBad");
 	}
 
 	@Test
-	public void quantifiers() throws ABCException, IOException {
+	public void quantifiers() throws ABCException {
 		check("quantifiers");
 	}
 
 	@Test
-	public void arrayLambda() throws ABCException, IOException {
+	public void arrayLambda() throws ABCException {
 		check("lambda");
 	}
 
 	@Test
-	public void with() throws ABCException, IOException {
+	public void with() throws ABCException {
 		check("with");
 	}
 
 	@Test
-	public void update() throws ABCException, IOException {
+	public void update() throws ABCException {
 		check("update");
 	}
-	
+
 	@Test
-	public void valueat() throws ABCException, IOException {
+	public void valueat() throws ABCException {
 		check("valueat");
+	}
+
+	@Test
+	public void defnScopes() throws ABCException {
+		check("defnScopes");
 	}
 
 	@Test(expected = SyntaxException.class)
