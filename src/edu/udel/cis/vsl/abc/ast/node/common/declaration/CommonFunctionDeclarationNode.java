@@ -10,7 +10,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
@@ -113,11 +112,6 @@ public class CommonFunctionDeclarationNode extends CommonOrdinaryDeclarationNode
 	@Override
 	public void setContract(SequenceNode<ContractNode> contract) {
 		setChild(2, contract);
-	}
-
-	@Override
-	public FunctionTypeNode getTypeNode() {
-		return (FunctionTypeNode) super.getTypeNode();
 	}
 
 	@Override

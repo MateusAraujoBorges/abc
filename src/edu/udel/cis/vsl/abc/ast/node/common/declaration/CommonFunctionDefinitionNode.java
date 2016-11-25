@@ -15,7 +15,8 @@ public class CommonFunctionDefinitionNode extends CommonFunctionDeclarationNode
 
 	public CommonFunctionDefinitionNode(Source source,
 			IdentifierNode identifier, FunctionTypeNode type,
-			SequenceNode<ContractNode> contract, CompoundStatementNode statement) {
+			SequenceNode<ContractNode> contract,
+			CompoundStatementNode statement) {
 		super(source, identifier, type, contract);
 		addChild(statement);
 	}
@@ -57,5 +58,10 @@ public class CommonFunctionDefinitionNode extends CommonFunctionDeclarationNode
 	@Override
 	public OrdinaryDeclarationKind ordinaryDeclarationKind() {
 		return OrdinaryDeclarationKind.FUNCTION_DEFINITION;
+	}
+
+	@Override
+	public FunctionTypeNode getTypeNode() {
+		return (FunctionTypeNode) super.getTypeNode();
 	}
 }
