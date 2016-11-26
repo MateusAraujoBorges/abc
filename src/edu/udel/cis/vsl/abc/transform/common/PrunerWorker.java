@@ -159,6 +159,9 @@ public class PrunerWorker {
 					} else if (isCompound
 							&& child instanceof StructureOrUnionTypeNode) {
 						// do nothing ---- see if this is reachable
+						// TODO: the struct or union decl might contain
+						// side-effects.   Check for this and mark reachable
+						// if side-effects are possible.
 					} else
 						markReachable(child);
 				}
