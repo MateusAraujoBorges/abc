@@ -1,3 +1,4 @@
+#pragma PARSE_ACSL 
 
 int x;
 

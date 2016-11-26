@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.transform.common;
 import java.util.LinkedList;
 import java.util.List;
 
+import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
@@ -30,9 +31,11 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode.BlockItemKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CivlForNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Enumerator;
 import edu.udel.cis.vsl.abc.ast.type.IF.QualifiedObjectType;
@@ -54,12 +57,15 @@ public class PrunerWorker {
 
 	private AttributeKey reachedKey;
 
+	private AST ast;
+
 	List<ASTNode> reachableNodes = new LinkedList<ASTNode>();
 
 	public PrunerWorker(AttributeKey reachedKey, ASTNode root)
 			throws SyntaxException {
 		this.reachedKey = reachedKey;
 		this.root = root;
+		this.ast = root.getOwner();
 		search();
 	}
 
@@ -81,6 +87,7 @@ public class PrunerWorker {
 			return;
 		else {
 			Iterable<ASTNode> children = node.children();
+			boolean isCompound = node instanceof CompoundStatementNode;
 
 			node.setAttribute(reachedKey, Reachability.REACHABLE);
 			reachableNodes.add(node);
@@ -149,6 +156,9 @@ public class PrunerWorker {
 								markReachable(child);
 						}
 						// do nothing: we want to see if we can reach these
+					} else if (isCompound
+							&& child instanceof StructureOrUnionTypeNode) {
+						// do nothing ---- see if this is reachable
 					} else
 						markReachable(child);
 				}
@@ -166,11 +176,12 @@ public class PrunerWorker {
 	private void explore(ProgramEntity entity) {
 		if (entity instanceof TaggedEntity) {
 			// only need the first decl and the defn:
-			ASTNode firstDecl = entity.getFirstDeclaration();
 			ASTNode defn = entity.getDefinition();
+			ASTNode firstDecl = entity.getFirstDeclaration();
 
 			if (firstDecl != null) {
-				if (firstDecl.parent().parent() instanceof TypedefDeclarationNode)
+				if (firstDecl.parent()
+						.parent() instanceof TypedefDeclarationNode)
 					markReachable(firstDecl.parent().parent());
 				else
 					markReachable(firstDecl);
@@ -181,8 +192,14 @@ public class PrunerWorker {
 			// if a decl is equivalent to any previous decl for this entity
 			// don't mark it reachable. Correctness of below requires that
 			// getDeclarations are returned in program order.
+			// also, system types are weird and have decls from every
+			// AST ever seen, so ignore them...
 			for (DeclarationNode current : entity.getDeclarations()) {
+				if (current.getOwner() != ast)
+					continue;
 				for (DeclarationNode previous : entity.getDeclarations()) {
+					if (previous.getOwner() != ast)
+						continue;
 					if (previous == current) {
 						markReachable(current);
 						break;
@@ -233,18 +250,10 @@ public class PrunerWorker {
 					|| externalDef instanceof StaticAssertionNode
 					|| isAssumeOrAssert(externalDef)
 					|| externalDef instanceof StatementNode)
-				// || isElaborateDomainFunction(externalDef))
 				markReachable(externalDef);
 		}
 		explore(main);
 	}
-
-	// private boolean isElaborateDomainFunction(BlockItemNode item) {
-	// if ((item != null) && item instanceof FunctionDeclarationNode)
-	// return ((FunctionDeclarationNode) item).getIdentifier().name()
-	// .equals("$elaborate_rectangular_domain");
-	// return false;
-	// }
 
 	private boolean isAssumeOrAssert(BlockItemNode item) {
 		if (item == null)
