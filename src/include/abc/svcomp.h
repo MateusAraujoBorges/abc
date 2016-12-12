@@ -19,7 +19,7 @@ extern $system void assume(_Bool);
 int __VERIFIER_nondet_int(void);
 unsigned int __VERIFIER_nondet_uint(void);
 void* __VERIFIER_nondet_pointer(void);
-int __VERIFIER_nondet_bool(void);
+_Bool __VERIFIER_nondet_bool(void);
 int __VERIFIER_nondet_int(void);
 long __VERIFIER_nondet_long(void);
 unsigned long __VERIFIER_nondet_ulong(void);
