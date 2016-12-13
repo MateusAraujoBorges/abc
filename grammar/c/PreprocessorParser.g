@@ -324,6 +324,7 @@ c_keyword	:	c_pp_keyword | c_notpp_keyword
 /* Words used in C but not in preprocessor */
 c_notpp_keyword	:	ALIGNAS 
 		|	ALIGNOF
+		|	ASM
 		|	ASSIGNS 
 		|	ATOMIC
 		|	AUTO 

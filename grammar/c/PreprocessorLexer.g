@@ -50,6 +50,7 @@ UNDEF		:	'undef'		;
 
 /****** C keywords, from C11 Sec. 6.4.1 ******/
 AUTO		:	'auto'		;
+ASM			:	'asm'		;
 BREAK		:	'break'		;
 CASE		:	'case'		;
 CHAR		:	'char'		;

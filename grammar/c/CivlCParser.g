@@ -1341,6 +1341,7 @@ statement
     | runStatement -> ^(STATEMENT runStatement)
     | withStatement -> ^(STATEMENT withStatement)
     | updateStatement -> ^(STATEMENT updateStatement)
+    | asmStatement -> ^(STATEMENT asmStatement)
     ;
 
 statementWithScope
@@ -1601,6 +1602,18 @@ updateStatement
 	  -> ^(UPDATE assignmentExpression  
 	  	^(CALL ABSENT postfixExpressionRoot ABSENT argumentExpressionList RPAREN)
 	      )
+	;
+
+balancedToken
+	: ~(LPAREN | RPAREN)
+	| LPAREN balancedToken* RPAREN
+	;
+	
+asmStatement
+	: ASM VOLATILE? GOTO? LPAREN
+	  balancedToken*
+	  RPAREN SEMI
+	  -> ^(ASM VOLATILE? GOTO? ^(TOKEN_LIST balancedToken*))
 	;
 
 /* CIVL-C $when statement.  This is a guarded command.

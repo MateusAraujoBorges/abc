@@ -184,4 +184,15 @@ public class SvcompTest {
 	public void svcompbug() throws ABCException {
 		check(this.file("svcomp_frontend_bug.c"));
 	}
+
+	/**
+	 * Checks that ABC can parse assembly "asm" statements but will ignore them.
+	 * 
+	 * @throws ABCException
+	 *             never
+	 */
+	@Test
+	public void asm() throws ABCException {
+		check(this.file("asm_ignore.c"));
+	}
 }

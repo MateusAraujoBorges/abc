@@ -2399,6 +2399,9 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 		kind = statementTree.getType();
 		switch (kind) {
+		case ASM:
+			// for now, all assembly code is a no-op
+			return nodeFactory.newNullStatementNode(newSource(statementTree));
 		case BREAK:
 			return nodeFactory.newBreakNode(newSource(statementTree));
 		case CASE_LABELED_STATEMENT:
@@ -2828,7 +2831,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			break;
 		default:
 			throw new ABCUnsupportedException(
-					"translating block item node of " + kind + " kind");
+					"translating block item node " + blockItemTree.toString());
 		}
 		return items;
 	}
