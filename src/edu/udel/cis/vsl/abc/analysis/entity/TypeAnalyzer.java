@@ -48,6 +48,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.UnqualifiedObjectType;
 import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
 import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
+import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
@@ -73,6 +74,8 @@ public class TypeAnalyzer {
 
 	private Language language;
 
+	private Configuration config;
+
 	/**
 	 * The type used for enumerators, i.e., the elements of enumeration types.
 	 * It is an unspecified integer type according to the C Standard.
@@ -81,7 +84,8 @@ public class TypeAnalyzer {
 
 	// ************************** Constructors ****************************
 
-	TypeAnalyzer(EntityAnalyzer entityAnalyzer, TypeFactory typeFactory) {
+	TypeAnalyzer(EntityAnalyzer entityAnalyzer, TypeFactory typeFactory,
+			Configuration config) {
 		this.entityAnalyzer = entityAnalyzer;
 		this.nodeFactory = entityAnalyzer.nodeFactory;
 		this.typeFactory = typeFactory;
@@ -89,6 +93,7 @@ public class TypeAnalyzer {
 		this.enumeratorType = (IntegerType) typeFactory
 				.basicType(BasicTypeKind.INT);
 		this.language = entityAnalyzer.language;
+		this.config = config;
 	}
 
 	// ************************** Private Methods **************************
@@ -799,8 +804,8 @@ public class TypeAnalyzer {
 				.enumerators(); // could
 								// be
 								// null
-		EnumerationType enumeration;
-		Type result;
+		EnumerationType enumeration = null;
+		Type result = typeFactory.enumerationType(node, node.getName());
 
 		if (node.isRestrictQualified())
 			throw error("Use of restrict qualifier with non-pointer type",
@@ -818,22 +823,24 @@ public class TypeAnalyzer {
 			} else {
 				TaggedEntity oldEntity = scope.getLexicalTaggedEntity(tag);
 
-				if (oldEntity == null)
+				if (!config.getSVCOMP() && oldEntity == null)
 					throw error(
 							"See C11 6.7.2.3(3):\n\"A type specifier of the form\n"
 									+ "    enum identifier\n"
 									+ "without an enumerator list shall only appear after the type\n"
 									+ "it specifies is complete.\"",
 							node);
-				if (!(oldEntity instanceof EnumerationType))
-					throw error("Re-use of tag " + tag
-							+ " for enumeration when tag is visible with different kind.  Previous use was at "
-							+ oldEntity.getFirstDeclaration().getSource(),
-							node);
-				enumeration = (EnumerationType) oldEntity;
-				assert enumeration.isComplete();
-				// if not, you would have caught the earlier incomplete use
-				enumeration.addDeclaration(node);
+				if (oldEntity != null) {
+					if (!(oldEntity instanceof EnumerationType))
+						throw error("Re-use of tag " + tag
+								+ " for enumeration when tag is visible with different kind.  Previous use was at "
+								+ oldEntity.getFirstDeclaration().getSource(),
+								node);
+					enumeration = (EnumerationType) oldEntity;
+					assert config.getSVCOMP() || enumeration.isComplete();
+					// if not, you would have caught the earlier incomplete use
+					enumeration.addDeclaration(node);
+				}
 			}
 		} else {
 			// no tag: create new anonymous enumeration
@@ -845,7 +852,7 @@ public class TypeAnalyzer {
 		node.setEntity(enumeration);
 		if (identifier != null)
 			identifier.setEntity(enumeration);
-		{
+		if (enumeration != null) {
 			boolean constQ = node.isConstQualified();
 			boolean volatileQ = node.isVolatileQualified();
 			UnqualifiedObjectType unqualifiedType = enumeration.getType();

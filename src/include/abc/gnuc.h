@@ -12,6 +12,7 @@
 #define __asm__(X)
 #define __signed__ signed
 #define __volatile volatile
+#define __typeof__ typeof
 #define __PRETTY_FUNCTION__ (void*)0
 #define alloca(size) __builtin_alloca (size)
 

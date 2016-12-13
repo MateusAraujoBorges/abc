@@ -137,7 +137,7 @@ public class EntityAnalyzer implements Analyzer {
 		this.statementAnalyzer = new StatementAnalyzer(this, expressionAnalyzer,
 				conversionFactory, typeFactory, configuration);
 		this.expressionAnalyzer.setStatementAnalyzer(statementAnalyzer);
-		this.typeAnalyzer = new TypeAnalyzer(this, typeFactory);
+		this.typeAnalyzer = new TypeAnalyzer(this, typeFactory, configuration);
 		// externVariablesAllowedWoDef.add("stdin");
 		// externVariablesAllowedWoDef.add("stdout");
 		// externVariablesAllowedWoDef.add("stderr");
