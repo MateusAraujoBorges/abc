@@ -195,4 +195,16 @@ public class SvcompTest {
 	public void asm() throws ABCException {
 		check(this.file("asm_ignore.c"));
 	}
+
+	/**
+	 * Checks validity of pointer addition when the pointer has type void*,
+	 * which is allowed in GNU-C, and therefore in SV-COMP.
+	 * 
+	 * @throws ABCException
+	 *             never
+	 */
+	@Test
+	public void void_star_add() throws ABCException {
+		check(this.file("void_star_add.c"));
+	}
 }
