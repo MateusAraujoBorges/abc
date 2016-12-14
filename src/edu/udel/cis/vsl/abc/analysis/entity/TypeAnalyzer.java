@@ -206,9 +206,10 @@ public class TypeAnalyzer {
 				entityAnalyzer.expressionAnalyzer
 						.processExpression(sizeExpression);
 				if (sizeExpression.isConstantExpression()) {
+					Value extent = nodeFactory.getConstantValue(sizeExpression);
+
 					result = typeFactory.arrayType(elementType,
-							(IntegerValue) nodeFactory
-									.getConstantValue(sizeExpression));
+							(IntegerValue) extent);
 				} else {
 					// C11 6.7.6.2(5): "If the size is an expression that is not
 					// an integer constant expression: if it occurs in a
@@ -598,6 +599,8 @@ public class TypeAnalyzer {
 					throw error(
 							"Non-constant expression used for bit width in field declaration",
 							bitWidthExpression);
+				this.entityAnalyzer.expressionAnalyzer
+						.processExpression(bitWidthExpression);
 				bitWidth = nodeFactory.getConstantValue(bitWidthExpression);
 			}
 			field = typeFactory.newField(decl, fieldType, bitWidth
@@ -805,7 +808,7 @@ public class TypeAnalyzer {
 								// be
 								// null
 		EnumerationType enumeration = null;
-		Type result = typeFactory.enumerationType(node, node.getName());
+		Type result;// = typeFactory.enumerationType(node, node.getName());
 
 		if (node.isRestrictQualified())
 			throw error("Use of restrict qualifier with non-pointer type",
@@ -823,7 +826,7 @@ public class TypeAnalyzer {
 			} else {
 				TaggedEntity oldEntity = scope.getLexicalTaggedEntity(tag);
 
-				if (!config.getSVCOMP() && oldEntity == null)
+				if (/* !config.getSVCOMP() && */ oldEntity == null)
 					throw error(
 							"See C11 6.7.2.3(3):\n\"A type specifier of the form\n"
 									+ "    enum identifier\n"
@@ -852,19 +855,19 @@ public class TypeAnalyzer {
 		node.setEntity(enumeration);
 		if (identifier != null)
 			identifier.setEntity(enumeration);
-		if (enumeration != null) {
-			boolean constQ = node.isConstQualified();
-			boolean volatileQ = node.isVolatileQualified();
-			UnqualifiedObjectType unqualifiedType = enumeration.getType();
+		// if (enumeration != null) {
+		boolean constQ = node.isConstQualified();
+		boolean volatileQ = node.isVolatileQualified();
+		UnqualifiedObjectType unqualifiedType = enumeration.getType();
 
-			if (node.isAtomicQualified())
-				unqualifiedType = typeFactory.atomicType(unqualifiedType);
-			if (constQ || volatileQ)
-				result = typeFactory.qualifiedType(unqualifiedType, constQ,
-						volatileQ, false, false, false);
-			else
-				result = unqualifiedType;
-		}
+		if (node.isAtomicQualified())
+			unqualifiedType = typeFactory.atomicType(unqualifiedType);
+		if (constQ || volatileQ)
+			result = typeFactory.qualifiedType(unqualifiedType, constQ,
+					volatileQ, false, false, false);
+		else
+			result = unqualifiedType;
+		// }
 		node.setType(result);
 		return result;
 	}

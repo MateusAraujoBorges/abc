@@ -627,11 +627,11 @@ public class CommonValueFactory implements ValueFactory {
 		case BITXOR: // ^ bit-wise exclusive or
 		case CONDITIONAL: // ?: the conditional operator
 		case DEREFERENCE: // * pointer dereference
-		case SHIFTLEFT: // << shift left
-		case SHIFTRIGHT: // >> shift right
 		case SUBSCRIPT: // [] array subscript
 			break;
 			
+		case SHIFTLEFT: // << shift left
+		case SHIFTRIGHT: // >> shift right
 		case EQUALS: // == equality
 		case GT: // > greater than
 		case GTE: // >= greater than or equals
