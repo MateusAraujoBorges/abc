@@ -36,4 +36,5 @@ void* __builtin_alloca(size_t);
 size_t __builtin_strlen(const char *str);
 float __builtin_inff (void);
 float __builtin_nanf (const char *str);
+int __builtin_constant_p(int);
 #endif 
