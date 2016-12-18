@@ -70,6 +70,16 @@ $system[pthread] void $pthread_gpool_join($pthread_gpool_t gpool);
   @*/
 $atomic_f $pthread_pool_t $pthread_pool_create($scope scope, $pthread_gpool_t gpool);
 
+/* Creates a new local pthread pool object for the main function, also all the main thread to the thread pool;
+   and returns a handle to the new local pthread pool object. */
+/*@ depends_on \nothing;
+  @ assigns gpool;
+  @ reads \nothing;
+  @ executes_when \true;
+  @*/
+$atomic_f $pthread_pool_t $pthread_pool_create_main($scope scope, $pthread_gpool_t gpool);
+
+
 /* Terminates this thread */
 /*@ depends_on \access(pool, value);
   @ executes_when \true;
