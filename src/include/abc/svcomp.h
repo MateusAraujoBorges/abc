@@ -26,4 +26,13 @@ unsigned long __VERIFIER_nondet_ulong(void);
 char __VERIFIER_nondet_char(void);
 double __VERIFIER_nondet_double(void);
 float __VERIFIER_nondet_float(void);
+
+//Undefined functions:
+typedef unsigned int __u32;
+typedef __u32 __kernel_dev_t;
+typedef __kernel_dev_t dev_t;
+
+int access_ok(int type, const void *addr, unsigned long size);
+
+int alloc_chrdev_region(dev_t *, unsigned int, unsigned int, const char *);
 #endif
