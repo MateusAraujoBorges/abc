@@ -29,10 +29,25 @@ float __VERIFIER_nondet_float(void);
 
 //Undefined functions:
 typedef unsigned int __u32;
+typedef unsigned int u32;
 typedef __u32 __kernel_dev_t;
 typedef __kernel_dev_t dev_t;
+typedef long long loff_t;
+typedef u32 phys_addr_t;                                                                                                                      
+typedef phys_addr_t resource_size_t;
 
 int access_ok(int type, const void *addr, unsigned long size);
 
-int alloc_chrdev_region(dev_t *, unsigned int, unsigned int, const char *);
+int alloc_chrdev_region(unsigned int *, unsigned int, unsigned int, const char *);
+
+int register_chrdev_region(dev_t, unsigned, const char *);
+
+void unregister_chrdev_region(dev_t, unsigned);
+
+loff_t no_llseek(struct file *file, loff_t offset, int origin);
+
+int nonseekable_open(struct inode * inode, struct file * filp);
+
+void __release_region(struct resource *, resource_size_t, resource_size_t);
+
 #endif
