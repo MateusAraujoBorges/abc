@@ -27,6 +27,7 @@ char __VERIFIER_nondet_char(void);
 double __VERIFIER_nondet_double(void);
 float __VERIFIER_nondet_float(void);
 
+/*
 //Undefined functions:
 typedef unsigned int __u32;
 typedef unsigned int u32;
@@ -47,5 +48,5 @@ loff_t no_llseek(struct file *file, loff_t offset, int origin);
 int nonseekable_open(struct inode * inode, struct file * filp);
 
 void __release_region(struct resource *, resource_size_t, resource_size_t);
-
+*/
 #endif
