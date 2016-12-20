@@ -740,6 +740,11 @@ public class ExpressionAnalyzer {
 	 * If the first expression has qualified type, the result has the
 	 * so-qualified version of the type of the designated member."
 	 * 
+	 * TODO: I don't think this behaves correctly with anonymous structs/unions.
+	 * These are unnamed fields of struct/unions which are structs/unions. The
+	 * Standard says they are considered to be fields of the containing
+	 * struct/union. See C11 6.7.2.1 (19).
+	 * 
 	 * @param node
 	 * @throws SyntaxException
 	 */

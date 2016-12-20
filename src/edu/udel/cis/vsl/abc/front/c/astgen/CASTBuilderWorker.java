@@ -1020,15 +1020,6 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 					.getChild(1);
 			InitializerNode initializer = translateInitializer(initializerTree,
 					scope);
-
-			// TODO: the following won't work if the struct or union
-			// is anonymous. Need to give it a temp name.
-			// Could give a unique name to every anonymous thing in
-			// this translation unit, but might create problem with linking
-			// if two different translation units have anonymous things
-			// with same name. Linker will have to recognize this and
-			// perhaps change names of anonymous things. At least in file scope.
-
 			TypeNode baseType = i == 0 ? newSpecifierType(analysis, scope)
 					: makeIncomplete(newSpecifierType(analysis, scope));
 			DeclaratorData data = processDeclarator(declaratorTree, baseType,
@@ -1274,13 +1265,9 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			CommonTree declarationTree, SimpleScope scope)
 			throws SyntaxException {
 		CommonTree declarationSpecifiers = (CommonTree) declarationTree
-				.getChild(0); // may
-								// be
-								// ABSENT
+				.getChild(0); // may be ABSENT
 		CommonTree structDeclaratorList = (CommonTree) declarationTree
-				.getChild(1); // may
-								// be
-								// ABSENT
+				.getChild(1); // may be ABSENT
 		SpecifierAnalysis analysis = newSpecifierAnalysis(
 				declarationSpecifiers);
 		int numDeclarators = structDeclaratorList.getChildCount();
@@ -1291,6 +1278,8 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 			// this can happen if the specifier is an anonymous struct or union
 			TypeNode baseType = newSpecifierType(analysis, scope);
 
+			// TODO: consider given a name to this anonymous field
+			// and then updating DOT and ARROW expressions which refer to it
 			result.add(nodeFactory.newFieldDeclarationNode(source, null,
 					baseType, null));
 		} else {
@@ -1300,13 +1289,9 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				CommonTree structDeclarator = (CommonTree) structDeclaratorList
 						.getChild(i);
 				CommonTree declaratorTree = (CommonTree) structDeclarator
-						.getChild(0); // could
-										// be
-										// ABSENT
+						.getChild(0); // could be ABSENT
 				CommonTree bitFieldTree = (CommonTree) structDeclarator
-						.getChild(1); // could
-										// be
-										// ABSENT
+						.getChild(1); // could be ABSENT
 				ExpressionNode bitFieldWidth = translateExpression(bitFieldTree,
 						scope);
 				DeclaratorData data = processDeclarator(declaratorTree,

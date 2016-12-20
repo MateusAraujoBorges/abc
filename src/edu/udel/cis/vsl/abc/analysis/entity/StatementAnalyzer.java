@@ -219,8 +219,9 @@ public class StatementAnalyzer {
 			Value constant;
 
 			expressionAnalyzer.processExpression(caseExpression);
-			if (!caseExpression.isConstantExpression())
+			if (!caseExpression.isConstantExpression()) {
 				throw error("Case expression not constant", caseExpression);
+			}
 			constant = nodeFactory.getConstantValue(caseExpression);
 			while (cases.hasNext()) {
 				SwitchLabelNode labelNode = (SwitchLabelNode) cases.next()

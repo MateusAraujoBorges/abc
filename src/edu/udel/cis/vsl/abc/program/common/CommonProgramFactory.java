@@ -62,7 +62,7 @@ public class CommonProgramFactory implements ProgramFactory {
 	 * into a program.
 	 */
 	private Analyzer standardAnalyzer;
-	
+
 	private AttributeKey intDivAttributeKey;
 
 	// Constructors...
@@ -131,7 +131,8 @@ public class CommonProgramFactory implements ProgramFactory {
 				throw new ABCRuntimeException("unreachable: " + def);
 		}
 		for (ProgramEntity entity : plan.getEntityRemoveActions()) {
-			boolean isSysTypedef = entity instanceof Typedef && ((Typedef) entity).isSystem();
+			boolean isSysTypedef = entity instanceof Typedef
+					&& ((Typedef) entity).isSystem();
 
 			// system typedefs require special handling because there
 			// is one entity shared by all ASTs. The declarations
@@ -301,7 +302,8 @@ public class CommonProgramFactory implements ProgramFactory {
 		NodeFactory nodeFactory = astFactory.getNodeFactory();
 		TokenFactory tokenFactory = astFactory.getTokenFactory();
 		Formation formation = tokenFactory.newSystemFormation("Program");
-		CivlcToken fakeToken = tokenFactory.newCivlcToken(CivlCParser.PROGRAM, "Program", formation);
+		CivlcToken fakeToken = tokenFactory.newCivlcToken(CivlCParser.PROGRAM,
+				"Program", formation);
 		Source fakeSource = tokenFactory.newSource(fakeToken);
 		List<BlockItemNode> definitions = new LinkedList<>();
 		SequenceNode<BlockItemNode> newRoot;
@@ -319,7 +321,8 @@ public class CommonProgramFactory implements ProgramFactory {
 			for (int i = 0; i < n; i++) {
 				SequenceNode<BlockItemNode> root = roots.get(i);
 				SequenceNode<BlockItemNode> rootClone = root.copy();
-				Collection<SourceFile> sourceFiles = translationUnits[i].getSourceFiles();
+				Collection<SourceFile> sourceFiles = translationUnits[i]
+						.getSourceFiles();
 				AST ast = astFactory.newAST(rootClone, sourceFiles, false);
 
 				out.println(ast + ":");
@@ -340,10 +343,10 @@ public class CommonProgramFactory implements ProgramFactory {
 			}
 		}
 		newRoot = nodeFactory.newProgramNode(fakeSource, definitions);
-		if(intDivAttributeKey != null) {
+		if (intDivAttributeKey != null) {
 			for (ASTNode root : roots) {
 				Object value = root.getAttribute(intDivAttributeKey);
-	
+
 				if (value != null) {
 					newRoot.setAttribute(intDivAttributeKey, value);
 					break;
@@ -357,7 +360,6 @@ public class CommonProgramFactory implements ProgramFactory {
 			out.println();
 			out.flush();
 		}
-		
 		return result;
 	}
 
