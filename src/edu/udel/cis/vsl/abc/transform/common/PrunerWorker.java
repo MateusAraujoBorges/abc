@@ -18,38 +18,45 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.QualifiedObjectType;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.transform.common.Pruner.Reachability;
 
 /**
  * Finds all reachable nodes in the AST and marks them REACHABLE. Assumes that
  * the AST has already had the standard analyses performed, so that every
  * identifier has been resolved to refer to some Entity.
  * 
- * @author siegel
+ * @author Stephen Siegel (siegel)
  * 
  */
 public class PrunerWorker {
 
+	/**
+	 * The root node of the AST.
+	 */
 	private ASTNode root;
 
+	/**
+	 * The attribute key used to mark reachability of a node. The value has
+	 * boolean type.
+	 */
 	private AttributeKey reachedKey;
 
+	/**
+	 * The AST being searched.
+	 */
 	private AST ast;
 
 	/**
 	 * Creates new instance and performs the reachability analysis on the
 	 * <code>root</code> node. After returning, all reachable nodes in the AST
 	 * will be marked with the <code>reachedKey</code> attribute set to
-	 * {@link #REACHABLE}.
+	 * <code>true</code>.
 	 * 
 	 * @param reachedKey
-	 *            the attribute key use
+	 *            the attribute key to use for recording reachability of a node
 	 * @param root
 	 *            root node of AST
-	 * @throws SyntaxException
 	 */
 	public PrunerWorker(AttributeKey reachedKey, ASTNode root) {
-		// throws SyntaxException {
 		this.reachedKey = reachedKey;
 		this.root = root;
 		this.ast = root.getOwner();
@@ -99,9 +106,11 @@ public class PrunerWorker {
 	 *            the AST node to mark as reachable and explore
 	 */
 	private void markReachable(ASTNode node) {
-		if (node.getAttribute(reachedKey) == Reachability.REACHABLE)
+		Boolean value = (Boolean) node.getAttribute(reachedKey);
+
+		if (value != null && value)
 			return;
-		node.setAttribute(reachedKey, Reachability.REACHABLE);
+		node.setAttribute(reachedKey, true);
 
 		if (node instanceof IdentifierNode) {
 			Entity entity = ((IdentifierNode) node).getEntity();

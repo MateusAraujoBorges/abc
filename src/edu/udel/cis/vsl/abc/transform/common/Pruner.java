@@ -11,6 +11,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
+import edu.udel.cis.vsl.abc.transform.IF.Transformer;
 
 /**
  * <p>
@@ -44,27 +45,58 @@ import edu.udel.cis.vsl.abc.transform.IF.BaseTransformer;
  * encoded in it. If you want them, they should be invoked on the new AST.
  * </p>
  * 
- * @author siegel
+ * <p>
+ * What is reachable:
+ * </p>
  * 
+ * <ul>
+ * <li>the main function is reachable</li>
+ * <li>if an IdentifierNode is reachable, the result of exploring its Entity is
+ * reachable</li>
+ * <li>if a node is reachable, so are all its ancestors</li>
+ * <li>if a node is reachable, so are all its children, EXCEPT: a declaration of
+ * something in a sequence of block items UNLESS that declaration is an input or
+ * output declaration, or that declaration has an initializer with a side effect
+ * </li>
+ * </ul>
+ * 
+ * <p>
+ * The result of exploring an Entity: the definition node, and: for a tagged
+ * entity, the first declaration, and for an ordinary entity: all declarations
+ * that are not equivalent to previous declarations.
+ * </p>
+ * 
+ * @author siegel
  */
 public class Pruner extends BaseTransformer {
 
+	/**
+	 * The short code used to identify this {@link Transformer}.
+	 */
 	public final static String CODE = "prune";
+
+	/**
+	 * The long name used to identify this {@link Transformer}.
+	 */
 	public final static String LONG_NAME = "Pruner";
+
+	/**
+	 * The short description of what this {@link Transformer} does.
+	 */
 	public final static String SHORT_DESCRIPTION = "removes unreachable objects from the AST";
 
-	public enum Reachability {
-		/**
-		 * Indicates this node is unreachable and can therefore be pruned from
-		 * the AST.
-		 */
-		UNREACHABLE,
-		/**
-		 * Indicates this node is reachable and must therefore be kept in the
-		 * AST.
-		 */
-		REACHABLE
-	};
+	// public enum Reachability {
+	// /**
+	// * Indicates this node is unreachable and can therefore be pruned from
+	// * the AST.
+	// */
+	// UNREACHABLE,
+	// /**
+	// * Indicates this node is reachable and must therefore be kept in the
+	// * AST.
+	// */
+	// REACHABLE
+	// };
 
 	private AttributeKey reachedKey;
 
@@ -72,14 +104,14 @@ public class Pruner extends BaseTransformer {
 
 	public Pruner(ASTFactory astFactory) {
 		super(CODE, LONG_NAME, SHORT_DESCRIPTION, astFactory);
-		reachedKey = nodeFactory.newAttribute("reached", Reachability.class);
+		reachedKey = nodeFactory.newAttribute("reached", Boolean.class);
 		reachable = new NodePredicate() {
-
 			@Override
 			public boolean holds(ASTNode node) {
-				return node.getAttribute(reachedKey) == Reachability.REACHABLE;
-			}
+				Boolean result = (Boolean) node.getAttribute(reachedKey);
 
+				return result != null && result;
+			}
 		};
 	}
 
@@ -89,7 +121,7 @@ public class Pruner extends BaseTransformer {
 		else {
 			Iterable<ASTNode> children = node.children();
 
-			node.setAttribute(reachedKey, Reachability.UNREACHABLE);
+			node.setAttribute(reachedKey, false);
 			for (ASTNode child : children)
 				markAllUnreachable(child);
 		}
