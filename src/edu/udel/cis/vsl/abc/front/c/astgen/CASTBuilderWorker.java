@@ -1257,8 +1257,11 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				}
 			}
 		}
-		return nodeFactory.newStructOrUnionTypeNode(wholeSource, isStruct, tag,
-				structDeclList);
+
+		StructureOrUnionTypeNode result = nodeFactory.newStructOrUnionTypeNode(
+				wholeSource, isStruct, tag, structDeclList);
+
+		return result;
 	}
 
 	private List<FieldDeclarationNode> translateFieldDeclaration(

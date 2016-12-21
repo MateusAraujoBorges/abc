@@ -212,10 +212,10 @@ public abstract class CommonASTNode implements ASTNode {
 		int size;
 
 		if (!(attributeClass.isInstance(value)))
-			throw new IllegalArgumentException("Attribute "
-					+ ((CommonAttributeKey) key).getAttributeName()
-					+ " has type  " + attributeClass + " but given " + value
-					+ " of type " + value.getClass());
+			throw new IllegalArgumentException(
+					"Attribute " + ((CommonAttributeKey) key).getAttributeName()
+							+ " has type  " + attributeClass + " but given "
+							+ value + " of type " + value.getClass());
 		if (attributes == null)
 			attributes = new ArrayList<Object>();
 		size = attributes.size();
@@ -238,10 +238,10 @@ public abstract class CommonASTNode implements ASTNode {
 		children.add(child);
 		if (child != null) {
 			if (child.parent() != null)
-				throw new ASTException("Cannot make\n" + child
-						+ "\na child of node\n" + this
-						+ "\nbecause it is already a child of\n"
-						+ child.parent());
+				throw new ASTException(
+						"Cannot make\n" + child + "\na child of node\n" + this
+								+ "\nbecause it is already a child of\n"
+								+ child.parent());
 			((CommonASTNode) child).parent = this;
 			((CommonASTNode) child).childIndex = index;
 		}
@@ -255,8 +255,8 @@ public abstract class CommonASTNode implements ASTNode {
 
 		checkModifiable();
 		if (index < 0)
-			throw new ASTException("Negative index " + index
-					+ " used in setChild on " + this);
+			throw new ASTException(
+					"Negative index " + index + " used in setChild on " + this);
 		if (child != null && child.parent() != null)
 			throw new ASTException("Cannot make\n" + child
 					+ "\na child of node\n" + this
@@ -296,8 +296,8 @@ public abstract class CommonASTNode implements ASTNode {
 			throw new ASTException("Negative index " + index
 					+ " used in insertChildren on " + this);
 		if (index > oldSize)
-			throw new ASTException("Index " + index + " exceeds size "
-					+ oldSize + " in insertChildren on " + this);
+			throw new ASTException("Index " + index + " exceeds size " + oldSize
+					+ " in insertChildren on " + this);
 		children.addAll(index, list);
 		for (int i = index; i < index + listSize; i++) {
 			ASTNode child = children.get(i);

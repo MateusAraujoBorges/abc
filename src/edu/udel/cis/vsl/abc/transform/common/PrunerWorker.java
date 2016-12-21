@@ -1,10 +1,6 @@
 package edu.udel.cis.vsl.abc.transform.common;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
@@ -14,32 +10,13 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Variable;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.OrdinaryDeclarationNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrayLambdaNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode.BlockItemKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.CivlForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
-import edu.udel.cis.vsl.abc.ast.type.IF.Enumerator;
+import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.QualifiedObjectType;
-import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.transform.common.Pruner.Reachability;
 
@@ -59,10 +36,20 @@ public class PrunerWorker {
 
 	private AST ast;
 
-	List<ASTNode> reachableNodes = new LinkedList<ASTNode>();
-
-	public PrunerWorker(AttributeKey reachedKey, ASTNode root)
-			throws SyntaxException {
+	/**
+	 * Creates new instance and performs the reachability analysis on the
+	 * <code>root</code> node. After returning, all reachable nodes in the AST
+	 * will be marked with the <code>reachedKey</code> attribute set to
+	 * {@link #REACHABLE}.
+	 * 
+	 * @param reachedKey
+	 *            the attribute key use
+	 * @param root
+	 *            root node of AST
+	 * @throws SyntaxException
+	 */
+	public PrunerWorker(AttributeKey reachedKey, ASTNode root) {
+		// throws SyntaxException {
 		this.reachedKey = reachedKey;
 		this.root = root;
 		this.ast = root.getOwner();
@@ -70,127 +57,98 @@ public class PrunerWorker {
 	}
 
 	/**
-	 * Marks a node and its descendants reachable.
-	 * 
-	 * If <code>node</code> is already marked reachable, returns immediately.
-	 * Otherwise marks the node as reachable and recurses over the node's
-	 * children. For each child, if the child is an identifier node, the entity
-	 * to which that identifier refers is explored. In addition, if the child is
-	 * anything other than an ordinary declaration (i.e., a function or variable
-	 * declaration) or a typedef declaration, then <code>markReachable</code> is
-	 * invoked recursively on the child.
+	 * Determines whether a declaration occurring in a sequence of block items
+	 * nodes should be kept. In general, such a declaration will not be kept
+	 * unless the thing that it declares is used in something reachable.
+	 * However, there are some exceptions: an input/output variable declaration
+	 * will be kept in all cases, and a variable declaration with an initializer
+	 * with side effects will be kept.
 	 * 
 	 * @param node
+	 *            a declaration node occurring as a child of a sequence of
+	 *            {@link BlockItemNode}.
+	 * @return <code>true</code> iff <code>node</code> should be kept
+	 */
+	private boolean keepSequenceDecl(DeclarationNode node) {
+		if (!(node instanceof VariableDeclarationNode))
+			return false;
+
+		ObjectType type = ((Variable) node.getEntity()).getType();
+
+		if (type instanceof QualifiedObjectType) {
+			QualifiedObjectType qualifiedType = (QualifiedObjectType) type;
+
+			if (qualifiedType.isInputQualified()
+					|| qualifiedType.isOutputQualified())
+				return true;
+		}
+
+		InitializerNode initializer = ((VariableDeclarationNode) node)
+				.getInitializer();
+
+		if (initializer != null && !initializer.isSideEffectFree(true))
+			return true;
+		return false;
+	}
+
+	/**
+	 * Marks given node as reachable (if not already marked). Explores children
+	 * of this node, and ancestors of this node.
+	 * 
+	 * @param node
+	 *            the AST node to mark as reachable and explore
 	 */
 	private void markReachable(ASTNode node) {
 		if (node.getAttribute(reachedKey) == Reachability.REACHABLE)
 			return;
-		else {
-			Iterable<ASTNode> children = node.children();
-			boolean isCompound = node instanceof CompoundStatementNode;
+		node.setAttribute(reachedKey, Reachability.REACHABLE);
 
-			node.setAttribute(reachedKey, Reachability.REACHABLE);
-			reachableNodes.add(node);
-			if (node instanceof FunctionTypeNode) {
-				// special case: don't want to remove unused formal parameters
-				SequenceNode<VariableDeclarationNode> formals = ((FunctionTypeNode) node)
-						.getParameters();
+		if (node instanceof IdentifierNode) {
+			Entity entity = ((IdentifierNode) node).getEntity();
 
-				for (VariableDeclarationNode formal : formals)
-					markReachable(formal);
-			} else if (node instanceof CivlForNode) {
-				// special case: cannot remove any loop variables
-				CivlForNode forNode = (CivlForNode) node;
+			if (entity != null && entity instanceof ProgramEntity)
+				explore((ProgramEntity) entity);
+		}
+		if (node.parent() != null)
+			markReachable(node.parent());
 
-				for (VariableDeclarationNode decl : forNode.getVariables())
-					markReachable(decl);
-			} else if (node instanceof QuantifiedExpressionNode) {
-				QuantifiedExpressionNode quantified = (QuantifiedExpressionNode) node;
+		boolean isCompound = node instanceof CompoundStatementNode
+				|| node.parent() == null;
+		// any sequence of block item node
 
-				for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> varaibleSubList : quantified
-						.boundVariableList()) {
-					for (VariableDeclarationNode variable : varaibleSubList
-							.getLeft())
-						markReachable(variable);
-				}
-			} else if (node instanceof ArrayLambdaNode) {
-				ArrayLambdaNode arrayLambda = (ArrayLambdaNode) node;
-
-				for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> varaibleSubList : arrayLambda
-						.boundVariableList()) {
-					for (VariableDeclarationNode variable : varaibleSubList
-							.getLeft())
-						markReachable(variable);
-				}
-			}
-			if (node instanceof TypeNode) {
-				// special case: if this is a type node under a
-				// typedef declaration node, the whole typedef declaration
-				// is reachable...
-				ASTNode parent = node.parent();
-
-				if (parent instanceof TypedefDeclarationNode) {
-					markReachable(parent);
-				}
-			}
-			for (ASTNode child : children) {
-				if (child != null) {
-					if (child instanceof IdentifierNode) {
-						Entity entity = ((IdentifierNode) child).getEntity();
-
-						if (entity != null && entity instanceof ProgramEntity)
-							// TODO: check this: throw new
-							// ASTException("Identifier not resolved: "
-							// + child.getSource().getSummary(false));
-							explore((ProgramEntity) entity);
-					}
-					if (child instanceof OrdinaryDeclarationNode
-							|| child instanceof TypedefDeclarationNode) {
-						if (child instanceof VariableDeclarationNode) {
-							InitializerNode init = ((VariableDeclarationNode) child)
-									.getInitializer();
-
-							// at some point improve this to keep the init
-							// but not necessarily the variable...
-							if (init != null && !init.isSideEffectFree(true))
-								markReachable(child);
-						}
-						// do nothing: we want to see if we can reach these
-					} else if (isCompound
-							&& child instanceof StructureOrUnionTypeNode) {
-						// do nothing ---- see if this is reachable
-						// TODO: the struct or union decl might contain
-						// side-effects.   Check for this and mark reachable
-						// if side-effects are possible.
-					} else
-						markReachable(child);
-				}
-			}
+		for (ASTNode child : node.children()) {
+			if (child == null)
+				continue;
+			if (isCompound && child instanceof DeclarationNode
+					&& !keepSequenceDecl((DeclarationNode) child))
+				continue;
+			markReachable(child);
 		}
 	}
 
 	/**
-	 * Invokes {@link #markReachable(ASTNode)} on all declarations of the
+	 * Marks reachable all necessary declarations and/or definition of an
 	 * entity.
 	 * 
 	 * @param entity
-	 *            an Entity occurring in the AST
+	 *            any non-<code>null</code> program entity
 	 */
 	private void explore(ProgramEntity entity) {
 		if (entity instanceof TaggedEntity) {
-			// only need the first decl and the defn:
 			ASTNode defn = entity.getDefinition();
-			ASTNode firstDecl = entity.getFirstDeclaration();
 
-			if (firstDecl != null) {
-				if (firstDecl.parent()
-						.parent() instanceof TypedefDeclarationNode)
-					markReachable(firstDecl.parent().parent());
-				else
-					markReachable(firstDecl);
-			}
-			if (defn != null && defn != firstDecl)
+			if (defn != null)
 				markReachable(defn);
+			// need the first decl in case there other uses in inner scopes
+			// before the definition; see C11 6.7.2.3. Without the first decl,
+			// those inner uses will declare new types instead of referring
+			// to the existing one...
+
+			DeclarationNode decl = entity.getFirstDeclaration();
+
+			if (decl != null && decl != defn) {
+				markReachable(decl);
+			}
 		} else {
 			// if a decl is equivalent to any previous decl for this entity
 			// don't mark it reachable. Correctness of below requires that
@@ -211,11 +169,6 @@ public class PrunerWorker {
 						break;
 				}
 			}
-			// special case: if you use at least one enumerator
-			// in the enumeration, you use the whole enumeration...
-			if (entity instanceof Enumerator) {
-				explore(((Enumerator) entity).getType());
-			}
 		}
 	}
 
@@ -224,68 +177,10 @@ public class PrunerWorker {
 	 * 
 	 * @throws SyntaxException
 	 */
-	private void search() throws SyntaxException {
+	private void search() {
 		Scope rootScope = root.getScope();
 		Function main = (Function) rootScope.getOrdinaryEntity(false, "main");
-		Iterable<ASTNode> children = root.children();
 
-		for (Variable variable : rootScope.getVariables()) {
-			Type type = variable.getType();
-
-			if (type instanceof QualifiedObjectType) {
-				QualifiedObjectType qotype = (QualifiedObjectType) type;
-
-				if (qotype.isInputQualified() || qotype.isOutputQualified()) {
-					VariableDeclarationNode decl = variable.getDefinition();
-
-					if (decl == null)
-						throw new ASTException(
-								"No definition for input or output variable: "
-										+ variable);
-					markReachable(decl);
-				}
-			}
-		}
-		for (ASTNode child : children) {
-			BlockItemNode externalDef = (BlockItemNode) child;
-
-			if (externalDef instanceof PragmaNode
-					|| externalDef instanceof StaticAssertionNode
-					|| isAssumeOrAssert(externalDef)
-					|| externalDef instanceof StatementNode)
-				markReachable(externalDef);
-		}
 		explore(main);
 	}
-
-	private boolean isAssumeOrAssert(BlockItemNode item) {
-		if (item == null)
-			return false;
-		if (item.blockItemKind() == BlockItemKind.STATEMENT) {
-			if (item instanceof ExpressionStatementNode) {
-				ExpressionStatementNode exprStmt = (ExpressionStatementNode) item;
-				ExpressionNode expr = exprStmt.getExpression();
-
-				if (expr instanceof FunctionCallNode) {
-					FunctionCallNode funcCall = (FunctionCallNode) expr;
-					ExpressionNode function = funcCall.getFunction();
-
-					if (function instanceof IdentifierExpressionNode) {
-						IdentifierExpressionNode funcID = (IdentifierExpressionNode) function;
-						String funcName = funcID.getIdentifier().name();
-
-						if (funcName.equals("$assert")
-								|| funcName.equals("$assume"))
-							return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	public List<ASTNode> getReachableNodes() {
-		return reachableNodes;
-	}
-
 }

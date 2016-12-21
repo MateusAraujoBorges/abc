@@ -914,7 +914,8 @@ public class TypeAnalyzer {
 
 		if (identifier == null) {
 			throw error(
-					"Anonymous struct or union.  Should not happen since anons have been given names",
+					"Anonymous struct or union.  Should not happen since anons have been given names.\n"
+							+ node.toString(),
 					node);
 		}
 

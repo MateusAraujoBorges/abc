@@ -1,7 +1,5 @@
 package edu.udel.cis.vsl.abc.transform.common;
 
-import java.util.List;
-
 import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
@@ -63,16 +61,9 @@ public class Pruner extends BaseTransformer {
 		UNREACHABLE,
 		/**
 		 * Indicates this node is reachable and must therefore be kept in the
-		 * AST. This is a temporary state. Eventually, any node marked REACHABLE
-		 * will eventually be marked KEEP.
+		 * AST.
 		 */
-		REACHABLE,
-		/**
-		 * Indicates that not only is this node reachable, but all of its
-		 * ancestors have also been marked reachable (in fact, all ancestors
-		 * have been marked reachable and closed).
-		 */
-		KEEP
+		REACHABLE
 	};
 
 	private AttributeKey reachedKey;
@@ -86,7 +77,7 @@ public class Pruner extends BaseTransformer {
 
 			@Override
 			public boolean holds(ASTNode node) {
-				return node.getAttribute(reachedKey) == Reachability.KEEP;
+				return node.getAttribute(reachedKey) == Reachability.REACHABLE;
 			}
 
 		};
@@ -104,23 +95,6 @@ public class Pruner extends BaseTransformer {
 		}
 	}
 
-	/**
-	 * Change status of all reachable nodes and their ancestors to KEEP.
-	 * 
-	 * @param ast
-	 *            the AST which has already been analyzed by the worker for
-	 *            REACHABLE nodes
-	 */
-	private void close(List<ASTNode> reachableNodes) {
-		for (ASTNode node : reachableNodes) {
-			while (node != null
-					&& node.getAttribute(reachedKey) != Reachability.KEEP) {
-				node.setAttribute(reachedKey, Reachability.KEEP);
-				node = node.parent();
-			}
-		}
-	}
-
 	@Override
 	public AST transform(AST ast) throws SyntaxException {
 		SequenceNode<BlockItemNode> root = ast.getRootNode();
@@ -134,21 +108,14 @@ public class Pruner extends BaseTransformer {
 		if (main.getDefinition() == null)
 			throw new ASTException("Main function missing definition");
 		else {
-			PrunerWorker worker;
-			AST newAst;
-			List<ASTNode> reachableNodes;
-
 			ast.release();
 			markAllUnreachable(root);
-			worker = new PrunerWorker(reachedKey, root);
-			reachableNodes = worker.getReachableNodes();
-			close(reachableNodes);
-			// TODO: for variable declarations: if the initializer is reachable
-			// but not the declaration, need to replace that node with an
-			// expression statement node.
+			new PrunerWorker(reachedKey, root);
 			root.keepOnly(reachable);
-			newAst = astFactory.newAST(root, ast.getSourceFiles(),
+
+			AST newAst = astFactory.newAST(root, ast.getSourceFiles(),
 					ast.isWholeProgram());
+
 			return newAst;
 		}
 	}
