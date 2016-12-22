@@ -166,7 +166,7 @@ int          setregid(gid_t, gid_t);
 int          setreuid(uid_t, uid_t);
 pid_t        setsid(void);
 int          setuid(uid_t);
-unsigned int sleep(unsigned int);
+unsigned     sleep(unsigned);
 void         swab(const void *, void *, ssize_t);
 int          symlink(const char *, const char *);
 void         sync(void);
