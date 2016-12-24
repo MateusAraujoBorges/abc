@@ -173,8 +173,7 @@ public class SvcompTest {
 		check(this.file("typeof.c"));
 	}
 
-	// TODO: Why? What's the bug?
-	@Test(expected = SyntaxException.class)
+	@Test
 	public void externVar() throws ABCException {
 		check(this.file("externVar.c"));
 	}

@@ -49,4 +49,12 @@ public interface Field extends Entity {
 	 */
 	Value getBitWidth();
 
+	/**
+	 * Determines whether this is an anonymous field, i.e., one in which the
+	 * identifier node child of the definition node is <code>null</code>.
+	 * 
+	 * @return <code>true</code> iff this field is anonymous
+	 */
+	boolean isAnonymous();
+
 }

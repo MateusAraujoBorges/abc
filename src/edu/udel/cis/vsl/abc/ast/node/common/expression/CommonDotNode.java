@@ -5,9 +5,12 @@ import java.io.PrintStream;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.DotNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.Field;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonDotNode extends CommonExpressionNode implements DotNode {
+
+	private Field[] navigationSequence = null;
 
 	public CommonDotNode(Source source, ExpressionNode structure,
 			IdentifierNode fieldName) {
@@ -54,9 +57,19 @@ public class CommonDotNode extends CommonExpressionNode implements DotNode {
 	public ExpressionKind expressionKind() {
 		return ExpressionKind.DOT;
 	}
-	
+
 	@Override
 	public boolean isSideEffectFree(boolean errorsAreSideEffects) {
 		return getStructure().isSideEffectFree(errorsAreSideEffects);
+	}
+
+	@Override
+	public Field[] getNavigationSequence() {
+		return navigationSequence;
+	}
+
+	@Override
+	public void setNavigationSequence(Field[] sequence) {
+		this.navigationSequence = sequence;
 	}
 }

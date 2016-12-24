@@ -85,21 +85,15 @@ public class Pruner extends BaseTransformer {
 	 */
 	public final static String SHORT_DESCRIPTION = "removes unreachable objects from the AST";
 
-	// public enum Reachability {
-	// /**
-	// * Indicates this node is unreachable and can therefore be pruned from
-	// * the AST.
-	// */
-	// UNREACHABLE,
-	// /**
-	// * Indicates this node is reachable and must therefore be kept in the
-	// * AST.
-	// */
-	// REACHABLE
-	// };
-
+	/**
+	 * The attribute key used to make a node as reachable.
+	 */
 	private AttributeKey reachedKey;
 
+	/**
+	 * The predicate on {@link ASTNode} which returns true iff the node's
+	 * reachable attribute key has value <code>true</code>.
+	 */
 	private NodePredicate reachable;
 
 	public Pruner(ASTFactory astFactory) {
@@ -115,6 +109,14 @@ public class Pruner extends BaseTransformer {
 		};
 	}
 
+	/**
+	 * Marks every node reachable from <code>node</code> (through the child
+	 * relation) as unreachable, i.e., sets the value associated to the
+	 * {@link #reachedKey} to <code>false</code>.
+	 * 
+	 * @param node
+	 *            an AST node (non-<code>null</code>)
+	 */
 	private void markAllUnreachable(ASTNode node) {
 		if (node == null)
 			return;

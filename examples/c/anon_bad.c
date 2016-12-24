@@ -11,5 +11,5 @@ struct v {
 int main() {
     v1.i = 2; // valid
     v1.w.k = 5; // valid
-//    v1.k = 3; // invalid
+    v1.k = 3; // invalid
 }

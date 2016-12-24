@@ -3,20 +3,28 @@ package edu.udel.cis.vsl.abc.ast.type.IF;
 import edu.udel.cis.vsl.abc.ast.entity.IF.TaggedEntity;
 
 /**
+ * <p>
  * A structure or union type. Such a type is specified by (0) a key, (1) a bit
  * which says whether this is a structure or a union, (2) a tag (which is a
  * string which names the type), and (3) a sequence of Fields, which are the
  * members of the type. The type may be incomplete (the fields have not yet been
  * specified) or complete (the fields have been specified).
+ * </p>
  * 
+ * <p>
  * Two instances are considered equal if they have equal keys, isStruct bits,
  * and tags.
+ * </p>
+ * 
+ * 
+ * TODO: Idea for dealing better with anonymous members. Introduce new
+ * methods getMember(String), getNumMembers(), getMember(int). Check that no two
+ * members have the same name --- even if they are deep.
  * 
  * @author siegel
- * 
  */
-public interface StructureOrUnionType extends UnqualifiedObjectType,
-		TaggedEntity {
+public interface StructureOrUnionType
+		extends UnqualifiedObjectType, TaggedEntity {
 
 	/**
 	 * Returns the key associated to this instance. The key is used in the
@@ -97,4 +105,20 @@ public interface StructureOrUnionType extends UnqualifiedObjectType,
 
 	@Override
 	StructureOrUnionType getType();
+
+	/**
+	 * Finds the field with the given name by looking not only in the immediate
+	 * scope but also recursively through anonymous structure and union members.
+	 * According to C11, these deep fields are also members of this structure or
+	 * union.
+	 * 
+	 * @param fieldName
+	 *            the name of the field to search for
+	 * @return the sequence of fields that navigate to the deep field named
+	 *         <code>fieldName</code>, or <code>null</code> if no such such
+	 *         field exists. The first elements of this sequence will be an
+	 *         immediate field. The last element will be the Field named
+	 *         <code>fieldName</code>.
+	 */
+	Field[] findDeepField(String fieldName);
 }

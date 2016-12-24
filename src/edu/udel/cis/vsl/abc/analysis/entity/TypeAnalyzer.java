@@ -602,9 +602,7 @@ public class TypeAnalyzer {
 						.processExpression(bitWidthExpression);
 				bitWidth = nodeFactory.getConstantValue(bitWidthExpression);
 			}
-			field = typeFactory.newField(decl, fieldType, bitWidth
-			// ,structureOrUnion
-			);
+			field = typeFactory.newField(decl, fieldType, bitWidth);
 			decl.setEntity(field);
 			if (decl.getIdentifier() != null)
 				decl.getIdentifier().setEntity(field);

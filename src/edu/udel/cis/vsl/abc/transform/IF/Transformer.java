@@ -19,8 +19,8 @@ import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
  * </p>
  * 
  * <p>
- * Every Transformer should be <strong>re-useable</strong>, i.e., it should be
- * possible to use a single transfomer object to transform multiple ASTs, as in
+ * Every Transformer should be <strong>reusable</strong>, i.e., it should be
+ * possible to use a single transformer object to transform multiple ASTs, as in
  * 
  * <pre>
  * newAST1 = transformer.transform(ast1);

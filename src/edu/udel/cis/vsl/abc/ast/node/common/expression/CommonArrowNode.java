@@ -5,9 +5,12 @@ import java.io.PrintStream;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ArrowNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.Field;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonArrowNode extends CommonExpressionNode implements ArrowNode {
+
+	private Field[] navigationSequence = null;
 
 	public CommonArrowNode(Source source, ExpressionNode structurePointer,
 			IdentifierNode fieldName) {
@@ -63,6 +66,16 @@ public class CommonArrowNode extends CommonExpressionNode implements ArrowNode {
 	public boolean isSideEffectFree(boolean errorsAreSideEffects) {
 		return !errorsAreSideEffects
 				&& getStructurePointer().isSideEffectFree(errorsAreSideEffects);
+	}
+
+	@Override
+	public Field[] getNavigationSequence() {
+		return navigationSequence;
+	}
+
+	@Override
+	public void setNavigationSequence(Field[] sequence) {
+		this.navigationSequence = sequence;
 	}
 
 }

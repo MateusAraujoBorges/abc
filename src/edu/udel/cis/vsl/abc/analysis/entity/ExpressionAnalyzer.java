@@ -617,7 +617,6 @@ public class ExpressionAnalyzer {
 		StructureOrUnionType structureOrUnionType;
 		boolean atomicQ = false, restrictQ = false, constQ = false,
 				volatileQ = false;
-		Field field;
 		Type tempType, type;
 		ObjectType fieldType;
 
@@ -648,14 +647,21 @@ public class ExpressionAnalyzer {
 		if (!structureOrUnionType.isComplete())
 			throw error("Structure or union type "
 					+ structureOrUnionType.getTag() + " is incomplete", node);
-		field = structureOrUnionType.getField(fieldName);
-		if (field == null)
+
+		Field[] navigationSequence = structureOrUnionType
+				.findDeepField(fieldName);
+
+		if (navigationSequence == null)
 			throw error(
 					"Structure or union type " + structureOrUnionType.getTag()
 							+ " contains no field named " + fieldName,
 					identifier);
-		identifier.setEntity(field);
-		fieldType = field.getType();
+		node.setNavigationSequence(navigationSequence);
+
+		Field lastField = navigationSequence[navigationSequence.length - 1];
+
+		identifier.setEntity(lastField);
+		fieldType = lastField.getType();
 		type = typeFactory.qualify(fieldType, atomicQ, constQ, volatileQ,
 				restrictQ, false, false);
 		node.setInitialType(type);
@@ -730,23 +736,34 @@ public class ExpressionAnalyzer {
 	/**
 	 * C11 Sec. 6.5.2.3:
 	 * 
+	 * <p>
 	 * "The first operand of the . operator shall have an atomic, qualified, or
 	 * unqualified structure or union type, and the second operand shall name a
 	 * member of that type."
+	 * </p>
 	 * 
+	 * <p>
 	 * "A postfix expression followed by the . operator and an identifier
 	 * designates a member of a structure or union object. The value is that of
 	 * the named member, and is an lvalue if the first expression is an lvalue.
 	 * If the first expression has qualified type, the result has the
 	 * so-qualified version of the type of the designated member."
+	 * </p>
 	 * 
-	 * TODO: I don't think this behaves correctly with anonymous structs/unions.
-	 * These are unnamed fields of struct/unions which are structs/unions. The
-	 * Standard says they are considered to be fields of the containing
-	 * struct/union. See C11 6.7.2.1 (19).
+	 * <p>
+	 * This behaves correctly with anonymous structs/unions. These are unnamed
+	 * fields of struct/unions which are structs/unions. The Standard says they
+	 * are considered to be fields of the containing struct/union. See C11
+	 * 6.7.2.1 (19).
+	 * </p>
 	 * 
 	 * @param node
+	 *            an AST node representing a "dot" expression
 	 * @throws SyntaxException
+	 *             if left operand is not a structure or union, or no field of
+	 *             the name corresponding to the right operand exists in that
+	 *             structure or union, or if there is any static error in either
+	 *             operand
 	 */
 	private void processDot(DotNode node) throws SyntaxException {
 		ExpressionNode expression = node.getStructure();
@@ -757,7 +774,6 @@ public class ExpressionAnalyzer {
 		StructureOrUnionType structureOrUnionType;
 		ObjectType fieldType;
 		Type tempType, type;
-		Field field;
 
 		processExpression(expression);
 		tempType = expression.getType();
@@ -782,14 +798,21 @@ public class ExpressionAnalyzer {
 			throw error("Structure or union type "
 					+ structureOrUnionType.getTag() + " is incomplete",
 					expression);
-		field = structureOrUnionType.getField(fieldName);
-		if (field == null)
+
+		Field[] navigationSequence = structureOrUnionType
+				.findDeepField(fieldName);
+
+		if (navigationSequence == null)
 			throw error(
 					"Structure or union type " + structureOrUnionType.getTag()
 							+ " contains no field named " + fieldName,
 					identifier);
-		identifier.setEntity(field);
-		fieldType = field.getType();
+		node.setNavigationSequence(navigationSequence);
+
+		Field lastField = navigationSequence[navigationSequence.length - 1];
+
+		identifier.setEntity(lastField);
+		fieldType = lastField.getType();
 		type = typeFactory.qualify(fieldType, atomicQ, constQ, volatileQ,
 				restrictQ, false, false);
 		node.setInitialType(type);

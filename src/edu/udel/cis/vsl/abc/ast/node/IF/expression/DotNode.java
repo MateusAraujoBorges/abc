@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.expression;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.Field;
 
 /**
  * A C expression in which the operator is the <code>.</code> (dot) operator,
@@ -43,6 +44,35 @@ public interface DotNode extends ExpressionNode {
 	 *            the right operand
 	 */
 	void setFieldName(IdentifierNode field);
+
+	/**
+	 * Returns the sequence of nested fields navigates from an outer structure
+	 * or union member to an inner member through anonymous structure or union
+	 * members.  Example:
+	 * 
+	 * <pre>
+	 * struct S {
+	 *   union {       // call this field "f0"
+	 *     struct {    // call this field "f1"
+	 *       union {   // call this field "f2"
+	 *         int x;
+	 *       };
+	 *     };
+	 *   };
+	 * } u;
+	 * </pre>
+	 * 
+	 * For the dot expression <code>u.x</code>, the navigation sequence is
+	 * the sequence of Field objects {f0, f1, f2, x}.
+	 * If those anonymous fields were given the
+	 * names f0, f1, and f2, then the dot expression would
+	 * be transformed to <code>u.f0.f1.f2.x</code>.
+	 * 
+	 * @return the navigation sequence
+	 */
+	Field[] getNavigationSequence();
+
+	void setNavigationSequence(Field[] sequence);
 
 	@Override
 	DotNode copy();

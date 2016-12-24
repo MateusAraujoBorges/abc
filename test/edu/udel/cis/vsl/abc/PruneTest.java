@@ -16,12 +16,20 @@ import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.FrontEnd;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.program.IF.Program;
+import edu.udel.cis.vsl.abc.transform.common.Pruner;
 
+/**
+ * Tests the {@link Pruner}. Each test consists of a pair of programs. The first
+ * is the input to the pruner, the second is the expected result: the program
+ * that should result from pruning the first program.
+ * 
+ * @author siegel
+ */
 public class PruneTest {
 
 	public final static PrintStream out = System.out;
 
-	public final static boolean debug = true;
+	public final static boolean debug = false;
 
 	private File root = new File("examples/prune");
 

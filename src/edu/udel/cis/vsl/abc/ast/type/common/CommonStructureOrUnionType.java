@@ -15,8 +15,8 @@ import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 
-public class CommonStructureOrUnionType extends CommonObjectType implements
-		StructureOrUnionType {
+public class CommonStructureOrUnionType extends CommonObjectType
+		implements StructureOrUnionType {
 
 	private final static int classCode = CommonStructureOrUnionType.class
 			.hashCode();
@@ -40,7 +40,8 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 	 */
 	private Map<String, Field> fieldMap = new LinkedHashMap<String, Field>();
 
-	public CommonStructureOrUnionType(Object key, String tag, boolean isStruct) {
+	public CommonStructureOrUnionType(Object key, String tag,
+			boolean isStruct) {
 		super(TypeKind.STRUCTURE_OR_UNION);
 		assert key != null;
 		this.key = key;
@@ -158,8 +159,8 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 			CommonStructureOrUnionType that = (CommonStructureOrUnionType) type;
 
 			if (this.tag != null) {
-				if (!this.getCompatibilityString().equals(
-						that.getCompatibilityString()))
+				if (!this.getCompatibilityString()
+						.equals(that.getCompatibilityString()))
 					return false;
 			} else {
 				if (that.tag != null)
@@ -219,8 +220,8 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 			CommonStructureOrUnionType that = (CommonStructureOrUnionType) other;
 
 			if (this.tag != null) {
-				if (!this.getCompatibilityString().equals(
-						that.getCompatibilityString()))
+				if (!this.getCompatibilityString()
+						.equals(that.getCompatibilityString()))
 					return false;
 			} else {
 				if (that.tag != null)
@@ -281,6 +282,32 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 	}
 
 	@Override
+	public Field[] findDeepField(String fieldName) {
+		Field field = getField(fieldName);
+
+		if (field != null)
+			return new Field[] { field };
+		for (Field f : fields) {
+			if (f.isAnonymous()
+					&& f.getType().kind() == TypeKind.STRUCTURE_OR_UNION) {
+				Field[] sub_result = ((StructureOrUnionType) f.getType())
+						.findDeepField(fieldName);
+
+				if (sub_result != null) {
+					int n = sub_result.length;
+					Field[] result = new Field[n + 1];
+
+					result[0] = f;
+					for (int i = 0; i < n; i++)
+						result[i + 1] = sub_result[i];
+					return result;
+				}
+			}
+		}
+		return null;
+	}
+
+	@Override
 	public Field getField(String fieldName) {
 		return fieldMap.get(fieldName);
 	}
@@ -307,7 +334,6 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 				}
 			}
 		}
-
 	}
 
 	@Override
@@ -414,8 +440,9 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 			CommonStructureOrUnionType that = (CommonStructureOrUnionType) obj;
 
 			return isStruct == that.isStruct
-					&& ((tag == null && that.tag == null) || tag
-							.equals(that.tag)) && key.equals(that.key);
+					&& ((tag == null && that.tag == null)
+							|| tag.equals(that.tag))
+					&& key.equals(that.key);
 		}
 		return false;
 	}
@@ -434,8 +461,8 @@ public class CommonStructureOrUnionType extends CommonObjectType implements
 	@Override
 	protected boolean similar(Type other, boolean equivalent,
 			Map<TypeKey, Type> seen) {
-		return equivalent ? equivalentTo(other, seen) : compatibleWith(other,
-				seen);
+		return equivalent ? equivalentTo(other, seen)
+				: compatibleWith(other, seen);
 	}
 
 	@Override

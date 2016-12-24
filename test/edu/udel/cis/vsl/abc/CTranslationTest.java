@@ -35,7 +35,7 @@ public class CTranslationTest {
 	private static File root = new File("examples");
 
 	/**
-	 * The transformationd which will be applied to each example.
+	 * The transformations which will be applied to each example.
 	 */
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
@@ -208,6 +208,16 @@ public class CTranslationTest {
 	@Test
 	public void funcDecls() throws ABCException {
 		check("c/funcs");
+	}
+
+	@Test
+	public void anon() throws ABCException {
+		check("c/anon");
+	}
+
+	@Test(expected = SyntaxException.class)
+	public void anon_bad() throws ABCException {
+		check("c/anon_bad");
 	}
 
 	@Test(expected = SyntaxException.class)

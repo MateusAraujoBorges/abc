@@ -15,7 +15,8 @@ public class CommonField extends CommonEntity implements Field {
 
 	public CommonField(FieldDeclarationNode declaration, ObjectType type,
 			Value bitWidth) {
-		super(EntityKind.FIELD, declaration.getName(), ProgramEntity.LinkageKind.NONE);
+		super(EntityKind.FIELD, declaration.getName(),
+				ProgramEntity.LinkageKind.NONE);
 		addDeclaration(declaration);
 		setDefinition(declaration);
 		this.bitWidth = bitWidth;
@@ -43,4 +44,8 @@ public class CommonField extends CommonEntity implements Field {
 		return memberIndex;
 	}
 
+	@Override
+	public boolean isAnonymous() {
+		return getDefinition().getIdentifier() == null;
+	}
 }
