@@ -144,5 +144,9 @@ $system $state_f _Bool $is_derefable(void*ptr);
 /*@ depends_on \nothing; */
 $system $state_f $state $get_state();
 
-//$system int $access_ok(const void *ptr, size_t count);
+// the types will be updated to $integer later
+$system int $remainder(int x, int y);
+
+$system int $quotient(int x, int y);
+
 #endif
