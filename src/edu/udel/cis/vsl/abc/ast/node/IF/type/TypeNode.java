@@ -111,10 +111,4 @@ public interface TypeNode extends SizeableNode {
 
 	void setVolatileQualified(boolean value);
 
-	/**
-	 * 
-	 * @return The kind of this type node.
-	 */
-	TypeNodeKind typeNodeKind();
-
 }

@@ -175,16 +175,11 @@ public abstract class CommonTypeNode extends CommonASTNode implements TypeNode {
 	}
 
 	@Override
-	public TypeNodeKind typeNodeKind() {
-		return typeNodeKind;
-	}
-
-	@Override
 	protected DifferenceObject diffWork(ASTNode that) {
 		if (that instanceof TypeNode) {
 			TypeNode thatType = (TypeNode) that;
 
-			if (this.typeNodeKind == thatType.typeNodeKind()
+			if (this.typeNodeKind == thatType.kind()
 					&& this.atomicQualified == thatType.isAtomicQualified()
 					&& this.constQualified == thatType.isConstQualified()
 					&& this.inputQualified == thatType.isInputQualified()

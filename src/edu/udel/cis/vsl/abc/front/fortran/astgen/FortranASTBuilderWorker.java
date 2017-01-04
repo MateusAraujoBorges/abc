@@ -469,7 +469,7 @@ public class FortranASTBuilderWorker {
 					TypeNode tempNode = argType;
 
 					// Eliminate sub-scripts of the actual arg with array type
-					while (tempNode.typeNodeKind() == TypeNodeKind.ARRAY) {
+					while (tempNode.kind() == TypeNodeKind.ARRAY) {
 						tempNode.removeChild(1);
 						tempNode = (TypeNode) tempNode.child(0);
 					}
@@ -1093,7 +1093,7 @@ public class FortranASTBuilderWorker {
 			TypeNode tempNode = argType;
 
 			// Eliminate sub-scripts of the actual arg with array type
-			while (tempNode.typeNodeKind() == TypeNodeKind.ARRAY) {
+			while (tempNode.kind() == TypeNodeKind.ARRAY) {
 				tempNode.removeChild(1);
 				tempNode = (TypeNode) tempNode.child(0);
 			}
