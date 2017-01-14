@@ -1,7 +1,6 @@
 package edu.udel.cis.vsl.abc.ast.node.common.expression;
 
 import java.io.PrintStream;
-import java.util.Arrays;
 
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject.DiffKind;
@@ -38,11 +37,16 @@ public class CommonQuantifiedExpressionNode extends CommonExpressionNode
 	 *            Boolean-valued expression
 	 * @param expression
 	 *            the expression that is quantified
+	 * @param intervalSequence
+	 *            optional sequence of intervals used to specify domain of
+	 *            uniform convergence for a $uniform expression; may be
+	 *            <code>null</code>
 	 */
 	public CommonQuantifiedExpressionNode(Source source, Quantifier quantifier,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList,
-			ExpressionNode restriction, ExpressionNode expression) {
-		super(source, Arrays.asList(variableList, restriction, expression));
+			ExpressionNode restriction, ExpressionNode expression,
+			SequenceNode<PairNode<ExpressionNode, ExpressionNode>> intervalSequence) {
+		super(source, variableList, restriction, expression, intervalSequence);
 		this.quantifier = quantifier;
 	}
 
@@ -55,7 +59,7 @@ public class CommonQuantifiedExpressionNode extends CommonExpressionNode
 	public ExpressionNode copy() {
 		return new CommonQuantifiedExpressionNode(this.getSource(), quantifier,
 				duplicate(boundVariableList()), duplicate(restriction()),
-				duplicate(expression()));
+				duplicate(expression()), duplicate(intervalSequence()));
 	}
 
 	@Override
@@ -125,5 +129,12 @@ public class CommonQuantifiedExpressionNode extends CommonExpressionNode
 						"different quantifier");
 		}
 		return new DifferenceObject(this, that);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public SequenceNode<PairNode<ExpressionNode, ExpressionNode>> intervalSequence() {
+		return (SequenceNode<PairNode<ExpressionNode, ExpressionNode>>) this
+				.child(3);
 	}
 }

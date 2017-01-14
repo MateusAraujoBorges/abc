@@ -957,7 +957,7 @@ public class AcslContractWorker {
 		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
 				nodeFactory.newSequenceNode(source,
 						"bound variable declaration list", boundVariableList),
-				restrict, pred);
+				restrict, pred, null);
 	}
 
 	/**

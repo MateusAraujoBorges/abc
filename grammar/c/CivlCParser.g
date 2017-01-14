@@ -67,7 +67,9 @@ tokens
 	INITIALIZER_LIST;         // initializer list in compound initializer
 	INIT_DECLARATOR;          // initializer-declaration pair
 	INIT_DECLARATOR_LIST;     // list of initializer-declarator pairs
-	LIB_NAME;
+	INTERVAL;                 // a closed real interval [a,b] (used by $uniform)
+	INTERVAL_SEQ;             // a sequence of INTERVAL
+	LIB_NAME;                 // name of a library
 	OPERATOR;                 // symbol indicating an operator
 	PARAMETER_DECLARATION;    // parameter declaration in function decl
 	PARAMETER_LIST;           // list of parameter decls in function decl
@@ -81,11 +83,11 @@ tokens
 	PRE_DECREMENT;            // --expr
 	PRE_INCREMENT;            // ++expr
 	PROGRAM;                  // whole program (linking translation units)
-	QUANTIFIED;		  // quantified expression
+	QUANTIFIED;               // quantified expression
 	SCALAR_INITIALIZER;       // initializer for scalar variable
 	SPECIFIER_QUALIFIER_LIST; // list of type specifiers and qualifiers
-    	STATEMENT;                // a statement
-    	STATEMENT_EXPRESSION;     // a statement expression (GNU C extension)
+	STATEMENT;                // a statement
+	STATEMENT_EXPRESSION;     // a statement expression (GNU C extension)
 	STRUCT_DECLARATION;       // a field declaration
 	STRUCT_DECLARATION_LIST;  // list of field declarations
 	STRUCT_DECLARATOR;        // a struct/union declarator
@@ -94,8 +96,8 @@ tokens
 	TRANSLATION_UNIT;         // final result of translation
 	TYPE;                     // symbol indicating "type"
 	TYPEDEF_NAME;             // use of typedef name
-   	 TYPEOF_EXPRESSION;
-    	TYPEOF_TYPE;
+   	TYPEOF_EXPRESSION;
+	TYPEOF_TYPE;
 	TYPE_NAME;                // type specification without identifier
 	TYPE_QUALIFIER_LIST;      // list of type qualifiers
 }
@@ -513,9 +515,8 @@ conditionalExpression
     	)
 	;
 
-/* A CIVL-C quantified expression using $exists or $forall.
- */
-quantifiedExpression
+
+quantifiedExpressionOLD
 	: 
 	 ((quantifier LPAREN boundVariableDeclarationList BITOR) =>
      	  quantifier LPAREN boundVariableDeclarationList BITOR 
@@ -524,7 +525,31 @@ quantifiedExpression
    	| quantifier LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression 
 	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond2)
 	;
-	
+     
+/* A CIVL-C quantified expression using $exists, $forall, or $uniform. */   
+quantifiedExpression
+	: quantifier intervalSeq LPAREN boundVariableDeclarationList
+     	  ( BITOR restrict=conditionalExpression RPAREN body1=assignmentExpression
+	    -> ^(QUANTIFIED quantifier boundVariableDeclarationList
+                 $body1 $restrict intervalSeq)
+          | RPAREN body2=assignmentExpression 
+	    -> ^(QUANTIFIED quantifier boundVariableDeclarationList
+                 $body2 ABSENT intervalSeq)
+          )
+	;
+
+/* A closed interval of real numbers [a,b].  Used in a $uniform expression. */
+interval
+        : LSQUARE conditionalExpression COMMA conditionalExpression RSQUARE
+          -> ^(INTERVAL conditionalExpression conditionalExpression)
+        ;
+
+/* A (possibly empty) sequence of interval. */
+intervalSeq
+        : -> ABSENT
+        | i+= interval i+= interval* -> ^(INTERVAL_SEQ $i+)
+        ;
+
 /* A CIVL-C lambda expression */
 arrayLambdaExpression
 	: 

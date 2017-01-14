@@ -173,6 +173,11 @@ public class CIVLTranslationTest {
 	}
 
 	@Test
+	public void uniform() throws ABCException {
+		check("uniform");
+	}
+
+	@Test
 	public void arrayLambda() throws ABCException {
 		check("lambda");
 	}

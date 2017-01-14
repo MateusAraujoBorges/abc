@@ -1140,6 +1140,13 @@ public class ExpressionAnalyzer {
 
 	private void processQuantifiedExpression(QuantifiedExpressionNode node)
 			throws SyntaxException {
+		if (node.intervalSequence() != null) {
+			for (PairNode<ExpressionNode, ExpressionNode> interval : node
+					.intervalSequence()) {
+				processExpression(interval.getLeft());
+				processExpression(interval.getRight());
+			}
+		}
 		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> variableSubList : node
 				.boundVariableList()) {
 			for (VariableDeclarationNode variable : variableSubList.getLeft())

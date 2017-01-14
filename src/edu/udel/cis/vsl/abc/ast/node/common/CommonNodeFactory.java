@@ -1193,9 +1193,11 @@ public class CommonNodeFactory implements NodeFactory {
 	public QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
 			Quantifier quantifier,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
-			ExpressionNode restriction, ExpressionNode expression) {
+			ExpressionNode restriction, ExpressionNode expression,
+			SequenceNode<PairNode<ExpressionNode, ExpressionNode>> intervalSequence) {
 		return new CommonQuantifiedExpressionNode(source, quantifier,
-				boundVariableDeclarationList, restriction, expression);
+				boundVariableDeclarationList, restriction, expression,
+				intervalSequence);
 	}
 
 	@Override

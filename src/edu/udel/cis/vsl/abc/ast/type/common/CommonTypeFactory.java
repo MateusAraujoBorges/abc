@@ -78,8 +78,7 @@ public class CommonTypeFactory implements TypeFactory {
 
 	private ObjectType rangeType = null;
 
-	private UnsignedIntegerType size_t = null, char16_t = null,
-			char32_t = null;
+	private UnsignedIntegerType size_t = null, char16_t = null, char32_t = null;
 
 	private SignedIntegerType ptrdiff_t = null;
 
@@ -164,7 +163,8 @@ public class CommonTypeFactory implements TypeFactory {
 			result = new CommonFloatingType(FloatKind.REAL, false);
 			break;
 		case BOOL:
-			result = new CommonStandardUnsignedIntegerType(UnsignedIntKind.BOOL);
+			result = new CommonStandardUnsignedIntegerType(
+					UnsignedIntKind.BOOL);
 			break;
 		case FLOAT_COMPLEX:
 			result = new CommonFloatingType(FloatKind.FLOAT, true);
@@ -183,14 +183,15 @@ public class CommonTypeFactory implements TypeFactory {
 
 	@Override
 	public StandardSignedIntegerType signedIntegerType(SignedIntKind kind) {
-		return (StandardSignedIntegerType) canonicalize(new CommonStandardSignedIntegerType(
-				kind));
+		return (StandardSignedIntegerType) canonicalize(
+				new CommonStandardSignedIntegerType(kind));
 	}
 
 	@Override
-	public StandardUnsignedIntegerType unsignedIntegerType(UnsignedIntKind kind) {
-		return (StandardUnsignedIntegerType) canonicalize(new CommonStandardUnsignedIntegerType(
-				kind));
+	public StandardUnsignedIntegerType unsignedIntegerType(
+			UnsignedIntKind kind) {
+		return (StandardUnsignedIntegerType) canonicalize(
+				new CommonStandardUnsignedIntegerType(kind));
 	}
 
 	@Override
@@ -203,13 +204,16 @@ public class CommonTypeFactory implements TypeFactory {
 				return (FloatingType) basicType(BasicTypeKind.DOUBLE);
 			case FLOAT:
 				return (FloatingType) basicType(BasicTypeKind.FLOAT);
+			case REAL:
+				return (FloatingType) basicType(BasicTypeKind.REAL);
 			default:
 				throw new RuntimeException("unreachable");
 			}
 		} else {
 			switch (kind) {
 			case LONG_DOUBLE:
-				return (FloatingType) basicType(BasicTypeKind.LONG_DOUBLE_COMPLEX);
+				return (FloatingType) basicType(
+						BasicTypeKind.LONG_DOUBLE_COMPLEX);
 			case DOUBLE:
 				return (FloatingType) basicType(BasicTypeKind.DOUBLE_COMPLEX);
 			case FLOAT:
@@ -233,7 +237,8 @@ public class CommonTypeFactory implements TypeFactory {
 
 	@Override
 	public PointerType pointerType(Type referencedType) {
-		return (PointerType) canonicalize(new CommonPointerType(referencedType));
+		return (PointerType) canonicalize(
+				new CommonPointerType(referencedType));
 	}
 
 	@Override
@@ -243,25 +248,28 @@ public class CommonTypeFactory implements TypeFactory {
 
 	@Override
 	public ArrayType incompleteArrayType(ObjectType elementType) {
-		return (ArrayType) canonicalize(new CommonArrayType(elementType, false));
+		return (ArrayType) canonicalize(
+				new CommonArrayType(elementType, false));
 	}
 
 	@Override
-	public ArrayType unspecifiedVariableLengthArrayType(ObjectType elementType) {
+	public ArrayType unspecifiedVariableLengthArrayType(
+			ObjectType elementType) {
 		return (ArrayType) canonicalize(new CommonArrayType(elementType, true));
 	}
 
 	@Override
 	public ArrayType variableLengthArrayType(ObjectType elementType,
 			ExpressionNode variableSize) {
-		return (ArrayType) canonicalize(new CommonArrayType(elementType,
-				variableSize));
+		return (ArrayType) canonicalize(
+				new CommonArrayType(elementType, variableSize));
 	}
 
 	@Override
-	public ArrayType arrayType(ObjectType elementType, IntegerValue constantSize) {
-		return (ArrayType) canonicalize(new CommonArrayType(elementType,
-				constantSize));
+	public ArrayType arrayType(ObjectType elementType,
+			IntegerValue constantSize) {
+		return (ArrayType) canonicalize(
+				new CommonArrayType(elementType, constantSize));
 	}
 
 	@Override
@@ -398,8 +406,8 @@ public class CommonTypeFactory implements TypeFactory {
 		int numParameters = type1.getNumParameters();
 
 		for (int i = 0; i < numParameters; i++) {
-			ObjectType p1 = type1.getParameterType(i), p2 = type2
-					.getParameterType(i);
+			ObjectType p1 = type1.getParameterType(i),
+					p2 = type2.getParameterType(i);
 
 			// C11 6.7.6.3(15):
 			// "In the determination of type compatibility and of a
@@ -484,12 +492,12 @@ public class CommonTypeFactory implements TypeFactory {
 			QualifiedObjectType qualifiedType = (QualifiedObjectType) startType;
 			UnqualifiedObjectType unqualifiedType = qualifiedType.getBaseType();
 
-			return qualifiedType(unqualifiedType, constQualified
-					|| qualifiedType.isConstQualified(), volatileQualified
-					|| qualifiedType.isVolatileQualified(), restrictQualified
-					|| qualifiedType.isRestrictQualified(), inputQualified
-					|| qualifiedType.isInputQualified(), outputQualified
-					|| qualifiedType.isOutputQualified());
+			return qualifiedType(unqualifiedType,
+					constQualified || qualifiedType.isConstQualified(),
+					volatileQualified || qualifiedType.isVolatileQualified(),
+					restrictQualified || qualifiedType.isRestrictQualified(),
+					inputQualified || qualifiedType.isInputQualified(),
+					outputQualified || qualifiedType.isOutputQualified());
 		}
 		return qualifiedType((UnqualifiedObjectType) startType, constQualified,
 				volatileQualified, restrictQualified, inputQualified,
@@ -601,7 +609,8 @@ public class CommonTypeFactory implements TypeFactory {
 			case UNSIGNED_CHAR:
 			case UNSIGNED_SHORT:
 				// either int or unsigned int, depending on widths
-				return (IntegerType) canonicalize(new IntegerPromotionType(type));
+				return (IntegerType) canonicalize(
+						new IntegerPromotionType(type));
 			case UNSIGNED:
 			case UNSIGNED_LONG:
 			case UNSIGNED_LONG_LONG:
@@ -617,9 +626,6 @@ public class CommonTypeFactory implements TypeFactory {
 	@Override
 	public ArithmeticType usualArithmeticConversion(ArithmeticType type1,
 			ArithmeticType type2) {
-		// if (type1.equals(type2))
-		// return type1;
-		// else {
 		ArithmeticType result = floatingArithmeticConversion(type1, type2);
 
 		if (result != null)
@@ -635,13 +641,13 @@ public class CommonTypeFactory implements TypeFactory {
 		if (intType1.equals(intType2))
 			return intType1;
 		return integerArithmeticConversion(intType1, intType2);
-		// }
 	}
 
 	/**
 	 * Returns the usual arithmetic conversion type in the case where at least
 	 * one of the two types is a floating type. If neither is a floating type,
-	 * returns null.
+	 * returns null. Note that the CIVL-C type "$real" is considered a floating
+	 * type for these purposes.
 	 * 
 	 * @param type1
 	 *            an arithmetic type
@@ -670,7 +676,11 @@ public class CommonTypeFactory implements TypeFactory {
 				float2 = (FloatingType) type2;
 				kind2 = float2.getFloatKind();
 			}
-			if (kind1 == FloatKind.LONG_DOUBLE)
+			if (kind1 == FloatKind.REAL)
+				kind = kind1;
+			else if (kind2 == FloatKind.REAL)
+				kind = kind2;
+			else if (kind1 == FloatKind.LONG_DOUBLE)
 				kind = kind1;
 			else if (kind2 == FloatKind.LONG_DOUBLE)
 				kind = kind2;
@@ -723,8 +733,8 @@ public class CommonTypeFactory implements TypeFactory {
 					return unsignedType;
 				}
 			}
-			return (ArithmeticConversionType) canonicalize(new ArithmeticConversionType(
-					type1, type2));
+			return (ArithmeticConversionType) canonicalize(
+					new ArithmeticConversionType(type1, type2));
 		}
 	}
 
@@ -759,9 +769,10 @@ public class CommonTypeFactory implements TypeFactory {
 							.getMinimumMaxValue()) <= 0)
 				return true;
 		} else if (type instanceof StandardBasicType
-				&& ((StandardBasicType) type).getBasicTypeKind() == BasicTypeKind.CHAR) {
-			if (value.signum() >= 0
-					&& value.compareTo(CommonStandardSignedIntegerType.SCHAR_MAX_MIN) <= 0)
+				&& ((StandardBasicType) type)
+						.getBasicTypeKind() == BasicTypeKind.CHAR) {
+			if (value.signum() >= 0 && value.compareTo(
+					CommonStandardSignedIntegerType.SCHAR_MAX_MIN) <= 0)
 				return true;
 		}
 		return false;
@@ -775,8 +786,8 @@ public class CommonTypeFactory implements TypeFactory {
 			return type1;
 		if (index == typeList.length - 1)
 			return new RangeChoiceType(value, type1, null);
-		return new RangeChoiceType(value, type1, rangeChoice(value, typeList,
-				index + 1));
+		return new RangeChoiceType(value, type1,
+				rangeChoice(value, typeList, index + 1));
 	}
 
 	@Override
@@ -880,8 +891,8 @@ public class CommonTypeFactory implements TypeFactory {
 			case UNSIGNED_LONG_LONG:
 				return 6;
 			default:
-				throw new RuntimeException("Unexpected basic integer type: "
-						+ type);
+				throw new RuntimeException(
+						"Unexpected basic integer type: " + type);
 			}
 		}
 		return null;
@@ -938,7 +949,8 @@ public class CommonTypeFactory implements TypeFactory {
 			ObjectType elementType = ((ArrayType) type).getElementType();
 
 			if (elementType instanceof StandardBasicType) {
-				return ((StandardBasicType) elementType).getBasicTypeKind() == BasicTypeKind.CHAR;
+				return ((StandardBasicType) elementType)
+						.getBasicTypeKind() == BasicTypeKind.CHAR;
 			}
 		}
 		return false;

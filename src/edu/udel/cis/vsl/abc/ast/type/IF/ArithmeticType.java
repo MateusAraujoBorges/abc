@@ -53,7 +53,7 @@ public interface ArithmeticType extends UnqualifiedObjectType {
 	/**
 	 * Is this a floating type? This includes the three real floating types and
 	 * the three complex floating types. If true, this object can be safely cast
-	 * to FloatingType.
+	 * to FloatingType.  $real is also included.
 	 * 
 	 * @return true iff this is a floating type
 	 */

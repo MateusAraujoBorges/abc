@@ -66,6 +66,15 @@ public interface QuantifiedExpressionNode extends ExpressionNode {
 	Quantifier quantifier();
 
 	/**
+	 * The following is an experimental field for the <code>$uniform</code>
+	 * operator. It is a sequence of real closed intervals that specify the
+	 * domain of uniform convergence of a big-O expression.
+	 * 
+	 * @return the interval sequence; may be <code>null</code>
+	 */
+	SequenceNode<PairNode<ExpressionNode, ExpressionNode>> intervalSequence();
+
+	/**
 	 * the bound variable declaration list, which is a sequence node of pairs of
 	 * variable declaration list and an optional expression that has domain
 	 * type. The dimension of the domain expression, if present, should agree

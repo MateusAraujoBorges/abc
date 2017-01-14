@@ -6,8 +6,8 @@ import java.util.Map;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 
-public class CommonBasicType extends CommonObjectType implements
-		StandardBasicType {
+public class CommonBasicType extends CommonObjectType
+		implements StandardBasicType {
 
 	private static int classCode = CommonBasicType.class.hashCode();
 
@@ -75,6 +75,7 @@ public class CommonBasicType extends CommonObjectType implements
 		case FLOAT_COMPLEX:
 		case DOUBLE_COMPLEX:
 		case LONG_DOUBLE_COMPLEX:
+		case REAL:
 			return true;
 		default:
 			return false;

@@ -401,45 +401,45 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			int type = token.getType();
 
 			switch (type) {
-				case PreprocessorParser.EOF :
-					processEOF(node);
-					break;
-				case PreprocessorParser.TEXT_BLOCK :
-					processTextBlock(node);
-					break;
-				case PreprocessorParser.DEFINE :
-					processMacroDefinition(node);
-					break;
-				case PreprocessorParser.ERROR :
-					processError(node);
-					break;
-				case PreprocessorParser.ELIF :
-				case PreprocessorParser.PIF :
-					processIf(node);
-					break;
-				case PreprocessorParser.IFDEF :
-					processIfdef(node);
-					break;
-				case PreprocessorParser.IFNDEF :
-					processIfndef(node);
-					break;
-				case PreprocessorParser.INCLUDE :
-					processInclude(node);
-					break;
-				case PreprocessorParser.PPRAGMA :
-					processPragma(node);
-					break;
-				case PreprocessorParser.UNDEF :
-					processUndef(node);
-					break;
-				case PreprocessorParser.HASH :
-					processNondirective(node);
-					break;
-				case PreprocessorParser.LINE :
-					processLine(node);
-					break;
-				default :
-					processText(node);
+			case PreprocessorParser.EOF:
+				processEOF(node);
+				break;
+			case PreprocessorParser.TEXT_BLOCK:
+				processTextBlock(node);
+				break;
+			case PreprocessorParser.DEFINE:
+				processMacroDefinition(node);
+				break;
+			case PreprocessorParser.ERROR:
+				processError(node);
+				break;
+			case PreprocessorParser.ELIF:
+			case PreprocessorParser.PIF:
+				processIf(node);
+				break;
+			case PreprocessorParser.IFDEF:
+				processIfdef(node);
+				break;
+			case PreprocessorParser.IFNDEF:
+				processIfndef(node);
+				break;
+			case PreprocessorParser.INCLUDE:
+				processInclude(node);
+				break;
+			case PreprocessorParser.PPRAGMA:
+				processPragma(node);
+				break;
+			case PreprocessorParser.UNDEF:
+				processUndef(node);
+				break;
+			case PreprocessorParser.HASH:
+				processNondirective(node);
+				break;
+			case PreprocessorParser.LINE:
+				processLine(node);
+				break;
+			default:
+				processText(node);
 			}
 		}
 	}
@@ -487,28 +487,28 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			boolean parseACSL = parseACSLPragmaStack.peek();
 
 			switch (token.getType()) {
-				case PreprocessorLexer.INLINE_ANNOTATION_START :
-					assert (inTextBlock);
-					inInlineAnnotation = true;
-					// will be set to false at next NEWLINE
-					break;
-				case PreprocessorLexer.ANNOTATION_START :
-					assert (inTextBlock);
-					inBlockAnnotation = true;
-					break;
-				case PreprocessorLexer.ANNOTATION_END :
-					assert (inTextBlock);
-					inBlockAnnotation = false;
-					// Quick return: if not parsing ACSL
-					if (!parseACSL) {
-						incrementNextNode();
-						return;
-					} else
-						break;
-				case PreprocessorLexer.PP_NUMBER :
-					processPPNumber(token);
+			case PreprocessorLexer.INLINE_ANNOTATION_START:
+				assert (inTextBlock);
+				inInlineAnnotation = true;
+				// will be set to false at next NEWLINE
+				break;
+			case PreprocessorLexer.ANNOTATION_START:
+				assert (inTextBlock);
+				inBlockAnnotation = true;
+				break;
+			case PreprocessorLexer.ANNOTATION_END:
+				assert (inTextBlock);
+				inBlockAnnotation = false;
+				// Quick return: if not parsing ACSL
+				if (!parseACSL) {
+					incrementNextNode();
 					return;
-				default :
+				} else
+					break;
+			case PreprocessorLexer.PP_NUMBER:
+				processPPNumber(token);
+				return;
+			default:
 			}
 			// If current control is NOT in block annotation and line
 			// annotation, or ACSL will be parsed anyway, put the node to
@@ -564,18 +564,23 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 				PreprocessorLexer.DOTDOT, chan, startIndex + index,
 				startIndex + index + 1, formation, line, pos + index);
 
-		// should not be necessary:
-		// dotdot.setText("..");
 		addOutput(dotdot);
 		if (index < length) {
 			CivlcToken rightToken = tokenFactory.newCivlcToken(stream,
 					PreprocessorLexer.INTEGER_CONSTANT, chan,
 					startIndex + index + 2, stopIndex, formation, line,
 					pos + index + 2);
+			String rightText = rightToken.getText();
+			char firstChar = rightText.charAt(0);
 
-			// rightToken.setText(text.substring(index + 2, length));
-			// rightToken.setCharPositionInLine(pos + index + 2);
-			// rightToken.setLine(line);
+			// rightText should be either an integer literal or
+			// identifier ... how to tell
+			if (firstChar == '+' || firstChar == '-'
+					|| (firstChar >= '0' && firstChar <= '9')) {
+				// OK: should be integer
+			} else {
+				rightToken.setType(PreprocessorLexer.IDENTIFIER);
+			}
 			addOutput(rightToken);
 		}
 		incrementNextNode();
@@ -699,20 +704,19 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		CivlcToken newToken;
 
 		switch (name) {
-			case "__LINE__" :
-				newToken = tokenFactory.newCivlcToken(
-						PreprocessorLexer.INTEGER_CONSTANT,
-						"" + origin.getLine(), formation);
-				break;
-			case "__FILE__" :
-				newToken = tokenFactory.newCivlcToken(
-						PreprocessorLexer.STRING_LITERAL,
-						'"' + getCurrentSource().getFile().getAbsolutePath()
-								+ '"',
-						formation);
-				break;
-			default :
-				throw new PreprocessorRuntimeException("unreachable");
+		case "__LINE__":
+			newToken = tokenFactory.newCivlcToken(
+					PreprocessorLexer.INTEGER_CONSTANT, "" + origin.getLine(),
+					formation);
+			break;
+		case "__FILE__":
+			newToken = tokenFactory.newCivlcToken(
+					PreprocessorLexer.STRING_LITERAL,
+					'"' + getCurrentSource().getFile().getAbsolutePath() + '"',
+					formation);
+			break;
+		default:
+			throw new PreprocessorRuntimeException("unreachable");
 		}
 		return newToken;
 	}

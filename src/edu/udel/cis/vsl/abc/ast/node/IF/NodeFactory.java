@@ -988,12 +988,17 @@ public interface NodeFactory {
 	 *            quantified variables is in the domain
 	 * @param expression
 	 *            The quantified expression.
+	 * @param intervalSequence
+	 *            field for the <code>$uniform</code> operator---a sequence of
+	 *            real closed intervals that specify the domain of uniform
+	 *            convergence of a big-O expression; may be <code>null</code>
 	 * @return The new quantified expression with the given children.
 	 */
 	QuantifiedExpressionNode newQuantifiedExpressionNode(Source source,
 			Quantifier quantifier,
 			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableDeclarationList,
-			ExpressionNode restriction, ExpressionNode expression);
+			ExpressionNode restriction, ExpressionNode expression,
+			SequenceNode<PairNode<ExpressionNode, ExpressionNode>> intervalSequence);
 
 	/**
 	 * Constructs a new array lambda expression.
