@@ -8,9 +8,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.AssignsOrReadsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonAssignsOrReadsNode extends CommonContractNode implements
-		AssignsOrReadsNode {
-
+public class CommonAssignsOrReadsNode extends CommonContractNode
+		implements
+			AssignsOrReadsNode {
 	private boolean isAssigns;
 
 	public CommonAssignsOrReadsNode(Source source, boolean isAssigns,

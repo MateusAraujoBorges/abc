@@ -66,9 +66,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.MemoryBlockReferenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.OriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
@@ -119,6 +119,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.DomainTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.LambdaTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.MemTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.PointerTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
@@ -429,6 +431,11 @@ public interface NodeFactory {
 	 * @return the new domain type node instance
 	 */
 	DomainTypeNode newDomainTypeNode(Source source);
+
+	LambdaTypeNode newLambdaTypeNode(Source source, TypeNode freeVariableType,
+			TypeNode lambdaFunctionType);
+
+	MemTypeNode newMemTypeNode(Source source);
 
 	/**
 	 * Returns a new instance of the domain type node with given integer
@@ -1041,19 +1048,38 @@ public interface NodeFactory {
 			ExpressionNode restriction, ExpressionNode expression);
 
 	/**
-	 * Constructs a new lambda expression.
+	 * Constructs a new lambda expression with a free (no restriction on the
+	 * bound variable) variable.
 	 * 
 	 * @param source
 	 *            The source code information for the entire expression
-	 * @param boundVariableDeclarationList
-	 *            The list of bound variable declarations.
+	 * @param boundVariableDeclaration
+	 *            The bound variable declaration.
 	 * @param expression
 	 *            The body-expression
 	 * @return The new array lambda expression with the given children.
 	 */
 	LambdaNode newLambdaNode(Source source,
-			SequenceNode<VariableDeclarationNode> boundVariableDeclarationList,
+			VariableDeclarationNode boundVariableDeclaration,
 			ExpressionNode expression);
+
+	/**
+	 * Constructs a new lambda expression with restriction on the bound
+	 * variable.
+	 * 
+	 * @param source
+	 *            The source code information for the entire expression
+	 * @param boundVariableDeclaration
+	 *            The bound variable declaration.
+	 * @param restriction
+	 *            A boolean restriction on the bound variable
+	 * @param expression
+	 *            The body-expression
+	 * @return The new array lambda expression with the given children.
+	 */
+	LambdaNode newLambdaNode(Source source,
+			VariableDeclarationNode boundVariableDeclaration,
+			ExpressionNode restriction, ExpressionNode expression);
 
 	/**
 	 * 
@@ -2534,6 +2560,23 @@ public interface NodeFactory {
 	 *            The expression represents a reference to a collate state
 	 * @param statement
 	 *            The statement attached with the $with statement
+	 * @param isParallel
+	 *            If the $with statement represented by this node will not
+	 *            affect the outside environment
+	 * @return A new {@link WithNode}
+	 */
+	WithNode newWithNode(Source source, ExpressionNode stateRef,
+			StatementNode statement, boolean isParallel);
+
+	/**
+	 * Create a new {@link WithNode}
+	 * 
+	 * @param source
+	 *            The {@link Source} attached to the $with statement
+	 * @param stateRef
+	 *            The expression represents a reference to a collate state
+	 * @param statement
+	 *            The statement attached with the $with statement
 	 * @return A new {@link WithNode}
 	 */
 	WithNode newWithNode(Source source, ExpressionNode stateRef,
@@ -2653,14 +2696,14 @@ public interface NodeFactory {
 			ExpressionNode pid, ExpressionNode expression);
 
 	/**
-	 * Creates a new expression node for <code>$orginal (expr) </code>.
+	 * Creates a new {@link MemoryBlockReferenceNode} for
+	 * <code>$mem_block (base_addr) </code>.
 	 * 
 	 * @param source
 	 *            the source of the new node
 	 * @param expression
-	 *            the expression to be evaluated
-	 * @return the new <code>$original</code> expression node
+	 *            the base address of the memory block
+	 * @return the new <code>$mem_block</code> expression node
 	 */
-	OriginalExpressionNode newOriginalExpressionNode(Source source,
-			ExpressionNode expression);
+	MemoryBlockReferenceNode newMemoryBlockNode(Source source, ExpressionNode baseAddr);
 }

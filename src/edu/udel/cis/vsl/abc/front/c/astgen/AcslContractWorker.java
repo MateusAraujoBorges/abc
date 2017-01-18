@@ -314,10 +314,11 @@ public class AcslContractWorker {
 						expression);
 			}
 			case AcslParser.LOOP_ASSIGNS :
+				return translateReadsOrAssigns(tree, scope, false);
 			case AcslParser.LOOP_ALLOC :
 			case AcslParser.LOOP_FREE :
 			default :
-				throw this.error("unkown kind of loop contract clause", tree);
+				throw this.error("unknown kind of loop contract clause", tree);
 		}
 	}
 
@@ -869,7 +870,9 @@ public class AcslContractWorker {
 		ExpressionNode expression = this
 				.translateExpression((CommonTree) lambda.getChild(2), newScope);
 
-		return nodeFactory.newLambdaNode(source, variableList, expression);
+		assert variableList.numChildren() == 1;
+		return nodeFactory.newLambdaNode(source,
+				variableList.getSequenceChild(0).copy(), expression);
 	}
 
 	private ExpressionNode translateExtendedQuantification(Source source,

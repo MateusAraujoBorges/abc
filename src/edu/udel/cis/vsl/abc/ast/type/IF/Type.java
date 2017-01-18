@@ -122,6 +122,10 @@ public interface Type {
 		 */
 		HEAP,
 		/**
+		 * The CIVL-C $lambda type, represented by <code>$lambda_t</code>
+		 */
+		LAMBDA,
+		/**
 		 * The CIVL-C memory type, represented by <code>$memory</code>
 		 */
 		MEMORY,

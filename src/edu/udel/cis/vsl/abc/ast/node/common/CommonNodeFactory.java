@@ -73,9 +73,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.MemoryBlockReferenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.OriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
@@ -129,6 +129,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.DomainTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.LambdaTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.MemTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.PointerTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
@@ -183,8 +185,8 @@ import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonHereOrRootNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonLambdaNode;
+import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonMemoryBlockNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonOperatorNode;
-import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonOriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonProcnullNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonQuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonRegularRangeNode;
@@ -233,6 +235,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.type.CommonBasicTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonDomainTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonEnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonFunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.common.type.CommonMemTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonPointerTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonRangeTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonScopeTypeNode;
@@ -1224,15 +1227,18 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public LambdaNode newLambdaNode(Source source,
-			SequenceNode<VariableDeclarationNode> boundVariableDeclarationList,
+			VariableDeclarationNode freeVariableDeclaration,
 			ExpressionNode expression) {
-		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList = new LinkedList<>();
+		return new CommonLambdaNode(source, freeVariableDeclaration,
+				expression);
+	}
 
-		variableList
-				.add(newPairNode(source, boundVariableDeclarationList, null));
-		return new CommonLambdaNode(source,
-				newSequenceNode(source, "bound variable list", variableList),
-				null, expression);
+	@Override
+	public LambdaNode newLambdaNode(Source source,
+			VariableDeclarationNode boundVariableDeclaration,
+			ExpressionNode restriction, ExpressionNode expression) {
+		return new CommonLambdaNode(source, boundVariableDeclaration,
+				restriction, expression);
 	}
 
 	@Override
@@ -1245,6 +1251,12 @@ public class CommonNodeFactory implements NodeFactory {
 	public WithNode newWithNode(Source source, ExpressionNode stateRef,
 			StatementNode statement) {
 		return new CommonWithNode(source, stateRef, statement);
+	}
+
+	@Override
+	public WithNode newWithNode(Source source, ExpressionNode stateRef,
+			StatementNode statement, boolean isParallel) {
+		return new CommonWithNode(source, stateRef, statement, isParallel);
 	}
 
 	@Override
@@ -1290,9 +1302,21 @@ public class CommonNodeFactory implements NodeFactory {
 	}
 
 	@Override
-	public OriginalExpressionNode newOriginalExpressionNode(Source source,
-			ExpressionNode expression) {
-		return new CommonOriginalExpressionNode(source, expression);
+	public MemoryBlockReferenceNode newMemoryBlockNode(Source source,
+			ExpressionNode baseAddr) {
+		return new CommonMemoryBlockNode(source, baseAddr);
+	}
+
+	@Override
+	public LambdaTypeNode newLambdaTypeNode(Source source,
+			TypeNode freeVariableType, TypeNode lambdaFunctionType) {
+		return new CommonLambdaTypeNode(source, freeVariableType,
+				lambdaFunctionType);
+	}
+
+	@Override
+	public MemTypeNode newMemTypeNode(Source source) {
+		return new CommonMemTypeNode(source);
 	}
 
 }

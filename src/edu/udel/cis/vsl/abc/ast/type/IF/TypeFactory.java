@@ -460,9 +460,8 @@ public interface TypeFactory {
 	 * @return a function type as specified in which the types of the parameters
 	 *         is known
 	 */
-	FunctionType functionType(ObjectType returnType,
-			boolean fromIdentifierList, Iterable<ObjectType> parameterTypes,
-			boolean hasVariableArgs);
+	FunctionType functionType(ObjectType returnType, boolean fromIdentifierList,
+			Iterable<ObjectType> parameterTypes, boolean hasVariableArgs);
 
 	/**
 	 * Returns the number of distinct types controlled by this type factory.
@@ -786,6 +785,19 @@ public interface TypeFactory {
 			boolean constQualified, boolean volatileQualified,
 			boolean restrictQualified, boolean inputQualified,
 			boolean outputQualified);
+
+	/**
+	 * Returns a {@link LambdaType} which consists of the type of the free
+	 * variable of the lambda term. (void if the free variable is absent); and
+	 * the type of the lambda function (the lambda function is an expression).
+	 * 
+	 * @param freeVariableType
+	 *            The type of the free variable of the lambda term.
+	 * @param lambdaFunctionType
+	 *            The type of the lambda function expression.
+	 * @return
+	 */
+	ObjectType lambdaType(Type freeVariableType, Type lambdaFunctionType);
 
 	/**
 	 * Is the given type an array-of-char type?

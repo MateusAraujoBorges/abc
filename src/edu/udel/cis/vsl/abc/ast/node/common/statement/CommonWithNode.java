@@ -7,11 +7,27 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.WithNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
+/**
+ * An implementation of {@Link WithNode}. Structures of a CommonWithNode:
+ * <li>Children 0: stateRef, 2: statement</li>
+ * 
+ * @author ziqing
+ *
+ */
 public class CommonWithNode extends CommonStatementNode implements WithNode {
+
+	private boolean isParallel = false;
 
 	public CommonWithNode(Source source, ExpressionNode stateRef,
 			StatementNode statement) {
 		super(source, stateRef, statement);
+	}
+
+	public CommonWithNode(Source source, ExpressionNode stateRef,
+			StatementNode statement, boolean isParallel) {
+		super(source, stateRef, statement);
+		this.isParallel = true;
+
 	}
 
 	@Override
@@ -38,5 +54,10 @@ public class CommonWithNode extends CommonStatementNode implements WithNode {
 	@Override
 	public StatementKind statementKind() {
 		return StatementKind.WITH;
+	}
+
+	@Override
+	public boolean isParallelStatement() {
+		return isParallel;
 	}
 }

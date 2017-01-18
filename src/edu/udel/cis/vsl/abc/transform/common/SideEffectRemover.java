@@ -1861,7 +1861,7 @@ public class SideEffectRemover extends BaseTransformer {
 				return translateNonSideEffectExpression(
 						(ArrayLambdaNode) expression);
 			case EXTENDED_QUANTIFIED :
-			case ORIGINAL :
+			case MEMORY_BLOCK :
 			case LAMBDA :
 				return translateNonSideEffectExpression(expression);
 			case VALUE_AT :

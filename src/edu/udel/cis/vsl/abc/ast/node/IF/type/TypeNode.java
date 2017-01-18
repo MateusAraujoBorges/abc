@@ -1,6 +1,7 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.type;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.LambdaType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 
 public interface TypeNode extends SizeableNode {
@@ -9,7 +10,15 @@ public interface TypeNode extends SizeableNode {
 	 * The different kinds of type nodes.
 	 */
 	public static enum TypeNodeKind {
-		ARRAY, ATOMIC, BASIC, DOMAIN, ENUMERATION, FUNCTION, POINTER, RANGE, SCOPE, STATE, STRUCTURE_OR_UNION, TYPEDEF_NAME, VOID,
+		ARRAY, ATOMIC, BASIC, DOMAIN, ENUMERATION, FUNCTION,
+		/**
+		 * $mem TypeNode. An instance of {@link MemTypeNode}
+		 */
+		MEMORY,
+		/**
+		 * $lambda_t TypeNode represents a {@link LambdaType}
+		 */
+		LAMBDA, POINTER, RANGE, SCOPE, STATE, STRUCTURE_OR_UNION, TYPEDEF_NAME, VOID,
 		/**
 		 * typeof() of GNU C extension
 		 */

@@ -5,15 +5,14 @@ import java.util.Arrays;
 
 import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.PairNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonLambdaNode extends CommonExpressionNode
-		implements LambdaNode {
+		implements
+			LambdaNode {
 
 	/**
 	 * @param source
@@ -29,9 +28,15 @@ public class CommonLambdaNode extends CommonExpressionNode
 	 *            the expression that is quantified
 	 */
 	public CommonLambdaNode(Source source,
-			SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> variableList,
+			VariableDeclarationNode freeVariableDecl,
+			ExpressionNode expression) {
+		super(source, Arrays.asList(freeVariableDecl, null, expression));
+	}
+
+	public CommonLambdaNode(Source source,
+			VariableDeclarationNode freeVariableDecl,
 			ExpressionNode restriction, ExpressionNode expression) {
-		super(source, Arrays.asList(variableList, restriction, expression));
+		super(source, Arrays.asList(freeVariableDecl, restriction, expression));
 	}
 
 	@Override
@@ -41,16 +46,13 @@ public class CommonLambdaNode extends CommonExpressionNode
 
 	@Override
 	public ExpressionNode copy() {
-		return new CommonLambdaNode(this.getSource(),
-				duplicate(boundVariableList()), duplicate(restriction()),
-				duplicate(expression()));
+		return new CommonLambdaNode(this.getSource(), duplicate(freeVariable()),
+				duplicate(lambdaFunction()));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableList() {
-		return (SequenceNode<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>>) this
-				.child(0);
+	public VariableDeclarationNode freeVariable() {
+		return (VariableDeclarationNode) this.child(0);
 	}
 
 	@Override
@@ -59,7 +61,7 @@ public class CommonLambdaNode extends CommonExpressionNode
 	}
 
 	@Override
-	public ExpressionNode expression() {
+	public ExpressionNode lambdaFunction() {
 		return (ExpressionNode) this.child(2);
 	}
 
@@ -75,11 +77,11 @@ public class CommonLambdaNode extends CommonExpressionNode
 
 	@Override
 	public boolean isSideEffectFree(boolean errorsAreSideEffects) {
-		boolean result = expression().isSideEffectFree(errorsAreSideEffects);
+		boolean result = lambdaFunction()
+				.isSideEffectFree(errorsAreSideEffects);
 
 		if (restriction() != null)
-			result = result && this.restriction()
-					.isSideEffectFree(errorsAreSideEffects);
+			result &= restriction().isSideEffectFree(errorsAreSideEffects);
 		return result;
 	}
 

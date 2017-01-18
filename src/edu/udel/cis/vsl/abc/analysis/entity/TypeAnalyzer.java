@@ -24,6 +24,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.DomainTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.LambdaTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.PointerTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
@@ -177,7 +178,8 @@ public class TypeAnalyzer {
 			// no scope restriction on pointer given, so use null...
 			PointerType pointerType = typeFactory.pointerType(elementType);
 			UnqualifiedObjectType unqualifiedType = (node.hasAtomicInBrackets()
-					? typeFactory.atomicType(pointerType) : pointerType);
+					? typeFactory.atomicType(pointerType)
+					: pointerType);
 
 			// need to process size expression, but ignore it...
 			sizeExpression = node.getExtent();
@@ -688,67 +690,84 @@ public class TypeAnalyzer {
 		Type type;
 
 		switch (kind) {
-		case VOID: {
-			boolean constQ = typeNode.isConstQualified();
-			boolean volatileQ = typeNode.isVolatileQualified();
+			case VOID : {
+				boolean constQ = typeNode.isConstQualified();
+				boolean volatileQ = typeNode.isVolatileQualified();
 
-			type = typeFactory.voidType();
-			if (typeNode.isRestrictQualified())
-				throw error("restrict qualifier used with void type", typeNode);
-			if (typeNode.isAtomicQualified())
-				throw error("_Atomic qualifier used with void type", typeNode);
-			if (constQ || volatileQ)
-				type = typeFactory.qualifiedType((UnqualifiedObjectType) type,
-						constQ, volatileQ, false, false, false);
-			break;
-		}
-		case BASIC:
-			type = processBasicType((BasicTypeNode) typeNode);
-			break;
-		case ENUMERATION:
-			type = processEnumerationType((EnumerationTypeNode) typeNode);
-			break;
-		case ARRAY:
-			type = processArrayType((ArrayTypeNode) typeNode, isParameter);
-			break;
-		case STRUCTURE_OR_UNION:
-			type = processStructureOrUnionType(
-					(StructureOrUnionTypeNode) typeNode);
-			break;
-		case FUNCTION:
-			type = processFunctionType((FunctionTypeNode) typeNode,
-					isParameter);
-			break;
-		case POINTER:
-			type = processPointerType((PointerTypeNode) typeNode);
-			break;
-		case ATOMIC:
-			type = processAtomicType((AtomicTypeNode) typeNode);
-			break;
-		case TYPEDEF_NAME:
-			type = processTypedefName((TypedefNameNode) typeNode, isParameter);
-			break;
-		case SCOPE:
-			type = typeFactory.scopeType();
-			break;
-		case DOMAIN:
-			type = processDomainType((DomainTypeNode) typeNode);
-			break;
-		case RANGE:
-			type = typeFactory.rangeType();
-			break;
-		case TYPEOF: {
-			ExpressionNode expression = ((TypeofNode) typeNode)
-					.getExpressionOperand();
-			entityAnalyzer.expressionAnalyzer.processExpression(expression);
-			type = expression.getType();
-			break;
-		}
-		case STATE:
-			type = typeFactory.stateType();
-			break;
-		default:
-			throw new RuntimeException("Unreachable");
+				type = typeFactory.voidType();
+				if (typeNode.isRestrictQualified())
+					throw error("restrict qualifier used with void type",
+							typeNode);
+				if (typeNode.isAtomicQualified())
+					throw error("_Atomic qualifier used with void type",
+							typeNode);
+				if (constQ || volatileQ)
+					type = typeFactory.qualifiedType(
+							(UnqualifiedObjectType) type, constQ, volatileQ,
+							false, false, false);
+				break;
+			}
+			case BASIC :
+				type = processBasicType((BasicTypeNode) typeNode);
+				break;
+			case ENUMERATION :
+				type = processEnumerationType((EnumerationTypeNode) typeNode);
+				break;
+			case ARRAY :
+				type = processArrayType((ArrayTypeNode) typeNode, isParameter);
+				break;
+			case STRUCTURE_OR_UNION :
+				type = processStructureOrUnionType(
+						(StructureOrUnionTypeNode) typeNode);
+				break;
+			case FUNCTION :
+				type = processFunctionType((FunctionTypeNode) typeNode,
+						isParameter);
+				break;
+			case POINTER :
+				type = processPointerType((PointerTypeNode) typeNode);
+				break;
+			case ATOMIC :
+				type = processAtomicType((AtomicTypeNode) typeNode);
+				break;
+			case TYPEDEF_NAME :
+				type = processTypedefName((TypedefNameNode) typeNode,
+						isParameter);
+				break;
+			case SCOPE :
+				type = typeFactory.scopeType();
+				break;
+			case DOMAIN :
+				type = processDomainType((DomainTypeNode) typeNode);
+				break;
+			case RANGE :
+				type = typeFactory.rangeType();
+				break;
+			case TYPEOF : {
+				ExpressionNode expression = ((TypeofNode) typeNode)
+						.getExpressionOperand();
+				entityAnalyzer.expressionAnalyzer.processExpression(expression);
+				type = expression.getType();
+				break;
+			}
+			case STATE :
+				type = typeFactory.stateType();
+				break;
+			case MEMORY :
+				type = typeFactory.memoryType();
+				break;
+			case LAMBDA :
+				LambdaTypeNode lambdaTypeNode = (LambdaTypeNode) typeNode;
+				Type freeVariableType = processTypeNode(
+						lambdaTypeNode.freeVariableType());
+				Type lambdaFunctionType = processTypeNode(
+						lambdaTypeNode.lambdaFunctionType());
+
+				type = typeFactory.lambdaType(freeVariableType,
+						lambdaFunctionType);
+				break;
+			default :
+				throw new RuntimeException("Unreachable");
 		}
 		assert type != null;
 		typeNode.setType(type);

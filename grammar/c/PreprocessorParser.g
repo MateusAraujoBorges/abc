@@ -372,6 +372,7 @@ c_notpp_keyword	:	ALIGNAS
 civl_keyword	:	ABSTRACT
 		|	BIG_O
 		|	CALLS
+        |   CATCH
 		|	CHOOSE
 		|	CIVLATOM
 		|	CIVLATOMIC

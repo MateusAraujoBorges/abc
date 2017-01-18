@@ -264,6 +264,9 @@ public class CommonConversionFactory implements ConversionFactory {
 		}
 		if (oldType instanceof PointerType && isBool(newType))
 			return pointerBoolConversion((PointerType) oldType);
+		if (oldType.kind() == TypeKind.LAMBDA
+				&& newType.kind() == TypeKind.LAMBDA)
+			return null;
 		if (config != null && config.getSVCOMP()) {
 			if (oldType instanceof PointerType
 					&& newType instanceof IntegerType)

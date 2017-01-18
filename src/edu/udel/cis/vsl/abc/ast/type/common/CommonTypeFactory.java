@@ -110,73 +110,75 @@ public class CommonTypeFactory implements TypeFactory {
 		StandardBasicType result;
 
 		switch (kind) {
-		case CHAR:
-			result = new CommonCharType();
-			break;
-		case SIGNED_CHAR:
-			result = new CommonStandardSignedIntegerType(
-					SignedIntKind.SIGNED_CHAR);
-			break;
-		case UNSIGNED_CHAR:
-			result = new CommonStandardUnsignedIntegerType(
-					UnsignedIntKind.UNSIGNED_CHAR);
-			break;
-		case SHORT:
-			result = new CommonStandardSignedIntegerType(SignedIntKind.SHORT);
-			break;
-		case UNSIGNED_SHORT:
-			result = new CommonStandardUnsignedIntegerType(
-					UnsignedIntKind.UNSIGNED_SHORT);
-			break;
-		case INT:
-			result = new CommonStandardSignedIntegerType(SignedIntKind.INT);
-			break;
-		case UNSIGNED:
-			result = new CommonStandardUnsignedIntegerType(
-					UnsignedIntKind.UNSIGNED);
-			break;
-		case LONG:
-			result = new CommonStandardSignedIntegerType(SignedIntKind.LONG);
-			break;
-		case UNSIGNED_LONG:
-			result = new CommonStandardUnsignedIntegerType(
-					UnsignedIntKind.UNSIGNED_LONG);
-			break;
-		case LONG_LONG:
-			result = new CommonStandardSignedIntegerType(
-					SignedIntKind.LONG_LONG);
-			break;
-		case UNSIGNED_LONG_LONG:
-			result = new CommonStandardUnsignedIntegerType(
-					UnsignedIntKind.UNSIGNED_LONG_LONG);
-			break;
-		case FLOAT:
-			result = new CommonFloatingType(FloatKind.FLOAT, false);
-			break;
-		case DOUBLE:
-			result = new CommonFloatingType(FloatKind.DOUBLE, false);
-			break;
-		case LONG_DOUBLE:
-			result = new CommonFloatingType(FloatKind.LONG_DOUBLE, false);
-			break;
-		case REAL:
-			result = new CommonFloatingType(FloatKind.REAL, false);
-			break;
-		case BOOL:
-			result = new CommonStandardUnsignedIntegerType(
-					UnsignedIntKind.BOOL);
-			break;
-		case FLOAT_COMPLEX:
-			result = new CommonFloatingType(FloatKind.FLOAT, true);
-			break;
-		case DOUBLE_COMPLEX:
-			result = new CommonFloatingType(FloatKind.DOUBLE, true);
-			break;
-		case LONG_DOUBLE_COMPLEX:
-			result = new CommonFloatingType(FloatKind.LONG_DOUBLE, true);
-			break;
-		default:
-			throw new RuntimeException("unreachable");
+			case CHAR :
+				result = new CommonCharType();
+				break;
+			case SIGNED_CHAR :
+				result = new CommonStandardSignedIntegerType(
+						SignedIntKind.SIGNED_CHAR);
+				break;
+			case UNSIGNED_CHAR :
+				result = new CommonStandardUnsignedIntegerType(
+						UnsignedIntKind.UNSIGNED_CHAR);
+				break;
+			case SHORT :
+				result = new CommonStandardSignedIntegerType(
+						SignedIntKind.SHORT);
+				break;
+			case UNSIGNED_SHORT :
+				result = new CommonStandardUnsignedIntegerType(
+						UnsignedIntKind.UNSIGNED_SHORT);
+				break;
+			case INT :
+				result = new CommonStandardSignedIntegerType(SignedIntKind.INT);
+				break;
+			case UNSIGNED :
+				result = new CommonStandardUnsignedIntegerType(
+						UnsignedIntKind.UNSIGNED);
+				break;
+			case LONG :
+				result = new CommonStandardSignedIntegerType(
+						SignedIntKind.LONG);
+				break;
+			case UNSIGNED_LONG :
+				result = new CommonStandardUnsignedIntegerType(
+						UnsignedIntKind.UNSIGNED_LONG);
+				break;
+			case LONG_LONG :
+				result = new CommonStandardSignedIntegerType(
+						SignedIntKind.LONG_LONG);
+				break;
+			case UNSIGNED_LONG_LONG :
+				result = new CommonStandardUnsignedIntegerType(
+						UnsignedIntKind.UNSIGNED_LONG_LONG);
+				break;
+			case FLOAT :
+				result = new CommonFloatingType(FloatKind.FLOAT, false);
+				break;
+			case DOUBLE :
+				result = new CommonFloatingType(FloatKind.DOUBLE, false);
+				break;
+			case LONG_DOUBLE :
+				result = new CommonFloatingType(FloatKind.LONG_DOUBLE, false);
+				break;
+			case REAL :
+				result = new CommonFloatingType(FloatKind.REAL, false);
+				break;
+			case BOOL :
+				result = new CommonStandardUnsignedIntegerType(
+						UnsignedIntKind.BOOL);
+				break;
+			case FLOAT_COMPLEX :
+				result = new CommonFloatingType(FloatKind.FLOAT, true);
+				break;
+			case DOUBLE_COMPLEX :
+				result = new CommonFloatingType(FloatKind.DOUBLE, true);
+				break;
+			case LONG_DOUBLE_COMPLEX :
+				result = new CommonFloatingType(FloatKind.LONG_DOUBLE, true);
+				break;
+			default :
+				throw new RuntimeException("unreachable");
 		}
 		return (StandardBasicType) canonicalize(result);
 	}
@@ -198,28 +200,30 @@ public class CommonTypeFactory implements TypeFactory {
 	public FloatingType floatingType(FloatKind kind, boolean isReal) {
 		if (isReal) {
 			switch (kind) {
-			case LONG_DOUBLE:
-				return (FloatingType) basicType(BasicTypeKind.LONG_DOUBLE);
-			case DOUBLE:
-				return (FloatingType) basicType(BasicTypeKind.DOUBLE);
-			case FLOAT:
-				return (FloatingType) basicType(BasicTypeKind.FLOAT);
-			case REAL:
-				return (FloatingType) basicType(BasicTypeKind.REAL);
-			default:
-				throw new RuntimeException("unreachable");
+				case LONG_DOUBLE :
+					return (FloatingType) basicType(BasicTypeKind.LONG_DOUBLE);
+				case DOUBLE :
+					return (FloatingType) basicType(BasicTypeKind.DOUBLE);
+				case FLOAT :
+					return (FloatingType) basicType(BasicTypeKind.FLOAT);
+				case REAL :
+					return (FloatingType) basicType(BasicTypeKind.REAL);
+				default :
+					throw new RuntimeException("unreachable");
 			}
 		} else {
 			switch (kind) {
-			case LONG_DOUBLE:
-				return (FloatingType) basicType(
-						BasicTypeKind.LONG_DOUBLE_COMPLEX);
-			case DOUBLE:
-				return (FloatingType) basicType(BasicTypeKind.DOUBLE_COMPLEX);
-			case FLOAT:
-				return (FloatingType) basicType(BasicTypeKind.FLOAT_COMPLEX);
-			default:
-				throw new RuntimeException("unreachable");
+				case LONG_DOUBLE :
+					return (FloatingType) basicType(
+							BasicTypeKind.LONG_DOUBLE_COMPLEX);
+				case DOUBLE :
+					return (FloatingType) basicType(
+							BasicTypeKind.DOUBLE_COMPLEX);
+				case FLOAT :
+					return (FloatingType) basicType(
+							BasicTypeKind.FLOAT_COMPLEX);
+				default :
+					throw new RuntimeException("unreachable");
 			}
 		}
 
@@ -588,15 +592,15 @@ public class CommonTypeFactory implements TypeFactory {
 					.getIntKind();
 
 			switch (kind) {
-			case SIGNED_CHAR:
-			case SHORT:
-				return signedIntegerType(SignedIntKind.INT);
-			case INT:
-			case LONG:
-			case LONG_LONG:
-				return type;
-			default:
-				throw new RuntimeException("unreachable");
+				case SIGNED_CHAR :
+				case SHORT :
+					return signedIntegerType(SignedIntKind.INT);
+				case INT :
+				case LONG :
+				case LONG_LONG :
+					return type;
+				default :
+					throw new RuntimeException("unreachable");
 			}
 		}
 		if (type instanceof StandardUnsignedIntegerType) {
@@ -604,19 +608,19 @@ public class CommonTypeFactory implements TypeFactory {
 					.getIntKind();
 
 			switch (kind) {
-			case BOOL:
-				return signedIntegerType(SignedIntKind.INT);
-			case UNSIGNED_CHAR:
-			case UNSIGNED_SHORT:
-				// either int or unsigned int, depending on widths
-				return (IntegerType) canonicalize(
-						new IntegerPromotionType(type));
-			case UNSIGNED:
-			case UNSIGNED_LONG:
-			case UNSIGNED_LONG_LONG:
-				return type;
-			default:
-				throw new RuntimeException("unreachable");
+				case BOOL :
+					return signedIntegerType(SignedIntKind.INT);
+				case UNSIGNED_CHAR :
+				case UNSIGNED_SHORT :
+					// either int or unsigned int, depending on widths
+					return (IntegerType) canonicalize(
+							new IntegerPromotionType(type));
+				case UNSIGNED :
+				case UNSIGNED_LONG :
+				case UNSIGNED_LONG_LONG :
+					return type;
+				default :
+					throw new RuntimeException("unreachable");
 			}
 		}
 		// enumeration type: no way to know compatible integer type
@@ -872,27 +876,27 @@ public class CommonTypeFactory implements TypeFactory {
 			BasicTypeKind kind = ((StandardBasicType) type).getBasicTypeKind();
 
 			switch (kind) {
-			case BOOL:
-				return 1;
-			case CHAR:
-			case SIGNED_CHAR:
-			case UNSIGNED_CHAR:
-				return 2;
-			case SHORT:
-			case UNSIGNED_SHORT:
-				return 3;
-			case INT:
-			case UNSIGNED:
-				return 4;
-			case LONG:
-			case UNSIGNED_LONG:
-				return 5;
-			case LONG_LONG:
-			case UNSIGNED_LONG_LONG:
-				return 6;
-			default:
-				throw new RuntimeException(
-						"Unexpected basic integer type: " + type);
+				case BOOL :
+					return 1;
+				case CHAR :
+				case SIGNED_CHAR :
+				case UNSIGNED_CHAR :
+					return 2;
+				case SHORT :
+				case UNSIGNED_SHORT :
+					return 3;
+				case INT :
+				case UNSIGNED :
+					return 4;
+				case LONG :
+				case UNSIGNED_LONG :
+					return 5;
+				case LONG_LONG :
+				case UNSIGNED_LONG_LONG :
+					return 6;
+				default :
+					throw new RuntimeException(
+							"Unexpected basic integer type: " + type);
 			}
 		}
 		return null;
@@ -979,12 +983,21 @@ public class CommonTypeFactory implements TypeFactory {
 		TypeKind typeKind = type.kind();
 
 		switch (typeKind) {
-		case POINTER:
-			return true;
-		case QUALIFIED:
-			return isPointerType(((QualifiedObjectType) type).getBaseType());
-		default:
-			return false;
+			case POINTER :
+				return true;
+			case QUALIFIED :
+				return isPointerType(
+						((QualifiedObjectType) type).getBaseType());
+			default :
+				return false;
 		}
+	}
+
+	@Override
+	public ObjectType lambdaType(Type freeVariableType,
+			Type lambdaFunctionType) {
+		if (freeVariableType == null)
+			freeVariableType = voidType;
+		return new CommonLambdaType(freeVariableType, lambdaFunctionType);
 	}
 }

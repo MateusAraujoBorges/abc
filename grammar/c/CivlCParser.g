@@ -1617,8 +1617,8 @@ runStatement
     ;
 
 withStatement
-	: WITH LPAREN assignmentExpression RPAREN statement
-	  -> ^(WITH assignmentExpression statement)
+	: WITH LPAREN assignmentExpression RPAREN statement 
+            -> ^(WITH assignmentExpression statement)
 	;
 	
 updateStatement

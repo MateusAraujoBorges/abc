@@ -49,9 +49,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.HereOrRootNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.MemoryBlockReferenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.OriginalExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ProcnullNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.RegularRangeNode;
@@ -76,6 +76,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.Enumerator;
 import edu.udel.cis.vsl.abc.ast.type.IF.Field;
 import edu.udel.cis.vsl.abc.ast.type.IF.FunctionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.IntegerType;
+import edu.udel.cis.vsl.abc.ast.type.IF.LambdaType;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.PointerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.QualifiedObjectType;
@@ -207,112 +208,117 @@ public class ExpressionAnalyzer {
 	void processExpression(ExpressionNode node) throws SyntaxException {
 		try {
 			switch (node.expressionKind()) {
-			case ARRAY_LAMBDA:
-				processArrayLambda((ArrayLambdaNode) node);
-				break;
-			case ALIGNOF:
-				processAlignOf((AlignOfNode) node);
-				break;
-			case ARROW:
-				processArrow((ArrowNode) node);
-				break;
-			case CAST:
-				processCast((CastNode) node);
-				break;
-			case COMPOUND_LITERAL:
-				processCompoundLiteral((CompoundLiteralNode) node);
-				break;
-			case CONSTANT:
-				processConstant((ConstantNode) node);
-				break;
-			case DERIVATIVE_EXPRESSION:
-				processDerivativeExpression((DerivativeExpressionNode) node);
-				break;
-			case DOT:
-				processDot((DotNode) node);
-				break;
-			case EXTENDED_QUANTIFIED:
-				processExtendedQuantifiedExpression(
-						(ExtendedQuantifiedExpressionNode) node);
-				break;
-			case FUNCTION_CALL:
-				processFunctionCall((FunctionCallNode) node);
-				break;
-			case GENERIC_SELECTION:
-				processGenericSelection((GenericSelectionNode) node);
-				break;
-			case IDENTIFIER_EXPRESSION:
-				processIdentifierExpression((IdentifierExpressionNode) node,
-						true, false);
-				break;
-			case LAMBDA:
-				processLambda((LambdaNode) node);
-				break;
-			case OPERATOR:
-				processOperator((OperatorNode) node);
-				break;
-			case QUANTIFIED_EXPRESSION:
-				processQuantifiedExpression((QuantifiedExpressionNode) node);
-				break;
-			case REGULAR_RANGE:
-				processRegularRange((RegularRangeNode) node);
-				break;
-			case REMOTE_REFERENCE:
-				processRemoteExpression((RemoteOnExpressionNode) node);
-				break;
-			case RESULT:
-				processResult((ResultNode) node);
-				break;
-			case SCOPEOF:
-				processScopeOf((ScopeOfNode) node);
-				break;
-			case SIZEOF:
-				processSizeof((SizeofNode) node);
-				break;
-			case SPAWN:
-				processSpawn((SpawnNode) node);
-				break;
-			case STATEMENT_EXPRESSION:
-				processStatementExpression((StatementExpressionNode) node);
-				break;
-			case MPI_CONTRACT_EXPRESSION:
-				processMPIContractExpression((MPIContractExpressionNode) node);
-				break;
-			case MEMORY_SET:
-				processMemorySet((MemorySetNode) node);
-				break;
-			case VALUE_AT:
-				processValueAt((ValueAtNode) node);
-				break;
-			case WILDCARD:
-				node.setInitialType(typeFactory.voidType());
-				break;
-			case NOTHING:
-				node.setInitialType(this.typeFactory.memoryType());
-				break;
-			case ORIGINAL: {
-				OriginalExpressionNode expr = (OriginalExpressionNode) node;
+				case ARRAY_LAMBDA :
+					processArrayLambda((ArrayLambdaNode) node);
+					break;
+				case ALIGNOF :
+					processAlignOf((AlignOfNode) node);
+					break;
+				case ARROW :
+					processArrow((ArrowNode) node);
+					break;
+				case CAST :
+					processCast((CastNode) node);
+					break;
+				case COMPOUND_LITERAL :
+					processCompoundLiteral((CompoundLiteralNode) node);
+					break;
+				case CONSTANT :
+					processConstant((ConstantNode) node);
+					break;
+				case DERIVATIVE_EXPRESSION :
+					processDerivativeExpression(
+							(DerivativeExpressionNode) node);
+					break;
+				case DOT :
+					processDot((DotNode) node);
+					break;
+				case EXTENDED_QUANTIFIED :
+					processExtendedQuantifiedExpression(
+							(ExtendedQuantifiedExpressionNode) node);
+					break;
+				case FUNCTION_CALL :
+					processFunctionCall((FunctionCallNode) node);
+					break;
+				case GENERIC_SELECTION :
+					processGenericSelection((GenericSelectionNode) node);
+					break;
+				case IDENTIFIER_EXPRESSION :
+					processIdentifierExpression((IdentifierExpressionNode) node,
+							true, false);
+					break;
+				case LAMBDA :
+					processLambda((LambdaNode) node);
+					break;
+				case OPERATOR :
+					processOperator((OperatorNode) node);
+					break;
+				case QUANTIFIED_EXPRESSION :
+					processQuantifiedExpression(
+							(QuantifiedExpressionNode) node);
+					break;
+				case REGULAR_RANGE :
+					processRegularRange((RegularRangeNode) node);
+					break;
+				case REMOTE_REFERENCE :
+					processRemoteExpression((RemoteOnExpressionNode) node);
+					break;
+				case RESULT :
+					processResult((ResultNode) node);
+					break;
+				case SCOPEOF :
+					processScopeOf((ScopeOfNode) node);
+					break;
+				case SIZEOF :
+					processSizeof((SizeofNode) node);
+					break;
+				case SPAWN :
+					processSpawn((SpawnNode) node);
+					break;
+				case STATEMENT_EXPRESSION :
+					processStatementExpression((StatementExpressionNode) node);
+					break;
+				case MPI_CONTRACT_EXPRESSION :
+					processMPIContractExpression(
+							(MPIContractExpressionNode) node);
+					break;
+				case MEMORY_SET :
+					processMemorySet((MemorySetNode) node);
+					break;
+				case VALUE_AT :
+					processValueAt((ValueAtNode) node);
+					break;
+				case WILDCARD :
+					node.setInitialType(typeFactory.voidType());
+					break;
+				case NOTHING :
+					node.setInitialType(this.typeFactory.memoryType());
+					break;
+				case MEMORY_BLOCK : {
+					MemoryBlockReferenceNode expr = (MemoryBlockReferenceNode) node;
 
-				processExpression(expr.expression());
-				expr.setInitialType(expr.expression().getConvertedType());
-				break;
-			}
-			case OBJECT_OR_REGION_OF: {
-				ExpressionNode operand = ((ObjectOrRegionOfNode) node)
-						.operand();
+					processExpression(expr.baseAddress());
+					expr.setInitialType(
+							typeFactory.pointerType(typeFactory.voidType()));
+					break;
+				}
+				case OBJECT_OR_REGION_OF : {
+					ExpressionNode operand = ((ObjectOrRegionOfNode) node)
+							.operand();
 
-				processExpression(operand);
-				if (!typeFactory.isPointerType(operand.getConvertedType()))
-					throw this.error(
-							"the expression " + operand.prettyRepresentation()
-									+ " doesn't have pointer type "
-									+ "and thus can't be used with $object_of/$region_of",
-							node);
-				node.setInitialType(this.typeFactory.memoryType());
-				break;
-			}
-			default:
-				throw new ABCRuntimeException("Unreachable");
+					processExpression(operand);
+					if (!typeFactory.isPointerType(operand.getConvertedType()))
+						throw this.error(
+								"the expression "
+										+ operand.prettyRepresentation()
+										+ " doesn't have pointer type "
+										+ "and thus can't be used with $object_of/$region_of",
+								node);
+					node.setInitialType(this.typeFactory.memoryType());
+					break;
+				}
+				default :
+					throw new ABCRuntimeException("Unreachable");
 			}
 		} catch (ASTException e) {
 			throw new SyntaxException(e.getMessage(), node.getSource());
@@ -346,7 +352,6 @@ public class ExpressionAnalyzer {
 				function = extQuantified.function();
 		ExtendedQuantifier extQuant = extQuantified.extQuantifier();
 		Type loType, hiType, funcType;
-		FunctionType functionType;
 		Type returnType;
 
 		processExpression(lo);
@@ -362,37 +367,47 @@ public class ExpressionAnalyzer {
 					+ " expression must have integer type but " + hiType
 					+ " is seen", hi);
 		processExpression(function);
+		if (function.expressionKind() != ExpressionKind.LAMBDA)
+			throw this.error("the third argument of " + extQuant.toString()
+					+ " expression must be a lambda expression but "
+					+ function.expressionKind() + " KIND expression is seen",
+					function);
 		funcType = function.getConvertedType();
-		if (!(funcType instanceof FunctionType))
-			throw this.error("the second argument of " + extQuant.toString()
-					+ " expression must have " + extQuant.type() + " but "
-					+ funcType + " is seen", function);
-		functionType = (FunctionType) funcType;
-		if (functionType.getNumParameters() != 1
-				|| !functionType.getParameterType(0).compatibleWith(intType))
-			throw this.error("the second argument of " + extQuant.toString()
-					+ " expression must have " + extQuant.type() + " but "
-					+ funcType + " is seen", function);
-		returnType = functionType.getReturnType();
+		// if (!(funcType instanceof FunctionType))
+		// throw this.error("the second argument of " + extQuant.toString()
+		// + " expression must have " + extQuant.type() + " but "
+		// + funcType + " is seen", function);
+		// functionType = (FunctionType) funcType;
+		// if (functionType.getNumParameters() != 1
+		// || !functionType.getParameterType(0).compatibleWith(intType))
+		// throw this.error("the second argument of " + extQuant.toString()
+		// + " expression must have " + extQuant.type() + " but "
+		// + funcType + " is seen", function);
+		// returnType = functionType.getReturnType();
+		returnType = ((LambdaType) funcType).lambdaFunctionReturnType();
 		switch (extQuant) {
-		case MAX:
-		case MIN:
-		case SUM:
-		case PROD:
-			if (!(returnType instanceof ArithmeticType))
-				throw this.error("the second argument of " + extQuant.toString()
-						+ " expression must have " + extQuant.type() + " but "
-						+ funcType + " is seen", function);
-			break;
-		case NUMOF:
-			if (!returnType.compatibleWith(boolType))
-				throw this.error("the second argument of " + extQuant.toString()
-						+ " expression must have " + extQuant.type() + " but "
-						+ funcType + " is seen", function);
-			break;
-		default:
-			throw new IllegalArgumentException(
-					"unknown extended quantifier " + extQuant);
+			case MAX :
+			case MIN :
+			case SUM :
+			case PROD :
+				if (!(returnType instanceof ArithmeticType))
+					throw this.error(
+							"the second argument of " + extQuant.toString()
+									+ " expression must have " + extQuant.type()
+									+ " but " + funcType + " is seen",
+							function);
+				break;
+			case NUMOF :
+				if (!returnType.compatibleWith(boolType))
+					throw this.error(
+							"the second argument of " + extQuant.toString()
+									+ " expression must have " + extQuant.type()
+									+ " but " + funcType + " is seen",
+							function);
+				break;
+			default :
+				throw new IllegalArgumentException(
+						"unknown extended quantifier " + extQuant);
 		}
 		extQuantified.setInitialType(returnType);
 	}
@@ -839,7 +854,8 @@ public class ExpressionAnalyzer {
 		processExpression(functionNode);
 		{
 			Type tmpType = functionNode.getType();
-			TypeKind tmpKind = tmpType == null ? TypeKind.FUNCTION
+			TypeKind tmpKind = tmpType == null
+					? TypeKind.FUNCTION
 					: tmpType.kind();
 
 			if (tmpKind == TypeKind.POINTER) {
@@ -986,18 +1002,19 @@ public class ExpressionAnalyzer {
 		}
 		kind = entity.getEntityKind();
 		switch (kind) {
-		case VARIABLE:
-			if (isFirstRound)
-				node.setInitialType(entity.getType());
-			else
-				throw error("Undeclared identifier " + name, node);
-			break;
-		case FUNCTION:
-			node.setInitialType(
-					getFunctionExpressionType(node, (Function) entity));
-			break;
-		default:
-			throw error("Use of " + kind + " " + name + " as expression", node);
+			case VARIABLE :
+				if (isFirstRound)
+					node.setInitialType(entity.getType());
+				else
+					throw error("Undeclared identifier " + name, node);
+				break;
+			case FUNCTION :
+				node.setInitialType(
+						getFunctionExpressionType(node, (Function) entity));
+				break;
+			default :
+				throw error("Use of " + kind + " " + name + " as expression",
+						node);
 		}
 		identifierNode.setEntity(entity);
 	}
@@ -1016,112 +1033,115 @@ public class ExpressionAnalyzer {
 			processExpression(child);
 		}
 		switch (operator) {
-		case ADDRESSOF: // & pointer to object
-			processADDRESSOF(node);
-			break;
-		case ASSIGN: // = standard assignment operator
-			processASSIGN(node);
-			break;
-		case HASH:
-			processHash(node);
-			break;
-		case BIG_O: // big-O expresion
-			processBIG_O(node);
-			break;
-		case BITAND: // & bit-wise and
-		case BITOR: // | bit-wise inclusive or
-		case BITXOR: // ^ bit-wise exclusive or
-		case BITEQUIV: // <--> bit-wise equivalent
-		case BITIMPLIES: // --> bit-wise implies
-			processBitwise(node);
-			break;
-		case BITANDEQ: // &= bit-wise and assignment
-		case BITOREQ: // |= bit-wise inclusive or assignment
-		case BITXOREQ: // ^= bit-wise exclusive or assignment
-			processBitwiseAssign(node);
-			break;
-		case BITCOMPLEMENT: // ~ bit-wise complement
-			processBITCOMPLEMENT(node);
-			break;
-		case COMMA: // : the comma operator
-			processCOMMA(node);
-			break;
-		case CONDITIONAL: // ?: the conditional operator
-			processCONDITIONAL(node);
-			break;
-		case DEREFERENCE: // * pointer dereference
-			processDEREFERENCE(node);
-			break;
-		case DIVEQ: // /= division assignment
-		case MODEQ: // %= integer modulus assignment
-		case TIMESEQ: // *= multiplication assignment
-			processTIMESEQorDIVEQorMODEQ(node);
-			break;
-		case EQUALS: // == equality
-		case NEQ: // != not equals
-			processEqualityOperator(node);
-			break;
-		case LXOR: // ^^ logical xor
-		case LAND: // && logical and
-		case LOR: // || logical or
-		case LEQ:// <==> logical equiv
-		case NOT: // ! logical not
-		case IMPLIES: // => logical implication
-			processLANDorLORorNOT(node);
-			break;
-		case GT: // > greater than
-		case GTE: // >= greater than or equals
-		case LT: // < less than
-		case LTE: // <= less than or equals
-			processRelational(node);
-			break;
-		case MINUS: // - binary subtraction (numbers and pointers)
-			processMINUS(node);
-			break;
-		case PLUS: // + binary addition: numeric or pointer
-			processPLUS(node);
-			break;
-		case MINUSEQ: // -= subtraction assignment
-		case PLUSEQ: // += addition assignment
-			processPLUSEQorMINUSEQ(node);
-			break;
-		case POSTDECREMENT: // -- decrement after expression
-		case POSTINCREMENT: // ++ increment after expression
-			processPostfixOperators(node);
-			break;
-		case PREDECREMENT: // -- decrement before expression
-		case PREINCREMENT: // ++ increment before expression
-			processPrefixOperators(node);
-			break;
-		case SHIFTLEFT: // << shift left
-		case SHIFTRIGHT: // >> shift right
-			processSHIFTLEFTorSHIFTRIGHT(node);
-			break;
-		case SHIFTLEFTEQ: // <<= shift left assignment
-		case SHIFTRIGHTEQ: // >>= shift right assignment
-			processSHIFTLEFTEQorSHIFTRIGHTEQ(node);
-			break;
-		case SUBSCRIPT: // [] array subscript
-			processSUBSCRIPT(node);
-			break;
-		case DIV: // / numerical division
-		case MOD: // % integer modulus
-		case TIMES: // * numeric multiplication
-			processTIMESorDIVorMOD(node);
-			break;
-		case UNARYMINUS: // - numeric negative
-		case UNARYPLUS: // + numeric no-op
-			processUNARAYPLUSorUNARYMINUS(node);
-			break;
-		case VALID:
-			processValidExpression(node);
-			break;
-		case OLD:
-			processExpression(node.getArgument(0));
-			node.setInitialType(node.getArgument(0).getConvertedType());
-			break;
-		default:
-			throw new RuntimeException("Unknown operator: " + operator);
+			case ADDRESSOF : // & pointer to object
+				processADDRESSOF(node);
+				break;
+			case APPLY :
+				processAPPLY(node);
+				break;
+			case ASSIGN : // = standard assignment operator
+				processASSIGN(node);
+				break;
+			case HASH :
+				processHash(node);
+				break;
+			case BIG_O : // big-O expresion
+				processBIG_O(node);
+				break;
+			case BITAND : // & bit-wise and
+			case BITOR : // | bit-wise inclusive or
+			case BITXOR : // ^ bit-wise exclusive or
+			case BITEQUIV : // <--> bit-wise equivalent
+			case BITIMPLIES : // --> bit-wise implies
+				processBitwise(node);
+				break;
+			case BITANDEQ : // &= bit-wise and assignment
+			case BITOREQ : // |= bit-wise inclusive or assignment
+			case BITXOREQ : // ^= bit-wise exclusive or assignment
+				processBitwiseAssign(node);
+				break;
+			case BITCOMPLEMENT : // ~ bit-wise complement
+				processBITCOMPLEMENT(node);
+				break;
+			case COMMA : // : the comma operator
+				processCOMMA(node);
+				break;
+			case CONDITIONAL : // ?: the conditional operator
+				processCONDITIONAL(node);
+				break;
+			case DEREFERENCE : // * pointer dereference
+				processDEREFERENCE(node);
+				break;
+			case DIVEQ : // /= division assignment
+			case MODEQ : // %= integer modulus assignment
+			case TIMESEQ : // *= multiplication assignment
+				processTIMESEQorDIVEQorMODEQ(node);
+				break;
+			case EQUALS : // == equality
+			case NEQ : // != not equals
+				processEqualityOperator(node);
+				break;
+			case LXOR : // ^^ logical xor
+			case LAND : // && logical and
+			case LOR : // || logical or
+			case LEQ :// <==> logical equiv
+			case NOT : // ! logical not
+			case IMPLIES : // => logical implication
+				processLANDorLORorNOT(node);
+				break;
+			case GT : // > greater than
+			case GTE : // >= greater than or equals
+			case LT : // < less than
+			case LTE : // <= less than or equals
+				processRelational(node);
+				break;
+			case MINUS : // - binary subtraction (numbers and pointers)
+				processMINUS(node);
+				break;
+			case PLUS : // + binary addition: numeric or pointer
+				processPLUS(node);
+				break;
+			case MINUSEQ : // -= subtraction assignment
+			case PLUSEQ : // += addition assignment
+				processPLUSEQorMINUSEQ(node);
+				break;
+			case POSTDECREMENT : // -- decrement after expression
+			case POSTINCREMENT : // ++ increment after expression
+				processPostfixOperators(node);
+				break;
+			case PREDECREMENT : // -- decrement before expression
+			case PREINCREMENT : // ++ increment before expression
+				processPrefixOperators(node);
+				break;
+			case SHIFTLEFT : // << shift left
+			case SHIFTRIGHT : // >> shift right
+				processSHIFTLEFTorSHIFTRIGHT(node);
+				break;
+			case SHIFTLEFTEQ : // <<= shift left assignment
+			case SHIFTRIGHTEQ : // >>= shift right assignment
+				processSHIFTLEFTEQorSHIFTRIGHTEQ(node);
+				break;
+			case SUBSCRIPT : // [] array subscript
+				processSUBSCRIPT(node);
+				break;
+			case DIV : // / numerical division
+			case MOD : // % integer modulus
+			case TIMES : // * numeric multiplication
+				processTIMESorDIVorMOD(node);
+				break;
+			case UNARYMINUS : // - numeric negative
+			case UNARYPLUS : // + numeric no-op
+				processUNARAYPLUSorUNARYMINUS(node);
+				break;
+			case VALID :
+				processValidExpression(node);
+				break;
+			case OLD :
+				processExpression(node.getArgument(0));
+				node.setInitialType(node.getArgument(0).getConvertedType());
+				break;
+			default :
+				throw new RuntimeException("Unknown operator: " + operator);
 		}
 	}
 
@@ -1175,30 +1195,29 @@ public class ExpressionAnalyzer {
 	}
 
 	void processLambda(LambdaNode node) throws SyntaxException {
-		ExpressionNode expression = node.expression();
+		ExpressionNode function = node.lambdaFunction();
+		ExpressionNode restriction = node.restriction();
 		ObjectType returnType;
 		List<ObjectType> parameterTypes = new ArrayList<>();
+		ObjectType variableType;
+		VariableDeclarationNode freeVariable = node.freeVariable();
 
-		for (PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode> variableSubList : node
-				.boundVariableList()) {
-			for (VariableDeclarationNode variable : variableSubList.getLeft()) {
-				ObjectType variableType;
+		entityAnalyzer.declarationAnalyzer
+				.processVariableDeclaration(freeVariable);
+		variableType = (ObjectType) freeVariable.getTypeNode().getType();
+		parameterTypes.add(variableType);
 
-				entityAnalyzer.declarationAnalyzer
-						.processVariableDeclaration(variable);
-				variableType = (ObjectType) variable.getTypeNode().getType();
-				parameterTypes.add(variableType);
-			}
-			if (variableSubList.getRight() != null)
-				processExpression(variableSubList.getRight());
+		if (restriction != null) {
+			processExpression(restriction);
+			if (!restriction.getType().equivalentTo(boolType))
+				throw this.error(
+						"Restriction expression of a lambda expression must be boolean type.",
+						node);
 		}
-		if (node.restriction() != null)
-			processExpression(node.restriction());
-		processExpression(expression);
-		addStandardConversions(expression);
-		returnType = (ObjectType) expression.getConvertedType();
-		node.setInitialType(this.typeFactory.functionType(returnType, false,
-				parameterTypes, false));
+		processExpression(function);
+		addStandardConversions(function);
+		returnType = (ObjectType) function.getConvertedType();
+		node.setInitialType(typeFactory.lambdaType(variableType, returnType));
 		if (!node.isSideEffectFree(false))
 			throw this.error(
 					"lambda expressions are not allowed to have side effects.",
@@ -1404,6 +1423,31 @@ public class ExpressionAnalyzer {
 		node.setInitialType(typeFactory.pointerType(arg0.getType()));
 	}
 
+	private void processAPPLY(OperatorNode node) throws SyntaxException {
+		ExpressionNode arg0 = node.getArgument(0);
+		ExpressionNode arg1 = node.getArgument(1);
+
+		if (node.getNumberOfArguments() != 2)
+			throw new SyntaxException("The apply operation takes two operands.",
+					arg0.getSource());
+
+		if (arg0.getType().kind() != TypeKind.LAMBDA)
+			throw new SyntaxException(
+					"The first argument of the APPLY operation must have a $lambda_t type",
+					arg0.getSource());
+		LambdaType lambdaType = (LambdaType) arg0.getType();
+
+		if (!lambdaType.freeVariableType().compatibleWith(arg1.getType()))
+			throw new SyntaxException(
+					"The single argument of APPLY operator has incompatible "
+							+ "type with the argument of the lambda expression\nThe single argument has: "
+							+ arg1.getType()
+							+ "\nThe argument of the lambda expression has: "
+							+ lambdaType.freeVariableType(),
+					node.getSource());
+		node.setInitialType(lambdaType.lambdaFunctionReturnType());
+	}
+
 	/**
 	 * Processes a simple assignment of the form lhs = rhs. Pre-req: the two
 	 * operands have already been processed via method
@@ -1460,22 +1504,22 @@ public class ExpressionAnalyzer {
 		ExpressionKind kind = node.expressionKind();
 
 		switch (kind) {
-		case ARROW:
-		case DOT:
-		case IDENTIFIER_EXPRESSION:
-			return true;
-		case OPERATOR: {
-			OperatorNode operatorNode = (OperatorNode) node;
-
-			switch (operatorNode.getOperator()) {
-			case DEREFERENCE:
-			case SUBSCRIPT:
+			case ARROW :
+			case DOT :
+			case IDENTIFIER_EXPRESSION :
 				return true;
-			default:
+			case OPERATOR : {
+				OperatorNode operatorNode = (OperatorNode) node;
+
+				switch (operatorNode.getOperator()) {
+					case DEREFERENCE :
+					case SUBSCRIPT :
+						return true;
+					default :
+				}
 			}
-		}
-		default:
-			return false;
+			default :
+				return false;
 		}
 	}
 
@@ -1986,12 +2030,12 @@ public class ExpressionAnalyzer {
 		TypeKind kind = type.kind();
 
 		switch (kind) {
-		case ARRAY:
-			return true;
-		case QUALIFIED:
-			return isArrayType(((QualifiedObjectType) type).getBaseType());
-		default:
-			return false;
+			case ARRAY :
+				return true;
+			case QUALIFIED :
+				return isArrayType(((QualifiedObjectType) type).getBaseType());
+			default :
+				return false;
 		}
 	}
 
@@ -2316,6 +2360,11 @@ public class ExpressionAnalyzer {
 			} else
 				throw error("Incompatible pointer types for operator "
 						+ operator + ":\n" + type0 + "\n" + type1, node);
+		} else if (type0.kind() == TypeKind.LAMBDA
+				&& type1.kind() == TypeKind.LAMBDA) {
+			if (!type0.equivalentTo(type1))
+				throw error("Incompatible lambda types for operator" + operator
+						+ ":\n" + type0 + "\n" + type1, node);
 		} else
 			throw error("Incompatible types for operator " + operator + ":\n"
 					+ type0 + "\n" + type1, node);
@@ -2435,41 +2484,43 @@ public class ExpressionAnalyzer {
 		MPIContractExpressionKind kind = node.MPIContractExpressionKind();
 
 		switch (kind) {
-		case MPI_AGREE:
-			ExpressionNode expr = node.getArgument(0);
-			processExpression(expr);
-			node.setInitialType(boolType);
-			break;
-		case MPI_EQUALS:
-			processMPIEqualsNode(node);
-			break;
-		case MPI_EMPTY_IN:
-		case MPI_EMPTY_OUT:
-			processExpression(node.getArgument(0));
+			case MPI_AGREE :
+				ExpressionNode expr = node.getArgument(0);
+				processExpression(expr);
+				node.setInitialType(boolType);
+				break;
+			case MPI_EQUALS :
+				processMPIEqualsNode(node);
+				break;
+			case MPI_EMPTY_IN :
+			case MPI_EMPTY_OUT :
+				processExpression(node.getArgument(0));
 
-			if (!node.getArgument(0).getConvertedType().equivalentTo(intType))
-				throw error(
-						"\\mpi_empty_in/mpi_empty_out requires that the argument has an integer type.",
+				if (!node.getArgument(0).getConvertedType()
+						.equivalentTo(intType))
+					throw error(
+							"\\mpi_empty_in/mpi_empty_out requires that the argument has an integer type.",
+							node);
+				node.setInitialType(boolType);
+				break;
+			case MPI_EXTENT :
+				processMPIExtentNode(node);
+				break;
+			case MPI_INTEGER_CONSTANT :
+				node.setInitialType(intType);
+				break;
+			case MPI_OFFSET :
+				processMPIOffsetNode(node);
+				break;
+			case MPI_VALID :
+				processMPIValidNode(node);
+				break;
+			case MPI_REGION :
+				processMPIRegionNode(node);
+				break;
+			default :
+				throw error("Unknown MPI contract expression kind: " + kind,
 						node);
-			node.setInitialType(boolType);
-			break;
-		case MPI_EXTENT:
-			processMPIExtentNode(node);
-			break;
-		case MPI_INTEGER_CONSTANT:
-			node.setInitialType(intType);
-			break;
-		case MPI_OFFSET:
-			processMPIOffsetNode(node);
-			break;
-		case MPI_VALID:
-			processMPIValidNode(node);
-			break;
-		case MPI_REGION:
-			processMPIRegionNode(node);
-			break;
-		default:
-			throw error("Unknown MPI contract expression kind: " + kind, node);
 		}
 	}
 
@@ -2563,18 +2614,23 @@ public class ExpressionAnalyzer {
 	 */
 	private void processMPIEqualsNode(MPIContractExpressionNode node)
 			throws SyntaxException {
-		ExpressionNode expr0 = node.getArgument(0);
-		ExpressionNode count = node.getArgument(1);
-		ExpressionNode type = node.getArgument(2);
-		ExpressionNode expr1 = node.getArgument(3);
+		ExpressionNode region0, region1, errorArg;
 
-		processMPIPtrWorker(expr0, count, type, "mpi_equals");
-		processExpression(expr1);
-		if (expr1.getConvertedType().kind() != TypeKind.POINTER)
-			throw error(
-					"\\mpi_equals requires that the forth argument has pointer type.",
-					expr1);
-		node.setInitialType(boolType);
+		region0 = node.getArgument(0);
+		region1 = node.getArgument(1);
+		processExpression(region0);
+		processExpression(region1);
+		if (region0.getType().kind() != TypeKind.MEMORY)
+			errorArg = region0;
+		else if (region1.getType().kind() != TypeKind.MEMORY)
+			errorArg = region1;
+		else {
+			node.setInitialType(boolType);
+			return;
+		}
+		throw error(
+				"\\mpi_equals takes two \\mpi_regions expressions as comparison operands",
+				errorArg);
 	}
 
 	/**

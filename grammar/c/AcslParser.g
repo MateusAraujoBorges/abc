@@ -168,7 +168,7 @@ loop_invariant
 
 loop_assigns
     : loop_key assigns_key argumentExpressionList
-        ->^(LOOP_ASSIGNS argumentExpressionList)
+        ->^(LOOP_ASSIGNS assigns_key argumentExpressionList)
     ;
 
 loop_allocation
@@ -902,8 +902,8 @@ mpi_expression
       	  -> ^(MPI_AGREE mpiagree_key $a) 
     	| mpiregion_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
       	  -> ^(MPI_REGION mpiregion_key $a $b $c)
-    	| mpiequals_key LPAREN a=term COMMA b=term COMMA c=term COMMA d=term RPAREN
-      	  -> ^(MPI_EQUALS mpiequals_key $a $b $c $d)
+    	| mpiequals_key LPAREN a=term COMMA b=term RPAREN
+      	  -> ^(MPI_EQUALS mpiequals_key $a $b)
         | mpiextent_key LPAREN a=primaryExpression RPAREN
           -> ^(MPI_EXTENT mpiextent_key $a)
         | mpioffset_key LPAREN a=term COMMA b=term COMMA c=term RPAREN

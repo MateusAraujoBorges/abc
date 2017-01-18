@@ -75,7 +75,7 @@ public class CommonMPIContractExpressionNode extends CommonExpressionNode
 					numArgs = 1;
 					break;
 				case MPI_EQUALS :
-					numArgs = 4;
+					numArgs = 2;
 					break;
 				case MPI_EXTENT :
 					numArgs = 1;

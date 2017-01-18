@@ -32,6 +32,11 @@ public interface OperatorNode extends ExpressionNode {
 		 */
 		ADDRESSOF,
 		/**
+		 * The CIVL-C "APPLY" operator which applies a single argument to a
+		 * lambda expression
+		 */
+		APPLY,
+		/**
 		 * The standard binary assignment operator <code>=</code>, as in
 		 * <code>lhs=rhs</code>.
 		 */

@@ -3,18 +3,12 @@ package edu.udel.cis.vsl.abc.ast.node.IF.statement;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
 /**
+ * <b>Syntax</b>
+ * <p>
  * Represents a CIVL-C <code>$with(p)</code> node. It has the form:
- * <code>$with(p) statement</code>.
- * 
- * The p in the parenthesis shall be an expression which represents a reference
- * to a collate state.
- * 
- * A <code>$with(p) statement</code> is a <code>$with(p)</code> keyword ahead of
- * a single {@link StatementNode} or a {@link CompoundStatementNode}.
- * 
- * A <code>$with(p) statement</code> means that the statement s will be executed
- * from a state referenced by p.
- * 
+ * <code>$with(expr) statement</code> or
+ * <code>$with(expr, &write_set) statement </code>.
+ * </p>
  * 
  * @author ziqingluo
  *
@@ -38,6 +32,17 @@ public interface WithNode extends StatementNode {
 	 * @return A {@link StatementNode} attached with the whole with expression.
 	 */
 	StatementNode getBodyNode();
+
+	/**
+	 * Returns true if and only if this node represents a "parallel" $with
+	 * statement, i.e. the execution of this statement will not affect any thing
+	 * outside of the $with scope.
+	 * 
+	 * A parallel $with statement takes an extra output argument : write_set
+	 * 
+	 * @return
+	 */
+	boolean isParallelStatement();
 
 	@Override
 	WithNode copy();

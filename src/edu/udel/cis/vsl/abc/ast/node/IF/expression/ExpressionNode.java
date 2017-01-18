@@ -137,10 +137,10 @@ public interface ExpressionNode
 		 */
 		OPERATOR,
 		/**
-		 * A CIVL-C <code>$original (expr)</code> expression, can be cast to
-		 * {@link OriginalExpressionNode}
+		 * An intermediate memory block expression, can be cast to
+		 * {@link MemoryBlockNode}
 		 */
-		ORIGINAL,
+		MEMORY_BLOCK,
 		/**
 		 * A CIVL-C expression formed using a quantifier, such as the universal
 		 * quantifier <code>$forall</code> or the existential quantifier
@@ -210,8 +210,8 @@ public interface ExpressionNode
 		 */
 		NOTHING,
 		/**
-		 * An ACSL extended quantification expression
-		 * (<code>\sum, \min, \max, \product, \numof</code>); can be cast to
+		 * An ACSL extended quantification expression (
+		 * <code>\sum, \min, \max, \product, \numof</code>); can be cast to
 		 * {@link ExtendedQuantifiedExpressionNode}.
 		 */
 		EXTENDED_QUANTIFIED
