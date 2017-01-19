@@ -3075,6 +3075,13 @@ public class ASTPrettyPrinter {
 		return trimStringBuffer(result, maxLength);
 	}
 
+	/**
+	 * Pretty printing a {@link MemoryBlockReferenceNode}
+	 * 
+	 * @param memBlock
+	 * @param maxLength
+	 * @return
+	 */
 	private static StringBuffer memBlock2Pretty(
 			MemoryBlockReferenceNode memBlock, int maxLength) {
 		if (maxLength == 0)
