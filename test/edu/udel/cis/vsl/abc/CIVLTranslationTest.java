@@ -2,54 +2,24 @@ package edu.udel.cis.vsl.abc;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
 
-import org.antlr.runtime.CharStream;
-import org.antlr.runtime.Lexer;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
-import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer;
 import edu.udel.cis.vsl.abc.main.ABCExecutor;
 import edu.udel.cis.vsl.abc.main.TranslationTask;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
-import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils.LexerFactory;
 
 public class CIVLTranslationTest {
 
 	private static boolean debug = false;
 
-	private static PrintStream out = System.out;
-
 	private static List<String> codes = Arrays.asList("prune", "sef");
 
 	private File root = new File(new File("examples"), "civl");
-
-	private static LexerFactory lf = new LexerFactory() {
-
-		@Override
-		public Lexer makeLexer(CharStream stream) {
-			return new PreprocessorLexer(stream);
-		}
-
-	};
-
-	@SuppressWarnings("unused")
-	private void lex(String name) throws IOException {
-		String filename = (new File(root, name)).getAbsolutePath();
-		PrintStream lexOut = debug ? out : new PrintStream(new OutputStream() {
-			public void write(int b) {
-				// DO NOTHING
-			}
-		});
-
-		ANTLRUtils.lex(lexOut, lf, filename);
-	}
 
 	private void checkFile(String filename) throws ABCException {
 		File file = new File(root, filename);
@@ -175,6 +145,11 @@ public class CIVLTranslationTest {
 	@Test
 	public void uniform() throws ABCException {
 		check("uniform");
+	}
+
+	@Test
+	public void abstractTest() throws ABCException {
+		check("abstract");
 	}
 
 	@Test

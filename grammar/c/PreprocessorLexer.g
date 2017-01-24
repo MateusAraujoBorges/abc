@@ -109,6 +109,7 @@ COLLECTIVE	:	'$collective'	;
 CONTIN		:	'$contin'	;
 DEPENDS     	:   	'$depends'	;
 DERIV		:	'$D'		;
+DIFFERENTIABLE	: '$differentiable';
 DOMAIN		:	'$domain'	;
 ENSURES		:	'$ensures'	;
 EXISTS		: 	'$exists'	;

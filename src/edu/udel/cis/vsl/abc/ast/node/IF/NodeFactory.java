@@ -2005,11 +2005,16 @@ public interface NodeFactory {
 	 * @param continuity
 	 *            The number of derivatives that may be taken; this applies to
 	 *            real valued functions of real variables only
+	 * @param intervals
+	 *            sequence of intervals whose Cartesian product specifies the
+	 *            domain on which this function is differentiable to the
+	 *            specified degree
 	 * @return An abstract function definition with the specified properties.
 	 */
 	AbstractFunctionDefinitionNode newAbstractFunctionDefinitionNode(
 			Source source, IdentifierNode name, TypeNode type,
-			SequenceNode<ContractNode> contract, int continuity);
+			SequenceNode<ContractNode> contract, int continuity,
+			SequenceNode<PairNode<ExpressionNode, ExpressionNode>> intervals);
 
 	/**
 	 * Creates a new node representing an entire translation unit. The children
@@ -2705,5 +2710,6 @@ public interface NodeFactory {
 	 *            the base address of the memory block
 	 * @return the new <code>$mem_block</code> expression node
 	 */
-	MemoryBlockReferenceNode newMemoryBlockNode(Source source, ExpressionNode baseAddr);
+	MemoryBlockReferenceNode newMemoryBlockNode(Source source,
+			ExpressionNode baseAddr);
 }

@@ -942,7 +942,15 @@ functionSpecifier
     | FATOMIC -> ^(FATOMIC)
     | DEVICE
     | GLOBAL
+    | differentiableSpecifier
     ;
+
+
+differentiableSpecifier
+	: DIFFERENTIABLE LPAREN INTEGER_CONSTANT COMMA intervalSeq RPAREN
+	  ->
+	  ^(DIFFERENTIABLE INTEGER_CONSTANT intervalSeq)
+	;
 
 libraryName
 	: LSQUARE i0=IDENTIFIER i1+=(SUB | IDENTIFIER)* RSQUARE

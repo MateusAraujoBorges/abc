@@ -9,6 +9,7 @@ import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.CHAR;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.COMPLEX;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.CONST;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DEVICE;
+import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DIFFERENTIABLE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DOMAIN;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.DOUBLE;
 import static edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant.ENUM;
@@ -193,6 +194,19 @@ public class SpecifierAnalysis {
 	private Configuration configuration;
 
 	/**
+	 * A function specifier of the form $differentiable(n, [a1,b1]...[an,bn]). n
+	 * is the degree of differentiability and [a1,b1]x...x[an,bn] is the domain
+	 * on which the function has that many continuous derivatives.
+	 */
+	CommonTree differentiableNode = null;
+
+	/**
+	 * If $differentiable is present, this is the conrete int n which is the
+	 * number of derivatives that exist.
+	 */
+	int differentiableDegree = 0;
+
+	/**
 	 * Creates a new analysis object and conducts the analysis. The
 	 * specifierListNode is the root of a tree which is a list of declaration
 	 * specifiers. It may have type DECLARATION_SPECIFIERS or
@@ -370,6 +384,14 @@ public class SpecifierAnalysis {
 						continuity = parseInt((CommonTree) node.getChild(0));
 					}
 					break;
+				case DIFFERENTIABLE:
+					if (differentiableNode != null)
+						throw error(
+								"More than one $differentiable specifier in function declaration",
+								node);
+					differentiableNode = node;
+					differentiableDegree = parseInt(
+							(CommonTree) node.getChild(0));
 				case DEVICE:
 					this.deviceSpecifier = true;
 					break;
@@ -415,7 +437,8 @@ public class SpecifierAnalysis {
 		if (typeNameKind != null && typeNameKind != kind)
 			throw error(
 					"Two different kinds of types specified in declaration specifier list: "
-							+ typeNameKind + " and " + kind, specifierListNode);
+							+ typeNameKind + " and " + kind,
+					specifierListNode);
 		typeNameKind = kind;
 	}
 
@@ -423,7 +446,8 @@ public class SpecifierAnalysis {
 		if (typeSpecifierNode != null)
 			throw error(
 					"Two type specifiers in declaration. Previous specifier was at "
-							+ error("", typeSpecifierNode).getSource(), node);
+							+ error("", typeSpecifierNode).getSource(),
+					node);
 		typeSpecifierNode = node;
 	}
 
