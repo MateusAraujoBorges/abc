@@ -8,6 +8,7 @@ import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonOperatorNode extends CommonExpressionNode
@@ -138,7 +139,14 @@ public class CommonOperatorNode extends CommonExpressionNode
 			// possible pointer or numeric arithmetic error:
 			case MINUS :
 			case PLUS :
-				// TODO:Make error side-effect analysis has multi-level options
+				// If the PLUS or MINUS is part of the pointer addition
+				// operation, then it may have error side-effects. Else, it is
+				// numerical operation which will not have error side-effects:
+				if (errorsAreSideEffects)
+					if (getArgument(0).getType().kind() == TypeKind.POINTER
+							|| getArgument(1).getType()
+									.kind() == TypeKind.POINTER)
+						return false;
 				break;
 			// always a problem:
 			case DEREFERENCE :
