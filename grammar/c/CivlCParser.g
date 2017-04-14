@@ -496,10 +496,10 @@ logicalOrExpression
 	
 /* Added for CIVL-C.  Usually 6.5.15 would use logicalOrExpression. */
 logicalImpliesExpression
-	: ( logicalOrExpression -> logicalOrExpression )
-	  ( IMPLIES y=logicalOrExpression
-	    -> ^(OPERATOR IMPLIES ^(ARGUMENT_LIST $logicalImpliesExpression $y))
-	  )*
+	: ( x=logicalOrExpression -> logicalOrExpression )
+	  ( IMPLIES y=logicalImpliesExpression
+	    -> ^(OPERATOR IMPLIES ^(ARGUMENT_LIST $x $y))
+	  )?
     	;
 
 /* 6.5.15 */
