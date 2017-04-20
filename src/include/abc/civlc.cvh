@@ -34,7 +34,8 @@ typedef struct $state $state;
 /* The CIVL-C dynamic type, used to represent a symbolic type */
 typedef struct $dynamic $dynamic;
 
-/* The CIVL-C program memory type */
+/* The CIVL-C program type: memory location set type.
+ */
 typedef struct _mem $mem;
 
 /* **************************** Misc. Functions **************************** */
@@ -149,15 +150,41 @@ $system $state_f $state $get_state();
 
 /*@ depends_on \nothing; 
   @ executes_when \true; */
-$system $state_f void $update_mem(void *, $mem * mem);
-
-/*@ depends_on \nothing; 
-  @ executes_when \true; */
-$system $state_f void $havoc_mem($mem * mem);
+$system $state_f void $havoc_mem($mem mem);
 
 // the types will be updated to $integer later
 $system int $remainder(int x, int y);
 
 $system int $quotient(int x, int y);
+
+/* Push an assumption into the partial path condition stack belong to
+   the calling process. */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system void $assume_push(_Bool pred);
+
+/* Pop an entry out of a partial path condition stack belong to the
+   calling process. */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system void $assume_pop();
+
+/*********************************************************************
+ * As long as a process has a non-empty write set stack, any
+ * modification on variables and memroy heap objects will be recorded
+ * in the write set.
+ *********************************************************************/
+
+/* Push an empty write set into the write set stack belong to the
+   calling process. */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system void $write_set_push();
+
+/* Pop an entry out of a write set stack belong to the calling
+   process. */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system void $write_set_pop($mem * ws);
 
 #endif
