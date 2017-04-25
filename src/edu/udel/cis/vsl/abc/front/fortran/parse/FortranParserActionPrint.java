@@ -97,12 +97,12 @@ public class FortranParserActionPrint implements IFortranParserAction {
 
 	public static String toString(int kp) {
 		switch (kp) {
-		case 0:
-			return "none";
-		case 1:
-			return "literal";
-		case 2:
-			return "id";
+			case 0 :
+				return "none";
+			case 1 :
+				return "literal";
+			case 2 :
+				return "id";
 		}
 		return "";
 	}
@@ -5559,6 +5559,28 @@ public class FortranParserActionPrint implements IFortranParserAction {
 	public FortranTree getFortranParseTree() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void pragma_stmt(Token pragmaToken, Token pragma_id,
+			Token eosToken) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void pragma_token_list__begin() {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void pragma_token_list(int count) {
+		// TODO -generated method stub
+	}
+
+	@Override
+	public void pragma_token(Token pragma_token) {
+		// TODO Auto-generated method stub
 	}
 
 }

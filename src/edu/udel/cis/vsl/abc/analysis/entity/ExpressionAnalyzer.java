@@ -2805,7 +2805,8 @@ public class ExpressionAnalyzer {
 	 */
 	private boolean isPointerToCompleteObjectType(Type type) {
 		if (type instanceof PointerType) {
-			if (this.language == Language.CIVL_C)
+			if (this.language == Language.CIVL_C
+					|| this.language == Language.FORTRAN77)
 				return true;
 			else {
 				Type baseType = ((PointerType) type).referencedType();

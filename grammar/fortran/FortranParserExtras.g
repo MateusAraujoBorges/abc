@@ -9,7 +9,7 @@ parser grammar FortranParserExtras;
 options {
     language=Java;
     superClass=AbstractFortranParser;
-    tokenVocab=FortranLexer;
+    tokenVocab=FortranParser08;
 }
 
 import FortranParser08;
@@ -130,6 +130,7 @@ executable_construct
    |   if_construct
    |   select_type_construct
    |   where_construct
+   |   pragma_stmt  //For OMP STATEMENT (W.Wu)
    ;
 
 /*

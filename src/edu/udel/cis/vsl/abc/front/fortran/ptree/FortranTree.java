@@ -19,6 +19,8 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import edu.udel.cis.vsl.abc.token.common.CommonCivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.common.CommonTokenFactory;
 
 /**
  * @author Wenhao Wu
@@ -340,6 +342,32 @@ public class FortranTree implements ParseTree {
 	public CivlcTokenSequence getTokenSourceProducer(CommonTree tokenListNode) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	public CivlcTokenSequence getTokenSourceProducer(
+			FortranTree tokenListNode) {
+		int numChildren = tokenListNode.numChildren();
+		TokenFactory tF = new CommonTokenFactory();
+
+		if (numChildren == 0) {
+			return tF.getEmptyTokenSubsequence(getCivlcTokenSource());
+		} else {
+			ArrayList<CivlcToken> tokens = new ArrayList<CivlcToken>();
+
+			for (int i = 0; i < numChildren; i++) {
+				tokens.add(tokenListNode.getChildByIndex(i).cTokens[0]);
+			}
+
+			CivlcToken startToken = tokens.get(0);
+			CivlcToken stopToken = tokens.get(numChildren - 1);
+
+			startToken.setIndex(0);
+			stopToken.setIndex(numChildren-1);
+			return tF.getTokenSubsequence(
+					new CommonCivlcTokenSource(tokens, tF), startToken,
+					stopToken);
+		}
+
 	}
 
 	@Override

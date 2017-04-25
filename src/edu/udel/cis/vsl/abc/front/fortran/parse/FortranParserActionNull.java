@@ -2313,26 +2313,45 @@ public class FortranParserActionNull implements IFortranParserAction {
 	@Override
 	public void do_term_action_stmt(Token label, Token endKeyword,
 			Token doKeyword, Token id, Token eos) {
-		// TODO Auto-generated method stub
-
+		// Auto-generated method stub
 	}
 
 	@Override
 	public void inclusion(String included, String source) {
-		// TODO Auto-generated method stub
-
+		// Auto-generated method stub
 	}
 
 	@Override
 	public AST getAST() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
 	}
 
 	@Override
 	public FortranTree getFortranParseTree() {
-		// TODO Auto-generated method stub
+		// Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void pragma_stmt(Token pragmaToken, Token pragma_id,
+			Token eosToken) {
+		// Auto-generated method stub
+	}
+
+	@Override
+	public void pragma_token_list__begin() {
+		// Auto-generated method stub
+	}
+
+	@Override
+	public void pragma_token_list(int count) {
+		// Auto-generated method stub
+	}
+
+	@Override
+	public void pragma_token(Token pragma_token) {
+		// Auto-generated method stub
 	}
 
 }

@@ -6,6 +6,9 @@ import edu.udel.cis.vsl.abc.front.c.astgen.CASTBuilder;
 import edu.udel.cis.vsl.abc.front.c.astgen.CIVLPragmaHandler;
 import edu.udel.cis.vsl.abc.front.c.astgen.COmpPragmaHandler;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
+import edu.udel.cis.vsl.abc.front.fortran.astgen.FOmpPragmaHandler;
+import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilder;
+import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
 
 /**
  * This factory produces new {@link PragmaHandler}s. Each {@link PragmaHandler}
@@ -43,12 +46,17 @@ public class PragmaFactory {
 	 */
 	public PragmaHandler newHandler(String code, ParseTree parseTree) {
 		switch (code) {
-		case "CIVL":
-			return new CIVLPragmaHandler((CASTBuilder) astBuilder, parseTree);
-		case "omp":
-			return new COmpPragmaHandler((CASTBuilder) astBuilder, parseTree);
-		default:
-			return new TrivialPragmaHandler(code, parseTree);
+			case "CIVL" :
+				return new CIVLPragmaHandler((CASTBuilder) astBuilder,
+						parseTree);
+			case "omp" :
+				return new COmpPragmaHandler((CASTBuilder) astBuilder,
+						parseTree);
+			case "OMP" :
+				return new FOmpPragmaHandler((FortranASTBuilder) astBuilder,
+						(FortranTree) parseTree);
+			default :
+				return new TrivialPragmaHandler(code, parseTree);
 		}
 	}
 

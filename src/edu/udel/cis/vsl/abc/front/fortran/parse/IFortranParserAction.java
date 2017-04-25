@@ -2080,6 +2080,38 @@ public abstract interface IFortranParserAction {
 			boolean hasShapeSpecList);
 
 	/**
+	 * R -501 Fortran comment pragma (e.g., '!$ OMP PARALLEL')
+	 * 
+	 * @param pragma_id
+	 *            Identifier (e.g., OMP)
+	 */
+	public abstract void pragma_stmt(Token pragmaToken, Token pragma_id, Token eosToken);
+
+	/**
+	 * R -502 Fortran comment pragma token list (e.g., '!$ OMP
+	 * <code><token list></code>')
+	 * 
+	 */
+	public abstract void pragma_token_list__begin();
+
+	/**
+	 * R -502 Fortran comment pragma token list (e.g., '!$ OMP
+	 * <code><token list></code>')
+	 * 
+	 * @param count
+	 *            the number of followed tokens
+	 */
+	public abstract void pragma_token_list(int count);
+
+	/**
+	 * R -503 Fortran comment pragma token 
+	 * 
+	 * @param pragma_token
+	 *            the pragma token
+	 */
+	public abstract void pragma_token(Token pragma_token);
+
+	/**
 	 * R601 variable : designator
 	 */
 	public abstract void variable();

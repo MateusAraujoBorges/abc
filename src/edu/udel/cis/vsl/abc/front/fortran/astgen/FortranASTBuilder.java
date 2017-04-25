@@ -13,20 +13,39 @@ public class FortranASTBuilder implements ASTBuilder {
 
 	private ASTFactory astFactory;
 
+	private PragmaFactory pragmaFactory;
+
 	private Configuration config;
+
+	private String filePath;
+
 
 	public FortranASTBuilder(Configuration configuration,
 			ASTFactory astFactory) {
 		this.config = configuration;
 		this.astFactory = astFactory;
+		pragmaFactory = new PragmaFactory(this);
+		this.filePath = "";
+	}
+	
+	public FortranASTBuilder(Configuration configuration,
+			ASTFactory astFactory, String filePath) {
+		this.config = configuration;
+		this.astFactory = astFactory;
+		pragmaFactory = new PragmaFactory(this);
+		this.filePath = filePath;
+	}
+
+	public FortranASTBuilderWorker getWorker(FortranTree tree) {
+		return new FortranASTBuilderWorker(config, tree, astFactory, filePath,
+				pragmaFactory);
 	}
 
 	@Override
 	public AST getTranslationUnit(ParseTree tree) throws SyntaxException {
 		FortranTree fTree = (FortranTree) tree;
-		String filePath = "";
 		FortranASTBuilderWorker worker = new FortranASTBuilderWorker(config,
-				fTree, astFactory, filePath);
+				fTree, astFactory, filePath, pragmaFactory);
 
 		return worker.generateAST();
 	}

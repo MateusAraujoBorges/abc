@@ -13,6 +13,7 @@ import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.Types;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Values;
+import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilder;
 import edu.udel.cis.vsl.abc.front.fortran.astgen.FortranASTBuilderWorker;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
@@ -281,6 +282,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 				|| rule == 557 /* CommonStmt */
 				|| rule == 1210 /* ExtStmt */
 				|| rule == 1216 /* IntrinsicStmt */
+		// || rule == -501 /* PragmaStmt */
 		;
 		specification_stmt_Node.addChild(temp);
 		stack.push(specification_stmt_Node);
@@ -306,6 +308,7 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 				|| rule == 825 /* DoConstruct */
 				|| rule == 744 /* WhereConstruct */
 				|| rule == 752 /* ForallConstruct */
+				|| rule == -501 /* PragmaStmt */
 		;
 		executable_construct_Node.addChild(temp);
 		stack.push(executable_construct_Node);
@@ -1707,9 +1710,9 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	 */
 	public void intent_spec(Token intentKeyword1, Token intentKeyword2,
 			int intent) {
-		//600 in, 601 out, 602 inout
+		// 600 in, 601 out, 602 inout
 		FortranTree intent_spec_Node = new FortranTree(517, "Intent", intent);
-		
+
 		stack.push(intent_spec_Node);
 	}
 
@@ -5403,13 +5406,12 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 				TypeFactory typeFactory = Types.newTypeFactory();
 				ValueFactory valueFactory = Values.newValueFactory(null,
 						typeFactory);
-				FortranASTBuilderWorker worker = new FortranASTBuilderWorker(
-						null, root,
+				FortranASTBuilder builder = new FortranASTBuilder(null,
 						ASTs.newASTFactory(
 								Nodes.newNodeFactory(null, typeFactory,
 										valueFactory),
-								tokenFactory, typeFactory),
-						filename);
+								tokenFactory, typeFactory), filename);
+				FortranASTBuilderWorker worker = builder.getWorker(root);
 
 				try {
 					ast = worker.generateAST();
@@ -5557,6 +5559,56 @@ public class FortranParserActionTreeMaker implements IFortranParserAction {
 	public void inclusion(String included, String source) {
 		// FortranTree inclusion_Node = new FortranTree(-3, "Include_Stmt");
 
+	}
+
+	@Override
+	public void pragma_stmt(Token pragmaToken, Token pragma_id, Token eosToken) {
+		FortranTree pragma_stmt_Node = new FortranTree(-501, "PragmaStmt",
+				getCToken(pragmaToken));
+		FortranTree pragmaIdNode = new FortranTree("PragmaId",
+				getCToken(pragma_id));
+		FortranTree pragmaEOSNode = new FortranTree("EOPragma",
+				getCToken(eosToken));
+		assert !stack.isEmpty();
+		assert stack.peek().rule() == -502; /* Pragma Token List */
+		pragma_stmt_Node.addChild(stack.pop());
+		pragma_stmt_Node.addChild(0, pragmaIdNode);
+		pragma_stmt_Node.addChild(pragmaEOSNode);
+		stack.push(pragma_stmt_Node);
+	}
+
+	@Override
+	public void pragma_token_list__begin() {
+		// Do nothing
+	}
+
+	@Override
+	public void pragma_token_list(int count) {
+		int counter = count;
+		FortranTree temp = null;
+		FortranTree pragma_token_list_Node = new FortranTree(-502,
+				"PragmaTokenList[" + counter + "]");
+
+		assert counter >= 1;
+		assert !stack.isEmpty();
+		temp = stack.pop();
+		assert temp.rule() == -503; /* Pragma Token */
+		pragma_token_list_Node.addChild(temp);
+		counter--;
+		while (counter > 0) {
+			assert !stack.isEmpty();
+			temp = stack.pop();
+			assert temp.rule() == -503; /* Pragma Token */
+			pragma_token_list_Node.addChild(0, temp);
+			counter--;
+		}
+		stack.push(pragma_token_list_Node);
+	}
+
+	@Override
+	public void pragma_token(Token pragma_token) {
+		stack.push(
+				new FortranTree(-503, "PragmaToken", getCToken(pragma_token)));
 	}
 
 	public AST getAST() {

@@ -255,6 +255,7 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 		case T_LEN:
 		case T_BIND:
 		case T_END_KEYWORDS:
+		case T_PRAGMA:
 			return true;
 		default:
 			return false;
@@ -394,24 +395,25 @@ import edu.udel.cis.vsl.abc.token.IF.Tokens;
 	public void setIncludeDirs(File[] systemIncludePaths, File[] userIncludePaths, File[] sourceUnit) {
 		TreeSet<String> pathSet = new TreeSet<String>();
 		
-		for (File f : systemIncludePaths) {
-			String path = f.getParentFile().getAbsolutePath();
-			
-			pathSet.add(path);
-		}
-		for (File f : userIncludePaths) {
-			String path = f.getParentFile().getAbsolutePath();
-
-			pathSet.add(path);
-		}
-		for (File f : sourceUnit) {
-			String path = f.getParentFile().getAbsolutePath();
-
-			pathSet.add(path);
-		}
+		if (systemIncludePaths != null)
+			for (File f : systemIncludePaths) {
+				if (f != null && f.getParentFile() != null)
+					pathSet.add(f.getParentFile().getAbsolutePath());
+			}
+		if (userIncludePaths != null)
+			for (File f : userIncludePaths) {
+				if (f != null && f.getParentFile() != null)
+					pathSet.add(f.getParentFile().getAbsolutePath());
+			}		
+		if (sourceUnit != null)
+			for (File f : sourceUnit) {
+				if (f != null && f.getParentFile() != null)
+					pathSet.add(f.getParentFile().getAbsolutePath());
+			}
 		for (String s : pathSet) {
 			includeDirs.add(s);
 		}
+	
 	}// end setIncludeDirs()
 
 	private File findFile(String fileName) {
@@ -970,7 +972,7 @@ T_EDIT_DESC_MISC
    ;
 
 LINE_COMMENT
-    : '!'  ~('\n'|'\r')*  
+    : '!'  ~('\n'|'\r'|'$')*  
         {
             $channel = HIDDEN;
         }
@@ -980,3 +982,6 @@ LINE_COMMENT
    character in column 6 to designate a continuation.  */
 MISC_CHAR : ~('\n' | '\r') ;
 
+T_PRAGMA
+   : '!$'
+   ;

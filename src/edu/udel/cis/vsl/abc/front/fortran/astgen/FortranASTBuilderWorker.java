@@ -19,6 +19,7 @@ import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
+import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FieldDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
@@ -33,12 +34,16 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.OrdinaryLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.label.SwitchLabelNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpExecutableNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ForLoopInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode.BlockItemKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
@@ -54,9 +59,12 @@ import edu.udel.cis.vsl.abc.front.IF.Parser;
 import edu.udel.cis.vsl.abc.front.IF.Preprocessor;
 import edu.udel.cis.vsl.abc.front.IF.PreprocessorException;
 import edu.udel.cis.vsl.abc.front.common.astgen.LibraryASTFactory;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaFactory;
+import edu.udel.cis.vsl.abc.front.common.astgen.PragmaHandler;
 import edu.udel.cis.vsl.abc.front.common.astgen.SimpleScope;
 import edu.udel.cis.vsl.abc.front.fortran.ptree.FortranTree;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
+import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSequence;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
@@ -86,6 +94,8 @@ public class FortranASTBuilderWorker {
 
 	private ASTFactory astFactory;
 
+	private PragmaFactory pragmaFactory;
+
 	private SequenceNode<BlockItemNode> rootNode;
 
 	private ArrayList<BlockItemNode> programUnits;
@@ -99,6 +109,8 @@ public class FortranASTBuilderWorker {
 	private Map<String, String> comm_val_block = new TreeMap<String, String>();
 
 	private Stack<IdentifierNode> programUnitTrackStack = new Stack<IdentifierNode>();
+
+	private Map<String, PragmaHandler> pragmaMap = new HashMap<>();
 	// private Map<String, VariableDeclarationNode> localMap2 = new
 	// HashMap<String, VariableDeclarationNode>();
 
@@ -109,7 +121,8 @@ public class FortranASTBuilderWorker {
 	/* Constructor */
 
 	public FortranASTBuilderWorker(Configuration config, FortranTree parseTree,
-			ASTFactory astFactory, String filePath) {
+			ASTFactory astFactory, String filePath,
+			PragmaFactory pragmaFactory) {
 		this.configuration = config;
 		this.parseTree = parseTree;
 		this.filePath = filePath;
@@ -118,6 +131,7 @@ public class FortranASTBuilderWorker {
 		this.tokenFactory = astFactory.getTokenFactory();
 		this.programUnits = new ArrayList<BlockItemNode>();
 		this.commonBlocks = new ArrayList<BlockItemNode>();
+		this.pragmaFactory = pragmaFactory;
 
 		Preprocessor libPreproc = Front.newPreprocessor(Language.C,
 				configuration, tokenFactory.newFileIndexer(), tokenFactory);
@@ -708,6 +722,11 @@ public class FortranASTBuilderWorker {
 		return nodeFactory.newIntegerConstantNode(source, representation);
 	}
 
+	public ExpressionNode translateExpression(FortranTree exprNode,
+			SimpleScope scope) throws SyntaxException {
+		return translateExpression(generateSource(exprNode), exprNode, scope);
+	}
+
 	private ExpressionNode translateExpression(Source source,
 			FortranTree exprNode, SimpleScope scope) throws SyntaxException {
 		ExpressionNode result = null;
@@ -958,6 +977,17 @@ public class FortranASTBuilderWorker {
 			case 801 : /* Block */
 				assert false;
 				break;
+			case -501 : /* Pragma Statement */ {
+				ASTNode newNode = translatePragma(blockItemNode, scope);
+
+				if (newNode == null)
+					return null;
+				else if (newNode instanceof StatementNode)
+					return (StatementNode) newNode;
+				else
+					throw error("This pragma cannot be used as a statement",
+							(FortranTree) newNode);
+			}
 			default :
 				System.out.println(rule);
 				assert false;
@@ -1227,6 +1257,44 @@ public class FortranASTBuilderWorker {
 			items.add(tempItemNode);
 		}
 		return nodeFactory.newCompoundStatementNode(source, items);
+	}
+
+	private PragmaHandler getPragmaHandler(String code) {
+		PragmaHandler result = pragmaMap.get(code);
+
+		if (result == null) {
+			result = pragmaFactory.newHandler(code, parseTree);
+			pragmaMap.put(code, result);
+		}
+		return result;
+	}
+
+	private ASTNode translatePragma(FortranTree pragmaTree, SimpleScope scope)
+			throws SyntaxException {
+		Source source = generateSource(pragmaTree);
+		FortranTree identifierTree = pragmaTree.getChildByIndex(0);
+		IdentifierNode identifier = translateIdentifier(identifierTree);
+		String code = identifier.name();
+		FortranTree bodyTree = pragmaTree.getChildByIndex(1);
+		FortranTree newlineTree = pragmaTree.getChildByIndex(2);
+		CivlcToken newlineToken = (CivlcToken) newlineTree.cTokens()[0];
+		CivlcTokenSequence producer = parseTree
+				.getTokenSourceProducer(bodyTree);
+		PragmaNode pragmaNode = nodeFactory.newPragmaNode(source, identifier,
+				producer, newlineToken);
+		PragmaHandler handler;
+		ASTNode result = null;
+
+		if (code.equals("PARSE_ACSL"))
+			return null;
+		handler = getPragmaHandler(code);
+		identifier.setEntity(handler);
+		try {
+			result = handler.processPragmaNode(pragmaNode, scope);
+		} catch (ParseException e) {
+			this.error(e.getMessage(), pragmaTree);
+		}
+		return result;
 	}
 
 	private List<BlockItemNode> translateBlockItem(FortranTree blockItemNode,
@@ -1601,6 +1669,9 @@ public class FortranASTBuilderWorker {
 				}
 			}
 		}
+
+		OmpExecutableNode ompStatementNode = null;
+
 		if (executionPartNode != null) {
 			int numOfExecution = executionPartNode.numChildren();
 
@@ -1614,6 +1685,7 @@ public class FortranASTBuilderWorker {
 				FortranTree execConstNode = executionPartNode
 						.getChildByIndex(i);
 				int rule = execConstNode.rule();
+				StatementNode tempASTNode = null;
 
 				switch (rule) {
 					case 213 : /* ExecutableConstruct */
@@ -1628,32 +1700,121 @@ public class FortranASTBuilderWorker {
 								List<BlockItemNode> blockItemNodes = this
 										.translateBlockItem(stmtNode, newScope,
 												null);
-								items.addAll(blockItemNodes);
 								if (execConstNode.getChildByIndex(0)
 										.getChildByIndex(0).rule() == 848) {
 									i++;
 								}
+								if (blockItemNodes.size() == 1 && blockItemNodes
+										.get(0)
+										.blockItemKind() == BlockItemKind.STATEMENT)
+									tempASTNode = (StatementNode) blockItemNodes
+											.get(0);
+								else
+									items.addAll(blockItemNodes);
 								break;
 							case 802 : /* If Construct */
-								items.add(translateStatement(stmtTypeNode,
-										scope));
+								tempASTNode = translateStatement(stmtTypeNode,
+										scope);
 								break;
 							case 825 : /* Do Construct */
-								items.add(translateStatement(
-										stmtTypeNode.getChildByIndex(0),
-										scope));
+								tempASTNode = translateStatement(
+										stmtTypeNode.getChildByIndex(0), scope);
+								break;
+							case -501 : /* Fortran Pragma Stmt */
+								tempASTNode = translateStatement(stmtTypeNode,
+										scope);
 								break;
 							default :
-								System.out.println(rule);
+								System.out.println(
+										"ASTBuilderWorker: Unkown Rule: " + rule
+												+ "for 'translateBody()'");
 								assert false;
 						}
 						break;
 					default :
-						System.out.println(rule);
+						System.out.println("ASTBuilderWorker: Unkown Rule: "
+								+ rule + "for 'translateBody()'");
 						assert false;
+				}
+				if (tempASTNode != null) {
+					if (ompStatementNode != null) {
+						ompStatementNode.setStatementNode(tempASTNode);
+						ompStatementNode = null;
+					} else {
+						items.add(tempASTNode);
+						if (tempASTNode.statementKind() == StatementKind.OMP) {
+							ompStatementNode = (OmpExecutableNode) tempASTNode;
+							if (ompStatementNode.isComplete())
+								ompStatementNode = null;
+						}
+					}
 				}
 			}
 		}
+		
+
+		int numItems = items.size();
+		boolean changed = false;
+
+		for (int i = 0; i < numItems; i++) {
+			ASTNode child = items.get(i);
+
+			if (child != null && child instanceof OmpExecutableNode) {
+				OmpExecutableNode ompStmt = (OmpExecutableNode) child;
+
+				if (!ompStmt.isComplete()) {
+					changed = true;
+					if (ompStmt instanceof OmpForNode) {
+						OmpForNode ompForNode = (OmpForNode) ompStmt;
+						int collapse = ompForNode.collapse();
+
+						if (collapse == 1) {
+							StatementNode forStatement = (StatementNode) items
+									.get(i + 1);
+
+							items.set(i + 1, null);
+							ompForNode.setStatementNode(forStatement);
+						} else {
+							List<BlockItemNode> forList = new ArrayList<>(
+									collapse);
+							CompoundStatementNode compoundStatement;
+
+							source = items.get(i + 1).getSource();
+
+							for (int k = 1; k <= collapse; k++) {
+								StatementNode forStatement = (StatementNode) items
+										.get(i + k);
+
+								items.set(i + k, null);
+								forList.add(forStatement);
+							}
+							compoundStatement = nodeFactory
+									.newCompoundStatementNode(source, forList);
+							ompForNode.setStatementNode(compoundStatement);
+						}
+						items.set(i, ompForNode);
+					} else {
+						StatementNode statementNode = (StatementNode) items
+								.get(i + 1);
+
+						items.set(i + 1, null);
+						ompStmt.setStatementNode(statementNode);
+						items.set(i, ompStmt);
+					}
+				}
+			}
+		}
+		if (changed) {
+			List<BlockItemNode> newItems = new LinkedList<>();
+			for (int i = 0; i < numItems; i++) {
+				BlockItemNode item = items.get(i);
+				if (item != null)
+					newItems.add(item);
+			}
+			items = newItems;
+		}
+		
+		
 		result = nodeFactory.newCompoundStatementNode(source, items);
 		return result;
 	}
@@ -1820,5 +1981,11 @@ public class FortranASTBuilderWorker {
 			sourceFiles.addAll(stdioAST.getSourceFiles());
 		}
 		return astFactory.newAST(oldRootNode, sourceFiles, false);
+	}
+
+	// ******** Util Func ********
+
+	private SyntaxException error(String message, FortranTree tree) {
+		return new SyntaxException(message, generateSource(tree));
 	}
 }

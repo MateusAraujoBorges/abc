@@ -352,6 +352,7 @@ executable_construct
    |   if_construct
    |   select_type_construct
    |   where_construct
+   |   pragma_stmt  //For OMP STATEMENT (W.Wu)
    ;
 
 
@@ -2409,8 +2410,25 @@ common_block_object_list
 		common_block_object {count++;} 
             ( T_COMMA common_block_object {count++;} )*
       		{action.common_block_object_list(count);}
-    ;
+    ;    
 
+pragma_stmt
+@after{checkForInclude();}
+    :	goName=T_PRAGMA 
+    	pragmaId=T_IDENT 
+    	pragma_tokens 
+    	eosToken=T_EOS
+        	{action.pragma_stmt(goName, pragmaId, eosToken);}
+    ;
+   
+pragma_tokens
+@init{ int count=0;}
+    :
+	{action.pragma_token_list__begin();}
+	(goName=(~ T_EOS)
+		{action.pragma_token(goName); count++;} )+
+	{action.pragma_token_list(count);}
+    ;
 
 /**
  * Section/Clause 6: Use of data objects
