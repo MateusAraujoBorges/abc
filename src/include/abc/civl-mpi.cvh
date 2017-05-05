@@ -26,35 +26,19 @@
 #define COMMDUP_TAG      9986
 #define COMMFREE_TAG     9985
 
-
-#ifdef _MPI_CONTRACT
-// A type of a union of all mpi datatypes.
-typedef union _mpi_data_bundle_t $mpi_data_bundle_t; 
-// A type represents an arbitrary MPI_Datatype:
-typedef struct _mpi_data_t $mpi_data_t;
-
-// Quick MPI_Datat_type translation:
-typedef int _MPI_INT_T;
-typedef int _MPI_SHORT_T;
-typedef int _MPI_LONG_T;
-typedef int _MPI_LONG_LONG_INT_T;
-typedef int _MPI_LONG_LONG_T;
-typedef int _MPI_UNSIGNED_LONG_LONG_T;
-typedef int _MPI_2INT_T[2];
-typedef $real _MPI_FLOAT_T;
-typedef $real _MPI_DOUBLE_T;
-typedef $real _MPI_LONG_DOUBLE_T;
-typedef char _MPI_CHAR_T;
-typedef char _MPI_BYTE_T;
-
-#endif
-
 /* Definition of CIVL-MPI */
 typedef enum _mpi_state{
   _MPI_UNINIT,
   _MPI_INIT,
   _MPI_FINALIZED
 }$mpi_state;
+
+#ifdef _MPI_CONTRACT
+typedef int   _MPI_INT_t;
+typedef int   _MPI_2INT_t[2];
+typedef $real _MPI_DOUBLE_t;
+typedef $real _MPI_FLOAT_t;
+#endif
 
 /**************************** Redundent Definitions *******************************/
 /* The independence between civlmpi.cvh and mpi.h causes redundent definition */
