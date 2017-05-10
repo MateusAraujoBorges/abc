@@ -12,10 +12,10 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode
 		implements MPICollectiveBlockNode {
 	private SequenceNode<ContractNode> body;
 
-	private MPICollectiveKind kind;
+	private MPICommunicatorMode kind;
 
 	public CommonMPICollectiveBlockNode(Source source, ExpressionNode mpiComm,
-			MPICollectiveKind kind, SequenceNode<ContractNode> body) {
+			MPICommunicatorMode kind, SequenceNode<ContractNode> body) {
 		super(source, mpiComm, body);
 		this.kind = kind;
 		this.body = body;
@@ -32,7 +32,7 @@ public class CommonMPICollectiveBlockNode extends CommonContractNode
 	}
 
 	@Override
-	public MPICollectiveKind getCollectiveKind() {
+	public MPICommunicatorMode getCollectiveKind() {
 		return kind;
 	}
 

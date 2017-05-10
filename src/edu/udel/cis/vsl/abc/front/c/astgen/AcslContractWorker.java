@@ -107,7 +107,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.EnsuresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode.ExtendedQuantifier;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICommunicatorMode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
@@ -1608,19 +1608,19 @@ public class AcslContractWorker {
 		List<ContractNode> bodyComponents = new LinkedList<>();
 		SequenceNode<ContractNode> bodyNode;
 		ExpressionNode mpiCommNode;
-		MPICollectiveKind colKind;
+		MPICommunicatorMode colKind;
 
 		mpiCommNode = translateExpression(mpiComm, scope);
 		// The mpi collective kind can only be :COL, P2P or BOTH
 		switch (kind.getType()) {
 			case AcslParser.COL :
-				colKind = MPICollectiveKind.COL;
+				colKind = MPICommunicatorMode.COL;
 				break;
 			case AcslParser.P2P :
-				colKind = MPICollectiveKind.P2P;
+				colKind = MPICommunicatorMode.P2P;
 				break;
 			case AcslParser.BOTH :
-				colKind = MPICollectiveKind.BOTH;
+				colKind = MPICommunicatorMode.BOTH;
 				break;
 			default :
 				throw error("Unknown MPI collective kind", kind);

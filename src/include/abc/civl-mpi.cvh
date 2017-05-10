@@ -40,9 +40,9 @@ typedef int   _MPI_2INT_t[2];
 typedef double _MPI_DOUBLE_t;
 typedef float _MPI_FLOAT_t;
 
-typedef enum MPI_CHANNEL {
+typedef enum MPI_COMM_MODE {
   P2P, COL
-} MPI_CHANNEL;
+} MPI_COMM_MODE;
 
 #endif
 
@@ -237,12 +237,16 @@ $bundle $mpi_create_coroutine_entry(int routineTag, int root,
 *  unmatched informations in these entries. */
 void $mpi_diff_coroutine_entries($bundle specEntry, $bundle mineEntry, int rank);
 
+/* Allocate memory space with MPI type signitures. Returns a pointer
+   to the allocated memory space */
+void * $mpi_malloc(int count, MPI_Datatype datatype);
 
 /* Checking a boolean expression in a collective way. Participating
    processes are defined by the first argument. */
 void $mpi_coassert(MPI_Comm, _Bool);
 
 /*********** Section: contract helper functions ***********/
+#ifdef _MPI_CONTRACT
 $collate_state $mpi_snapshot(MPI_Comm comm, $scope scope);
 
 void $mpi_unsnapshot(MPI_Comm comm, $collate_state cs);
@@ -255,8 +259,8 @@ $state_f size_t $mpi_extentof(MPI_Datatype);
 /* Assigns fresh new symbolic constants to the given mpi region */
 void $mpi_assigns(void * buf, int count, MPI_Datatype datatype);
 
-$atomic_f void $mpi_comm_empty(MPI_Comm comm, MPI_CHANNEL channel);
-
+$atomic_f void $mpi_comm_empty(MPI_Comm comm, MPI_COMM_MODE mode);
+#endif
 #endif
 
 

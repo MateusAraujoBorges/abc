@@ -23,7 +23,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ExtendedQuantifiedExpressionNode.Ex
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.GuardsNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.InvariantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICollectiveKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPICollectiveBlockNode.MPICommunicatorMode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstantKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
@@ -2498,7 +2498,7 @@ public interface NodeFactory {
 	 * @return
 	 */
 	MPICollectiveBlockNode newMPICollectiveBlockNode(Source source,
-			ExpressionNode mpiComm, MPICollectiveKind kind,
+			ExpressionNode mpiComm, MPICommunicatorMode kind,
 			SequenceNode<ContractNode> body);
 
 	/**
