@@ -34,10 +34,16 @@ typedef enum _mpi_state{
 }$mpi_state;
 
 #ifdef _MPI_CONTRACT
+
 typedef int   _MPI_INT_t;
 typedef int   _MPI_2INT_t[2];
-typedef $real _MPI_DOUBLE_t;
-typedef $real _MPI_FLOAT_t;
+typedef double _MPI_DOUBLE_t;
+typedef float _MPI_FLOAT_t;
+
+typedef enum MPI_CHANNEL {
+  P2P, COL
+} MPI_CHANNEL;
+
 #endif
 
 /**************************** Redundent Definitions *******************************/
@@ -244,23 +250,12 @@ void $mpi_unsnapshot(MPI_Comm comm, $collate_state cs);
 /* Returns the number of chars of the given MPI_Datatype.
  * equivalent to returns (datatypeSizeof(datatype) / sizeof(char))
  */
-$abstract size_t $mpi_extentof(MPI_Datatype);
+$state_f size_t $mpi_extentof(MPI_Datatype);
 
 /* Assigns fresh new symbolic constants to the given mpi region */
 void $mpi_assigns(void * buf, int count, MPI_Datatype datatype);
 
-/* Allocating memory space based on the MPI type signiture, returns a
-   pointer to the alloated memory space. */
-void * $mpi_malloc(int count, MPI_Datatype datatype);
-
-/*@ 
-  @ depends_on \nothing;
-  @ executes_when \true;
-  @ */
-$atomic_f void $mpi_target_enters(MPI_Comm comm);
-
-/* Reduction contracts needs the definition of MPI_Comm */
-$state_f _Bool $mpi_target_entered(MPI_Comm comm, $range range);
+$atomic_f void $mpi_comm_empty(MPI_Comm comm, MPI_CHANNEL channel);
 
 #endif
 
