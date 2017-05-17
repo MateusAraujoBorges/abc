@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -22,8 +23,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.InitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -38,10 +41,14 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
+import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
 import edu.udel.cis.vsl.abc.front.IF.CivlcTokenConstant;
+import edu.udel.cis.vsl.abc.front.c.parse.COmpParser;
+import edu.udel.cis.vsl.abc.front.c.parse.CParser;
 import edu.udel.cis.vsl.abc.front.c.preproc.CPreprocessor;
 import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.Formation;
@@ -67,15 +74,28 @@ public class CompareCombiner implements Combiner {
 
 	private final static String ASSUME = "$assume";
 
+	private final static String NEW_SPEC_MAIN = "$spec_main";
+
+	private final static String NEW_IMPL_MAIN = "$impl_main";
+
+	private final static String SYSTEM_SPEC = "$system_spec";
+
+	private final static String SYSTEM_IMPL = "$system_impl";
+
 	/**
 	 * The node factory that creates new AST nodes.
 	 */
-	private NodeFactory factory;
+	private NodeFactory nodeFactory;
 
 	/**
 	 * The AST factory that creates new AST's.
 	 */
 	private ASTFactory astFactory;
+
+	/**
+	 * The token factory that creates tokens.
+	 */
+	private TokenFactory tokenFactory;
 
 	/**
 	 * The source of the specification.
@@ -112,12 +132,14 @@ public class CompareCombiner implements Combiner {
 		allSourceFiles.addAll(sourceFiles0);
 		allSourceFiles.addAll(sourceFiles1);
 		astFactory = spec.getASTFactory();
+		tokenFactory = astFactory.getTokenFactory();
+		nodeFactory = astFactory.getNodeFactory();
 		spec.release();
 		impl.release();
 		specFileTypeDef = this.getAndRemoveFileTypeNode(specRoot);
 		implFileTypeDef = this.getAndRemoveFileTypeNode(implRoot);
-		processExternVariables(specRoot);
-		processExternVariables(implRoot);
+		processVariableDeclarations(specRoot);
+		processVariableDeclarations(implRoot);
 		if (specFileTypeDef != null)
 			nodes.add(specFileTypeDef);
 		else if (implFileTypeDef != null)
@@ -128,7 +150,6 @@ public class CompareCombiner implements Combiner {
 		impl = astFactory.newAST(implRoot, sourceFiles1, impl.isWholeProgram());
 		specSource = this.getMainSource(specRoot);
 		implSource = this.getMainSource(implRoot);
-		factory = astFactory.getNodeFactory();
 		inputVariablesAndAssumes = combineInputs(specRoot, implRoot);
 		nodes.add(this.assertFunctionNode(specSource));
 		nodes.add(definedFunctionNode(specSource));
@@ -142,9 +163,11 @@ public class CompareCombiner implements Combiner {
 		nameTransformer = new CommonNameTransformer(
 				renameVariables(specOutputs.values(), "_spec"), astFactory);
 		spec = nameTransformer.transform(spec);
+		spec.release();
+		impl.release();
 		// TODO: Check consistency of assumptions
-		specSystem = wrapperFunction(specSource, specRoot, "system_spec");
-		implSystem = wrapperFunction(implSource, implRoot, "system_impl");
+		specSystem = wrapperFunction(specSource, specRoot, SYSTEM_SPEC);
+		implSystem = wrapperFunction(implSource, implRoot, SYSTEM_IMPL);
 		for (VariableDeclarationNode v : specOutputs.values()) {
 			v.getTypeNode().setOutputQualified(false);
 			nodes.add(v.copy());
@@ -156,64 +179,64 @@ public class CompareCombiner implements Combiner {
 		nodes.add(specSystem);
 		nodes.add(implSystem);
 
-		newMainBodyNodes.add(factory.newVariableDeclarationNode(specSource,
-				factory.newIdentifierNode(specSource, "_isEqual"),
-				factory.newBasicTypeNode(specSource, BasicTypeKind.BOOL)));
+		newMainBodyNodes.add(nodeFactory.newVariableDeclarationNode(specSource,
+				nodeFactory.newIdentifierNode(specSource, "_isEqual"),
+				nodeFactory.newBasicTypeNode(specSource, BasicTypeKind.BOOL)));
 
-		newMainBodyNodes.add(factory.newExpressionStatementNode(
-				factory.newFunctionCallNode(specSource,
-						factory.newIdentifierExpressionNode(specSource,
-								factory.newIdentifierNode(specSource,
-										"system_spec")),
+		newMainBodyNodes.add(nodeFactory.newExpressionStatementNode(
+				nodeFactory.newFunctionCallNode(specSource,
+						nodeFactory.newIdentifierExpressionNode(specSource,
+								nodeFactory.newIdentifierNode(specSource,
+										SYSTEM_SPEC)),
 						new ArrayList<ExpressionNode>(), null)));
-		newMainBodyNodes.add(factory.newExpressionStatementNode(
-				factory.newFunctionCallNode(implSource,
-						factory.newIdentifierExpressionNode(implSource,
-								factory.newIdentifierNode(implSource,
-										"system_impl")),
+		newMainBodyNodes.add(nodeFactory.newExpressionStatementNode(
+				nodeFactory.newFunctionCallNode(implSource,
+						nodeFactory.newIdentifierExpressionNode(implSource,
+								nodeFactory.newIdentifierNode(implSource,
+										SYSTEM_IMPL)),
 						new ArrayList<ExpressionNode>(), null)));
 		// TODO: spawn and join (but calls ok until joint assertions
 		// implemented)
 		newMainBodyNodes.addAll(outputAssertions(specOutputs, implOutputs));
-		newMain = factory.newFunctionDefinitionNode(specSource,
-				factory.newIdentifierNode(specSource, "main"),
-				factory.newFunctionTypeNode(specSource,
-						factory.newVoidTypeNode(specSource),
-						factory.newSequenceNode(specSource, "Formals",
+		newMain = nodeFactory.newFunctionDefinitionNode(specSource,
+				nodeFactory.newIdentifierNode(specSource, "main"),
+				nodeFactory.newFunctionTypeNode(specSource,
+						nodeFactory.newVoidTypeNode(specSource),
+						nodeFactory.newSequenceNode(specSource, "Formals",
 								new ArrayList<VariableDeclarationNode>()),
 						false),
-				factory.newSequenceNode(specSource, "Contract",
+				nodeFactory.newSequenceNode(specSource, "Contract",
 						new ArrayList<ContractNode>()),
-				factory.newCompoundStatementNode(specSource, newMainBodyNodes));
+				nodeFactory.newCompoundStatementNode(specSource,
+						newMainBodyNodes));
 		nodes.add(newMain);
-		newRoot = factory.newSequenceNode(
+		newRoot = nodeFactory.newSequenceNode(
 				astFactory.getTokenFactory().join(specSource, implSource),
 				"Composite System", nodes);
-
 		AST result = astFactory.newAST(newRoot, allSourceFiles, true);
-
 		// result.prettyPrint(System.out, false);
 		return result;
 	}
 
 	private FunctionDeclarationNode assertFunctionNode(Source specSource) {
-		IdentifierNode name = factory.newIdentifierNode(specSource, "$assert");
-		
-		FunctionTypeNode funcType = factory.newFunctionTypeNode(specSource,
-				factory.newVoidTypeNode(specSource),
-				factory.newSequenceNode(specSource, "Formals",
-						Arrays.asList(
-								factory.newVariableDeclarationNode(specSource,
-										factory.newIdentifierNode(specSource,
-												"expression"),
-										factory.newBasicTypeNode(specSource,
+		IdentifierNode name = nodeFactory.newIdentifierNode(specSource,
+				"$assert");
+
+		FunctionTypeNode funcType = nodeFactory.newFunctionTypeNode(specSource,
+				nodeFactory.newVoidTypeNode(specSource),
+				nodeFactory.newSequenceNode(specSource, "Formals",
+						Arrays.asList(nodeFactory
+								.newVariableDeclarationNode(specSource,
+										nodeFactory.newIdentifierNode(
+												specSource, "expression"),
+										nodeFactory.newBasicTypeNode(specSource,
 												BasicTypeKind.BOOL))))
 
 				, false);
-		
+
 		funcType.setVariableArgs(true);
 
-		FunctionDeclarationNode function = factory
+		FunctionDeclarationNode function = nodeFactory
 				.newFunctionDeclarationNode(specSource, name, funcType, null);
 
 		function.setSystemFunctionSpecifier(true);
@@ -256,17 +279,20 @@ public class CompareCombiner implements Combiner {
 	 * @return
 	 */
 	private FunctionDeclarationNode definedFunctionNode(Source specSource) {
-		IdentifierNode name = factory.newIdentifierNode(specSource, "$defined");
-		FunctionTypeNode funcType = factory.newFunctionTypeNode(specSource,
-				factory.newBasicTypeNode(specSource, BasicTypeKind.BOOL),
-				factory.newSequenceNode(specSource, "Formals",
-						Arrays.asList(factory.newVariableDeclarationNode(
-								specSource, factory.newIdentifierNode(
-										specSource, "obj"),
-								factory.newPointerTypeNode(specSource,
-										factory.newVoidTypeNode(specSource))))),
+		IdentifierNode name = nodeFactory.newIdentifierNode(specSource,
+				"$defined");
+		FunctionTypeNode funcType = nodeFactory.newFunctionTypeNode(specSource,
+				nodeFactory.newBasicTypeNode(specSource, BasicTypeKind.BOOL),
+				nodeFactory.newSequenceNode(specSource, "Formals",
+						Arrays.asList(nodeFactory.newVariableDeclarationNode(
+								specSource,
+								nodeFactory.newIdentifierNode(specSource,
+										"obj"),
+								nodeFactory.newPointerTypeNode(specSource,
+										nodeFactory.newVoidTypeNode(
+												specSource))))),
 				false);
-		FunctionDeclarationNode function = factory
+		FunctionDeclarationNode function = nodeFactory
 				.newFunctionDeclarationNode(specSource, name, funcType, null);
 
 		function.setSystemFunctionSpecifier(true);
@@ -525,13 +551,14 @@ public class CompareCombiner implements Combiner {
 	 */
 	private FunctionDefinitionNode wrapperFunction(Source source, ASTNode root,
 			String name) {
-		FunctionTypeNode functionType = factory
+		FunctionTypeNode functionType = nodeFactory
 				.newFunctionTypeNode(source,
-						factory.newBasicTypeNode(source, BasicTypeKind.INT),
-						factory.newSequenceNode(source, "Formals",
+						nodeFactory.newBasicTypeNode(source, BasicTypeKind.INT),
+						nodeFactory.newSequenceNode(source, "Formals",
 								new ArrayList<VariableDeclarationNode>()),
 						false);
 		List<BlockItemNode> items = new ArrayList<BlockItemNode>();
+		FunctionDefinitionNode oldMain = null;
 		CompoundStatementNode body;
 		FunctionDefinitionNode result;
 
@@ -555,11 +582,13 @@ public class CompareCombiner implements Combiner {
 				FunctionDefinitionNode function = (FunctionDefinitionNode) child;
 				if (function.getName() != null
 						&& function.getName().equals("main")) {
-					for (int j = 0; j < ((FunctionDefinitionNode) function)
-							.getBody().numChildren(); j++) {
-						items.add(((FunctionDefinitionNode) function).getBody()
-								.getSequenceChild(j).copy());
-					}
+					// convert main function into a function with another name.
+					items.add(
+							oldMain = (name.equals(SYSTEM_SPEC)
+									? constructNewMainFunction(function,
+											NEW_SPEC_MAIN)
+									: constructNewMainFunction(function,
+											NEW_IMPL_MAIN)));
 				} else {
 					items.add(function.copy());
 				}
@@ -568,14 +597,63 @@ public class CompareCombiner implements Combiner {
 				items.add((BlockItemNode) child.copy());
 			}
 		}
-		body = factory.newCompoundStatementNode(source, items);
-		result = factory
+		// spec and impl should both have main functions.
+		assert oldMain != null;
+		items.add(nodeFactory.newExpressionStatementNode(
+				constructFunctionCallNode(oldMain)));
+		body = nodeFactory.newCompoundStatementNode(source, items);
+		result = nodeFactory
 				.newFunctionDefinitionNode(source,
-						factory.newIdentifierNode(root.getSource(), name),
-						functionType, factory.newSequenceNode(source,
+						nodeFactory.newIdentifierNode(root.getSource(), name),
+						functionType, nodeFactory.newSequenceNode(source,
 								"Contract", new ArrayList<ContractNode>()),
 						body);
 		return result;
+	}
+
+	/**
+	 * Construct a function call node from a function definition node.
+	 * 
+	 * @param functionDefinition
+	 * 
+	 * @return The corresponding function definition node.
+	 */
+	private FunctionCallNode constructFunctionCallNode(
+			FunctionDefinitionNode functionDefinition) {
+		String functionName = functionDefinition.getName();
+		Source source = this.newSource(functionName + "()",
+				CivlcTokenConstant.CALL);
+		ExpressionNode functionExpression = nodeFactory
+				.newIdentifierExpressionNode(
+						functionDefinition.getIdentifier().getSource(),
+						functionDefinition.getIdentifier().copy());
+
+		return nodeFactory.newFunctionCallNode(source, functionExpression,
+				new LinkedList<>(), null);
+	}
+
+	/**
+	 * Convert original main function into a function with another name.
+	 * 
+	 * @param mainFunction
+	 *            The original main function.
+	 * @param name
+	 *            {@link #SYSTEM_IMPL} or {@link #SYSTEM_SPEC}
+	 * @return the converted main function.
+	 */
+	private FunctionDefinitionNode constructNewMainFunction(
+			FunctionDefinitionNode mainFunction, String name) {
+		Source newSource = mainFunction.getSource();
+		CompoundStatementNode newBody = mainFunction.getBody();
+		FunctionTypeNode newFunctionType = mainFunction.getTypeNode();
+		IdentifierNode newIdentifier = nodeFactory.newIdentifierNode(
+				mainFunction.getIdentifier().getSource(), name);
+
+		newBody.remove();
+		newFunctionType.remove();
+
+		return nodeFactory.newFunctionDefinitionNode(newSource, newIdentifier,
+				newFunctionType, null, newBody);
 	}
 
 	/**
@@ -603,9 +681,9 @@ public class CompareCombiner implements Combiner {
 		// TODO: do something better for source
 		// ExpressionNode equalFunction = factory.newIdentifierExpressionNode(
 		// specSource, factory.newIdentifierNode(specSource, "$equals"));
-		ExpressionNode assertEqualFunction = factory
-				.newIdentifierExpressionNode(specSource,
-						factory.newIdentifierNode(specSource, ASSERT_EQUALS));
+		ExpressionNode assertEqualFunction = nodeFactory
+				.newIdentifierExpressionNode(specSource, nodeFactory
+						.newIdentifierNode(specSource, ASSERT_EQUALS));
 
 		for (String outputName : specOutputs.keySet()) {
 			Source source = specOutputs.get(outputName).getSource();
@@ -623,20 +701,20 @@ public class CompareCombiner implements Combiner {
 				continue;
 			message = "\"Specification and implementation have"
 					+ " different values for the output " + outputName + "!\"";
-			args.add(factory.newOperatorNode(specOutput.getSource(),
+			args.add(nodeFactory.newOperatorNode(specOutput.getSource(),
 					Operator.ADDRESSOF,
-					Arrays.asList((ExpressionNode) factory
+					Arrays.asList((ExpressionNode) nodeFactory
 							.newIdentifierExpressionNode(specOutput.getSource(),
 									specOutput.getIdentifier().copy()))));
-			args.add(factory.newOperatorNode(implOutput.getSource(),
+			args.add(nodeFactory.newOperatorNode(implOutput.getSource(),
 					Operator.ADDRESSOF,
-					Arrays.asList((ExpressionNode) factory
+					Arrays.asList((ExpressionNode) nodeFactory
 							.newIdentifierExpressionNode(implOutput.getSource(),
 									implOutput.getIdentifier().copy()))));
 			args.add(this.createStringLiteral(message));
-			assertEqualCall = factory.newFunctionCallNode(source,
+			assertEqualCall = nodeFactory.newFunctionCallNode(source,
 					assertEqualFunction.copy(), args, null);
-			result.add(factory.newExpressionStatementNode(assertEqualCall));
+			result.add(nodeFactory.newExpressionStatementNode(assertEqualCall));
 		}
 		return result;
 	}
@@ -693,29 +771,123 @@ public class CompareCombiner implements Combiner {
 				CivlcTokenConstant.STRING_LITERAL, text, formation);
 		StringToken stringToken = tokenFactory.newStringToken(ctoke);
 
-		return factory.newStringLiteralNode(tokenFactory.newSource(ctoke), text,
-				stringToken.getStringLiteral());
+		return nodeFactory.newStringLiteralNode(tokenFactory.newSource(ctoke),
+				text, stringToken.getStringLiteral());
 	}
 
 	/**
-	 * removed extra declaration nodes for extern variables; also make remove
-	 * the extern qualifier for the definition node
+	 * <p>
+	 * Process the declaration of variables. Since each translation unit will
+	 * become a function, declaration in the global/file scope will become
+	 * declaration in a function scope. While re-declaration in file scope is
+	 * allowed (N1570 6.9.2), re-declaration is not allowed in function scope.
+	 * </p>
+	 * 
+	 * <p>
+	 * <ul>
+	 * <li>Remove <code>extern</code> decorator for all declarations</li>
+	 * <li>For array declarations of identifier var_arr:
+	 * <ul>
+	 * <li>if there exists an declaration with explicit initializer of var_arr,
+	 * this declaration will be moved to the location where var_arr is first
+	 * declared, and also the rest declaration of var_arr will be removed.</li>
+	 * <li>if there doesn't exist an declaration of var_arr with explicit
+	 * initializer, the first declaration will be kept, the rest will be
+	 * removed.</li>
+	 * </ul>
+	 * </li>
+	 * <li>For declarations of a variable var, the first declaration will be
+	 * kept. The rest declaration without definition will be removed, the one
+	 * with definition will converted into an assignment.</li>
+	 * </ul>
+	 * </p>
 	 * 
 	 * @param root
+	 *            The root node of this translation unit.
 	 */
-	private void processExternVariables(SequenceNode<BlockItemNode> root) {
-		for (BlockItemNode item : root) {
+	private void processVariableDeclarations(SequenceNode<BlockItemNode> root) {
+		Map<String, Integer> identifierCache = new HashMap<>();
+		int numChildern = root.numChildren();
+
+		for (int i = 0; i < numChildern; i++) {
+			BlockItemNode item = (BlockItemNode) root.child(i);
+
 			if (item == null)
 				continue;
 			if (item instanceof VariableDeclarationNode) {
-				VariableDeclarationNode variable = (VariableDeclarationNode) item;
+				VariableDeclarationNode variableDecl = (VariableDeclarationNode) item;
+				String identifier = variableDecl.getName();
 
-				if (variable.hasExternStorage())
-					if (!variable.getEntity().getDefinition().equals(variable))
-						variable.remove();
+				if (variableDecl.hasExternStorage())
+					variableDecl.setExternStorage(false);
+				if (variableDecl.getEntity().getDefinition()
+						.equals(variableDecl)) {
+					// definition
+					if (identifierCache.containsKey(identifier)) {
+						if (variableDecl.getTypeNode().getType()
+								.kind() == TypeKind.ARRAY) {
+							int index = identifierCache.get(identifier);
+
+							variableDecl.remove();
+							root.setChild(index, variableDecl);
+						} else
+							// change to a assignment
+							root.setChild(i,
+									convertVariableDefinitionToVaribleAssignment(
+											variableDecl));
+					} else
+						identifierCache.put(identifier, i);
+				} else {
+					// just declaration
+					if (identifierCache.containsKey(identifier))
+						variableDecl.remove();
 					else
-						variable.setExternStorage(false);
+						identifierCache.put(identifier, i);
+				}
 			}
+		}
+	}
+
+	/**
+	 * Construct an assignment expression statement from variable declaration
+	 * node.
+	 * 
+	 * @param variableDecl
+	 *            The given declaration node.
+	 * @return the converted assignment statement node.
+	 */
+	private ExpressionStatementNode convertVariableDefinitionToVaribleAssignment(
+			VariableDeclarationNode variableDecl) {
+		Source variableDeclSource = variableDecl.getSource();
+		IdentifierNode identifierNode = variableDecl.getIdentifier();
+		Source identifierSource = identifierNode.getSource();
+		InitializerNode initializerNode = variableDecl.getInitializer();
+		TypeNode typeNode = variableDecl.getTypeNode();
+
+		identifierNode.remove();
+		initializerNode.remove();
+		typeNode.remove();
+
+		IdentifierExpressionNode identifierExpression = nodeFactory
+				.newIdentifierExpressionNode(identifierSource, identifierNode);
+		assert initializerNode != null;
+		// TODO for InitializerNode, if it is not just scalar
+		// (stuct union array).
+
+		ExpressionNode righHandSide = initializerNode instanceof CompoundInitializerNode
+				? nodeFactory.newCompoundLiteralNode(
+						initializerNode.getSource(), typeNode,
+						(CompoundInitializerNode) initializerNode)
+				: (ExpressionNode) initializerNode;
+
+		if (initializerNode instanceof CompoundInitializerNode) {
+			return nodeFactory.newExpressionStatementNode(nodeFactory
+					.newOperatorNode(variableDeclSource, Operator.ASSIGN,
+							identifierExpression, righHandSide));
+		} else {
+			return nodeFactory.newExpressionStatementNode(nodeFactory
+					.newOperatorNode(variableDeclSource, Operator.ASSIGN,
+							identifierExpression, righHandSide));
 		}
 	}
 
@@ -780,20 +952,49 @@ public class CompareCombiner implements Combiner {
 	 *         declaration
 	 */
 	private FunctionDeclarationNode assumeFunctionDeclaration(Source source) {
-		IdentifierNode name = factory.newIdentifierNode(source, "$assume");
-		FunctionTypeNode funcType = factory.newFunctionTypeNode(source,
-				factory.newVoidTypeNode(source),
-				factory.newSequenceNode(source, "Formals",
-						Arrays.asList(factory.newVariableDeclarationNode(source,
-								factory.newIdentifierNode(source, "expression"),
-								factory.newBasicTypeNode(source,
-										BasicTypeKind.BOOL))))
+		IdentifierNode name = nodeFactory.newIdentifierNode(source, "$assume");
+		FunctionTypeNode funcType = nodeFactory.newFunctionTypeNode(source,
+				nodeFactory.newVoidTypeNode(source),
+				nodeFactory.newSequenceNode(source, "Formals",
+						Arrays.asList(
+								nodeFactory.newVariableDeclarationNode(source,
+										nodeFactory.newIdentifierNode(source,
+												"expression"),
+										nodeFactory.newBasicTypeNode(source,
+												BasicTypeKind.BOOL))))
 
 				, false);
-		FunctionDeclarationNode function = factory
+		FunctionDeclarationNode function = nodeFactory
 				.newFunctionDeclarationNode(source, name, funcType, null);
 
 		function.setSystemFunctionSpecifier(true);
 		return function;
+	}
+
+	/**
+	 * Creates a new {@link Source} object to associate to AST nodes that are
+	 * invented by this compare combiner.
+	 * 
+	 * @param method
+	 *            any string which identifies the specific part of this combiner
+	 *            responsible for creating the new content; typically, the name
+	 *            of the method that created the new context. This will appear
+	 *            in error message to help isolate the source of the new
+	 *            content.
+	 * @param tokenType
+	 *            the integer code for the type of the token used to represent
+	 *            the source; use one of the constants in {@link CParser} or
+	 *            {@link COmpParser}, for example, such as
+	 *            {@link CParser#IDENTIFIER}.
+	 * @return the new source object
+	 */
+	protected Source newSource(String method, int tokenType) {
+		Formation formation = tokenFactory
+				.newTransformFormation("compare combiner", method);
+		CivlcToken token = tokenFactory.newCivlcToken(tokenType,
+				"inserted text", formation);
+		Source source = tokenFactory.newSource(token);
+
+		return source;
 	}
 }
