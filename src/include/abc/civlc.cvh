@@ -19,6 +19,8 @@
 #define __UNSIGNED_BOUND 32
 #endif
 
+#define $elaborate(x)  for(int _i = 0; _i < (x); _i++)
+
 typedef unsigned long int size_t;
 
 /* **************************  Basic CIVL-C Types ************************** */ 
@@ -78,13 +80,6 @@ $system void $assert(_Bool expr, ...);
   @ executes_when \true;
   @*/
 $system void $assume(_Bool expr);
-
-/* Elaborate tricks: elaborating a given variable */
-/*@ pure;
-  @ depends_on \nothing;
-  @ executes_when \true;
-  @*/
-$system void $elaborate(int x);
 
 /* get a unique non-negative integer number for time count */
 /*@ depends_on \nothing;
