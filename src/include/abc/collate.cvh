@@ -6,8 +6,9 @@
 #define _COLLATE_
 #pragma PARSE_ACSL
 #include <bundle.cvh>
-/************************** Datatypes: **************************/
 
+
+/************************** Datatypes: **************************/
 /* _gcollator: An invisible shared collation object;
  * $gcollator: A handle to the shared collation object;
  *
@@ -50,8 +51,13 @@ typedef struct _collate_state $collate_state;
 /* API for creating a $gcollator: */
 $atomic_f $gcollator $gcollator_create($scope scope, int nprocs);
 
+/* API for destroying a $gcollator, all referred gcollate states will
+   be destroyed: */
+$atomic_f void $gcollator_destroy($gcollator gc);
+
 /* API for creating a $collator: */
 $atomic_f $collator  $collator_create($gcollator gcollator, $scope scope, int place);
+/* $collator can be destroyed by calling $free(..) */
 
 /* Take a snapshot on the current state. Returns the collate state
  * which contains the snapshot. This function allows processes commit
