@@ -1,18 +1,15 @@
 package edu.udel.cis.vsl.abc.analysis.dataflow;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
@@ -26,9 +23,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LoopNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
-import edu.udel.cis.vsl.abc.token.IF.Source;
-import edu.udel.cis.vsl.abc.util.IF.Pair;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonOperatorNode;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 
 
 

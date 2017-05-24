@@ -6,24 +6,15 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
-import edu.udel.cis.vsl.abc.token.IF.UnsourcedException;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**

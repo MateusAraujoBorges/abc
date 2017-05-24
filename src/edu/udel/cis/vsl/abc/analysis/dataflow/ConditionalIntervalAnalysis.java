@@ -7,22 +7,17 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
+import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
+import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue.IntervalRelation;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
-import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory.Answer;
-import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
-
-import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
-import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue.IntervalRelation;
-import edu.udel.cis.vsl.abc.analysis.dataflow.DataflowUtilities;
 
 public class ConditionalIntervalAnalysis extends EdgeDataFlowFramework<Pair<Entity, IntervalValue>>{
 	private static ConditionalIntervalAnalysis instance = null;
@@ -311,6 +306,7 @@ public class ConditionalIntervalAnalysis extends EdgeDataFlowFramework<Pair<Enti
 		return "<"+entry+">";
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean isBottom(final Set<Pair<Entity, IntervalValue>> set){
 		for(Pair<Entity, IntervalValue> p: set)
 			if(!p.right.isBottom())

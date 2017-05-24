@@ -7,6 +7,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.IF.AbstractValue;
+import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
+import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue.IntervalRelation;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
@@ -15,10 +17,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.common.expression.CommonIdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
-
-import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue;
-import edu.udel.cis.vsl.abc.analysis.dataflow.common.IntervalValue.IntervalRelation;
-import edu.udel.cis.vsl.abc.analysis.dataflow.DataflowUtilities;
 
 public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, IntervalValue>>{
 	private static IntervalAnalysisSARL instance = null;
@@ -306,6 +304,7 @@ public class IntervalAnalysisSARL extends DataFlowFramework<Pair<Entity, Interva
 		return "<"+entry+">";
 	}
 	
+	@SuppressWarnings("unused")
 	private boolean isBottom(final Set<Pair<Entity, IntervalValue>> set){
 		for(Pair<Entity, IntervalValue> p: set)
 			if(!p.right.isBottom())

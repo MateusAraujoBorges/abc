@@ -80,6 +80,7 @@ public class Summarizer {
 		}
 	}
 
+	@SuppressWarnings("unused")
 	private Collection<SourceFile> getFilesOf(CivlcToken token) {
 		HashSet<SourceFile> sourceFiles = new HashSet<>();
 

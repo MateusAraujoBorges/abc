@@ -5,15 +5,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import edu.udel.cis.vsl.abc.analysis.dataflow.ControlFlowAnalysis;
-import edu.udel.cis.vsl.abc.analysis.dataflow.DominatorAnalysis;
-import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
-import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 /**
  * Gating expressions encode the conditions that govern a path from

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import edu.udel.cis.vsl.abc.analysis.dataflow.IF.Evaluation;
 import edu.udel.cis.vsl.abc.analysis.dataflow.common.MyInterval;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
@@ -21,8 +20,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.BasicTypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
-import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.IntegerValue;
+import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
 
 public class IntervalAnalysis extends DataFlowFramework<Pair<Entity, MyInterval>>{

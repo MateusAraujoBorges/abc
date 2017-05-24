@@ -9,12 +9,7 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import edu.udel.cis.vsl.abc.analysis.common.CallAnalyzer;
-import edu.udel.cis.vsl.abc.analysis.dataflow.ConditionalConstantPropagation;
-import edu.udel.cis.vsl.abc.analysis.dataflow.DominatorAnalysis;
-import edu.udel.cis.vsl.abc.analysis.dataflow.ReachingDefinitionAnalysis;
 import edu.udel.cis.vsl.abc.ast.IF.AST;
-import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
@@ -32,6 +27,7 @@ import edu.udel.cis.vsl.abc.main.FrontEnd;
 @Ignore
 public class EvaluationCommonTest {
 
+	@SuppressWarnings("unused")
 	private static boolean debug = false;
 
 	private static File root = new File(new File("examples"), "c");
@@ -53,6 +49,7 @@ public class EvaluationCommonTest {
 
 	private void check(String filenameRoot) throws ABCException, IOException {
 		File file = new File(root, filenameRoot + ".c");
+		@SuppressWarnings("unused")
 		AST ast = fe.compile(new File[] { file }, Language.C, new File[0],
 				new File[0], new HashMap<String, String>());
 

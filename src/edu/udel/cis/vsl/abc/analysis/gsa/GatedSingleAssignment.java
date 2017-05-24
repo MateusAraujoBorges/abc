@@ -1,12 +1,9 @@
 package edu.udel.cis.vsl.abc.analysis.gsa;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import java.util.List;
+import java.util.Set;
 
 import edu.udel.cis.vsl.abc.analysis.dataflow.ControlFlowAnalysis;
 import edu.udel.cis.vsl.abc.analysis.dataflow.DominatorAnalysis;
@@ -123,6 +120,7 @@ public class GatedSingleAssignment  {
 	 * @param dfo the computed order
 	 * @param seen used to control the depth-first traversal
 	 */
+	@SuppressWarnings("unused")
 	private void dforder(ASTNode n, List<ASTNode> dfo, Set<ASTNode> seen	) {
 		if (seen.contains(n)) return;
 		seen.add(n);
@@ -143,6 +141,7 @@ public class GatedSingleAssignment  {
 	 * @param s
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private List<ASTNode> toporder(List<ASTNode> l) {
 		List<ASTNode> to = new ArrayList<ASTNode>();
 		
@@ -167,6 +166,7 @@ public class GatedSingleAssignment  {
 	/*
 	 * Refactor the following to utility functions
 	 */
+	@SuppressWarnings("unused")
 	private boolean isAssignment(final ASTNode s) {
 		if (s instanceof ExpressionStatementNode) {
 			ExpressionNode e = ((ExpressionStatementNode)s).getExpression();
