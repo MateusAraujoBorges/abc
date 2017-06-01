@@ -279,9 +279,6 @@ public class StatementAnalyzer {
 	private void processLoop(LoopNode loopNode) throws SyntaxException {
 		SequenceNode<ContractNode> loopContracts = loopNode.loopContracts();
 
-		if (loopContracts != null) {
-			this.acslAnalyzer.processLoopContractNodes(loopContracts);
-		}
 		switch (loopNode.getKind()) {
 			case WHILE :
 				processExpression(loopNode.getCondition());
@@ -321,6 +318,9 @@ public class StatementAnalyzer {
 			}
 			default :
 				throw new RuntimeException("Unreachable");
+		}
+		if (loopContracts != null) {
+			acslAnalyzer.processLoopContractNodes(loopContracts);
 		}
 	}
 

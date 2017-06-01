@@ -234,14 +234,32 @@ public class ScopeAnalyzer implements Analyzer {
 				processRecursive(falseBranch, falseBranchScope, functionScope);
 			}
 		} else if (node instanceof LoopNode) {
-			ASTNode body = ((LoopNode) node).getBody();
+			LoopNode loopNode = (LoopNode) node;
+			ASTNode body = loopNode.getBody();
+			ASTNode loopContracts = loopNode.loopContracts();
 			Scope bodyScope;
 
 			parentScope = scopeFactory.newScope(ScopeKind.BLOCK, parentScope,
 					node);
 			bodyScope = scopeFactory.newScope(ScopeKind.BLOCK, parentScope,
 					body);
+
+			Iterable<ASTNode> children = loopNode.children();
+
+			loopNode.setScope(parentScope);
+			for (ASTNode child : children)
+				if (child != null && child != body && child != loopContracts)
+					processRecursive(child, parentScope, functionScope);
+
+			// Process body and contracts (if exists) specially:
 			processRecursive(body, bodyScope, functionScope);
+			if (loopContracts != null) {
+				Scope conditionScope = scopeFactory.newScope(ScopeKind.CONTRACT,
+						loopNode.getCondition().getScope(), loopContracts);
+
+				processRecursive(loopContracts, conditionScope, functionScope);
+			}
+			return;
 		} else if (node instanceof CivlForNode) {
 			ASTNode body = ((CivlForNode) node).getBody();
 			Scope bodyScope;
