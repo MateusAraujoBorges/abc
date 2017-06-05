@@ -1762,6 +1762,10 @@ public class ExpressionAnalyzer {
 				&& type1.kind().equals(TypeKind.RANGE)) {
 			node.setInitialType(
 					typeFactory.incompleteArrayType((ObjectType) type0));
+		} else if (isPointerToCompleteObjectType(type1)
+				&& type0.kind().equals(TypeKind.RANGE)) {
+			node.setInitialType(
+					typeFactory.incompleteArrayType((ObjectType) type1));
 		} else if (type0.kind() == TypeKind.POINTER && isZero(arg1)) {
 			node.setInitialType(type0);
 		} else

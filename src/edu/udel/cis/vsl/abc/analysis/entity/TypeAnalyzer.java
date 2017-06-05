@@ -279,7 +279,8 @@ public class TypeAnalyzer {
 		OrdinaryEntity entity = scope.getLexicalOrdinaryEntity(true, name);
 
 		if (entity == null)
-			throw error("Typedef name used before definition?", typeNode);
+			throw error("Typedef name " + typeNode.prettyRepresentation()
+					+ "used before definition?", typeNode);
 
 		EntityKind kind = entity.getEntityKind();
 		Typedef typedef;
