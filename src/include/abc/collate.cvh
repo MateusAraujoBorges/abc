@@ -155,7 +155,7 @@ $atomic_f _Bool $collator_has_entered($collator colaltor, $range range);
 /** returns the state reference. */
 /*@ depends_on \access(&state);
   @ executes_when \true; */
-$atomic_f $state_f $state $collate_get_state($collate_state state);
+$atomic_f $state_f $state * $collate_get_state($collate_state state);
 
 #endif
 
