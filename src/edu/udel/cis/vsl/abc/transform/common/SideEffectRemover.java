@@ -3088,6 +3088,15 @@ public class SideEffectRemover extends BaseTransformer {
 			case ORDINARY_DECLARATION :
 				return translateOrdinaryDeclaration(
 						(OrdinaryDeclarationNode) item);
+			case OMP_DECLARATIVE :
+				/*
+				 * OMP declarative nodes should be transformed away by OMP
+				 * transformers. But if one only uses ABC to parse an OMP
+				 * program, this side-effect remover has no op on this kind of
+				 * nodes because an OMP declarative node only has variables as
+				 * its children. No side-effect in variables.
+				 */
+				return Arrays.asList(item);
 			case PRAGMA :
 				return Arrays.asList((BlockItemNode) item);
 			case STATEMENT :
