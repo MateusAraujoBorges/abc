@@ -6,7 +6,7 @@
  * This grammar assumes the input token stream is the result of
  * translation phase 7, as specified in the C11 Standard.
  * In particular, all the preprocessing has already been
- * done.  
+ * done.
  *
  * In addition to the Standard, I borrowed from the older
  * C grammar included with the ANTLR distribution.
@@ -139,7 +139,7 @@ import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;
 	public void displayRecognitionError(String[] tokenNames, RecognitionException e) {
 		String hdr = getErrorHeader(e);
 		String msg = getErrorMessage(e, tokenNames);
-		
+
 		throw new RuntimeParseException(hdr+" "+msg, e.token);
 	}
 
@@ -156,7 +156,7 @@ import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;
 
 	boolean isEnumerationConstant(String name) {
 		boolean answer = false;
-		
+
 		// System.err.print("Is "+name+" an enumeration constant: ");
 		for (Object scope : Symbols_stack) {
 			if (((Symbols_scope)scope).enumerationConstants.contains(name)) {
@@ -167,7 +167,7 @@ import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;
 		// System.err.println(answer);
 		// System.err.flush();
 		return answer;
-	}	
+	}
 }
 
 /* ***** A.2.1: Expressions ***** */
@@ -180,7 +180,7 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| SELF | PROCNULL | STATE_NULL
-	// TRUE | FALSE | 
+	// TRUE | FALSE |
 	| RESULT
 	| HERE | ELLIPSIS
 	;
@@ -197,11 +197,11 @@ primaryExpression
 	| STRING_LITERAL
     	| LPAREN compoundStatement RPAREN
       	  -> ^(STATEMENT_EXPRESSION LPAREN compoundStatement RPAREN)
-	| LPAREN expression RPAREN 
+	| LPAREN expression RPAREN
 	  -> ^(PARENTHESIZED_EXPRESSION LPAREN expression RPAREN)
 	| genericSelection
 	| derivativeExpression
-	| ORIGINAL LPAREN expression RPAREN 
+	| ORIGINAL LPAREN expression RPAREN
 	  -> ^(ORIGINAL LPAREN expression RPAREN)
 	;
 
@@ -216,7 +216,7 @@ genericSelection
  * of partial-differentiation operators applied to a function.
  */
 derivativeExpression
-	: DERIV LSQUARE IDENTIFIER COMMA partialList RSQUARE 
+	: DERIV LSQUARE IDENTIFIER COMMA partialList RSQUARE
 	  LPAREN argumentExpressionList RPAREN
 	  -> ^(DERIVATIVE_EXPRESSION IDENTIFIER partialList
 	       argumentExpressionList RPAREN)
@@ -230,7 +230,7 @@ partialList
 
 /* A partial-derivative operator */
 partial
-	: LCURLY IDENTIFIER COMMA INTEGER_CONSTANT RCURLY 
+	: LCURLY IDENTIFIER COMMA INTEGER_CONSTANT RCURLY
 	  -> ^(PARTIAL IDENTIFIER INTEGER_CONSTANT)
 	;
 
@@ -262,7 +262,7 @@ postfixExpression
 	    -> ^(CALL LPAREN $postfixExpression ABSENT argumentExpressionList
 	    	 RPAREN ABSENT)
 	  |	// CUDA kernel function call:
-	    LEXCON args1=argumentExpressionList REXCON 
+	    LEXCON args1=argumentExpressionList REXCON
 	    LPAREN args2=argumentExpressionList RPAREN
 	    -> ^(CALL LPAREN $postfixExpression $args1 $args2 RPAREN ABSENT)
 	  | DOT IDENTIFIER
@@ -296,7 +296,7 @@ postfixExpression
  */
 postfixExpressionRoot
 	: (LPAREN typeName RPAREN LCURLY)=>
-	  LPAREN typeName RPAREN LCURLY initializerList 
+	  LPAREN typeName RPAREN LCURLY initializerList
 		( RCURLY
 		| COMMA RCURLY
 		)
@@ -344,15 +344,15 @@ scope DeclarationScope;
 
 /* CIVL $spawn expression */
 spawnExpression
-	: SPAWN postfixExpressionRoot LPAREN 
-	  argumentExpressionList RPAREN 
+	: SPAWN postfixExpressionRoot LPAREN
+	  argumentExpressionList RPAREN
 	  -> ^(SPAWN LPAREN postfixExpressionRoot ABSENT
 	       argumentExpressionList RPAREN)
 	;
 
 /* CIVL $calls expression */
 callsExpression
-	: CALLS LPAREN postfixExpressionRoot LPAREN 
+	: CALLS LPAREN postfixExpressionRoot LPAREN
 	  argumentExpressionList RPAREN RPAREN
 	  -> ^(CALLS LPAREN postfixExpressionRoot ABSENT
 	       argumentExpressionList RPAREN)
@@ -377,7 +377,7 @@ scope DeclarationScope;
 	  -> ^(CAST typeName castExpression $l)
 	| unaryExpression
 	;
-	
+
 // TODO
 remoteExpression
 	:(castExpression -> castExpression)
@@ -493,7 +493,7 @@ logicalOrExpression
 	    -> ^(OPERATOR OR ^(ARGUMENT_LIST $logicalOrExpression $y))
 	  )*
 	;
-	
+
 /* Added for CIVL-C.  Usually 6.5.15 would use logicalOrExpression. */
 logicalImpliesExpression
 	: ( x=logicalOrExpression -> logicalOrExpression )
@@ -517,22 +517,22 @@ conditionalExpression
 
 
 quantifiedExpressionOLD
-	: 
+	:
 	 ((quantifier LPAREN boundVariableDeclarationList BITOR) =>
-     	  quantifier LPAREN boundVariableDeclarationList BITOR 
+     	  quantifier LPAREN boundVariableDeclarationList BITOR
      	  restrict=conditionalExpression RPAREN cond1=assignmentExpression)
 	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond1 $restrict)
-   	| quantifier LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression 
+   	| quantifier LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression
 	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond2)
 	;
-     
-/* A CIVL-C quantified expression using $exists, $forall, or $uniform. */   
+
+/* A CIVL-C quantified expression using $exists, $forall, or $uniform. */
 quantifiedExpression
 	: quantifier intervalSeq LPAREN boundVariableDeclarationList
      	  ( BITOR restrict=conditionalExpression RPAREN body1=assignmentExpression
 	    -> ^(QUANTIFIED quantifier boundVariableDeclarationList
                  $body1 $restrict intervalSeq)
-          | RPAREN body2=assignmentExpression 
+          | RPAREN body2=assignmentExpression
 	    -> ^(QUANTIFIED quantifier boundVariableDeclarationList
                  $body2 ABSENT intervalSeq)
           )
@@ -552,33 +552,33 @@ intervalSeq
 
 /* A CIVL-C lambda expression */
 arrayLambdaExpression
-	: 
+	:
 	 ((LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList BITOR) =>
-     	  LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList BITOR 
+     	  LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList BITOR
      	  restrict=conditionalExpression RPAREN cond1=assignmentExpression)
 	  -> ^(LAMBDA typeName boundVariableDeclarationList $cond1 $restrict)
-   	| LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression 
+   	| LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression
 	  -> ^(LAMBDA typeName boundVariableDeclarationList $cond2)
 	;
-	
+
 boundVariableDeclarationSubList
-	:	
+	:
 	  typeName IDENTIFIER (COMMA IDENTIFIER)* (COLON rangeExpression)?
 	  -> ^(BOUND_VARIABLE_DECLARATION typeName ^(BOUND_VARIABLE_NAME_LIST IDENTIFIER+) rangeExpression?)
 	;
 
 boundVariableDeclarationList
-	:	
+	:
 	  boundVariableDeclarationSubList (SEMI boundVariableDeclarationSubList)*
 	  -> ^(BOUND_VARIABLE_DECLARATION_LIST boundVariableDeclarationSubList+)
 	;
-	
+
 
 
 
 /* One of the CIVL-C first-order quantifiers.
- * UNIFORM represents uniform continuity.  
- */	
+ * UNIFORM represents uniform continuity.
+ */
 quantifier
 	: FORALL | EXISTS | UNIFORM
 	;
@@ -592,7 +592,7 @@ quantifier
  * Child 1.1: assignmentExpression
  */
 assignmentExpression
-	: 
+	:
 	  (arrayLambdaExpression)
 	  =>
 	  arrayLambdaExpression
@@ -635,13 +635,13 @@ expression
 	  -> ^(COLLECTIVE $proc $body)
 	| commaExpression
 	;
-			
+
 
 /* 6.6 */
 constantExpression
 	: conditionalExpression
 	;
-	
+
 
 /* ***** A.2.2: Declarations ***** */
 
@@ -660,7 +660,7 @@ constantExpression
  * Child 1: stringLiteral
  *
  * The declarationSpecifiers rule returns a bit telling whether
- * "typedef" occurred among the specifiers.  This bit is passed 
+ * "typedef" occurred among the specifiers.  This bit is passed
  * to the initDeclaratorList rule, and down the call chain,
  * where eventually an IDENTIFIER should be reached.  At that point,
  * if the bit is true, the IDENTIFIER is added to the set of typedef
@@ -673,7 +673,7 @@ scope DeclarationScope;
   $DeclarationScope::typedefNameUsed=false;
 }
 	: d=declarationSpecifiers
-	  ( 
+	  (
 	    i=initDeclaratorList contract SEMI
 	    -> ^(DECLARATION $d $i contract)
 	  | SEMI
@@ -708,7 +708,7 @@ declarationSpecifier
 	| alignmentSpecifier
 	;
 
-/* 
+/*
  * I factored this out of the declarationSpecifiers rule
  * to deal with the ambiguity of "ATOMIC" in one place.
  * "ATOMIC ( typeName )" matches atomicTypeSpecifier, which
@@ -760,15 +760,15 @@ typeSpecifier
     	| typeofSpecifier
 	;
 
-/* GNU C extension: 
+/* GNU C extension:
  * 6.6 Referring to a Type with typeof
- * Another way to refer to the type of an expression is with typeof. 
- * The syntax of using of this keyword looks like sizeof, but the construct acts 
+ * Another way to refer to the type of an expression is with typeof.
+ * The syntax of using of this keyword looks like sizeof, but the construct acts
  * semantically like a type name defined with typedef.
- * There are two ways of writing the argument to typeof: with an expression or with a type. 
+ * There are two ways of writing the argument to typeof: with an expression or with a type.
  * Here is an example with an expression:
  *   typeof (x[0](1))
- * This assumes that x is an array of pointers to functions; the type described is that of 
+ * This assumes that x is an array of pointers to functions; the type described is that of
  * the values of the functions.
  * Here is an example with a typename as the argument:
  *   typeof (int *)
@@ -877,8 +877,8 @@ structDeclarator
  * Child 1: enumeratorList
  */
 enumSpecifier
-    : ENUM 
-        ( IDENTIFIER 
+    : ENUM
+        ( IDENTIFIER
           -> ^(ENUM IDENTIFIER ABSENT)
         | IDENTIFIER LCURLY enumeratorList COMMA? RCURLY
           -> ^(ENUM IDENTIFIER enumeratorList)
@@ -905,7 +905,7 @@ enumerator
 	: IDENTIFIER
     	  {
     		$Symbols::enumerationConstants.add($IDENTIFIER.text);
-		// System.err.println("define enum constant "+$IDENTIFIER.text);	
+		// System.err.println("define enum constant "+$IDENTIFIER.text);
     	  }
     	  (  -> ^(ENUMERATOR IDENTIFIER ABSENT)
     	  | (ASSIGN constantExpression)
@@ -927,12 +927,12 @@ typeQualifier
 /* 6.7.4.  Added CIVL $atomic_f, indicating
  * a function should be executed atomically.  CIVL's
  * $abstract specifier also included for abstract functions.
- * CIVL's $system specifier indicates a system function, with 
+ * CIVL's $system specifier indicates a system function, with
  * additional field to denote the corresponding library.
  */
 functionSpecifier
     : INLINE | NORETURN
-    | ABSTRACT CONTIN LPAREN INTEGER_CONSTANT RPAREN 
+    | ABSTRACT CONTIN LPAREN INTEGER_CONSTANT RPAREN
       -> ^(ABSTRACT INTEGER_CONSTANT)
     | ABSTRACT -> ^(ABSTRACT)
     | PURE -> ^(PURE)
@@ -956,23 +956,23 @@ libraryName
 	: LSQUARE i0=IDENTIFIER i1+=(SUB | IDENTIFIER)* RSQUARE
 	->^(LIB_NAME $i0 $i1*)
 	;
-	
+
 
 /* 6.7.5
  * Root: ALIGNAS
- * Child 0: TYPE or EXPR 
+ * Child 0: TYPE or EXPR
  * Child 1: typeName (if Child 0 is TYPE) or constantExpression
  *          (if Child 0 is EXPR)
  */
 alignmentSpecifier
-    : ALIGNAS LPAREN 
+    : ALIGNAS LPAREN
         ( typeName RPAREN
           -> ^(ALIGNAS TYPE typeName)
         | constantExpression RPAREN
           -> ^(ALIGNAS EXPR constantExpression)
         )
     ;
-	
+
 /* 6.7.6
  * Root: DECLARATOR
  * Child 0: pointer or ABSENT
@@ -987,7 +987,7 @@ declarator
 
 /* 6.7.6
  * Root: DIRECT_DECLARATOR
- * Child 0: directDeclaratorPrefix 
+ * Child 0: directDeclaratorPrefix
  * Children 1..: list of directDeclaratorSuffix (may be empty)
  */
 directDeclarator
@@ -1001,7 +1001,7 @@ directDeclarator
  * Tree: either an IDENTIFIER or a declarator.
  */
 directDeclaratorPrefix
-	: IDENTIFIER 
+	: IDENTIFIER
 		{
 			if ($DeclarationScope::isTypedef) {
 				$Symbols::types.add($IDENTIFIER.text);
@@ -1024,7 +1024,7 @@ directDeclaratorSuffix
  * child 0: LSQUARE (for source information)
  * child 1: STATIC or ABSENT
  * child 2: TYPE_QUALIFIER_LIST
- * child 3: expression (array extent), 
+ * child 3: expression (array extent),
  *          "*" (unspecified variable length), or ABSENT
  * child 4: RSQUARE (for source information)
  */
@@ -1058,7 +1058,7 @@ scope DeclarationScope;
     $DeclarationScope::typedefNameUsed = false;
 }
 	: LPAREN
-	  ( parameterTypeList RPAREN 
+	  ( parameterTypeList RPAREN
 	    -> ^(FUNCTION_SUFFIX LPAREN parameterTypeList  RPAREN)
 	  | identifierList RPAREN
 	    -> ^(FUNCTION_SUFFIX LPAREN identifierList RPAREN)
@@ -1082,7 +1082,7 @@ assignmentExpression_opt
 	| assignmentExpression
 	;
 
-/* 6.7.6 
+/* 6.7.6
  * Root: POINTER
  * children: STAR
  */
@@ -1107,17 +1107,17 @@ typeQualifierList
     : typeQualifier+ -> ^(TYPE_QUALIFIER_LIST typeQualifier+)
     ;
 
-/* 6.7.6 
+/* 6.7.6
  * Root: PARAMETER_TYPE_LIST
  * child 0: parameterList (at least 1 parameter declaration)
  * child 1: ELLIPSIS or ABSENT
- * 
+ *
  * If the parameterTypeList occurs in a function prototype
  * (that is not part of a function definition), it defines
  * a new scope (a "function prototype scope").  If it occurs
- * in a function definition, it does not define a new scope. 
+ * in a function definition, it does not define a new scope.
  */
- 
+
 parameterTypeList
 	: {$Symbols::isFunctionDefinition}? parameterTypeListWithoutScope
 	| parameterTypeListWithScope
@@ -1150,7 +1150,7 @@ parameterList
       -> ^(PARAMETER_LIST parameterDeclaration+)
     ;
 
-/* 6.7.6 
+/* 6.7.6
  * Root: PARAMETER_DECLARATION
  * Child 0: declarationSpecifiers
  * Child 1: declarator, or abstractDeclarator, or ABSENT
@@ -1177,7 +1177,7 @@ declaratorOrAbstractDeclarator
 	:	(declarator)=> declarator
 	|	abstractDeclarator
 	;
-	
+
 
 /* 6.7.6
  * Root: IDENTIFIER_LIST
@@ -1208,7 +1208,7 @@ typeName
  * Root: ABSTRACT_DECLARATOR
  * Child 0. pointer (may be ABSENT).  Some number of *s with possible
  *   type qualifiers.
- * Child 1. directAbstractDeclarator (may be ABSENT). 
+ * Child 1. directAbstractDeclarator (may be ABSENT).
  */
 abstractDeclarator
     : pointer
@@ -1222,7 +1222,7 @@ abstractDeclarator
 /* 6.7.7
  *
  * Root: DIRECT_ABSTRACT_DECLARATOR
- * Child 0. abstract declarator or ABSENT.  
+ * Child 0. abstract declarator or ABSENT.
  * Children 1..: any number of direct abstract declarator suffixes
  *
  * Note that the difference between this and a directDeclarator
@@ -1238,7 +1238,7 @@ directAbstractDeclarator
     ;
 
 
-/* 6.7.8 
+/* 6.7.8
  * Root: TYPEDEF_NAME
  * Child 0: IDENTIFIER
  *
@@ -1249,7 +1249,7 @@ directAbstractDeclarator
  * This is perfectly legal: you can define a typedef twice
  * as long as both definitions are equivalent.  However,
  * the first definition causes foo to be entered into the type name
- * table, so when parsing the second definition, foo is 
+ * table, so when parsing the second definition, foo is
  * interpreted as a typedefName (a type specifier), and the
  * declaration would have empty declarator.   This is not
  * what you want, so you have to forbid it somehow.  I do this
@@ -1262,7 +1262,7 @@ typedefName
 @after{
     if(!$DeclarationScope::typedefNameUsed)
     	$DeclarationScope::typedefNameUsed=true;
-} 
+}
     : {!$DeclarationScope::typedefNameUsed && isTypeName(input.LT(1).getText())}?
       IDENTIFIER
       -> ^(TYPEDEF_NAME IDENTIFIER)
@@ -1385,6 +1385,7 @@ scope Symbols;
         $Symbols::isFunctionDefinition = false;
 }
 	: statement
+	| pragma+ statement -> ^(STATEMENT ^(COMPOUND_STATEMENT ABSENT ^(BLOCK_ITEM_LIST pragma+ statement) ABSENT))
 	;
 
 /* 6.8.1
@@ -1426,7 +1427,7 @@ scope DeclarationScope;
 	$Symbols::enumerationConstants = new HashSet<String>();
         $Symbols::isFunctionDefinition = false;
         $DeclarationScope::isTypedef = false;
-        $DeclarationScope::typedefNameUsed = false;	
+        $DeclarationScope::typedefNameUsed = false;
 }
     : LCURLY
       ( RCURLY
@@ -1507,14 +1508,14 @@ scope Symbols;
 	$Symbols::enumerationConstants = new HashSet<String>();
         $Symbols::isFunctionDefinition = false;
 }
-	: WHILE LPAREN expression RPAREN invariant_opt 
+	: WHILE LPAREN expression RPAREN invariant_opt
 	  s=statementWithScope
 	  -> ^(WHILE expression $s invariant_opt)
-	| DO s=statementWithScope WHILE LPAREN expression RPAREN 
+	| DO s=statementWithScope WHILE LPAREN expression RPAREN
 	  invariant_opt SEMI
 	  -> ^(DO $s expression invariant_opt)
-	| FOR LPAREN 
-	  ( 
+	| FOR LPAREN
+	  (
 	    d=declaration e1=expression_opt SEMI e2=expression_opt
 	    RPAREN i=invariant_opt s=statementWithScope
 	    -> ^(FOR $d $e1 $e2 $s $i)
@@ -1554,12 +1555,12 @@ typeName_opt
  *
  * Root: CONTINUE
  * Child 0: SEMI (for source information)
- * 
+ *
  * Root: BREAK
  * Child 0: SEMI (for source information)
  *
  * Root: RETURN
- * Child 0: expression or ABSENT 
+ * Child 0: expression or ABSENT
  * Child 1: SEMI (for source information)
  */
 jumpStatement
@@ -1594,11 +1595,11 @@ inlineList : (~ NEWLINE)+ ;
  * Root: ANNOTATION
  * child 0 : INLINE_ANNOTATION_START or ANNOTATION_START
  * child 1 : TOKEN_LIST (children are list of tokens comprising annotation body)
- * child 2 : ANNOTATION_END or NEWLINE (marking end of annotation) 
+ * child 2 : ANNOTATION_END or NEWLINE (marking end of annotation)
  */
 
 annotation
-  :  INLINE_ANNOTATION_START 
+  :  INLINE_ANNOTATION_START
      ( NEWLINE
        -> ^(ANNOTATION INLINE_ANNOTATION_START ^(TOKEN_LIST) NEWLINE)
      | inlineList NEWLINE
@@ -1613,10 +1614,10 @@ annotation
 annotationBody : (~ ANNOTATION_END)+ ;
 
 
-/* CIVL-C $run statement. This statement invokes an 
+/* CIVL-C $run statement. This statement invokes an
  * asynchronous exeuction on the given statement.
  * Syntax: $run stmt.
- * 
+ *
  * Root: RUN
  * Child 0: statement
  */
@@ -1625,14 +1626,14 @@ runStatement
     ;
 
 withStatement
-	: WITH LPAREN assignmentExpression RPAREN statement 
+	: WITH LPAREN assignmentExpression RPAREN statement
             -> ^(WITH assignmentExpression statement)
 	;
-	
+
 updateStatement
-	: UPDATE LPAREN assignmentExpression RPAREN 
+	: UPDATE LPAREN assignmentExpression RPAREN
 	  postfixExpressionRoot LPAREN argumentExpressionList RPAREN SEMI
-	  -> ^(UPDATE assignmentExpression  
+	  -> ^(UPDATE assignmentExpression
 	  	^(CALL ABSENT postfixExpressionRoot ABSENT argumentExpressionList RPAREN)
 	      )
 	;
@@ -1641,7 +1642,7 @@ balancedToken
 	: ~(LPAREN | RPAREN)
 	| LPAREN balancedToken* RPAREN
 	;
-	
+
 asmStatement
 	: ASM VOLATILE? GOTO? LPAREN
 	  balancedToken*
@@ -1669,7 +1670,7 @@ whenStatement
  * Children: 1 or more statement
  */
 chooseStatement
-	:	CHOOSE LCURLY statement+ RCURLY 
+	:	CHOOSE LCURLY statement+ RCURLY
 		-> ^(CHOOSE statement+)
 	;
 
@@ -1741,7 +1742,7 @@ declarationList_opt
 	;
 
 /* An item in a CIVL-C contract.
- * 
+ *
  * Root: REQUIRES or ENSURES
  * Child: expression
  */
