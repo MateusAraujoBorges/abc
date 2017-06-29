@@ -182,4 +182,14 @@ $system void $write_set_push();
 /*@ executes_when \true; */
 $system void $write_set_pop($mem * ws);
 
+/* This is a system function which has the same specification as $when
+   but more strict requirements: The given condition can ONLY change
+   from false to true (or stay true) in any execution of a program,
+   otherwise CIVL will not guarantee the soundness for deadlock-free
+   property.
+ */
+/*@ depends_on \nothing;
+  @*/
+$system void $unidirectional_when(_Bool condition);
+
 #endif
