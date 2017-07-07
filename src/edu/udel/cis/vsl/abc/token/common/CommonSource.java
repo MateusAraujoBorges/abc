@@ -51,12 +51,12 @@ public class CommonSource implements Source {
 
 	@Override
 	public String toString() {
-		return getSummary(false);
+		return getSummary(false, false);
 	}
 
 	@Override
 	public void print(PrintStream out) {
-		out.print(getSummary(false));
+		out.print(getSummary(false, false));
 	}
 
 	@Override
@@ -66,8 +66,9 @@ public class CommonSource implements Source {
 	}
 
 	@Override
-	public String getSummary(boolean abbreviated) {
-		return TokenUtils.summarizeRange(firstToken, lastToken, abbreviated);
+	public String getSummary(boolean abbreviated, boolean isException) {
+		return TokenUtils.summarizeRange(firstToken, lastToken, abbreviated,
+				isException);
 	}
 
 	@Override

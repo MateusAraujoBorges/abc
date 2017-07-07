@@ -61,7 +61,7 @@ public class DifferenceObject {
 		} else
 			buf.append(node.prettyRepresentation());
 		buf.append("    at ");
-		buf.append(node.getSource().getSummary(false));
+		buf.append(node.getSource().getSummary(false, false));
 		return buf.toString();
 	}
 
@@ -109,68 +109,69 @@ public class DifferenceObject {
 		buf.append(kind);
 		buf.append("\n");
 		switch (kind) {
-		case BASIC_TYPE_KIND: {
-			BasicTypeNode thisType = (BasicTypeNode) thisNode, thatType = (BasicTypeNode) thatNode;
+			case BASIC_TYPE_KIND : {
+				BasicTypeNode thisType = (BasicTypeNode) thisNode,
+						thatType = (BasicTypeNode) thatNode;
 
-			buf.append("This node: type ");
-			buf.append(thisType.getBasicTypeKind());
-			buf.append("\n");
-			buf.append("  ");
-			buf.append(this.getNodeInfo(thisNode));
-			buf.append("\n");
-			buf.append("That node: type ");
-			buf.append(thatType.getBasicTypeKind());
-			buf.append("  ");
-			buf.append(this.getNodeInfo(thatNode));
-			break;
-		}
-		case NUM_CHILDREN:
-			buf.append("This node:  ");
-			buf.append(thisNode.numChildren());
-			buf.append(" children \n");
-			buf.append("  ");
-			buf.append(this.getNodeInfo(thisNode));
-			buf.append("\n");
-			buf.append("That node: ");
-			buf.append(thatNode.numChildren());
-			buf.append(" children");
-			buf.append("  ");
-			buf.append(this.getNodeInfo(thatNode));
-			break;
-		case IDENTIFIER_NAME:
-			buf.append("This node: name ");
-			buf.append(((IdentifierNode) thisNode).name());
-			buf.append("\n  ");
-			buf.append(this.getNodeInfo(thisNode));
-			buf.append("\n");
-			buf.append("That node: name ");
-			buf.append(((IdentifierNode) thatNode).name());
-			buf.append("  ");
-			buf.append(this.getNodeInfo(thatNode));
-			break;
-		case PRAGMA_NUM_TOKENS:
-			buf.append("This node:  ");
-			buf.append(((PragmaNode) thisNode).getNumTokens());
-			buf.append(" tokens \n  ");
-			buf.append(this.getNodeInfo(thisNode));
-			buf.append("\n");
-			buf.append("That node: ");
-			buf.append(((PragmaNode) thatNode).getNumTokens());
-			buf.append(" tokens\n  ");
-			buf.append(this.getNodeInfo(thatNode));
-			break;
-		default:
-			buf.append("This node: ");
-			if (thisNode != null)
+				buf.append("This node: type ");
+				buf.append(thisType.getBasicTypeKind());
+				buf.append("\n");
+				buf.append("  ");
 				buf.append(this.getNodeInfo(thisNode));
-			else
-				buf.append("NULL");
-			buf.append("\n");
-			buf.append("That node: ");
-			if (thatNode != null)
+				buf.append("\n");
+				buf.append("That node: type ");
+				buf.append(thatType.getBasicTypeKind());
+				buf.append("  ");
 				buf.append(this.getNodeInfo(thatNode));
-			else
-				buf.append("NULL");
+				break;
+			}
+			case NUM_CHILDREN :
+				buf.append("This node:  ");
+				buf.append(thisNode.numChildren());
+				buf.append(" children \n");
+				buf.append("  ");
+				buf.append(this.getNodeInfo(thisNode));
+				buf.append("\n");
+				buf.append("That node: ");
+				buf.append(thatNode.numChildren());
+				buf.append(" children");
+				buf.append("  ");
+				buf.append(this.getNodeInfo(thatNode));
+				break;
+			case IDENTIFIER_NAME :
+				buf.append("This node: name ");
+				buf.append(((IdentifierNode) thisNode).name());
+				buf.append("\n  ");
+				buf.append(this.getNodeInfo(thisNode));
+				buf.append("\n");
+				buf.append("That node: name ");
+				buf.append(((IdentifierNode) thatNode).name());
+				buf.append("  ");
+				buf.append(this.getNodeInfo(thatNode));
+				break;
+			case PRAGMA_NUM_TOKENS :
+				buf.append("This node:  ");
+				buf.append(((PragmaNode) thisNode).getNumTokens());
+				buf.append(" tokens \n  ");
+				buf.append(this.getNodeInfo(thisNode));
+				buf.append("\n");
+				buf.append("That node: ");
+				buf.append(((PragmaNode) thatNode).getNumTokens());
+				buf.append(" tokens\n  ");
+				buf.append(this.getNodeInfo(thatNode));
+				break;
+			default :
+				buf.append("This node: ");
+				if (thisNode != null)
+					buf.append(this.getNodeInfo(thisNode));
+				else
+					buf.append("NULL");
+				buf.append("\n");
+				buf.append("That node: ");
+				if (thatNode != null)
+					buf.append(this.getNodeInfo(thatNode));
+				else
+					buf.append("NULL");
 		}
 		this.message = buf.toString();
 	}

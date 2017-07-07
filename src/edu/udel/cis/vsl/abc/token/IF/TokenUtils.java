@@ -1,6 +1,11 @@
 package edu.udel.cis.vsl.abc.token.IF;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.stream.Stream;
 
 import org.antlr.runtime.CharStream;
 import org.antlr.runtime.CommonToken;
@@ -174,7 +179,10 @@ public class TokenUtils {
 	}
 
 	public static String summarizeRange(CivlcToken first, CivlcToken last,
-			boolean abbreviated) {
+			boolean abbreviated, boolean isException) {
+		if (isException)
+			return summarizeDetailedRange(first, last, abbreviated);
+
 		String result = summarizeRangeLocation(first, last, abbreviated);
 		String excerpt = "";
 		int tokenCount = 0;
@@ -256,6 +264,231 @@ public class TokenUtils {
 
 	public static TokenSource makeTokenSourceFromList(CivlcToken first) {
 		return new ListTokenSource(first);
+	}
+
+	/**
+	 * Get the whole line in the source file for the given token.
+	 * 
+	 * @param token
+	 * @return
+	 */
+	private static String getLineContentFromToken(CivlcToken token) {
+		String line = null;
+		String filePath = token.getSourceFile().getFile().getAbsolutePath();
+
+		if (token.getType() < 0)
+			return token.getText();
+		try {
+			if (filePath.startsWith("/include")) {
+				StringBuilder sBuilder = new StringBuilder();
+				int lineCount = token.getLine() - 1;
+				InputStream lines = Class.class.getResourceAsStream(filePath);
+
+				char c = (char) lines.read();
+				while (c != -1 && lineCount != 0){
+					if (c == '\n')
+						lineCount --;
+					c = (char) lines.read();
+				}
+				while (c != -1 && c != '\n'){
+					sBuilder.append(c);
+					c = (char) lines.read();
+				}
+				line = sBuilder.toString();
+				lines.close();
+			} else {
+				Stream<String> lines = Files.lines(Paths.get(filePath));
+				line = lines.skip(token.getLine() - 1).findFirst().get();
+				lines.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return line;
+	}
+
+	/**
+	 * Return the detailed source location information with highlights.
+	 * 
+	 * @param first
+	 *            first token in linked list
+	 * @param last
+	 *            last token in linked list
+	 * @param abbreviated
+	 *            should the filename be abbreviated?
+	 * @return string representation of token range
+	 */
+	public static String summarizeDetailedRange(CivlcToken first,
+			CivlcToken last, boolean abbreviated) {
+		String lineContent;
+		String filename1 = getShortFilename(first, abbreviated);
+		String filename2 = getShortFilename(last, abbreviated);
+		int startLine = first.getLine();
+		int endLine = last.getLine();
+		int startIndex = first.getCharPositionInLine();
+		int endIndex = last.getType() == Token.EOF
+				? 0
+				: last.getCharPositionInLine() + last.getStopIndex()
+						- last.getStartIndex();
+		int highlightCount = 0;
+		int otherCount = 0;
+		StringBuilder sBuilder = new StringBuilder();
+		CivlcToken tempToken = null;
+
+		if (filename1.equals(filename2)) {
+			if (startLine == endLine) {
+				// Construct file and location
+				sBuilder.append(getShortFilename(first, false));
+				sBuilder.append(":");
+				sBuilder.append(startLine);
+				sBuilder.append(".");
+				sBuilder.append(startIndex);
+				sBuilder.append("-");
+				sBuilder.append(endIndex);
+				sBuilder.append("\n");
+				// Construct content
+				lineContent = getLineContentFromToken(first);
+				sBuilder.append(lineContent);
+				// Calculate the position of highlights.
+				tempToken = first;
+				while (tempToken != null && tempToken != last) {
+					highlightCount += tempToken.getText().length();
+					tempToken = tempToken.getNext();
+				}
+				highlightCount += tempToken.getText().length();
+				otherCount = first.getCharPositionInLine();
+				// Construct highlight
+				sBuilder.append("\n");
+				for (int i = 0; i < otherCount; i++)
+					if (lineContent.charAt(i) == '\t')
+						sBuilder.append("\t");
+					else
+						sBuilder.append(" ");
+				while (highlightCount > 0) {
+					sBuilder.append("^");
+					highlightCount--;
+				}
+			} else {
+				// Construct file and location
+				sBuilder.append(getShortFilename(first, false));
+				sBuilder.append(":");
+				sBuilder.append(startLine);
+				sBuilder.append(".");
+				sBuilder.append(startIndex);
+				sBuilder.append("-");
+				sBuilder.append(endLine);
+				sBuilder.append(".");
+				sBuilder.append(endIndex >= 0 ? endIndex >= 0 : "EOL");
+				sBuilder.append("\n\t");
+				// Construct content
+				lineContent = getLineContentFromToken(first);
+				sBuilder.append(lineContent);
+				// Calculate the position of highlights.
+				tempToken = first;
+				while (tempToken != null && tempToken != last) {
+					highlightCount += tempToken.getText().length();
+					tempToken = tempToken.getNext();
+				}
+				highlightCount += tempToken.getText().length();
+				otherCount = first.getCharPositionInLine();
+				// Construct highlight
+				sBuilder.append("\n");
+				for (int i = 0; i < otherCount; i++)
+					if (lineContent.charAt(i) == '\t')
+						sBuilder.append("\t");
+					else
+						sBuilder.append(" ");
+				while (highlightCount > 0) {
+					sBuilder.append("^");
+					highlightCount--;
+				}
+				// Construct multi-line abbreviation
+				sBuilder.append("\n\t...\n");
+				// Construct content
+				lineContent = getLineContentFromToken(last);
+				sBuilder.append(lineContent);
+				// Calculate the position of highlights.
+				highlightCount = last.getCharPositionInLine();
+				tempToken = last;
+				highlightCount += tempToken.getText().length();
+				otherCount = last.getCharPositionInLine();
+				// Construct highlight
+				sBuilder.append("\n");
+				for (int i = 0; i < otherCount; i++)
+					if (lineContent.charAt(i) == '\t')
+						sBuilder.append("\t");
+					else
+						sBuilder.append(" ");
+				while (highlightCount > 0) {
+					sBuilder.append("^");
+					highlightCount--;
+				}
+			}
+		} else {
+			String lastFileName = last.getSourceFile().getName();
+			String tempFileName = first.getSourceFile().getName();
+
+			assert lastFileName.equals(tempFileName);
+			// Construct file and location
+			sBuilder.append(getShortFilename(first, false));
+			sBuilder.append(":");
+			sBuilder.append(startLine);
+			sBuilder.append(".");
+			sBuilder.append(startIndex);
+			sBuilder.append("-");
+			sBuilder.append(getShortFilename(last, false));
+			sBuilder.append(":");
+			sBuilder.append(endLine);
+			sBuilder.append(".");
+			sBuilder.append(endIndex >= 0 ? endIndex >= 0 : "EOL");
+			sBuilder.append("\n\t");
+			/* Note that this situation is rarely happened */
+
+			// Construct content
+			lineContent = getLineContentFromToken(first);
+			sBuilder.append(lineContent);
+			// Calculate the position of highlights.
+			tempToken = first;
+			while (tempToken != null && tempToken != last) {
+				highlightCount += tempToken.getText().length();
+				tempToken = tempToken.getNext();
+			}
+			highlightCount += tempToken.getText().length();
+			otherCount = first.getCharPositionInLine();
+			// Construct highlight
+			sBuilder.append("\n");
+			for (int i = 0; i < otherCount; i++)
+				if (lineContent.charAt(i) == '\t')
+					sBuilder.append("\t");
+				else
+					sBuilder.append(" ");
+			while (highlightCount > 0) {
+				sBuilder.append("^");
+				highlightCount--;
+			}
+			// Construct multi-line abbreviation
+			sBuilder.append("\n\t...\n");
+			// Construct content
+			lineContent = getLineContentFromToken(last);
+			sBuilder.append(lineContent);
+			// Calculate the position of highlights.
+			highlightCount = last.getCharPositionInLine();
+			tempToken = last;
+			highlightCount += tempToken.getText().length();
+			otherCount = last.getCharPositionInLine();
+			// Construct highlight
+			sBuilder.append("\n");
+			for (int i = 0; i < otherCount; i++)
+				if (lineContent.charAt(i) == '\t')
+					sBuilder.append("\t");
+				else
+					sBuilder.append(" ");
+			while (highlightCount > 0) {
+				sBuilder.append("^");
+				highlightCount--;
+			}
+		}
+		return sBuilder.toString();
 	}
 
 }

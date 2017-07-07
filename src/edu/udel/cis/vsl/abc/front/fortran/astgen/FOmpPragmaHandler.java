@@ -259,7 +259,7 @@ public class FOmpPragmaHandler extends PragmaHandler {
 								(tokenFactory
 										.newSource((CivlcToken) sectionsClause
 												.getToken())
-										.getSummary(false)));
+										.getSummary(false, true)));
 					}
 					workshareNode.setNowait(true);
 					break;
@@ -379,7 +379,7 @@ public class FOmpPragmaHandler extends PragmaHandler {
 											.newSource(
 													(CivlcToken) parallelClause
 															.getToken())
-											.getSummary(false)));
+											.getSummary(false, true)));
 						}
 					} else if (result == NUM_THREADS) {
 						if (!hasNumThreads) {
@@ -391,7 +391,7 @@ public class FOmpPragmaHandler extends PragmaHandler {
 											.newSource(
 													(CivlcToken) parallelClause
 															.getToken())
-											.getSummary(false)));
+											.getSummary(false, true)));
 						}
 					}
 					break;

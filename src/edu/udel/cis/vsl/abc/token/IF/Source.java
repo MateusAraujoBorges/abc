@@ -70,9 +70,12 @@ public interface Source {
 	 *            true iff want to have the shorter file name in the location,
 	 *            e.g, "f1:127.4-128.1" instead of
 	 *            "longOrignialFile.c:127.4-128.1"
+	 * @param isException
+	 *            true iff want to print the detailed information for a thrown
+	 *            exception.
 	 * @return summary of location and text
 	 */
-	String getSummary(boolean abbreviated);
+	String getSummary(boolean abbreviated, boolean isException);
 
 	String getContent(boolean abbreviated);
 

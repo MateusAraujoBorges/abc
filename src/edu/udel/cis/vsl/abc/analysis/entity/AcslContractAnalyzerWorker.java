@@ -198,7 +198,8 @@ public class AcslContractAnalyzerWorker {
 							"re-definition of behavior named as " + name
 									+ ": the previous definition was at "
 									+ definedBehaviors.get(name).getBehavior()
-											.getSource().getSummary(false),
+											.getSource()
+											.getSummary(false, true),
 							contractClause);
 				else
 					this.definedBehaviors.put(name, entityAnalyzer.entityFactory

@@ -105,21 +105,21 @@ public abstract class CommonASTNode implements ASTNode {
 	}
 
 	public CommonASTNode(Source source, ASTNode child) {
-		this(source, new ASTNode[] { child });
+		this(source, new ASTNode[]{child});
 	}
 
 	public CommonASTNode(Source source, ASTNode child0, ASTNode child1) {
-		this(source, new ASTNode[] { child0, child1 });
+		this(source, new ASTNode[]{child0, child1});
 	}
 
 	public CommonASTNode(Source source, ASTNode child0, ASTNode child1,
 			ASTNode child2) {
-		this(source, new ASTNode[] { child0, child1, child2 });
+		this(source, new ASTNode[]{child0, child1, child2});
 	}
 
 	public CommonASTNode(Source source, ASTNode child0, ASTNode child1,
 			ASTNode child2, ASTNode child3) {
-		this(source, new ASTNode[] { child0, child1, child2, child3 });
+		this(source, new ASTNode[]{child0, child1, child2, child3});
 	}
 
 	@Override
@@ -181,7 +181,7 @@ public abstract class CommonASTNode implements ASTNode {
 		}
 		if (includeSource && source != null) {
 			out.println();
-			out.print(prefix + "| source: " + source.getSummary(false));
+			out.print(prefix + "| source: " + source.getSummary(false, false));
 		}
 		printExtras(prefix + "| ", out);
 	}
@@ -449,7 +449,7 @@ public abstract class CommonASTNode implements ASTNode {
 	@Override
 	public String toString() {
 		return "Node[" + id + ", " + instanceId + ", "
-				+ source.getSummary(false) + "]";
+				+ source.getSummary(false, false) + "]";
 	}
 
 	@Override

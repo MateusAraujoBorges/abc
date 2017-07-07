@@ -310,7 +310,7 @@ public class SideEffectRemover extends BaseTransformer {
 				} else {
 					throw new ABCUnsupportedException(
 							"converting anonymous enumeration type  " + type,
-							source.getSummary(false));
+							source.getSummary(false, true));
 				}
 			}
 			case STRUCTURE_OR_UNION : {
@@ -361,7 +361,7 @@ public class SideEffectRemover extends BaseTransformer {
 			default :
 				throw new ABCUnsupportedException(
 						"converting type " + type + " to a type node.",
-						source.getSummary(false));
+						source.getSummary(false, true));
 		}
 	}
 
@@ -1274,7 +1274,7 @@ public class SideEffectRemover extends BaseTransformer {
 				throw new ABCRuntimeException(
 						"Unexpected operator: " + expression.getOperator()
 								+ ": " + expression,
-						expression.getSource().getSummary(false));
+						expression.getSource().getSummary(false, true));
 		}
 		return result;
 	}
