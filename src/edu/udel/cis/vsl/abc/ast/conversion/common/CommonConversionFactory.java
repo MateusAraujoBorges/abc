@@ -114,10 +114,16 @@ public class CommonConversionFactory implements ConversionFactory {
 	}
 
 	@Override
-	public ArrayConversion arrayConversion(ArrayType type) {
+	public ArrayConversion arrayConversion(ObjectType type) {
 		// get rid of $input/$output qualifiers on type.getElementType?
+		ArrayType arrayType;
+
+		if (type instanceof QualifiedObjectType)
+			arrayType = (ArrayType) ((QualifiedObjectType) type).getBaseType();
+		else
+			arrayType = (ArrayType) type;
 		return new CommonArrayConversion(type,
-				typeFactory.pointerType(type.getElementType()));
+				typeFactory.pointerType(arrayType.getElementType()));
 	}
 
 	@Override

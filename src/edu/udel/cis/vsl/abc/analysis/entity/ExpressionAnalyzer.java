@@ -1548,8 +1548,8 @@ public class ExpressionAnalyzer {
 	 * only if the corresponding bit in the converted operand is not set). The
 	 * integer promotions are performed on the operand, and the result has the
 	 * promoted type. If the promoted type is an unsigned type, the expression
-	 * ~E is equivalent to the maximum value representable in that type minus E.
-	 * </blockquote>
+	 * ~E is equivalent to the maximum value representable in that type minus
+	 * E. </blockquote>
 	 * 
 	 * @param node
 	 * @throws SyntaxException
@@ -1945,8 +1945,8 @@ public class ExpressionAnalyzer {
 	 * an assignment expression is the type the left operand would have after
 	 * lvalue conversion. The side effect of updating the stored value of the
 	 * left operand is sequenced after the value computations of the left and
-	 * right operands. The evaluations of the operands are unsequenced.
-	 * </blockquote>
+	 * right operands. The evaluations of the operands are
+	 * unsequenced. </blockquote>
 	 * 
 	 * and
 	 * 
@@ -2744,9 +2744,12 @@ public class ExpressionAnalyzer {
 			throws SyntaxException {
 		Type oldType = node.getConvertedType();
 
-		if (oldType instanceof ArrayType) {
+		// need to deal with input/output-qualified array types
+
+		if (oldType instanceof ObjectType
+				&& isArrayType((ObjectType) oldType)) {
 			Conversion conversion = conversionFactory
-					.arrayConversion((ArrayType) oldType);
+					.arrayConversion((ObjectType) oldType);
 
 			node.addConversion(conversion);
 		}

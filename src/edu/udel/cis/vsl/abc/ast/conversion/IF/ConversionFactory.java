@@ -2,7 +2,6 @@ package edu.udel.cis.vsl.abc.ast.conversion.IF;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.ArithmeticType;
-import edu.udel.cis.vsl.abc.ast.type.IF.ArrayType;
 import edu.udel.cis.vsl.abc.ast.type.IF.DomainType;
 import edu.udel.cis.vsl.abc.ast.type.IF.FunctionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.IntegerType;
@@ -105,12 +104,15 @@ public interface ConversionFactory {
 	 * and is not an lvalue. If the array object has register storage class, the
 	 * behavior is undefined."
 	 * 
+	 * The old type may be an ArrayType or a QualifiedObjectType (with $input or
+	 * $output qualifier) with base type ArrayType. I think.
+	 * 
 	 * @param type
-	 *            any array type
+	 *            any array type or qualified array type
 	 * @return array conversion with old type the given array type and new type
 	 *         the pointer type to the element type of the array type
 	 */
-	ArrayConversion arrayConversion(ArrayType type);
+	ArrayConversion arrayConversion(ObjectType type);
 
 	/**
 	 * Returns the function conversion object with old type equal to the given
@@ -122,8 +124,8 @@ public interface ConversionFactory {
 	 * type. Except when it is the operand of the <code>sizeof</code> operator,
 	 * the <code>_Alignof</code> operator, or the unary <code>&</code> operator,
 	 * a function designator with type "function returning type" is converted to
-	 * an expression that has type "pointer to function returning type".
-	 * </blockquote>
+	 * an expression that has type "pointer to function returning type"
+	 * . </blockquote>
 	 * 
 	 * @param type
 	 *            a function type
@@ -222,8 +224,8 @@ public interface ConversionFactory {
 	 * of an assignment expression is the type the left operand would have after
 	 * lvalue conversion. The side effect of updating the stored value of the
 	 * left operand is sequenced after the value computations of the left and
-	 * right operands. The evaluations of the operands are unsequenced.
-	 * </blockquote>
+	 * right operands. The evaluations of the operands are
+	 * unsequenced. </blockquote>
 	 * 
 	 * and C11 Section 6.5.16.1 continues:
 	 * 

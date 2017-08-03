@@ -490,7 +490,8 @@ public class CommonTypeFactory implements TypeFactory {
 	public ObjectType qualify(ObjectType startType, boolean constQualified,
 			boolean volatileQualified, boolean restrictQualified,
 			boolean inputQualified, boolean outputQualified) {
-		if (!constQualified && !volatileQualified && !restrictQualified)
+		if (!constQualified && !volatileQualified && !restrictQualified
+				&& !inputQualified && !outputQualified)
 			return startType;
 		if (startType.kind() == TypeKind.QUALIFIED) {
 			QualifiedObjectType qualifiedType = (QualifiedObjectType) startType;
