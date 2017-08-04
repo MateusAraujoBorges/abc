@@ -285,12 +285,12 @@ public class TokenUtils {
 				InputStream lines = Class.class.getResourceAsStream(filePath);
 
 				char c = (char) lines.read();
-				while (c != -1 && lineCount != 0){
+				while (c != -1 && lineCount != 0) {
 					if (c == '\n')
-						lineCount --;
+						lineCount--;
 					c = (char) lines.read();
 				}
-				while (c != -1 && c != '\n'){
+				while (c != -1 && c != '\n') {
 					sBuilder.append(c);
 					c = (char) lines.read();
 				}
@@ -416,6 +416,7 @@ public class TokenUtils {
 				}
 				// Construct highlight
 				sBuilder.append("\n");
+				otherCount = lineContent.length();
 				for (int i = 0; i < otherCount; i++)
 					if (lineContent.charAt(i) == '\t')
 						sBuilder.append("\t");

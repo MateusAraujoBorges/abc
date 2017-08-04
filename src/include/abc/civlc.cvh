@@ -192,4 +192,9 @@ $system void $write_set_pop($mem * ws);
   @*/
 $system void $unidirectional_when(_Bool condition);
 
+/*@ depends_on \access(value);
+  @ executes_when \true;
+  @*/
+$atomic_f void $output_assign(void * output,const void * value, int size);
+
 #endif
