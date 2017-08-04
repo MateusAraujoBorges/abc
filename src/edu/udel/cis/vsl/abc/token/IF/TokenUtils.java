@@ -378,14 +378,14 @@ public class TokenUtils {
 				sBuilder.append("-");
 				sBuilder.append(endLine);
 				sBuilder.append(".");
-				sBuilder.append(endIndex >= 0 ? endIndex >= 0 : "EOL");
+				sBuilder.append(endIndex >= 0 ? endIndex : "EOL");
 				sBuilder.append("\n\t");
 				// Construct content
 				lineContent = getLineContentFromToken(first);
 				sBuilder.append(lineContent);
 				// Calculate the position of highlights.
 				tempToken = first;
-				while (tempToken != null && tempToken != last) {
+				while (tempToken != null && tempToken.getLine() == startLine) {
 					highlightCount += tempToken.getText().length();
 					tempToken = tempToken.getNext();
 				}
@@ -408,10 +408,12 @@ public class TokenUtils {
 				lineContent = getLineContentFromToken(last);
 				sBuilder.append(lineContent);
 				// Calculate the position of highlights.
-				highlightCount = last.getCharPositionInLine();
-				tempToken = last;
-				highlightCount += tempToken.getText().length();
-				otherCount = last.getCharPositionInLine();
+				while (tempToken != null && tempToken.getLine() != endLine)
+					tempToken = tempToken.getNext();
+				while (tempToken != null && tempToken.getLine() == endLine) {
+					highlightCount += tempToken.getText().length();
+					tempToken = tempToken.getNext();
+				}
 				// Construct highlight
 				sBuilder.append("\n");
 				for (int i = 0; i < otherCount; i++)
