@@ -395,23 +395,35 @@ long double tgammal(long double x);
 
 //nearest integer functions
 /*@ pure;
+  @ executes_when \true;
   @*/
-double ceil(double x);
+$system double ceil(double x);
+
 /*@ pure;
+  @ executes_when \true;
   @*/
-float  ceilf(float x);
+$system float  ceilf(float x);
+
 /*@ pure;
+  @ executes_when \true;
   @*/
-long double ceill(long double x);
+$system long double ceill(long double x);
+
 /*@ pure;
+  @ executes_when \true;
   @*/
-double floor(double x);
+$system double floor(double x);
+
 /*@ pure;
+  @ executes_when \true;
   @*/
-float  floorf(float x);
+$system float  floorf(float x);
+
 /*@ pure;
+  @ executes_when \true;
   @*/
-long double floorl(long double x);
+$system long double floorl(long double x);
+
 /*@ pure;
   @*/
 double nearbyint(double x);
