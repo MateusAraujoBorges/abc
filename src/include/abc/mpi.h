@@ -308,7 +308,7 @@ int MPI_Op_create(MPI_User_function *, int, MPI_Op *);
 int MPI_Op_free( MPI_Op *);
 int MPI_Allreduce(const void*, void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
 int MPI_Reduce_scatter(const void* , void*, const int *, MPI_Datatype, MPI_Op, MPI_Comm);
-int MPI_Scan(void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
+int MPI_Scan(const void* , void*, int, MPI_Datatype, MPI_Op, MPI_Comm);
 int MPI_Group_size(MPI_Group, int *);
 int MPI_Group_rank(MPI_Group, int *);
 int MPI_Group_translate_ranks (MPI_Group, int,   int *, MPI_Group, int *);
@@ -419,7 +419,7 @@ int MPI_Win_wait(MPI_Win);
 int MPI_Alltoallw(const  void *, const  int [], const  int [],
                   const  MPI_Datatype [], void *, const int [],
 		  const  int [], const MPI_Datatype [], MPI_Comm);
-int MPI_Exscan(  void *, void *, int, MPI_Datatype, MPI_Op, MPI_Comm);
+int MPI_Exscan(const void *, void *, int, MPI_Datatype, MPI_Op, MPI_Comm);
  
 /* External Interfaces */
 int MPI_Add_error_class(int *);

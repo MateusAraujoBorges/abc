@@ -25,6 +25,8 @@
 #define BARRIER_TAG      9987
 #define COMMDUP_TAG      9986
 #define COMMFREE_TAG     9985
+#define SCAN_TAG         9984
+#define EXSCAN_TAG       9983
 
 /* Definition of CIVL-MPI */
 typedef enum _mpi_state{
@@ -179,6 +181,10 @@ int $mpi_scatterv(const void*, const int[], const
 		 int[], MPI_Datatype, void* ,
 		 int, MPI_Datatype, int, int,
 		  MPI_Comm, char *);
+
+int $mpi_scan(const void *, void *, int, MPI_Datatype, MPI_Op, MPI_Comm);
+
+int $mpi_exscan(const void *, void *, int, MPI_Datatype, MPI_Op, MPI_Comm);
 
 void* $mpi_pointer_add(const void*, int, MPI_Datatype);
 
