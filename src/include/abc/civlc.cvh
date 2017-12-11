@@ -170,17 +170,24 @@ $system void $assume_pop();
  * in the write set.
  *********************************************************************/
 
-/* Push an empty write set into the write set stack belong to the
-   calling process. */
+/* Push a $mem type object into the write set stack belong to the
+   calling process. If the object has value NULL, push an empty write
+   set. */
 /*@ depends_on \nothing; */
 /*@ executes_when \true; */
-$system void $write_set_push();
+$system void $write_set_push($mem ws);
 
 /* Pop an entry out of a write set stack belong to the calling
    process. */
 /*@ depends_on \nothing; */
 /*@ executes_when \true; */
 $system void $write_set_pop($mem * ws);
+
+
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+/* Initialize a $mem type object */
+$mem $new_mem();
 
 /* This is a system function which has the same specification as $when
    but more strict requirements: The given condition can ONLY change
