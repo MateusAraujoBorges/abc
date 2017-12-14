@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.transform.common;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,8 @@ import edu.udel.cis.vsl.abc.ast.IF.AST;
 import edu.udel.cis.vsl.abc.ast.IF.ASTException;
 import edu.udel.cis.vsl.abc.ast.IF.ASTFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Entity.EntityKind;
+import edu.udel.cis.vsl.abc.ast.entity.IF.Typedef;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode.NodeKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
@@ -40,9 +43,15 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.Enumerator;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
+import edu.udel.cis.vsl.abc.ast.type.IF.StructureOrUnionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
 import edu.udel.cis.vsl.abc.err.IF.ABCException;
@@ -148,6 +157,7 @@ public class CompareCombiner implements Combiner {
 		nodes.add(equalsFunc);
 		spec = astFactory.newAST(specRoot, sourceFiles0, spec.isWholeProgram());
 		impl = astFactory.newAST(implRoot, sourceFiles1, impl.isWholeProgram());
+
 		specSource = this.getMainSource(specRoot);
 		implSource = this.getMainSource(implRoot);
 		inputVariablesAndAssumes = combineInputs(specRoot, implRoot);
@@ -163,9 +173,15 @@ public class CompareCombiner implements Combiner {
 		nameTransformer = new CommonNameTransformer(
 				renameVariables(specOutputs.values(), "_spec"), astFactory);
 		spec = nameTransformer.transform(spec);
+		// TODO: Check consistency of assumptions
 		spec.release();
 		impl.release();
-		// TODO: Check consistency of assumptions
+
+		List<BlockItemNode> dependencies = removeInputOutPutDependencies(
+				implRoot);
+
+		removeInputOutPutDependencies(specRoot);
+		nodes.addAll(0, dependencies);
 		specSystem = wrapperFunction(specSource, specRoot, SYSTEM_SPEC);
 		implSystem = wrapperFunction(implSource, implRoot, SYSTEM_IMPL);
 		for (VariableDeclarationNode v : specOutputs.values()) {
@@ -178,7 +194,6 @@ public class CompareCombiner implements Combiner {
 		}
 		nodes.add(specSystem);
 		nodes.add(implSystem);
-
 		newMainBodyNodes.add(nodeFactory.newVariableDeclarationNode(specSource,
 				nodeFactory.newIdentifierNode(specSource, "_isEqual"),
 				nodeFactory.newBasicTypeNode(specSource, BasicTypeKind.BOOL)));
@@ -214,7 +229,6 @@ public class CompareCombiner implements Combiner {
 				astFactory.getTokenFactory().join(specSource, implSource),
 				"Composite System", nodes);
 		AST result = astFactory.newAST(newRoot, allSourceFiles, true);
-		// result.prettyPrint(System.out, false);
 		return result;
 	}
 
@@ -241,6 +255,49 @@ public class CompareCombiner implements Combiner {
 
 		function.setSystemFunctionSpecifier(true);
 		return function;
+	}
+
+	/**
+	 * Find all the type definitions, struct definitions, and union definitions
+	 * that input and output depend on. Removed those definitions from the ast
+	 * and return them.
+	 * 
+	 * @param root
+	 *            The root of an AST.
+	 * @return A list of ast nodes that input and output depend on.
+	 */
+	private List<BlockItemNode> removeInputOutPutDependencies(ASTNode root) {
+		Map<ASTNode, Integer> selfDefinedTypesIndexMap = new HashMap<>();
+		List<ASTNode> selfDefinedTypes = getSelfDefinedTypes(root,
+				selfDefinedTypesIndexMap);
+		int selfDefinedTypeSize = selfDefinedTypes.size();
+		Map<String, VariableDeclarationNode> input = getInputs(root);
+		Map<String, VariableDeclarationNode> output = getOutputs(root);
+		BitSet record = new BitSet(selfDefinedTypeSize);
+
+		for (VariableDeclarationNode var : output.values()) {
+			findStructUnionEnumerationThatInputAndOutDependOn(
+					selfDefinedTypesIndexMap, var, record);
+		}
+		for (VariableDeclarationNode var : input.values()) {
+			findStructUnionEnumerationThatInputAndOutDependOn(
+					selfDefinedTypesIndexMap, var, record);
+		}
+
+		List<BlockItemNode> dependencies = new LinkedList<>();
+
+		for (int i = record.nextSetBit(0); i >= 0; i = record
+				.nextSetBit(i + 1)) {
+			ASTNode dependentNode = selfDefinedTypes.get(i);
+
+			dependentNode.remove();
+			dependencies.add((BlockItemNode) dependentNode);
+			// operate on index i here
+			if (i == selfDefinedTypeSize) {
+				break; // or (i+1) would overflow
+			}
+		}
+		return dependencies;
 	}
 
 	/**
@@ -364,37 +421,6 @@ public class CompareCombiner implements Combiner {
 		return null;
 	}
 
-	// /**
-	// * Removes the $file type node from the AST. This is called after
-	// * {@link #getAndRemoveFileTypeNode(SequenceNode)}. When the compare
-	// * combiner moves the $file type node from one AST, it still needs to
-	// remove
-	// * it from
-	// *
-	// * @param root
-	// * the root node of the AST.
-	// */
-	// private void removeFileTypeNode(SequenceNode<ExternalDefinitionNode>
-	// root) {
-	// int numChildren = root.numChildren();
-	//
-	// for (int i = 0; i < numChildren; i++) {
-	// ExternalDefinitionNode def = root.getSequenceChild(i);
-	//
-	// if (def != null && def instanceof TypedefDeclarationNode) {
-	// TypedefDeclarationNode typeDefNode = (TypedefDeclarationNode) def;
-	// String sourceFile = typeDefNode.getSource().getFirstToken()
-	// .getSourceFile().getName();
-	//
-	// if (sourceFile.equals("stdio.cvl")
-	// && typeDefNode.getName().equals("$file")) {
-	// typeDefNode.parent().removeChild(typeDefNode.childIndex());
-	// return;
-	// }
-	// }
-	// }
-	// }
-
 	/**
 	 * <p>
 	 * <b>Summary :</b> Take the input variable declaration nodes and related
@@ -486,6 +512,34 @@ public class CompareCombiner implements Combiner {
 	}
 
 	/**
+	 * Return the input variables of the AST
+	 * 
+	 * @param root
+	 *            The root node of the AST
+	 * @return the input variables of the AST, where key is the name of the
+	 *         variable.
+	 */
+	private Map<String, VariableDeclarationNode> getInputs(ASTNode root) {
+		Map<String, VariableDeclarationNode> inputs = new LinkedHashMap<String, VariableDeclarationNode>();
+		int childNum = root.numChildren();
+
+		// put all input variables into the map.
+		for (int i = 0; i < childNum; i++) {
+			ASTNode child = root.child(i);
+
+			if (child != null
+					&& child.nodeKind() == NodeKind.VARIABLE_DECLARATION) {
+				VariableDeclarationNode var = (VariableDeclarationNode) child;
+
+				if (var.getTypeNode().isInputQualified()) {
+					inputs.put(var.getName(), var);
+				}
+			}
+		}
+		return inputs;
+	}
+
+	/**
 	 * Returns the output variables of the AST.
 	 * 
 	 * @param root
@@ -509,6 +563,119 @@ public class CompareCombiner implements Combiner {
 			}
 		}
 		return outputs;
+	}
+
+	/**
+	 * Get the {@link TypedefDeclarationNode}s, struct definition(
+	 * {@link TypeNode}) and union definition ({@link TypeNode}).
+	 * 
+	 * @param root
+	 *            The root node of specification and implementation.
+	 * @return a list of {@link TypedefDeclarationNode}.
+	 */
+	private List<ASTNode> getSelfDefinedTypes(ASTNode root,
+			Map<ASTNode, Integer> typesMap) {
+		List<ASTNode> selfDefinedTypes = new ArrayList<>();
+		int numChildren = root.numChildren();
+		int index = 0;
+
+		for (int i = 0; i < numChildren; i++) {
+			ASTNode child = root.child(i);
+
+			if (child != null) {
+				NodeKind nodeKind = child.nodeKind();
+
+				if (nodeKind == NodeKind.TYPEDEF) {
+					selfDefinedTypes.add(child);
+					typesMap.put(child, index++);
+				} else if (nodeKind == NodeKind.TYPE) {
+					TypeNode typeNode = (TypeNode) child;
+
+					if (typeNode instanceof StructureOrUnionTypeNode
+							|| typeNode instanceof EnumerationTypeNode) {
+						selfDefinedTypes.add(child);
+						typesMap.put(child, index++);
+					}
+				}
+			}
+		}
+		return selfDefinedTypes;
+	}
+
+	/**
+	 * Find struct, union, and enumeration that an input or output depends on.
+	 * 
+	 * @param typeMap
+	 *            A map that maps a struct, union or enumeration into an index.
+	 * @param typeNode
+	 */
+	private void findStructUnionEnumerationThatInputAndOutDependOn(
+			Map<ASTNode, Integer> typeMap, ASTNode astNode, BitSet record) {
+		if (astNode == null)
+			return;
+
+		if (astNode.nodeKind() == NodeKind.TYPE) {
+			TypeNode typeNode = (TypeNode) astNode;
+			TypeNodeKind typeNodeKind = typeNode.kind();
+
+			switch (typeNodeKind) {
+				case ENUMERATION : {
+					EnumerationTypeNode enumerationTypeNode = (EnumerationTypeNode) typeNode;
+					Entity enumerationTypeNodeEntity = enumerationTypeNode
+							.getEntity();
+
+					if (enumerationTypeNodeEntity
+							.getEntityKind() == EntityKind.ENUMERATION) {
+						Enumerator enumerator = (Enumerator) enumerationTypeNodeEntity;
+						ASTNode enumeratorDefinition = enumerator
+								.getDefinition();
+						Integer index = typeMap.get(enumeratorDefinition);
+
+						if (index != null)
+							record.set(index);
+					}
+					return;
+				}
+				case STRUCTURE_OR_UNION : {
+					StructureOrUnionTypeNode structureOrUnionTypeNode = (StructureOrUnionTypeNode) typeNode;
+					Entity structureOrUnionTypeNodeEntity = structureOrUnionTypeNode
+							.getEntity();
+
+					if (structureOrUnionTypeNodeEntity
+							.getEntityKind() == EntityKind.STRUCTURE_OR_UNION) {
+						StructureOrUnionType structureOrUnionType = (StructureOrUnionType) structureOrUnionTypeNodeEntity;
+						ASTNode structureOrUnionDefinition = structureOrUnionType
+								.getDefinition();
+						Integer index = typeMap.get(structureOrUnionDefinition);
+
+						if (index != null)
+							record.set(index);
+					}
+					return;
+				}
+				case TYPEDEF_NAME : {
+					TypedefNameNode typedefNameNode = (TypedefNameNode) typeNode;
+					Entity typedefNameNodeEntity = typedefNameNode.getName()
+							.getEntity();
+
+					if (typedefNameNodeEntity
+							.getEntityKind() == EntityKind.TYPEDEF) {
+						Typedef typedef = (Typedef) typedefNameNodeEntity;
+						ASTNode typedefDefinition = typedef.getDefinition();
+						Integer index = typeMap.get(typedefDefinition);
+
+						if (index != null)
+							record.set(index);
+					}
+					return;
+				}
+				default :
+			}
+		}
+		for (ASTNode child : astNode.children()) {
+			findStructUnionEnumerationThatInputAndOutDependOn(typeMap, child,
+					record);
+		}
 	}
 
 	/**
