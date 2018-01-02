@@ -1,7 +1,7 @@
 /**
  * This is example 2.27 from ACSL reference 1.9.
  */
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 int main(){
   int x=0;
   int y = 10;

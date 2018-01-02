@@ -4,7 +4,7 @@
 
 #ifndef _POINTER_
 #define _POINTER_
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 #include<civlc.cvh>
 #include<op.h>
 

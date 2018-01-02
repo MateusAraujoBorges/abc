@@ -8,7 +8,7 @@
 /* includes civlc.cvh because this library references $scope */
 #include <civlc.cvh>
 #include <bundle.cvh>
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 /* *********************** Constants *********************** */
 
 /* Like MPI_ANY_SOURCE, can be used in probe, seek, dequeue

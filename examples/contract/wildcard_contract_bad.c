@@ -2,7 +2,7 @@
    every other process using a wildcard receive. This program has a
    data race-condition. */
 #include <mpi.h>
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 
 int size, rank, x;
 int root = 0;

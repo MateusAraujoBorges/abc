@@ -5,7 +5,7 @@
 #ifndef _CIVLC_
 #define _CIVLC_
 
-#pragma PARSE_ACSL 
+#pragma CIVL ACSL 
 /* *********************  Standard Constants and Types ********************* */
 #define $true 1
 

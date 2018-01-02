@@ -3,7 +3,7 @@
 
 #ifndef _DOMAIN_
 #define _DOMAIN_
-#pragma PARSE_ACSL 
+#pragma CIVL ACSL 
 /* An enumerated type used to specify how domains are decomposed.
  * This is used, for example, to specify how a domain is partitioned
  * among members of a thread team at OpenMP "for" loops.  The model

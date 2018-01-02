@@ -1,4 +1,4 @@
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 //========================= func.c =========================
 int x;
 /*@ reads x;*/

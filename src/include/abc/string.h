@@ -6,7 +6,7 @@
 #define _STRING_
 
 #include <stddef.h>
-#pragma PARSE_ACSL 
+#pragma CIVL ACSL 
 /* copies n characters from the object pointed to by s2 into the 
    object pointed to by s1. If copying takes place between objects that overlap, 
    the behavior is undefined. */

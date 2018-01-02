@@ -1,5 +1,5 @@
 #include <assert.h>
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 /*@ requires x[0][0][0] == 0;
 */
 int add(int *** x) 

@@ -8,7 +8,7 @@
 #include <collate.cvh>
 #include <stddef.h>
 
-#pragma PARSE_ACSL 
+#pragma CIVL ACSL 
 
 #define BCAST_TAG        9999
 #define REDUCE_TAG       9998

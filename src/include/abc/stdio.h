@@ -9,7 +9,7 @@
 /* Needed from stdarg.h: */
 
 #include <stdarg.h>
-#pragma PARSE_ACSL 
+#pragma CIVL ACSL 
 /* Types */
 
 typedef unsigned long int size_t;

@@ -2,7 +2,7 @@
 #include<mpi.h>
 #include<civl-mpi.cvh>
 #include<stdio.h>
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 MPI_Comm comm = MPI_COMM_WORLD;
 int rank, nprocs, left, right;
 

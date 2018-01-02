@@ -6,7 +6,7 @@
 
 /* includes civlc.cvh because this library references $operation */
 #include<op.h>
-#pragma PARSE_ACSL 
+#pragma CIVL ACSL 
 /* *********************** Types *********************** */
 
 /* A system type for bundling any slice of memory into

@@ -1,6 +1,6 @@
 #include <civlc.cvh>
 #include <seq.cvh>
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 
 $scope root = $here;
 

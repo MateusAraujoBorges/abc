@@ -169,12 +169,12 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	private boolean inTextBlock = false;
 
 	/**
-	 * A stack of "PARSE_ACSL" pragmas. A "PARSE_ACSL" pragma denotes that all
-	 * the annotations, in the same source file and coming after this pragma,
-	 * will be parsed and a part of the final AST if they are written in ACSL
-	 * syntax. A {@link #pushStream(CharStream, Formation)} will cause a push of
-	 * a default PARSE_PRAGMA value (false); A "EOF" will cause a pop on the
-	 * stack.
+	 * A stack of "ACSL" pragmas (under the CIVL command-universe). An "ACSL"
+	 * pragma denotes that all the annotations, in the same source file and
+	 * coming after this pragma, will be parsed and a part of the final AST if
+	 * they are written in ACSL syntax. A
+	 * {@link #pushStream(CharStream, Formation)} will cause a push of a default
+	 * PARSE_PRAGMA value (false); A "EOF" will cause a pop on the stack.
 	 */
 	private Stack<Boolean> parseACSLPragmaStack = new Stack<>();
 
@@ -401,45 +401,45 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			int type = token.getType();
 
 			switch (type) {
-			case PreprocessorParser.EOF:
-				processEOF(node);
-				break;
-			case PreprocessorParser.TEXT_BLOCK:
-				processTextBlock(node);
-				break;
-			case PreprocessorParser.DEFINE:
-				processMacroDefinition(node);
-				break;
-			case PreprocessorParser.ERROR:
-				processError(node);
-				break;
-			case PreprocessorParser.ELIF:
-			case PreprocessorParser.PIF:
-				processIf(node);
-				break;
-			case PreprocessorParser.IFDEF:
-				processIfdef(node);
-				break;
-			case PreprocessorParser.IFNDEF:
-				processIfndef(node);
-				break;
-			case PreprocessorParser.INCLUDE:
-				processInclude(node);
-				break;
-			case PreprocessorParser.PPRAGMA:
-				processPragma(node);
-				break;
-			case PreprocessorParser.UNDEF:
-				processUndef(node);
-				break;
-			case PreprocessorParser.HASH:
-				processNondirective(node);
-				break;
-			case PreprocessorParser.LINE:
-				processLine(node);
-				break;
-			default:
-				processText(node);
+				case PreprocessorParser.EOF :
+					processEOF(node);
+					break;
+				case PreprocessorParser.TEXT_BLOCK :
+					processTextBlock(node);
+					break;
+				case PreprocessorParser.DEFINE :
+					processMacroDefinition(node);
+					break;
+				case PreprocessorParser.ERROR :
+					processError(node);
+					break;
+				case PreprocessorParser.ELIF :
+				case PreprocessorParser.PIF :
+					processIf(node);
+					break;
+				case PreprocessorParser.IFDEF :
+					processIfdef(node);
+					break;
+				case PreprocessorParser.IFNDEF :
+					processIfndef(node);
+					break;
+				case PreprocessorParser.INCLUDE :
+					processInclude(node);
+					break;
+				case PreprocessorParser.PPRAGMA :
+					processPragma(node);
+					break;
+				case PreprocessorParser.UNDEF :
+					processUndef(node);
+					break;
+				case PreprocessorParser.HASH :
+					processNondirective(node);
+					break;
+				case PreprocessorParser.LINE :
+					processLine(node);
+					break;
+				default :
+					processText(node);
 			}
 		}
 	}
@@ -487,28 +487,28 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 			boolean parseACSL = parseACSLPragmaStack.peek();
 
 			switch (token.getType()) {
-			case PreprocessorLexer.INLINE_ANNOTATION_START:
-				assert (inTextBlock);
-				inInlineAnnotation = true;
-				// will be set to false at next NEWLINE
-				break;
-			case PreprocessorLexer.ANNOTATION_START:
-				assert (inTextBlock);
-				inBlockAnnotation = true;
-				break;
-			case PreprocessorLexer.ANNOTATION_END:
-				assert (inTextBlock);
-				inBlockAnnotation = false;
-				// Quick return: if not parsing ACSL
-				if (!parseACSL) {
-					incrementNextNode();
-					return;
-				} else
+				case PreprocessorLexer.INLINE_ANNOTATION_START :
+					assert (inTextBlock);
+					inInlineAnnotation = true;
+					// will be set to false at next NEWLINE
 					break;
-			case PreprocessorLexer.PP_NUMBER:
-				processPPNumber(token);
-				return;
-			default:
+				case PreprocessorLexer.ANNOTATION_START :
+					assert (inTextBlock);
+					inBlockAnnotation = true;
+					break;
+				case PreprocessorLexer.ANNOTATION_END :
+					assert (inTextBlock);
+					inBlockAnnotation = false;
+					// Quick return: if not parsing ACSL
+					if (!parseACSL) {
+						incrementNextNode();
+						return;
+					} else
+						break;
+				case PreprocessorLexer.PP_NUMBER :
+					processPPNumber(token);
+					return;
+				default :
 			}
 			// If current control is NOT in block annotation and line
 			// annotation, or ACSL will be parsed anyway, put the node to
@@ -704,19 +704,20 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		CivlcToken newToken;
 
 		switch (name) {
-		case "__LINE__":
-			newToken = tokenFactory.newCivlcToken(
-					PreprocessorLexer.INTEGER_CONSTANT, "" + origin.getLine(),
-					formation);
-			break;
-		case "__FILE__":
-			newToken = tokenFactory.newCivlcToken(
-					PreprocessorLexer.STRING_LITERAL,
-					'"' + getCurrentSource().getFile().getAbsolutePath() + '"',
-					formation);
-			break;
-		default:
-			throw new PreprocessorRuntimeException("unreachable");
+			case "__LINE__" :
+				newToken = tokenFactory.newCivlcToken(
+						PreprocessorLexer.INTEGER_CONSTANT,
+						"" + origin.getLine(), formation);
+				break;
+			case "__FILE__" :
+				newToken = tokenFactory.newCivlcToken(
+						PreprocessorLexer.STRING_LITERAL,
+						'"' + getCurrentSource().getFile().getAbsolutePath()
+								+ '"',
+						formation);
+				break;
+			default :
+				throw new PreprocessorRuntimeException("unreachable");
 		}
 		return newToken;
 	}
@@ -808,8 +809,8 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 	 * concatenation. Then all PLACEMARKERs are removed. Hence before second
 	 * expansion all placemarkers and all of the original ## tokens should be
 	 * gone. ISN'T THIS THE SAME as saying: if actual argument is empty then
-	 * delete "A ##" or "## A" from the replacement list. What about
-	 * "B ## A ## C"? It becomes "B ## C".
+	 * delete "A ##" or "## A" from the replacement list. What about "B ## A ##
+	 * C"? It becomes "B ## C".
 	 * </p>
 	 * 
 	 * 
@@ -1503,12 +1504,18 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 		Token token = ((CommonTree) pragmaNode).getToken();
 		CivlcToken pragmaToken = tokenFactory.newCivlcToken(token,
 				getIncludeHistory());
-		Token pragmaTag = ((CommonTree) pragmaNode.getChild(1)).getToken();
+		Token pragmaUniverseName = ((CommonTree) pragmaNode.getChild(1))
+				.getToken();
 
 		// Assign the top ACSL parse mark to true:
-		if (pragmaTag.getText().equals("PARSE_ACSL")) {
-			parseACSLPragmaStack.pop();
-			parseACSLPragmaStack.push(true);
+		if (pragmaUniverseName.getText().equals("CIVL")) {
+			Token pragmaCommandName = ((CommonTree) pragmaNode.getChild(3))
+					.getToken();
+
+			if (pragmaCommandName.getText().equals("ACSL")) {
+				parseACSLPragmaStack.pop();
+				parseACSLPragmaStack.push(true);
+			}
 		}
 		addOutput(pragmaToken);
 		inPragma = true;

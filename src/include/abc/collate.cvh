@@ -4,7 +4,7 @@
  */
 #ifndef _COLLATE_
 #define _COLLATE_
-#pragma PARSE_ACSL
+#pragma CIVL ACSL
 #include <bundle.cvh>
 
 

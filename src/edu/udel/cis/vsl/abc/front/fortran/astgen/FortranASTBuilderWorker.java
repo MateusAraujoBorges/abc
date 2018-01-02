@@ -37,13 +37,13 @@ import edu.udel.cis.vsl.abc.ast.node.IF.label.SwitchLabelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpExecutableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode.BlockItemKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.ForLoopInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.LabeledStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode.BlockItemKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode.StatementKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.SwitchNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
@@ -1285,8 +1285,12 @@ public class FortranASTBuilderWorker {
 		PragmaHandler handler;
 		ASTNode result = null;
 
-		if (code.equals("PARSE_ACSL"))
-			return null;
+		if (code.equals("CIVL")) {
+			CivlcToken tokens[] = bodyTree.getChildByIndex(0).cTokens();
+
+			if (tokens.length > 0 && tokens[0].equals("ACSL"))
+				return null;
+		}
 		handler = getPragmaHandler(code);
 		identifier.setEntity(handler);
 		try {
@@ -1751,7 +1755,6 @@ public class FortranASTBuilderWorker {
 				}
 			}
 		}
-		
 
 		int numItems = items.size();
 		boolean changed = false;
@@ -1813,8 +1816,7 @@ public class FortranASTBuilderWorker {
 			}
 			items = newItems;
 		}
-		
-		
+
 		result = nodeFactory.newCompoundStatementNode(source, items);
 		return result;
 	}
