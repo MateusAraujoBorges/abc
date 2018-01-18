@@ -132,6 +132,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType.SignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardUnsignedIntegerType.UnsignedIntKind;
@@ -1071,8 +1072,15 @@ public class AcslContractWorker {
 
 		specifierAnalyzer = new SpecifierAnalysis(specifierList, parseTree,
 				config);
-		result = nodeFactory.newBasicTypeNode(specifierSource,
-				specifierAnalyzer.getBasicTypeKind());
+		if (specifierAnalyzer.typeNameKind == TypeNodeKind.BASIC)
+			result = nodeFactory.newBasicTypeNode(specifierSource,
+					specifierAnalyzer.getBasicTypeKind());
+		else if (specifierAnalyzer.typeNameKind == TypeNodeKind.VOID)
+			result = nodeFactory.newVoidTypeNode(specifierSource);
+		else
+			throw new RuntimeException("Translation of C type of kind : "
+					+ specifierAnalyzer.typeNameKind
+					+ " has not been implemented.");
 		if (declarators.getType() != ABSENT) {
 			declaratorData = processDeclarator(declarators, result, scope);
 			result = declaratorData.type;
