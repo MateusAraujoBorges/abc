@@ -22,9 +22,11 @@ import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.EnumerationType;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.front.c.parse.CivlCParser;
@@ -149,6 +151,14 @@ public class CommonProgramFactory implements ProgramFactory {
 					parent.removeChild(declIndex);
 				}
 			}
+		}
+		for (TypedefDeclarationNode decl : plan.getTypeDefUnwrapActions()) {
+			ASTNode parent = decl.parent();
+			int declIndex = decl.childIndex();
+			TypeNode typeNode = decl.getTypeNode();
+
+			typeNode.remove();
+			parent.setChild(declIndex, typeNode);
 		}
 		renamer.renameFrom(root);
 	}

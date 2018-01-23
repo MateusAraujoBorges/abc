@@ -78,88 +78,94 @@ public class LinkTest {
 
 	@Test
 	public void a() throws ABCException {
-		check(new String[] { "a_0.c", "a_1.c", "a_2.c" }, "a.c");
+		check(new String[]{"a_0.c", "a_1.c", "a_2.c"}, "a.c");
 	}
 
 	@Test
 	public void b() throws ABCException {
-		check(new String[] { "b_0.c", "b_1.c" }, "b.c");
+		check(new String[]{"b_0.c", "b_1.c"}, "b.c");
 	}
 
 	@Test
 	public void c() throws ABCException {
-		check(new String[] { "c_0.c", "c_1.c" }, "c.c");
+		check(new String[]{"c_0.c", "c_1.c"}, "c.c");
 	}
 
 	@Test
 	public void enum1() throws ABCException {
-		check(new String[] { "enum1_0.c", "enum1_1.c" }, "enum1.c");
+		check(new String[]{"enum1_0.c", "enum1_1.c"}, "enum1.c");
 	}
 
 	@Test
 	public void enum2() throws ABCException {
-		check(new String[] { "enum2_0.c", "enum2_1.c" }, "enum2.c");
+		check(new String[]{"enum2_0.c", "enum2_1.c"}, "enum2.c");
 	}
 
 	@Test
 	public void enum3() throws ABCException {
-		check(new String[] { "enum3_0.c", "enum3_1.c" }, "enum3.c");
+		check(new String[]{"enum3_0.c", "enum3_1.c"}, "enum3.c");
 	}
 
 	@Test
 	public void enum4() throws ABCException {
-		check(new String[] { "enum4_0.c", "enum4_1.c" }, "enum4.c");
+		check(new String[]{"enum4_0.c", "enum4_1.c"}, "enum4.c");
 	}
 
 	@Test
 	public void extern() throws ABCException {
-		check(new String[] { "extern/var_0.c", "extern/var_1.c",
-				"extern/var_2.c" }, "extern/var.c");
+		check(new String[]{"extern/var_0.c", "extern/var_1.c",
+				"extern/var_2.c"}, "extern/var.c");
 	}
 
 	@Test
 	public void struct_compat() throws ABCException {
-		check(new String[] { "struct_compat_0.c", "struct_compat_1.c" },
+		check(new String[]{"struct_compat_0.c", "struct_compat_1.c"},
 				"struct_compat.c");
 	}
 
 	@Test
 	public void struct_incompat() throws ABCException {
-		check(new String[] { "struct_incompat_0.c", "struct_incompat_1.c" },
+		check(new String[]{"struct_incompat_0.c", "struct_incompat_1.c"},
 				"struct_incompat.c");
 	}
 
 	@Test
 	public void struct4() throws ABCException {
-		check(new String[] { "struct4_0.c", "struct4_1.c", "struct4_2.c",
-				"struct4_3.c" }, "struct4.c");
+		check(new String[]{"struct4_0.c", "struct4_1.c", "struct4_2.c",
+				"struct4_3.c"}, "struct4.c");
 	}
 
 	@Test
 	public void sys() throws ABCException {
-		check(new String[] { "sys_0.c", "sys_1.c" }, "sys.c");
+		check(new String[]{"sys_0.c", "sys_1.c"}, "sys.c");
 	}
 
 	@Test
 	public void typedef1() throws ABCException {
-		check(new String[] { "typedef1_0.c", "typedef1_1.c" }, "typedef1.c");
+		check(new String[]{"typedef1_0.c", "typedef1_1.c"}, "typedef1.c");
 	}
 
 	@Test
 	public void typedef2() throws ABCException {
-		check(new String[] { "typedef2_0.c", "typedef2_1.c" }, "typedef2.c");
+		check(new String[]{"typedef2_0.c", "typedef2_1.c"}, "typedef2.c");
+	}
+	
+	@Test
+	public void typedef3() throws ABCException {
+		check(new String[]{"typedef3_0.c", "typedef3_1.c"},
+				"typedef3_2.c");
 	}
 
 	@Test
 	public void enumconflict() throws ABCException {
-		check(new String[] { "enumconflict_0.c", "enumconflict_1.c",
-				"enumconflict_2.c" }, "enumconflict.c");
+		check(new String[]{"enumconflict_0.c", "enumconflict_1.c",
+				"enumconflict_2.c"}, "enumconflict.c");
 	}
 
 	@Test
 	public void structunion() throws ABCException {
-		check(new String[] { "structunion_0.c", "structunion_1.c",
-				"structunion_2.c" }, "structunion.c");
+		check(new String[]{"structunion_0.c", "structunion_1.c",
+				"structunion_2.c"}, "structunion.c");
 	}
 
 	/**
@@ -170,6 +176,6 @@ public class LinkTest {
 	 */
 	@Test
 	public void quantifier() throws ABCException {
-		check(new String[] { "quantifier.cvl" }, "quantifier.cvl");
+		check(new String[]{"quantifier.cvl"}, "quantifier.cvl");
 	}
 }

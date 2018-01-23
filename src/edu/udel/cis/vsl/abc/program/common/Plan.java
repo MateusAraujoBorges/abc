@@ -7,6 +7,8 @@ import java.util.Map;
 
 import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.TaggedEntity;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 
 /**
  * A plan on how to transform an AST to prepare it for merging.
@@ -32,34 +34,30 @@ public class Plan {
 	 */
 	private Collection<ProgramEntity> entityRemoveSet = new LinkedList<>();
 
+	/**
+	 * The set of {@link TypedefDeclarationNode} that need to be unwrap (Unwrap
+	 * a {@link TypedefDeclarationNode} means converting the
+	 * {@link TypedefDeclarationNode} into the {@link TypeNode} it wraps).
+	 */
+	private Collection<TypedefDeclarationNode> typedefUnwrapSet = new LinkedList<>();
+
 	public Plan() {
 	}
 
 	public void addMakeIncompleteAction(TaggedEntity entity) {
-
-		// System.out.println("Adding incompletion action for " + entity
-		// + " def: " + entity.getDefinition());
-		// System.out.flush();
-
 		defDeleteSet.add(entity);
 	}
 
 	public void addRenameAction(ProgramEntity entity, String newName) {
-
-		// System.out.println("Adding rename action for " + entity + " def: "
-		// + entity.getDefinition() + " new name " + newName);
-		// System.out.flush();
-
 		renameMap.put(entity, newName);
 	}
 
 	public void addEntityRemoveAction(ProgramEntity entity) {
-
-		// System.out.println("Adding removal action for " + entity + " def: "
-		// + entity.getDefinition());
-		// System.out.flush();
-
 		entityRemoveSet.add(entity);
+	}
+
+	public void addTypedefUnwrapAction(TypedefDeclarationNode declarationNode) {
+		typedefUnwrapSet.add(declarationNode);
 	}
 
 	public Iterable<TaggedEntity> getMakeIncompleteActions() {
@@ -74,4 +72,7 @@ public class Plan {
 		return entityRemoveSet;
 	}
 
+	public Iterable<TypedefDeclarationNode> getTypeDefUnwrapActions() {
+		return typedefUnwrapSet;
+	}
 }

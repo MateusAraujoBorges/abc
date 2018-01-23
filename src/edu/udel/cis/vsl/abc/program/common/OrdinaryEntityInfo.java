@@ -7,9 +7,15 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.OrdinaryEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.ProgramEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Typedef;
+import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.TypedefDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.EnumerationType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Enumerator;
+import edu.udel.cis.vsl.abc.ast.type.IF.StructureOrUnionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
 import edu.udel.cis.vsl.abc.util.IF.Pair;
@@ -189,11 +195,25 @@ public class OrdinaryEntityInfo extends EntityInfo {
 				Pair<Integer, OrdinaryEntity> pair0 = internals.get(0);
 				Typedef typedef0 = (Typedef) pair0.right;
 				int tuid0 = pair0.left;
+				ASTNode typedefComplete0 = typeDefCompleteType(typedef0);
+				boolean typeComplete = typedefComplete0 != null;
 
 				for (int i = 1; i < numInternals; i++) {
 					Pair<Integer, OrdinaryEntity> pair = internals.get(i);
+					Typedef typedef = (Typedef) pair.right;
+					ASTNode completeDecl = typeDefCompleteType(typedef);
 
-					plan[pair.left].addEntityRemoveAction(pair.right);
+					if (!typeComplete && completeDecl != null) {
+						// if type is not complete yet, keep the typedef that
+						// completes the type and unwrap the typedef into the
+						// typeNode it wraps.
+						if (completeDecl instanceof TypedefDeclarationNode)
+							plan[pair.left].addTypedefUnwrapAction(
+									(TypedefDeclarationNode) completeDecl);
+						typeComplete = true;
+					} else {
+						plan[pair.left].addEntityRemoveAction(pair.right);
+					}
 				}
 				if (typedef0.getType().kind() == TypeKind.ENUMERATION) {
 					for (Pair<Integer, OrdinaryEntity> pair : internals) {
@@ -206,6 +226,38 @@ public class OrdinaryEntityInfo extends EntityInfo {
 					}
 				}
 			}
+		}
+	}
+
+	/**
+	 * @param typedef
+	 *            The {@link Typedef} being checked.
+	 * @return null if the typedef entity does not completes the type it checks,
+	 *         otherwise return the {@link ASTNode} that completes the involved
+	 *         type.
+	 */
+	private ASTNode typeDefCompleteType(Typedef typedef) {
+		if (!typedef.getDeclarations().iterator().hasNext())
+			return null;
+		DeclarationNode typedefDecl = typedef.getDeclarations().iterator()
+				.next();
+		TypeNode typeNode = ((TypedefDeclarationNode) typedefDecl)
+				.getTypeNode();
+		TypeNodeKind kind = typeNode.kind();
+
+		switch (kind) {
+			case STRUCTURE_OR_UNION : {
+				DeclarationNode structureOrUnionTypeNode = (DeclarationNode) typeNode;
+				DeclarationNode declNode = ((StructureOrUnionType) (structureOrUnionTypeNode
+						.getEntity())).getDefinition();
+
+				if (declNode != null) {
+					return declNode.parent();
+				} else
+					return null;
+			}
+			default :
+				return typedefDecl;
 		}
 	}
 
