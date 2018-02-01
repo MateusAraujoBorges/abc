@@ -110,7 +110,9 @@ $system[stdio] FILE * $fopen($filesystem fs, const char * restrict filename,
 /*@ depends_on \access(file);
   @ executes_when \true;
   @*/
-$system[stdio] int $textFileLength(char* file);
+$system[stdio] int $civl_text_file_length($filesystem fs, char* file);
+
+int $text_file_length(char* file);
 
 /* This assumes there is some output variable of type
  * array-of-$file, and copies the output files into that
