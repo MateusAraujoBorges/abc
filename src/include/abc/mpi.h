@@ -214,6 +214,13 @@ typedef struct MPI_Status{
 
 // Implementation should define their own MPI_COMM_NULL:
 extern const MPI_Comm MPI_COMM_NULL;
+#ifndef MPI_IN_PLACE
+extern const int MPI_IN_PLACE_SPOT ;
+/* MPI_IN_PLACE was defined as (void *)-1 in MPICH but that can be
+   wrong.  Let it refer to a fixed constant in the library probably is
+   a better idea.*/
+#define MPI_IN_PLACE  ((void *) &MPI_IN_PLACE_SPOT)
+#endif
 
 #define MPI_ANY_SOURCE 	(-1)
 #define MPI_ANY_TAG     (-2)
@@ -584,7 +591,6 @@ extern int * const MPI_UNWEIGHTED;
 #define MPI_FILE_NULL (MPI_File *)0
 #define MPI_GROUP_EMPTY (MPI_Group *)0
 #define MPI_GROUP_NULL (MPI_Group *)0
-#define MPI_IN_PLACE  (void *) -1
 
 /* Pre-defined constants */
 #define MPI_UNDEFINED      (-32766)
