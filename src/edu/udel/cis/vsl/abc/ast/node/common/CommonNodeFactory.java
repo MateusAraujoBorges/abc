@@ -1328,10 +1328,12 @@ public class CommonNodeFactory implements NodeFactory {
 			SequenceNode<VariableDeclarationNode> parameters,
 			ExpressionNode body) {
 		TypeNode boolType = newBasicTypeNode(source, BasicTypeKind.BOOL);
-		TypeNode predicateTypeNode = newFunctionTypeNode(source, boolType,
-				parameters.copy(), false);
+		FunctionTypeNode predicateTypeNode = newFunctionTypeNode(source,
+				boolType, parameters.copy(), false);
+		CompoundStatementNode wrappedBody = newCompoundStatementNode(source,
+				Arrays.asList(newExpressionStatementNode(body)));
 
 		return new CommonPredicateNode(source, predicateTypeNode, identifier,
-				parameters, body);
+				wrappedBody);
 	}
 }

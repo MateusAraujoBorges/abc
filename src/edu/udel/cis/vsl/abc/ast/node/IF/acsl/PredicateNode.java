@@ -2,7 +2,7 @@ package edu.udel.cis.vsl.abc.ast.node.IF.acsl;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
@@ -13,7 +13,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
  * @author ziqing
  *
  */
-public interface PredicateNode extends ContractNode, FunctionDeclarationNode {
+public interface PredicateNode extends ContractNode, FunctionDefinitionNode {
 	/**
 	 * The name of the predicate
 	 * 
@@ -33,7 +33,7 @@ public interface PredicateNode extends ContractNode, FunctionDeclarationNode {
 	 * 
 	 * @return
 	 */
-	ExpressionNode getBody();
+	ExpressionNode getExpressionBody();
 
 	@Override
 	PredicateNode copy();
