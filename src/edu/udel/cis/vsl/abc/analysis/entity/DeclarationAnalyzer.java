@@ -17,6 +17,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -33,6 +34,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.statement.GotoNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonCompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.type.IF.DomainType;
+import edu.udel.cis.vsl.abc.ast.type.IF.FunctionType;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type.TypeKind;
@@ -295,6 +297,8 @@ public class DeclarationAnalyzer {
 
 		if (contract != null)
 			acslAnalyzer.processContractNodes(contract, result);
+		if (node instanceof PredicateNode)
+			result.setAbstract(true);
 		return result;
 	}
 
@@ -388,8 +392,6 @@ public class DeclarationAnalyzer {
 		return result;
 	}
 
-	
-
 	// ************************* Private Methods **************************
 
 	/**
@@ -438,7 +440,7 @@ public class DeclarationAnalyzer {
 		assert currentType != null;
 		if (initializer instanceof ArrayLambdaNode) {
 			Type arrayLambdaType;
-	
+
 			entityAnalyzer.expressionAnalyzer
 					.processArrayLambda((ArrayLambdaNode) initializer);
 			arrayLambdaType = ((ArrayLambdaNode) initializer).getType();
@@ -449,11 +451,11 @@ public class DeclarationAnalyzer {
 								+ currentType + "\n\tintializer has type "
 								+ arrayLambdaType,
 						initializer);
-	
+
 			}
 		} else if (initializer instanceof ExpressionNode) {
 			ExpressionNode rhs = (ExpressionNode) initializer;
-	
+
 			entityAnalyzer.expressionAnalyzer
 					.processExpression((ExpressionNode) initializer);
 			try {
@@ -494,7 +496,7 @@ public class DeclarationAnalyzer {
 		String name = identifier.name();
 		Scope defnScope = functionDeclNode.getScope(),
 				parentScope = defnScope.getParentScope();
-	
+
 		while (parentScope != null) {
 			if (defnScope.getFunctionNames().contains(name))
 				break;
