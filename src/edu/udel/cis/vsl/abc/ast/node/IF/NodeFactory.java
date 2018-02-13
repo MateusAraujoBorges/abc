@@ -34,6 +34,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ObjectOrRegionOfNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -2712,4 +2713,21 @@ public interface NodeFactory {
 	 */
 	MemoryBlockReferenceNode newMemoryBlockNode(Source source,
 			ExpressionNode baseAddr);
+
+	/**
+	 * Creates a new {@link PredicateNode} for ACSL predicates
+	 * 
+	 * @param source
+	 *            the source of the new node
+	 * @param identifier
+	 *            the {@link IdentifierNode} of the predicate identifier
+	 * @param parameters
+	 *            parameters used in the predicate definition
+	 * @param body
+	 *            the predicate body expression
+	 * @return
+	 */
+	PredicateNode newPredicateNode(Source source, IdentifierNode identifier,
+			SequenceNode<VariableDeclarationNode> parameters,
+			ExpressionNode body);
 }

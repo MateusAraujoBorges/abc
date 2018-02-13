@@ -102,6 +102,9 @@ tokens{
     POINTER;
     PROD;
     PURE;
+    PREDICATE;
+    PREDICATE_CLAUSE;
+    PREDICATE_DEFINITION;
     QUANTIFIED;
     QUANTIFIED_EXT;
     READ_ACSL;
@@ -139,6 +142,7 @@ package edu.udel.cis.vsl.abc.front.c.parse;
 contract
     : loop_contract 
     | function_contract 
+    | predicate_contract
     ;
 
 /* Section 2.4.2 Loop Annotations */
@@ -194,6 +198,23 @@ loop_variant
 function_contract
     : pure_function? full_contract_block
       -> ^(FUNC_CONTRACT full_contract_block pure_function?)
+    ;
+
+/* sec. 2.6.1 Predicate and ... definitions */
+predicate_contract
+    : (a+=predicate_clause*) -> ^(PREDICATE  $a*)
+    ; 
+predicate_clause
+    : predicate_key a=IDENTIFIER b=predicate_definition SEMI
+        -> ^(PREDICATE_CLAUSE $a $b) 
+    ;
+
+/* binders (optional) = predicate-body */
+predicate_definition
+    : LPAREN binders RPAREN ASSIGN term 
+      -> ^(PREDICATE_DEFINITION binders term) 
+    | ASSIGN term 
+      -> ^(PREDICATE_DEFINITION ABSENT term) 
     ;
 
 pure_function
@@ -1015,6 +1036,10 @@ variant_key
 waitsfor_key
     : {input.LT(1).getText().equals("waitsfor")}? IDENTIFIER
     ;
+
+predicate_key
+	: {input.LT(1).getText().equals("predicate")}? IDENTIFIER
+	;
 
 /* ACSL terms keywords */
 /* keywords of terms */

@@ -83,6 +83,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.WRITE_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.XOR_ACSL;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -113,6 +114,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstant
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
@@ -245,6 +247,8 @@ public class AcslContractWorker {
 			case AcslParser.LOOP_CONTRACT :
 				return translateLoopContractBlock(
 						(CommonTree) contractTree.getChild(0), scope);
+			case AcslParser.PREDICATE :
+				return translatePredicateContract(contractTree, scope);
 			default :
 				throw this.error("unknown kind of contract", contractTree);
 		}
@@ -285,6 +289,56 @@ public class AcslContractWorker {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * translate PREDICATE_CLAUSE list
+	 */
+	private List<ContractNode> translatePredicateContract(CommonTree predicate,
+			SimpleScope scope) throws SyntaxException {
+		int numChild = predicate.getChildCount();
+		List<ContractNode> predicates = new LinkedList<>();
+
+		for (int i = 0; i < numChild; i++) {
+			CommonTree clause = (CommonTree) predicate.getChild(i);
+
+			predicates.add(translatePredicateClause(clause, scope));
+		}
+		return predicates;
+	}
+
+	/**
+	 * Translate ACSL predicate clause
+	 * <code>predicate id binders (opt) = definition</code>
+	 * 
+	 * @param predicate
+	 * @param scope
+	 * @return
+	 * @throws SyntaxException
+	 */
+	private PredicateNode translatePredicateClause(CommonTree predicateClause,
+			SimpleScope scope) throws SyntaxException {
+		CommonTree identifierTree = (CommonTree) predicateClause.getChild(0);
+		CommonTree definitionTree = (CommonTree) predicateClause.getChild(1);
+		CommonTree bindersTree = (CommonTree) definitionTree.getChild(0);
+		CommonTree bodyTree = (CommonTree) definitionTree.getChild(1);
+		IdentifierNode identifier = translateIdentifier(identifierTree);
+		SimpleScope defiScope = new SimpleScope(scope);
+		SequenceNode<VariableDeclarationNode> binders;
+		Source source = parseTree.source(predicateClause);
+
+		if (bindersTree.getType() != AcslParser.ABSENT)
+			binders = translateBinders(bindersTree,
+					parseTree.source(bindersTree), defiScope);
+		else
+			binders = nodeFactory.newSequenceNode(
+					parseTree.source(identifierTree), "ABSENT",
+					Arrays.asList());
+
+		ExpressionNode definition = translateExpression(bodyTree, defiScope);
+
+		return nodeFactory.newPredicateNode(source, identifier, binders,
+				definition);
 	}
 
 	/**

@@ -77,8 +77,16 @@ public interface ContractNode extends ASTNode {
 		 * A "waitsfor" node represents a synchronization clause in a CIVL-C
 		 * procedure contract. May be safe cast to {@link WaitsforNode}.
 		 */
-		WAITSFOR
-
+		WAITSFOR,
+		/**
+		 * <p>
+		 * ACSL: ANSI/ISO C Specification Language v1.12 section: 2.6.1.
+		 * </p>
+		 * <p>
+		 * A predicate is a boolean value expression
+		 * </p>
+		 */
+		PREDICATE
 	}
 
 	/**

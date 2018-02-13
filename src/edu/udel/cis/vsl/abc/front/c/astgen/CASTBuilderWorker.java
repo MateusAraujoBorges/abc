@@ -129,6 +129,9 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 	private AcslContractHandler acslHandler;
 
+	/**
+	 * TODO: how does this stack work ? no doc.
+	 */
 	private Stack<Pair<SimpleScope, SequenceNode<ContractNode>>> scopeAndContracts = new Stack<>();
 
 	/* *************************** Constructors *************************** */
@@ -2928,7 +2931,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 				items.add(translateStaticAssertion(blockItemTree, scope));
 				break;
 			case ANNOTATION :
-				translateAnnotation(blockItemTree, scope);
+				items.addAll(translateAnnotation(blockItemTree, scope));
 				break;
 			default :
 				throw new ABCUnsupportedException("translating block item node "
@@ -2952,7 +2955,7 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 	 * @throws SyntaxException
 	 *             if something goes wrong in translating the annotation
 	 */
-	private void translateAnnotation(CommonTree annotationTree,
+	private List<BlockItemNode> translateAnnotation(CommonTree annotationTree,
 			SimpleScope scope) throws SyntaxException {
 		CommonTree bodyTree = (CommonTree) annotationTree.getChild(1);
 		CivlcTokenSource tokenSource = parseTree
@@ -2961,8 +2964,27 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 		SimpleScope newScope = new SimpleScope(scope);
 
 		this.scopeAndContracts.peek().left = newScope;
-		this.scopeAndContracts.peek().right = acslHandler
+
+		SequenceNode<ContractNode> contracts = acslHandler
 				.translateAcslAnnotation(source, tokenSource, newScope, config);
+		int numChild = contracts.numChildren();
+
+		// filter out predicate declarations:
+		List<BlockItemNode> predicates = new LinkedList<>();
+		List<ContractNode> remaining = new LinkedList<>();
+
+		for (int i = 0; i < numChild; i++) {
+			ContractNode contract = (ContractNode) contracts.child(i);
+
+			if (contract instanceof FunctionDeclarationNode)
+				predicates.add((FunctionDeclarationNode) contract);
+			else
+				remaining.add(contract);
+			contract.remove();
+		}
+		this.scopeAndContracts.peek().right = nodeFactory
+				.newSequenceNode(contracts.getSource(), "contracts", remaining);
+		return predicates;
 	}
 
 	/**

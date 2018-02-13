@@ -41,6 +41,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NoactNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.NothingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ObjectOrRegionOfNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.ArrayDesignatorNode;
@@ -157,6 +158,7 @@ import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonMemorySetNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNoactNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonNothingNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonObjectOrRegionOfNode;
+import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonPredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonRequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.common.acsl.CommonWaitsforNode;
 import edu.udel.cis.vsl.abc.ast.node.common.compound.CommonArrayDesignatorNode;
@@ -1320,4 +1322,16 @@ public class CommonNodeFactory implements NodeFactory {
 		return new CommonMemTypeNode(source);
 	}
 
+	@Override
+	public PredicateNode newPredicateNode(Source source,
+			IdentifierNode identifier,
+			SequenceNode<VariableDeclarationNode> parameters,
+			ExpressionNode body) {
+		TypeNode boolType = newBasicTypeNode(source, BasicTypeKind.BOOL);
+		TypeNode predicateTypeNode = newFunctionTypeNode(source, boolType,
+				parameters.copy(), false);
+
+		return new CommonPredicateNode(source, predicateTypeNode, identifier,
+				parameters, body);
+	}
 }
