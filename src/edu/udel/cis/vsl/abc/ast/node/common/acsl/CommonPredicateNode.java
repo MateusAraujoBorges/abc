@@ -7,21 +7,21 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
-import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonFunctionDeclarationNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonFunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
-public class CommonPredicateNode extends CommonFunctionDeclarationNode
+public class CommonPredicateNode extends CommonFunctionDefinitionNode
 		implements
 			PredicateNode {
 
-	public CommonPredicateNode(Source source, TypeNode type,
-			IdentifierNode name,
-			SequenceNode<VariableDeclarationNode> parameters,
-			ExpressionNode definition) {
-		super(source, name, type, null);
-		this.addChild(parameters);
-		this.addChild(definition);
+	private ExpressionNode bodyExpression = null;
+
+	public CommonPredicateNode(Source source, FunctionTypeNode type,
+			IdentifierNode name, CompoundStatementNode definition) {
+		super(source, name, (FunctionTypeNode) type, null, definition);
 	}
 
 	@Override
@@ -32,8 +32,7 @@ public class CommonPredicateNode extends CommonFunctionDeclarationNode
 	@Override
 	public CommonPredicateNode copy() {
 		return new CommonPredicateNode(getSource(), duplicate(getTypeNode()),
-				duplicate(getPredicateName()), duplicate(getParameters()),
-				duplicate(getBody()));
+				duplicate(getPredicateName()), duplicate(getBody()));
 	}
 
 	@Override
@@ -41,15 +40,18 @@ public class CommonPredicateNode extends CommonFunctionDeclarationNode
 		return (IdentifierNode) this.child(0);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public SequenceNode<VariableDeclarationNode> getParameters() {
-		return ((SequenceNode<VariableDeclarationNode>) this.child(3));
+		return ((FunctionTypeNode) this.child(1)).getParameters();
 	}
 
 	@Override
-	public ExpressionNode getBody() {
-		return (ExpressionNode) this.child(4);
+	public ExpressionNode getExpressionBody() {
+		if (bodyExpression == null) {
+			bodyExpression = ((ExpressionStatementNode) ((CompoundStatementNode) this
+					.child(3)).child(0)).getExpression();
+		}
+		return bodyExpression;
 	}
 
 	@Override
@@ -61,5 +63,15 @@ public class CommonPredicateNode extends CommonFunctionDeclarationNode
 			params += binder.prettyRepresentation() + " ";
 		out.print("predicate " + getPredicateName().prettyRepresentation()
 				+ " (" + params + ") = " + getBody().prettyRepresentation());
+	}
+
+	@Override
+	public StringBuffer prettyRepresentation() {
+		StringBuffer text = new StringBuffer();
+
+		text.append("predicate " + this.getName() + " ("
+				+ getParameters().prettyRepresentation() + ") = "
+				+ this.getExpressionBody().prettyRepresentation());
+		return text;
 	}
 }
