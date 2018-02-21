@@ -297,8 +297,21 @@ public class DeclarationAnalyzer {
 
 		if (contract != null)
 			acslAnalyzer.processContractNodes(contract, result);
-		if (node instanceof PredicateNode)
+		if (node instanceof PredicateNode) {
+			// check if all arguments have scalar(and non-pointer) type:
+			PredicateNode predNode = (PredicateNode) node;
+
+			for (VariableDeclarationNode varDecl : predNode.getParameters()) {
+				Type varType = varDecl.getTypeNode().getType();
+
+				if (!varType.isScalar() || varType.kind() == TypeKind.POINTER)
+					throw error(
+							"Currently we do not support specifying non-scalar or"
+									+ " pointer type arguments for ACSL predicates.",
+							varDecl);
+			}
 			result.setAbstract(true);
+		}
 		return result;
 	}
 

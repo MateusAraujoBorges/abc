@@ -528,8 +528,8 @@ quantifierExpression
 	: logicalEquivExpression
     | forall_key binders SEMI a=logicalOrExpression IMPLIES_ACSL b=logicalOrExpression
 	   -> ^(QUANTIFIED forall_key binders $a $b) 
-    | exists_key binders SEMI a=logicalOrExpression AND b=logicalOrExpression
-       -> ^(QUANTIFIED exists_key binders $a $b) 
+    | exists_key binders SEMI a=logicalOrExpression
+       -> ^(QUANTIFIED exists_key binders $a) 
 	| lambda_key binders SEMI logicalOrExpression
 	   -> ^(LAMBDA_ACSL lambda_key binders logicalOrExpression)
 	;

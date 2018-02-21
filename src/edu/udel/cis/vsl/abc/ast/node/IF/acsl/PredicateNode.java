@@ -8,7 +8,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 
 /**
  * The ACSL predicate node, which in the view of ABC, is just a function with a
- * boolean return type.
+ * boolean return type. An ACSL predicate annotation will become a function
+ * which get inserted in the AST tree at the location of the annotation.
  * 
  * @author ziqing
  *

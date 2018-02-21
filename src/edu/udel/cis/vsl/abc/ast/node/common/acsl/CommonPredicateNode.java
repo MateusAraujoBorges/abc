@@ -8,11 +8,18 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.statement.ExpressionStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.ReturnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.declaration.CommonFunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
+/**
+ * A predicate node extends the function definition node. It has 3 children:
+ * name, function type node and definition node. The definition node is just a
+ * return statement.
+ * 
+ * @author ziqing
+ */
 public class CommonPredicateNode extends CommonFunctionDefinitionNode
 		implements
 			PredicateNode {
@@ -32,7 +39,8 @@ public class CommonPredicateNode extends CommonFunctionDefinitionNode
 	@Override
 	public CommonPredicateNode copy() {
 		return new CommonPredicateNode(getSource(), duplicate(getTypeNode()),
-				duplicate(getPredicateName()), duplicate(getBody()));
+				duplicate(getPredicateName()),
+				duplicate((CompoundStatementNode) child(3)));
 	}
 
 	@Override
@@ -48,7 +56,7 @@ public class CommonPredicateNode extends CommonFunctionDefinitionNode
 	@Override
 	public ExpressionNode getExpressionBody() {
 		if (bodyExpression == null) {
-			bodyExpression = ((ExpressionStatementNode) ((CompoundStatementNode) this
+			bodyExpression = ((ReturnNode) ((CompoundStatementNode) this
 					.child(3)).child(0)).getExpression();
 		}
 		return bodyExpression;

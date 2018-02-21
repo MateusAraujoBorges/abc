@@ -989,8 +989,7 @@ public class AcslContractWorker {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree quantifierTree = (CommonTree) expressionTree.getChild(0);
 		CommonTree bindersTree = (CommonTree) expressionTree.getChild(1);
-		CommonTree restrictTree = (CommonTree) expressionTree.getChild(2);
-		CommonTree predTree = (CommonTree) expressionTree.getChild(3);
+		CommonTree restrictTree, predTree;
 		ExpressionNode restrict, pred;
 		SequenceNode<VariableDeclarationNode> binders;
 		Quantifier quantifier;
@@ -1001,17 +1000,23 @@ public class AcslContractWorker {
 		// ExpressionNode result = null;
 		List<PairNode<SequenceNode<VariableDeclarationNode>, ExpressionNode>> boundVariableList = new LinkedList<>();
 
-		if (quantifierTree.getType() == AcslParser.FORALL_ACSL)
+		if (quantifierTree.getType() == AcslParser.FORALL_ACSL) {
 			quantifier = Quantifier.FORALL;
-		else if (quantifierTree.getType() == AcslParser.EXISTS_ACSL)
+			restrictTree = (CommonTree) expressionTree.getChild(2);
+			predTree = (CommonTree) expressionTree.getChild(3);
+			restrict = translateExpression(restrictTree, newScope);
+			pred = translateExpression(predTree, newScope);
+		} else if (quantifierTree.getType() == AcslParser.EXISTS_ACSL) {
 			quantifier = Quantifier.EXISTS;
-		else
+			predTree = (CommonTree) expressionTree.getChild(2);
+			pred = translateExpression(predTree, newScope);
+			restrict = null;
+		} else
 			throw error("Unexpexted quantifier " + quantifierTree.getType(),
 					quantifierTree);
 		binders = translateBinders(bindersTree, source, newScope);
 		boundVariableList.add(nodeFactory.newPairNode(source, binders, null));
-		restrict = translateExpression(restrictTree, newScope);
-		pred = translateExpression(predTree, newScope);
+
 		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
 				nodeFactory.newSequenceNode(source,
 						"bound variable declaration list", boundVariableList),

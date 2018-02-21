@@ -1331,7 +1331,7 @@ public class CommonNodeFactory implements NodeFactory {
 		FunctionTypeNode predicateTypeNode = newFunctionTypeNode(source,
 				boolType, parameters.copy(), false);
 		CompoundStatementNode wrappedBody = newCompoundStatementNode(source,
-				Arrays.asList(newExpressionStatementNode(body)));
+				Arrays.asList(newReturnNode(source, body)));
 
 		return new CommonPredicateNode(source, predicateTypeNode, identifier,
 				wrappedBody);
