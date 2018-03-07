@@ -57,7 +57,7 @@
 		OmpLexer.tokens depends on OmpLexer.g and CivlCParser.tokens.
 	-->
 
-	<target name="OmpLexerF08Dependencies" depends="fortranParsers">
+	<target name="OmpLexerF08Dependencies" depends="FortranParserExtras">
 		<uptodate property="unchangedOmpLexerF08Grammar" srcfile="${fortran.grammar.dir}/OmpLexerF08.g" targetfile="${fortran.grammar.dir}/OmpLexerF08.tokens" />
 		<uptodate property="FortranParserTokensBeforeOmpLexerF08" srcfile="${fortran.real.src.dir}/parse/FortranParserExtras_FortranParser08.java" targetfile="${fortran.grammar.dir}/OmpLexerF08.tokens" />
 		<condition property="OmpLexerF08UpToDate">
@@ -68,7 +68,7 @@
 		</condition>
 	</target>
 
-	<target name="FortranOMPLexer" depends="FortranLexer" unless="OmpLexerF08UpToDate">
+	<target name="FortranOMPLexer" depends="OmpLexerF08Dependencies" unless="OmpLexerF08UpToDate">
 		<delete file="${fortran.grammar.dir}/OmpLexerF08.tokens" />
 		<touch file="${fortran.grammar.dir}/OmpLexerF08.tokens" />
 		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${fortran.grammar.dir}">
@@ -85,7 +85,7 @@
 		at beginning manually.
 	-->
 
-	<target name="OmpParserF08Dependencies" depends="FortranOMPLexer,fortranParsers">
+	<target name="OmpParserF08Dependencies" depends="FortranParserExtras, FortranOMPLexer">
 		<uptodate property="unchangedOmpParserF08Grammar" srcfile="${fortran.grammar.dir}/OmpParserF08.g" targetfile="${fortran.real.src.dir}/parse/OmpParserF08.java" />
 		<uptodate property="OmpLexerF08BeforeOmpParserF08" srcfile="${fortran.grammar.dir}/OmpLexerF08.g" targetfile="${fortran.real.src.dir}/parse/OmpParserF08.java" />
 		<uptodate property="FortranParsersBeforeOmpParserF08" srcfile="${fortran.real.src.dir}/parse/FortranParserExtras_FortranParser08.java" targetfile="${fortran.real.src.dir}/parse/OmpParserF08.java" />
@@ -98,7 +98,7 @@
 		</condition>
 	</target>
 
-	<target name="FortranOMPParser" depends="FortranOMPLexer" unless="OmpParserF08UpToDate">
+	<target name="FortranOMPParser" depends="OmpParserF08Dependencies" unless="OmpParserF08UpToDate">
 		<delete file="${fortran.grammar.dir}/OmpParserF08.tokens" />
 		<delete file="${fortran.grammar.dir}/parse/OmpParserF08.java" />
 		<java classname="org.antlr.Tool" classpathref="antlr.class.path" fork="true" failonerror="true" dir="${fortran.grammar.dir}">
@@ -111,7 +111,7 @@
 			<filelist dir="${fortran.grammar.dir}" files="OmpParserF08_2.java" />
 		</concat>
 		<delete file="${fortran.grammar.dir}/OmpParserF08_2.java" />
-		<move file="${fortran.grammar.dir}/OmpParserF08.java" todir="${fortran.real.src.dir}/parse" />
+		<move file="${fortran.grammar.dir}/OmpParserF08.java" todir="${fortran.real.src.dir}/parse/" />
 	</target>
 
 	<!--

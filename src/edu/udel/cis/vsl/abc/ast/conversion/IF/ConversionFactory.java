@@ -99,10 +99,10 @@ public interface ConversionFactory {
 	 * "Except when it is the operand of the <code>sizeof</code> operator, the
 	 * <code>_Alignof</code> operator, or the unary <code>&</code> operator, or
 	 * is a string literal used to initialize an array, an expression that has
-	 * type "array of type" is converted to an expression with type
-	 * "pointer to type" that points to the initial element of the array object
-	 * and is not an lvalue. If the array object has register storage class, the
-	 * behavior is undefined."
+	 * type "array of type" is converted to an expression with type "pointer to
+	 * type" that points to the initial element of the array object and is not
+	 * an lvalue. If the array object has register storage class, the behavior
+	 * is undefined."
 	 * 
 	 * The old type may be an ArrayType or a QualifiedObjectType (with $input or
 	 * $output qualifier) with base type ArrayType. I think.
@@ -124,8 +124,8 @@ public interface ConversionFactory {
 	 * type. Except when it is the operand of the <code>sizeof</code> operator,
 	 * the <code>_Alignof</code> operator, or the unary <code>&</code> operator,
 	 * a function designator with type "function returning type" is converted to
-	 * an expression that has type "pointer to function returning type"
-	 * . </blockquote>
+	 * an expression that has type "pointer to function returning type" .
+	 * </blockquote>
 	 * 
 	 * @param type
 	 *            a function type
@@ -224,8 +224,8 @@ public interface ConversionFactory {
 	 * of an assignment expression is the type the left operand would have after
 	 * lvalue conversion. The side effect of updating the stored value of the
 	 * left operand is sequenced after the value computations of the left and
-	 * right operands. The evaluations of the operands are
-	 * unsequenced. </blockquote>
+	 * right operands. The evaluations of the operands are unsequenced.
+	 * </blockquote>
 	 * 
 	 * and C11 Section 6.5.16.1 continues:
 	 * 
@@ -294,6 +294,96 @@ public interface ConversionFactory {
 	 */
 	Conversion assignmentConversion(Configuration config, ExpressionNode rhs,
 			Type newType) throws UnsourcedException;
+
+	/**
+	 * Given (1) the processed right hand side of an assignment expression and
+	 * (2) the type of the assignment expression (i.e., the adjusted type of the
+	 * left hand side), returns the conversion from the right-hand type to the
+	 * assignment type. If no conversion is necessary because the types are
+	 * equal, returns null. If no such conversion exists, an exception is
+	 * thrown.
+	 * 
+	 * C11 Section 6.5.16(3) states:
+	 * 
+	 * <blockquote> An assignment operator stores a value in the object
+	 * designated by the left operand. An assignment expression has the value of
+	 * the left operand after the assignment,111) but is not an lvalue. The type
+	 * of an assignment expression is the type the left operand would have after
+	 * lvalue conversion. The side effect of updating the stored value of the
+	 * left operand is sequenced after the value computations of the left and
+	 * right operands. The evaluations of the operands are unsequenced.
+	 * </blockquote>
+	 * 
+	 * and C11 Section 6.5.16.1 continues:
+	 * 
+	 * <blockquote> One of the following shall hold:
+	 * 
+	 * <ul>
+	 * <li>the left operand has atomic, qualified, or unqualified arithmetic
+	 * type, and the right has arithmetic type;</li>
+	 * 
+	 * <li>the left operand has an atomic, qualified, or unqualified version of
+	 * a structure or union type compatible with the type of the right;</li>
+	 * 
+	 * <li>the left operand has atomic, qualified, or unqualified pointer type,
+	 * and (considering the type the left operand would have after lvalue
+	 * conversion) both operands are pointers to qualified or unqualified
+	 * versions of compatible types, and the type pointed to by the left has all
+	 * the qualifiers of the type pointed to by the right;</li>
+	 * 
+	 * <li>the left operand has atomic, qualified, or unqualified pointer type,
+	 * and (considering the type the left operand would have after lvalue
+	 * conversion) one operand is a pointer to an object type, and the other is
+	 * a pointer to a qualified or unqualified version of void, and the type
+	 * pointed to by the left has all the qualifiers of the type pointed to by
+	 * the right;</li>
+	 * 
+	 * <li>the left operand is an atomic, qualified, or unqualified pointer, and
+	 * the right is a null pointer constant; or</li>
+	 * 
+	 * <li>the left operand has type atomic, qualified, or unqualified _Bool,
+	 * and the right is a pointer.</li>
+	 * </ul>
+	 * </blockquote>
+	 * 
+	 * These suggest the following types of conversions be used, respectively,
+	 * for the cases above: {@link ArithmeticConversion},
+	 * {@link CompatibleStructureOrUnionConversion},
+	 * {@link CompatiblePointerConversion}, {@link VoidPointerConversion},
+	 * {@link NullPointerConversion}, {@link PointerBoolConversion}.
+	 * 
+	 * The processing of a simple assignement expression then proceeds as
+	 * follows:
+	 * 
+	 * <ol>
+	 * <li>let <code>newType</code> be the result of applying lvalue conversion
+	 * to the lhs expression and make this the initial type of the assignment
+	 * expression</li>
+	 * <li>add standard conversions to rhs expression and call the resulting
+	 * type <code>oldType</code></li>
+	 * <li>consider cases above to generate a conversion from
+	 * <code>oldType</code> to <code>newType</code>; add that conversion to rhs
+	 * expression</li>
+	 * </ol>
+	 * 
+	 * This method helps in the above process by finding the right conversion
+	 * for the last step.
+	 *
+	 * @param config
+	 * @param rhs
+	 *            the right-hand side of the assignment, after having been
+	 *            processed and the standard conversions applied
+	 * @param newType
+	 *            the type of the assignment expression, i.e., the type to which
+	 *            the rhs expression must be converted; it is the result of
+	 *            applying lvalue conversion to the left hand side.
+	 * @param ignoreQualifier
+	 *            whether involved qualifiers should be ignored.
+	 * @return
+	 * @throws UnsourcedException
+	 */
+	Conversion assignmentConversion(Configuration config, ExpressionNode rhs,
+			Type newType, boolean ignoreQualifier) throws UnsourcedException;
 
 	/**
 	 * When a range expression is used in $for or $parfor, it is converted

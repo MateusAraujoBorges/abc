@@ -219,10 +219,17 @@ public class CommonConversionFactory implements ConversionFactory {
 	public boolean isPointerToObject(PointerType type) {
 		return type.referencedType() instanceof ObjectType;
 	}
-
+	
 	@Override
 	public Conversion assignmentConversion(Configuration config,
 			ExpressionNode rhs, Type newType) throws UnsourcedException {
+		return assignmentConversion(config, rhs, newType, false);
+	}
+	
+	@Override
+	public Conversion assignmentConversion(Configuration config,
+			ExpressionNode rhs, Type newType, boolean ignoreQualifier)
+			throws UnsourcedException {
 		Type oldType = rhs.getConvertedType();
 
 		if (rhs instanceof WildcardNode) {
@@ -260,11 +267,11 @@ public class CommonConversionFactory implements ConversionFactory {
 
 			if (isPointerToObject(type1) && isPointerToVoid(type2)
 					|| isPointerToObject(type2) && isPointerToVoid(type1)) {
-				if (config == null || !config.getSVCOMP())
+				if (!ignoreQualifier && (config == null || !config.getSVCOMP()))
 					checkQualifierConsistency(type1, type2, false);
 				return voidPointerConversion(type1, type2);
 			}
-			if (config == null || !config.getSVCOMP())
+			if (!ignoreQualifier && (config == null || !config.getSVCOMP()))
 				checkQualifierConsistency(type1, type2, true);
 			return new CommonCompatiblePointerConversion(type1, type2);
 		}

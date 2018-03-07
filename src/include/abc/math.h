@@ -4,19 +4,52 @@
 
 #ifndef _MATH_
 #define _MATH_
-#pragma CIVL ACSL 
+#pragma CIVL ACSL
 /* Types */
+#ifndef FLT_EVAL_METHOD
+#define FLT_EVAL_METHOD 0
+#endif
+
+#if (FLT_EVAL_METHOD == 0)
 #define float_t float      // floating-point type at least 
                            //as wide as 'float' used to evaluate 
                            //'float' expression. 
 #define double_t double    // floating-point type at least 
                            //as wide as 'double' used to evaluate 
                            //'double' expression. 
+#elif (FLT_EVAL_METHOD == 1)
+#define float_t double
+#define double_t double
+#elif (FLT_EVAL_METHOD == 2)
+#define float_t long double
+#define double_t long double
+#else // Implementation defined.
+#define float_t float 
+#define double_t double 
+#endif
+
 /* Macros */
 //In CIVL implementation, they better be abstract functions.
-#define HUGE_VAL       3.40282347e+38F
-#define INFINITY       (1/0)
-#define NAN            sqrt(-1)
+//TODO: Make PI an abstract function with assumptions.
+//3.14 < PI < 3.15
+#define M_E 			2.7182818284590452354
+#define M_LOG2E		1.4426950408889634074
+#define M_LOG10E		0.43429448190325182765
+#define M_LN2		0.69314718055994530942
+#define M_LN10		2.30258509299404568402
+#define M_PI			3.14159265358979323846
+#define M_PI_2		M_PI/2.0                //1.57079632679489661923
+#define M_PI_4		0.78539816339744830962
+#define M_1_PI		0.31830988618379067154
+#define M_2_PI		0.63661977236758134308
+#define M_2_SQRTPI	1.12837916709551257390
+#define M_SQRT2		1.41421356237309504880
+#define M_SQRT1_2	0.70710678118654752440
+#define HUGE_VAL   	3.40282347e+38F
+#define HUGE_VALF   	3.40282347e+38F
+#define HUGE_VALL   	3.40282347e+38F
+#define INFINITY   	(1/0)
+#define NAN        	sqrt(-1)
 
 typedef enum {
   FP_INFINITE,
@@ -35,20 +68,51 @@ typedef enum {
   MATH_ERREXCEPT = 3
 }math_errhandling;
 
-/*macro functions
-inline int fpclassify (float x);
-inline int fpclassify (double x);
-inline int isfinite (float x);
-inline int isfinite (double x);
-inline int isinf (float x);
-inline int isinf (double x);
-inline int isnan (float x);
-inline int isnan (double x);
-inline int isnormal (float x);
-inline int isnormal (double x);
-inline int signbit (float x);
-inline int signbit (double x);
-*/
+// Macro functions
+#define fpclassify(x) \
+	((sizeof(x) == sizeof(float))	? __fpclassifyf(x) : \
+	 (sizeof(x) == sizeof(double)) 	? __fpclassifyd(x) : \
+									  __fpclassifyl(x))
+#define isfinite(x) \
+	((sizeof(x) == sizeof(float))	? __isfinitef(x) : \
+	 (sizeof(x) == sizeof(double)) 	? __isfinited(x) : \
+									  __isfinitel(x))
+#define isinf(x) \
+	((sizeof(x) == sizeof(float))	? __isinff(x) : \
+	 (sizeof(x) == sizeof(double)) 	? __isinfd(x) : \
+									  __isinfl(x))
+#define isnan(x) \
+	((sizeof(x) == sizeof(float))	? __isnanf(x) : \
+	 (sizeof(x) == sizeof(double)) 	? __isnand(x) : \
+									  __isnanl(x))
+#define isnormal(x) \
+	((sizeof(x) == sizeof(float))	? __isnormalf(x) : \
+	 (sizeof(x) == sizeof(double)) 	? __isnormald(x) : \
+									  __isnormall(x))
+#define signbit(x) \
+	((sizeof(x) == sizeof(float))	? __signbitf(x) : \
+	 (sizeof(x) == sizeof(double)) 	? __signbitd(x) : \
+									  __signbitl(x))
+
+
+int __fpclassifyf (float x);
+int __fpclassifyd (double x);
+int __fpclassifyl (long double x);
+int __isfinitef (float x);
+int __isfinited (double x);
+int __isfinitel (long double x);
+int __isinff (float x);
+int __isinfd (double x);
+int __isinfl (long double x);
+int __isnanf (float x);
+int __isnand (double x);
+int __isnanl (long double x);
+int __isnormalf (float x);
+int __isnormald (double x);
+int __isnormall (long double x);
+int __signbitf (float x);
+int __signbitd (double x);
+int __signbitl (long double x);
 
 //trigonomatric functions
 /*@ pure;
@@ -602,13 +666,14 @@ float fmaf(float x, float y, float z);
   @*/
 long double fmal(long double x, long double y, long double z);
 
-// Comparison macro
+// Comparison macro (Defined in math.cvl in CIVL project)
+/* 
 #define isgreater(X,Y) ((X)>(Y))
 #define isgreaterequal(X,Y) ((X)>=(Y))
 #define isless(X,Y) ((X)<(Y))
 #define islessequal(X,Y) ((X)<=(Y))
 #define islessgreater(X,Y) ((X)<(Y))||((X)>(Y))
-// TODO: isunordered macro: int isunordered(real-floating x, real-floating y);
-//       The isunordered macro returns 1 if its arguments are unordered and 0 otherwise
+#define isunordered(X,Y) (isnan(X) || isnan(Y))
+*/
 
 #endif

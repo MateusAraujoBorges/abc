@@ -308,11 +308,10 @@ public class ExpressionAnalyzer {
 
 					processExpression(operand);
 					if (!typeFactory.isPointerType(operand.getConvertedType()))
-						throw this.error(
-								"the expression "
-										+ operand.prettyRepresentation()
-										+ " doesn't have pointer type "
-										+ "and thus can't be used with $object_of/$region_of",
+						throw this.error("the expression "
+								+ operand.prettyRepresentation()
+								+ " doesn't have pointer type "
+								+ "and thus can't be used with $object_of/$region_of",
 								node);
 					node.setInitialType(this.typeFactory.memoryType());
 					break;
@@ -477,7 +476,7 @@ public class ExpressionAnalyzer {
 
 		if (!typeFactory.isArrayOfCharType(lhsType))
 			addStandardConversions(rhs);
-		convertRHS(rhs, type);
+		convertRHS(rhs, type, false); // with Qualifiers
 		return type;
 	}
 
@@ -927,7 +926,10 @@ public class ExpressionAnalyzer {
 							.variableParameterType(functionName, i);
 				type = conversionFactory.lvalueConversionType(lhsType);
 				try {
-					convertRHS(argument, type);
+					convertRHS(argument, type,
+							functionName == null
+									? false
+									: functionName.equals("$equals"));
 				} catch (UnsourcedException e) {
 					throw error(e, argument);
 				}
@@ -1180,9 +1182,10 @@ public class ExpressionAnalyzer {
 		processExpression(node.expression());
 		node.setInitialType(typeFactory.basicType(BasicTypeKind.BOOL));
 		if (!node.isSideEffectFree(false))
-			throw this
-					.error("quantified expressions are not allowed to have side effects.\n"
-							+ node.prettyRepresentation(), node);
+			throw this.error(
+					"quantified expressions are not allowed to have side effects.\n"
+							+ node.prettyRepresentation(),
+					node);
 	}
 
 	private ObjectType getNonArrayElementType(ArrayType arrayType) {
@@ -1464,11 +1467,9 @@ public class ExpressionAnalyzer {
 		ExpressionNode rhs = node.getArgument(1);
 
 		if (!this.isLvalue(lhs)) {
-			throw error(
-					"The expression " + lhs.prettyRepresentation()
-							+ " doesn't designate an object and thus "
-							+ "can't be used as the left argument of assignment",
-					node);
+			throw error("The expression " + lhs.prettyRepresentation()
+					+ " doesn't designate an object and thus "
+					+ "can't be used as the left argument of assignment", node);
 		}
 		if (lhs.getType() instanceof ArrayType) {
 			ArrayType lhsType = (ArrayType) lhs.getConvertedType();
@@ -1486,7 +1487,7 @@ public class ExpressionAnalyzer {
 
 			addStandardConversions(rhs);
 			try {
-				convertRHS(rhs, type);
+				convertRHS(rhs, type, false);// with Qualifiers
 			} catch (UnsourcedException e) {
 				throw error(e, node);
 			}
@@ -1548,8 +1549,8 @@ public class ExpressionAnalyzer {
 	 * only if the corresponding bit in the converted operand is not set). The
 	 * integer promotions are performed on the operand, and the result has the
 	 * promoted type. If the promoted type is an unsigned type, the expression
-	 * ~E is equivalent to the maximum value representable in that type minus
-	 * E. </blockquote>
+	 * ~E is equivalent to the maximum value representable in that type minus E.
+	 * </blockquote>
 	 * 
 	 * @param node
 	 * @throws SyntaxException
@@ -1945,8 +1946,8 @@ public class ExpressionAnalyzer {
 	 * an assignment expression is the type the left operand would have after
 	 * lvalue conversion. The side effect of updating the stored value of the
 	 * left operand is sequenced after the value computations of the left and
-	 * right operands. The evaluations of the operands are
-	 * unsequenced. </blockquote>
+	 * right operands. The evaluations of the operands are unsequenced.
+	 * </blockquote>
 	 * 
 	 * and
 	 * 
@@ -2662,14 +2663,12 @@ public class ExpressionAnalyzer {
 		processExpression(count);
 		processExpression(type);
 		if (ptr.getConvertedType().kind() != TypeKind.POINTER)
-			throw error(
-					"\\" + name
-							+ " requires that the first argument has a pointer type.",
+			throw error("\\" + name
+					+ " requires that the first argument has a pointer type.",
 					ptr);
 		if (!count.getConvertedType().equivalentTo(intType))
-			throw error(
-					"\\" + name
-							+ " requires that the second argument has a integer type.",
+			throw error("\\" + name
+					+ " requires that the second argument has a integer type.",
 					count);
 		if (type.getConvertedType().kind() == TypeKind.ENUMERATION) {
 			EnumerationType mpiDatatype = (EnumerationType) type
@@ -3021,10 +3020,10 @@ public class ExpressionAnalyzer {
 					conversionFactory.arithmeticConversion(a1, commonType));
 	}
 
-	private void convertRHS(ExpressionNode rightNode, Type type)
-			throws UnsourcedException {
+	private void convertRHS(ExpressionNode rightNode, Type type,
+			boolean ignoreQualifier) throws UnsourcedException {
 		Conversion rightConversion = conversionFactory
-				.assignmentConversion(config, rightNode, type);
+				.assignmentConversion(config, rightNode, type, ignoreQualifier);
 
 		if (rightConversion != null)
 			rightNode.addConversion(rightConversion);

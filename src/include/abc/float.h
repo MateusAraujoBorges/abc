@@ -32,9 +32,6 @@
 #define LDBL_MANT_DIG LDBL_MANT_DIG
 
 /* Number of decimal digits */
-#define FLT_DECIMAL_DIG 6
-#define DBL_DECIMAL_DIG 10
-#define LDBL_DECIMAL_DIG 10
 #define DECIMAL_DIG 10
 #define FLT_DIG 6
 #define DBL_DIG 10

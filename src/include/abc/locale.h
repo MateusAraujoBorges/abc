@@ -12,9 +12,10 @@
 #define LC_TIME          5     
 
 #ifndef NULL
- #define	NULL	0
+ #define NULL ((void*)0)
 #endif
 
+typedef struct locale_t locale_t;
 struct lconv {
     char *decimal_point;      //"."          
     char *grouping;           //""           
@@ -48,6 +49,7 @@ struct lconv {
     
 /* Functions */  
 struct  lconv *localeconv(void);
+
 char   *setlocale(int, const char *);
 
 #endif
