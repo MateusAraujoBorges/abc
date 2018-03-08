@@ -9,6 +9,7 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.err.IF.ABCRuntimeException;
 import edu.udel.cis.vsl.abc.transform.common.CommonNameTransformer;
 import edu.udel.cis.vsl.abc.transform.common.CompareCombiner;
+import edu.udel.cis.vsl.abc.transform.common.ExternLinkageVariableRenamer;
 import edu.udel.cis.vsl.abc.transform.common.Pruner;
 import edu.udel.cis.vsl.abc.transform.common.SideEffectRemover;
 
@@ -42,7 +43,7 @@ public class Transform {
 	 * one entry here when you create a new transformer, following the same
 	 * pattern as the others.
 	 */
-	private static TransformRecord[] records = new TransformRecord[] {
+	private static TransformRecord[] records = new TransformRecord[]{
 
 			new TransformRecord(SideEffectRemover.CODE,
 					SideEffectRemover.LONG_NAME,
@@ -58,6 +59,15 @@ public class Transform {
 				@Override
 				public Transformer create(ASTFactory astFactory) {
 					return new Pruner(astFactory);
+				}
+			},
+
+			new TransformRecord(ExternLinkageVariableRenamer.CODE,
+					ExternLinkageVariableRenamer.LONG_NAME,
+					ExternLinkageVariableRenamer.SHORT_DESCRIPTION) {
+				@Override
+				public Transformer create(ASTFactory astFactory) {
+					return new ExternLinkageVariableRenamer(astFactory);
 				}
 			}
 
