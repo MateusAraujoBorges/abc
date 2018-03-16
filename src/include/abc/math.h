@@ -666,14 +666,12 @@ float fmaf(float x, float y, float z);
   @*/
 long double fmal(long double x, long double y, long double z);
 
-// Comparison macro (Defined in math.cvl in CIVL project)
-/* 
+// Comparison macros:
 #define isgreater(X,Y) ((X)>(Y))
 #define isgreaterequal(X,Y) ((X)>=(Y))
 #define isless(X,Y) ((X)<(Y))
 #define islessequal(X,Y) ((X)<=(Y))
 #define islessgreater(X,Y) ((X)<(Y))||((X)>(Y))
-#define isunordered(X,Y) (isnan(X) || isnan(Y))
-*/
+#define isunordered(X,Y) (X>Y)?1:0
 
 #endif
