@@ -1,0 +1,154 @@
+#ifndef _MEM_
+#define _MEM_
+#include <civlc.cvh>
+#pragma CIVL ACSL
+/* The mem library provides: 
+ *
+ *   a type $mem : an object of $mem type is a
+ *   set of memory locations.
+ *
+ *   and a set of functions that creates and manipulates the memory
+ *   locaton sets. Documents in this library will use 'memory location
+ *   set' to refer to a $mem type object.
+ */
+
+/* 
+ * The memory location set type. 
+ */
+typedef struct _mem $mem;
+
+/* **************** Functions create $mem objects  **************** */
+/* Description: Push an empty memory location set into the specific
+ *              stack belong to the calling process.  Each process has
+ *              a specific stack for manageing memory location sets.
+ */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system void $write_set_push();
+
+/* Description: Pop an memory location set out of the specific stack
+ *              belong to the calling process.  Returns the popped
+ *              memory location set
+ */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system $mem $write_set_pop();
+
+/* Description: Returns a copy of the memory location set at the top
+ *              frame of the specific stack belong to the calling
+ *              process.
+ */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$state_f $system $mem $write_set_peek();
+
+/* Description: Flush a given set of memory locations into the memory
+ *              location set on the top frame of the stack of the
+ *              calling process.  No-op if the stack is empty.
+ */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system void $write_set_flush($mem m);
+
+/* Description: Returns a new empty memory location set.
+ */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$state_f $system $mem $mem_new();
+
+/* Description: Havocing all the memory locations in the given memory
+ *              location set.  Since that a memory location l can be a
+ *              part of an object o, and there are memory locations l'
+ *              that are parts of o outside of l.  Let eval(l, s)
+ *              denote the value of l at a state s.  This havoc
+ *              operation ensures after the operation: 
+ *              eval(l, current) is a fresh new value; 
+ *              eval(l', current) == eval(l', pre_state); where 'current' is the state
+ *              where the function just returns.
+ */
+/*@ depends_on \nothing; 
+  @ executes_when \true; */
+$system _Bool $mem_havoc($mem mem, $state pre_state);
+
+/* Description: Unions two memory location sets.
+ */
+/*@ depends_on \nothing; 
+  @ executes_when \true; */
+$system $state_f $mem $mem_union($mem mem0, $mem mem1);
+
+/* Description: Performs a widening operation on a memory location
+ *              set.
+ */
+/*@ depends_on \nothing; 
+  @ executes_when \true; */
+$system $state_f $mem $mem_widening($mem mem);
+
+/* Description: Returns true if and only if the two memory location
+   sets are exactly same.
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$state_f $system _Bool $mem_equals($mem m0, $mem m1);
+
+/************ Groups in memory location sets ***********/
+/* This section of functions is mainly dividing a memory location set
+ * into groups according to the heap objects that they belong to.
+ * 
+ * A group is a set of memory locations that belong to the same heap
+ * object.  A heap object is either a variable or a chunk of memory
+ * region that allocated by a malloc call.
+ */
+
+/* Description: Returns the total number of groups that the memory
+ *              location set is suppose to be divided into.
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$state_f $system int $mem_num_groups($mem m);
+
+/* Description: Divides the given memory location set into groups and
+ *              let the given pointer refers to an array of memory
+ *              location sets, each of which is a group.  It requires
+ *              that the given pointer 'groups' must point to some
+ *              memory region that is large enough for holding the
+ *              array of groups.
+ */
+/*@ depends_on \access(groups);
+  @ executes_when \true;
+  @*/
+$atomic_f $system void $mem_groups($mem m, $mem * groups);
+
+/* Description: Get a group from a memory location set according to a
+ *              'key'.  The 'key' here is required to be a group.
+ *              Elements in the returned group and the 'key' group
+ *              belong to a same heap object.
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$state_f $system $mem $mem_get_group($mem m, $mem key);
+
+/* Description: Convert a $mem object m to an array of pointers P.
+ *              The memory location set referred by all pointers in P
+ *              is equivalent to the memory location set represented
+ *              by m.
+ */
+/*@ depends_on \access(pointers);
+  @ executes_when \true;
+  @*/
+$system void $mem_to_pointers($mem m, void * ((* pointers)[]));
+
+/* Description: Returns the number of pointers if one converts the
+ *              given $mem object m to a set of pointers P.  The
+ *              memory location set referred by all pointers in P will
+ *              be equivalent to the memory location set represented
+ *              by m.
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$state_f $system int $mem_to_pointers_size($mem m);
+
+#endif

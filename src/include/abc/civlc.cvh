@@ -36,10 +36,6 @@ typedef struct $state $state;
 /* The CIVL-C dynamic type, used to represent a symbolic type */
 typedef struct $dynamic $dynamic;
 
-/* The CIVL-C program type: memory location set type.
- */
-typedef struct _mem $mem;
-
 /* **************************** Misc. Functions **************************** */
 
 /* Wait for another process p to terminate. */
@@ -138,14 +134,16 @@ $system double $pow(double base, double exp);
   @*/
 $system $state_f _Bool $is_derefable(void*ptr);
 
-/** returns the reference to the current state */
+/* Returns the reference to a snapshot of the current process from the
+   current state  */
 /*@ depends_on \nothing; */
 /*@ executes_when \true; */
 $system $state_f $state $get_state();
 
-/*@ depends_on \nothing; 
-  @ executes_when \true; */
-$system $state_f void $havoc_mem($mem mem);
+/* Returns the reference to the current state  */
+/*@ depends_on \nothing; */
+/*@ executes_when \true; */
+$system $state $get_full_state();
 
 // the types will be updated to $integer later
 $system int $remainder(int x, int y);
@@ -169,18 +167,6 @@ $system void $assume_pop();
  * modification on variables and memroy heap objects will be recorded
  * in the write set.
  *********************************************************************/
-
-/* Push an empty write set into the write set stack belong to the
-   calling process. */
-/*@ depends_on \nothing; */
-/*@ executes_when \true; */
-$system void $write_set_push();
-
-/* Pop an entry out of a write set stack belong to the calling
-   process. */
-/*@ depends_on \nothing; */
-/*@ executes_when \true; */
-$system void $write_set_pop($mem * ws);
 
 /* This is a system function which has the same specification as $when
    but more strict requirements: The given condition can ONLY change
