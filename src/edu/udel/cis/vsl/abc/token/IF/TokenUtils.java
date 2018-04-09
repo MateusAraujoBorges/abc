@@ -355,7 +355,6 @@ public class TokenUtils {
 					highlightCount += tempToken.getText().length();
 					tempToken = tempToken.getNext();
 				}
-				highlightCount += tempToken.getText().length();
 				otherCount = first.getCharPositionInLine();
 				// Construct highlight
 				sBuilder.append("\n");
@@ -389,7 +388,6 @@ public class TokenUtils {
 					highlightCount += tempToken.getText().length();
 					tempToken = tempToken.getNext();
 				}
-				highlightCount += tempToken.getText().length();
 				otherCount = first.getCharPositionInLine();
 				// Construct highlight
 				sBuilder.append("\n");
@@ -456,7 +454,6 @@ public class TokenUtils {
 				highlightCount += tempToken.getText().length();
 				tempToken = tempToken.getNext();
 			}
-			highlightCount += tempToken.getText().length();
 			otherCount = first.getCharPositionInLine();
 			// Construct highlight
 			sBuilder.append("\n");

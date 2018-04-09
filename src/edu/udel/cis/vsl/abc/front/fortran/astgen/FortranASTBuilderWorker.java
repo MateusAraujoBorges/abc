@@ -883,6 +883,22 @@ public class FortranASTBuilderWorker {
 								}
 								return nodeFactory.newOperatorNode(source,
 										operator, arguments);
+							} else if (IdStr.matches("^MODULO$")) {
+								Operator operator = Operator.MOD;
+								List<ExpressionNode> arguments = new LinkedList<ExpressionNode>();
+
+								for (int i = 0; i < 2; i++) {
+									ExpressionNode argument = translateExpression(
+											source,
+											refNode.getChildByIndex(1)
+													.getChildByIndex(i)
+													.getChildByIndex(0),
+											scope);
+
+									arguments.add(argument);
+								}
+								return nodeFactory.newOperatorNode(source,
+										operator, arguments);
 							} else if (IdStr.matches("^SIN|COS|SQRT|LOG$")) {
 								hasMATH = true;
 
