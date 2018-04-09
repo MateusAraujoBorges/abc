@@ -32,6 +32,8 @@ public class LibraryASTFactory {
 	public final static String STDLIB = "stdlib.h";
 
 	public final static String STDIO = "stdio.h";
+	
+	public final static String MATH = "math.h";
 
 	private final static Map<String, String> EMPTY_MACRO_MAP = new HashMap<>();
 

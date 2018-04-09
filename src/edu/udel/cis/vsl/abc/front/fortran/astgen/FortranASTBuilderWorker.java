@@ -29,6 +29,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode.ExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FloatingConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
@@ -102,8 +103,10 @@ public class FortranASTBuilderWorker {
 	private ArrayList<BlockItemNode> commonBlocks;
 
 	private boolean hasSTDIO = false;
+	private boolean hasMATH = false;
 
 	private Map<String, TypeNode> localMap = new HashMap<String, TypeNode>();
+	private Map<String, VariableDeclarationNode> argsMap = new HashMap<String, VariableDeclarationNode>();
 
 	private Map<String, StructureOrUnionTypeNode> commonBlockSet = new TreeMap<String, StructureOrUnionTypeNode>();
 	private Map<String, String> comm_val_block = new TreeMap<String, String>();
@@ -271,6 +274,9 @@ public class FortranASTBuilderWorker {
 					defaultType = nodeFactory.newBasicTypeNode(typeSource,
 							BasicTypeKind.DOUBLE);
 				}
+				if (defaultType.kind() == TypeNodeKind.BASIC)
+					defaultType = nodeFactory.newPointerTypeNode(typeSource,
+							defaultType.copy());
 				formal = nodeFactory.newVariableDeclarationNode(typeSource,
 						formalIdNode, defaultType);
 				argsMap.put(formalName, formal);
@@ -482,6 +488,9 @@ public class FortranASTBuilderWorker {
 
 					TypeNode tempNode = argType;
 
+					if (tempNode.kind() == TypeNodeKind.BASIC)
+						argType = nodeFactory.newPointerTypeNode(source,
+								argType.copy());
 					// Eliminate sub-scripts of the actual arg with array type
 					while (tempNode.kind() == TypeNodeKind.ARRAY) {
 						tempNode.removeChild(1);
@@ -678,6 +687,19 @@ public class FortranASTBuilderWorker {
 				}
 				return nodeFactory.newOperatorNode(source, operator, arguments);
 			case 705 : /* AddOperand(s) */
+				if (exprNode.numChildren() == 2) {// signed
+					String op_string = exprNode.getChildByIndex(0).cTokens()[0]
+							.getText();
+					ExpressionNode unaryNode = null;
+
+					operator = op_string.startsWith("+")
+							? Operator.UNARYPLUS
+							: Operator.UNARYMINUS;
+					unaryNode = translateExpression(source,
+							exprNode.getChildByIndex(1), scope);
+					return nodeFactory.newOperatorNode(source, operator,
+							unaryNode);
+				}
 				for (int i = 0; i < exprNode.numChildren(); i++) {
 					String op_string = exprNode.getChildByIndex(0).cTokens()[0]
 							.getText();
@@ -744,9 +766,17 @@ public class FortranASTBuilderWorker {
 								.getChildByIndex(0).getChildByIndex(0);
 
 						if (refNode.numChildren() < 2) {
-							return nodeFactory.newIdentifierExpressionNode(
-									source, translateIdentifier(
-											refNode.getChildByIndex(0)));
+							IdentifierExpressionNode idExprNode = nodeFactory
+									.newIdentifierExpressionNode(source,
+											translateIdentifier(refNode
+													.getChildByIndex(0)));
+							String varName = idExprNode.getIdentifier().name();
+
+							if (argsMap.containsKey(varName))
+								return nodeFactory.newOperatorNode(source,
+										Operator.DEREFERENCE, idExprNode);
+
+							return idExprNode;
 						} else {
 							return translateOperatorExpression(source, refNode,
 									scope);
@@ -790,9 +820,17 @@ public class FortranASTBuilderWorker {
 								return nodeFactory.newDotNode(source,
 										s_lhsArgExprNode, varIdNode);
 							}
-							return nodeFactory.newIdentifierExpressionNode(
-									source, translateIdentifier(
-											refNode.getChildByIndex(0)));
+							IdentifierExpressionNode idExprNode = nodeFactory
+									.newIdentifierExpressionNode(source,
+											translateIdentifier(refNode
+													.getChildByIndex(0)));
+							String varName = idExprNode.getIdentifier().name();
+
+							if (argsMap.containsKey(varName))
+								return nodeFactory.newOperatorNode(source,
+										Operator.DEREFERENCE, idExprNode);
+
+							return idExprNode;
 						} else {
 							FortranTree refIdNode = refNode.getChildByIndex(0);
 							String IdStr = refIdNode.cTokens()[0].getText();
@@ -845,6 +883,37 @@ public class FortranASTBuilderWorker {
 								}
 								return nodeFactory.newOperatorNode(source,
 										operator, arguments);
+							} else if (IdStr.matches("^SIN|COS|SQRT|LOG$")) {
+								hasMATH = true;
+
+								FortranTree argumentListTree = null;
+								IdentifierNode idNode = nodeFactory
+										.newIdentifierNode(source,
+												IdStr.toLowerCase());
+								ExpressionNode functionNode = nodeFactory
+										.newIdentifierExpressionNode(source,
+												idNode);
+								boolean hasSubScripts = refNode
+										.numChildren() > 1;
+								int numArgs = 0;
+								List<ExpressionNode> argumentList = new LinkedList<ExpressionNode>();
+
+								if (hasSubScripts) {
+									argumentListTree = refNode
+											.getChildByIndex(1);
+									numArgs = argumentListTree.numChildren();
+									for (int i = 0; i < numArgs; i++) {
+										FortranTree argumentTree = argumentListTree
+												.getChildByIndex(i)
+												.getChildByIndex(0);
+										ExpressionNode argumentNode = translateExpression(
+												source, argumentTree, scope);
+
+										argumentList.add(argumentNode);
+									}
+								}
+								return nodeFactory.newFunctionCallNode(source,
+										functionNode, argumentList, null);
 							} else {
 								// Array Read
 							}
@@ -1067,6 +1136,7 @@ public class FortranASTBuilderWorker {
 		boolean hasActualArgs = blockItemNode.numChildren() > 2;
 		boolean hasSubScripts = functionIdNode.numChildren() > 1;
 		int numArgs = 0;
+		List<ExpressionNode> parameterList = new LinkedList<ExpressionNode>();
 		List<ExpressionNode> argumentList = new LinkedList<ExpressionNode>();
 
 		if (hasActualArgs) {
@@ -1081,6 +1151,11 @@ public class FortranASTBuilderWorker {
 				ExpressionNode argumentNode = translateExpression(source,
 						argumentTree, scope);
 
+				parameterList.add(argumentNode);
+				if (argumentNode instanceof IdentifierExpressionNode) {
+					argumentNode = nodeFactory.newOperatorNode(source,
+							Operator.ADDRESSOF, argumentNode);
+				}
 				argumentList.add(argumentNode);
 			}
 		}
@@ -1088,7 +1163,7 @@ public class FortranASTBuilderWorker {
 		FunctionCallNode callNode = nodeFactory.newFunctionCallNode(source,
 				functionNode, argumentList, null);
 		FunctionTypeNode typeNode = translateFunctionCallType(source,
-				argumentList);
+				parameterList);
 		FunctionDeclarationNode declNode = nodeFactory
 				.newFunctionDeclarationNode(source, idNode.copy(), typeNode,
 						null);
@@ -1122,6 +1197,9 @@ public class FortranASTBuilderWorker {
 
 			TypeNode tempNode = argType;
 
+			if (tempNode.kind() == TypeNodeKind.BASIC)
+				argType = nodeFactory.newPointerTypeNode(
+						argumentNode.getSource(), argType.copy());
 			// Eliminate sub-scripts of the actual arg with array type
 			while (tempNode.kind() == TypeNodeKind.ARRAY) {
 				tempNode.removeChild(1);
@@ -1878,13 +1956,13 @@ public class FortranASTBuilderWorker {
 		 * FortranTree endSubroutineStatementNode = subroutineTree
 		 * .getChildByIndex(numChildren - 1);
 		 */
-		Map<String, VariableDeclarationNode> argsMap = new HashMap<String, VariableDeclarationNode>();
 		Source source;
 		IdentifierNode name;
 		FunctionTypeNode functionType;
 		CompoundStatementNode body;
 		BlockItemNode result = null;
 
+		argsMap = new HashMap<String, VariableDeclarationNode>();
 		source = generateSource(subroutineTree);
 		name = this.translateIdentifier(idTree);
 		programUnitTrackStack.push(name);
@@ -1981,6 +2059,19 @@ public class FortranASTBuilderWorker {
 			}
 			oldRootNode.insertChildren(0, nodes);
 			sourceFiles.addAll(stdioAST.getSourceFiles());
+		}
+		if (hasMATH) {
+			AST mathAST = libFactory.getASTofLibrary(LibraryASTFactory.MATH);
+			SequenceNode<BlockItemNode> mathNodes = mathAST.getRootNode();
+			List<BlockItemNode> nodes = new ArrayList<BlockItemNode>();
+
+			mathAST.release();
+			for (BlockItemNode node : mathNodes) {
+				node.remove();
+				nodes.add(node);
+			}
+			oldRootNode.insertChildren(0, nodes);
+			sourceFiles.addAll(mathAST.getSourceFiles());
 		}
 		return astFactory.newAST(oldRootNode, sourceFiles, false);
 	}
