@@ -44,9 +44,9 @@ public class PreprocessorTest {
 
 	private static File dir2 = new File(root, "dir2");
 
-	private static File[] systemIncludes = new File[] { dir2 };
+	private static File[] systemIncludes = new File[]{dir2};
 
-	private static File[] userIncludes = new File[] { dir1, dir11 };
+	private static File[] userIncludes = new File[]{dir1, dir11};
 
 	private static LexerFactory lf = new LexerFactory() {
 
@@ -98,7 +98,7 @@ public class PreprocessorTest {
 	private void check(String rootName) throws PreprocessorException {
 		File sourceFile = new File(root, rootName + ".txt");
 		TokenSource source = p.preprocess(systemIncludes, userIncludes,
-				new HashMap<String, String>(), new File[] { sourceFile });
+				new HashMap<String, String>(), new File[]{sourceFile});
 
 		readSource(source);
 	}
@@ -160,7 +160,7 @@ public class PreprocessorTest {
 		File solutionFile = new File(root, rootName + ".sol.txt");
 
 		TokenSource actualSource = p.preprocess(systemIncludes, userIncludes,
-				new HashMap<String, String>(), new File[] { sourceFile });
+				new HashMap<String, String>(), new File[]{sourceFile});
 		TokenSource expectedSource = p.lexer(solutionFile);
 
 		compare(actualSource, expectedSource);
@@ -497,7 +497,7 @@ public class PreprocessorTest {
 	public void variadic1() throws PreprocessorException {
 		checkPair("variadic1");
 	}
-	
+
 	@Test
 	public void variadic2() throws PreprocessorException {
 		checkPair("variadic2");
@@ -506,5 +506,10 @@ public class PreprocessorTest {
 	@Test
 	public void lex_test() throws IOException {
 		lex("conditions2");
+	}
+
+	@Test
+	public void dotdot_ppnumber() throws IOException, PreprocessorException {
+		check("dotdot_preproc");
 	}
 }

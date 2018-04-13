@@ -565,7 +565,7 @@ public class PreprocessorTokenSource implements CivlcTokenSource {
 				startIndex + index + 1, formation, line, pos + index);
 
 		addOutput(dotdot);
-		if (index < length) {
+		if (index + 2 < length) {
 			CivlcToken rightToken = tokenFactory.newCivlcToken(stream,
 					PreprocessorLexer.INTEGER_CONSTANT, chan,
 					startIndex + index + 2, stopIndex, formation, line,
