@@ -31,6 +31,10 @@ public interface ContractNode extends ASTNode {
 		 */
 		ASSUMES,
 		/**
+		 * an ACSL "assert" annotation
+		 */
+		ASSERT,
+		/**
 		 * An "behavior" node encodes a named behavior block
 		 */
 		BEHAVIOR,

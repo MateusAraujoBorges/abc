@@ -27,6 +27,7 @@ tokens{
     ARRAY_SUFFIX;
     ASSUMES_ACSL;
     ASSIGNS_ACSL;
+    ASSERT_ACSL;
     BEHAVIOR;
     BEHAVIOR_BODY;
     BEHAVIOR_COMPLETE;
@@ -143,6 +144,7 @@ contract
     : loop_contract 
     | function_contract 
     | predicate_contract
+    | assert_contract
     ;
 
 /* Section 2.4.2 Loop Annotations */
@@ -207,6 +209,11 @@ predicate_contract
 predicate_clause
     : predicate_key a=IDENTIFIER b=predicate_definition SEMI
         -> ^(PREDICATE_CLAUSE $a $b) 
+    ;
+
+/* simple ACSL assertion */
+assert_contract
+    : assert_key term SEMI -> ^(ASSERT_ACSL term)
     ;
 
 /* binders (optional) = predicate-body */
@@ -984,6 +991,10 @@ assigns_key
 assumes_key 
     : {input.LT(1).getText().equals("assumes")}? IDENTIFIER
     ; 
+
+assert_key
+    : {input.LT(1).getText().equals("assert")}? IDENTIFIER
+    ;
 
 behaviors_key 
     : {input.LT(1).getText().equals("behaviors")}? IDENTIFIER

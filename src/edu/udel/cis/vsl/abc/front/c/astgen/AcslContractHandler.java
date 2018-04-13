@@ -5,10 +5,9 @@ import org.antlr.runtime.TokenStream;
 import org.antlr.runtime.tree.CommonTree;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
-import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
 import edu.udel.cis.vsl.abc.config.IF.Configurations.Language;
+import edu.udel.cis.vsl.abc.front.c.astgen.AcslContractWorker.ACSLSpecTranslation;
 import edu.udel.cis.vsl.abc.front.c.parse.CAcslParser;
 import edu.udel.cis.vsl.abc.front.c.parse.CParser.RuleKind;
 import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
@@ -87,12 +86,12 @@ public class AcslContractHandler {
 	 *            the scope of the annotation. For example, if this is a
 	 *            function scope, then it is the scope of the function
 	 *            parameters.
-	 * @return a sequence of contract nodes which are the result of the
-	 *         translation
+	 * @return a {@link ACSLSpecTranslation} which is the result of the
+	 *         translation of the ACSL annotation.
 	 * @throws SyntaxException
 	 *             if there are any syntax errors.
 	 */
-	public SequenceNode<ContractNode> translateAcslAnnotation(Source source,
+	public ACSLSpecTranslation translateAcslAnnotation(Source source,
 			CivlcTokenSource tokenSource, SimpleScope scope,
 			Configuration config) throws SyntaxException {
 		TokenStream tokens;
@@ -107,8 +106,6 @@ public class AcslContractHandler {
 		AcslContractWorker worker = new AcslContractWorker(nodeFactory,
 				tokenFactory, parseTree, config);
 
-		return this.nodeFactory.newSequenceNode(source, "ACSL Annotation",
-				worker.generateContractNodes(scope));
-
+		return worker.generateContractNodes(scope);
 	}
 }

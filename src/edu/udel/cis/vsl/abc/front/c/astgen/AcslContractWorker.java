@@ -132,6 +132,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode.Quan
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
@@ -171,6 +172,39 @@ import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 public class AcslContractWorker {
 
 	/**
+	 * A collection of translated nodes. The collection is the result of any
+	 * ACSL contract translation. The collection includes two groups:
+	 * <li>a set of {@link ContractNode}s</li>
+	 * <li>a set of {@link BlockItemNode}s that can be directly put at the
+	 * position of the translated ACSL contract.</li>
+	 * 
+	 * @author ziqingluo
+	 */
+	public class ACSLSpecTranslation {
+		/**
+		 * A set of {@link ContractNode}s which are the translation results of
+		 * the ACSL contract annotations.
+		 */
+		final SequenceNode<ContractNode> contractNodes;
+		/**
+		 * A set of {@link BlockItemNode}s which are the translation results of
+		 * some ACSL contract annotations that can be directly mapped to
+		 * existing ABC nodes.
+		 */
+		final List<BlockItemNode> blockItemNodes;
+
+		ACSLSpecTranslation(Source acslSpecSource,
+				List<ContractNode> contractNodes,
+				List<BlockItemNode> blockItemNodes) {
+			assert contractNodes != null;
+			assert blockItemNodes != null;
+			this.contractNodes = nodeFactory.newSequenceNode(acslSpecSource,
+					"ACSL spec", contractNodes);
+			this.blockItemNodes = blockItemNodes;
+		}
+	}
+
+	/**
 	 * the parse tree to be translated
 	 */
 	private CParseTree parseTree;
@@ -203,6 +237,7 @@ public class AcslContractWorker {
 	/* ******************** Constants ******************* */
 	private final String MPI_COMM_RANK = "\\mpi_comm_rank";
 	private final String MPI_COMM_SIZE = "\\mpi_comm_size";
+	private final String CIVL_ASSERT = "$assert";
 
 	/**
 	 * creates a new instance of AcslContractWorker
@@ -236,22 +271,34 @@ public class AcslContractWorker {
 	 * @throws SyntaxException
 	 *             if there are syntax errors during the translation
 	 */
-	public List<ContractNode> generateContractNodes(SimpleScope scope)
+	public ACSLSpecTranslation generateContractNodes(SimpleScope scope)
 			throws SyntaxException {
 		CommonTree contractTree = parseTree.getRoot();
+		List<ContractNode> translatedContractNodes = new LinkedList<>();
+		List<BlockItemNode> translatedBlockItems = new LinkedList<>();
 
 		switch (contractTree.getType()) {
 			case AcslParser.FUNC_CONTRACT :
-				return translateFunctionContractBlock(
-						(CommonTree) contractTree.getChild(0), scope);
+				translatedContractNodes.addAll(translateFunctionContractBlock(
+						(CommonTree) contractTree.getChild(0), scope));
+				break;
 			case AcslParser.LOOP_CONTRACT :
-				return translateLoopContractBlock(
-						(CommonTree) contractTree.getChild(0), scope);
+				translatedContractNodes.addAll(translateLoopContractBlock(
+						(CommonTree) contractTree.getChild(0), scope));
+				break;
 			case AcslParser.PREDICATE :
-				return translatePredicateContract(contractTree, scope);
+				translatedContractNodes.addAll(
+						translatePredicateContract(contractTree, scope));
+				break;
+			case AcslParser.ASSERT_ACSL :
+				translatedBlockItems
+						.add(translateACSLAssertion(contractTree, scope));
+				break;
 			default :
 				throw this.error("unknown kind of contract", contractTree);
 		}
+		return new ACSLSpecTranslation(parseTree.source(contractTree),
+				translatedContractNodes, translatedBlockItems);
 	}
 
 	/**
@@ -281,8 +328,11 @@ public class AcslContractWorker {
 					result.add(this.translateLoopClause(
 							(CommonTree) loopIterm.getChild(0), scope));
 					break;
-				case AcslParser.LOOP_BEHAVIOR :
 				case AcslParser.LOOP_VARIANT :
+					System.err.println(
+							"loop variants are not supported hence ignored.");
+					break;
+				case AcslParser.LOOP_BEHAVIOR :
 				default :
 					throw this.error("unknown kind of loop contract",
 							loopIterm);
@@ -305,6 +355,22 @@ public class AcslContractWorker {
 			predicates.add(translatePredicateClause(clause, scope));
 		}
 		return predicates;
+	}
+
+	/**
+	 * 
+	 * Translate ACSL assert to CIVL $assert.
+	 */
+	private BlockItemNode translateACSLAssertion(CommonTree assertTree,
+			SimpleScope scope) throws SyntaxException {
+		CommonTree predicate = (CommonTree) assertTree.getChild(0);
+		Source source = parseTree.source(assertTree);
+		ExpressionNode assertCall = nodeFactory.newFunctionCallNode(source,
+				nodeFactory.newIdentifierExpressionNode(source,
+						nodeFactory.newIdentifierNode(source, CIVL_ASSERT)),
+				Arrays.asList(translateExpression(predicate, scope)), null);
+
+		return nodeFactory.newExpressionStatementNode(assertCall);
 	}
 
 	/**
