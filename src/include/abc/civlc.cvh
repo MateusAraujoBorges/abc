@@ -183,4 +183,6 @@ $system void $unidirectional_when(_Bool condition);
   @*/
 $atomic_f void $output_assign(void * output,const void * value, int size);
 
+$system $atomic_f size_t $heap_size($scope scope);
+
 #endif
