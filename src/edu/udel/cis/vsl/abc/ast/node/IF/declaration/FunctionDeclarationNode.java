@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.ast.node.IF.declaration;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Function;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.TypedefNameNode;
 
 /**
  * <p>
@@ -207,4 +208,24 @@ public interface FunctionDeclarationNode extends OrdinaryDeclarationNode {
 	@Override
 	FunctionDeclarationNode copy();
 
+	/**
+	 * @return true iff this function declaration node represents a logic
+	 *         function declaration. A logic function is a function declared to
+	 *         be logic (including predicates and functions defined in ACSL
+	 *         annotations). The function definition is optional but if it
+	 *         exists, the function defintion is a (return of a) side-effect
+	 *         free expression.
+	 * 
+	 */
+	boolean isLogicFunction();
+
+	/**
+	 * Sets weather this function definition node represents a logic function
+	 * declaration.
+	 * 
+	 * @param isLogicFunction
+	 *            true if to set this node to be a logic function declaration,
+	 *            false otherwise.
+	 */
+	void setIsLogicFunction(boolean isLogicFunction);
 }

@@ -14,7 +14,8 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonFunctionDeclarationNode extends CommonOrdinaryDeclarationNode
-		implements FunctionDeclarationNode {
+		implements
+			FunctionDeclarationNode {
 
 	private boolean inlineFunctionSpecifier = false;
 
@@ -27,6 +28,11 @@ public class CommonFunctionDeclarationNode extends CommonOrdinaryDeclarationNode
 	private boolean pureFunctionSpecifier = false;
 	private boolean systemFunctionSpecifier = false;
 	private String systemLibrary = null;
+
+	/**
+	 * a flag indicating if the declared function is a logic function
+	 */
+	private boolean isLogic = false;
 
 	public CommonFunctionDeclarationNode(Source source,
 			IdentifierNode identifier, TypeNode type,
@@ -207,5 +213,15 @@ public class CommonFunctionDeclarationNode extends CommonOrdinaryDeclarationNode
 	@Override
 	public void setPureFunctionSpecifier(boolean value) {
 		this.pureFunctionSpecifier = value;
+	}
+
+	@Override
+	public boolean isLogicFunction() {
+		return isLogic;
+	}
+
+	@Override
+	public void setIsLogicFunction(boolean isLogicFunction) {
+		this.isLogic = isLogicFunction;
 	}
 }

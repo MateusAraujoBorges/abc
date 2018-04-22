@@ -114,9 +114,9 @@ import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractConstantNode.MPIConstant
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MPIContractExpressionNode.MPIContractExpressionKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.MemoryEventNode.MemoryEventNodeKind;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.RequiresNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.WaitsforNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.VariableDeclarationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.CharacterConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ConstantNode;
@@ -133,7 +133,10 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.SizeofNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.StringLiteralNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.BlockItemNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.StatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.ArrayTypeNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode.TypeNodeKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
@@ -287,7 +290,7 @@ public class AcslContractWorker {
 						(CommonTree) contractTree.getChild(0), scope));
 				break;
 			case AcslParser.PREDICATE :
-				translatedContractNodes.addAll(
+				translatedBlockItems.addAll(
 						translatePredicateContract(contractTree, scope));
 				break;
 			case AcslParser.ASSERT_ACSL :
@@ -344,17 +347,19 @@ public class AcslContractWorker {
 	/**
 	 * translate PREDICATE_CLAUSE list
 	 */
-	private List<ContractNode> translatePredicateContract(CommonTree predicate,
+	private List<BlockItemNode> translatePredicateContract(CommonTree predicate,
 			SimpleScope scope) throws SyntaxException {
 		int numChild = predicate.getChildCount();
-		List<ContractNode> predicates = new LinkedList<>();
+		List<BlockItemNode> programNodes = new LinkedList<>();
 
 		for (int i = 0; i < numChild; i++) {
 			CommonTree clause = (CommonTree) predicate.getChild(i);
+			BlockItemNode translatedClause = translatePredicateClause(clause,
+					scope);
 
-			predicates.add(translatePredicateClause(clause, scope));
+			programNodes.add(translatedClause);
 		}
-		return predicates;
+		return programNodes;
 	}
 
 	/**
@@ -382,7 +387,7 @@ public class AcslContractWorker {
 	 * @return
 	 * @throws SyntaxException
 	 */
-	private PredicateNode translatePredicateClause(CommonTree predicateClause,
+	private BlockItemNode translatePredicateClause(CommonTree predicateClause,
 			SimpleScope scope) throws SyntaxException {
 		CommonTree identifierTree = (CommonTree) predicateClause.getChild(0);
 		CommonTree definitionTree = (CommonTree) predicateClause.getChild(1);
@@ -392,6 +397,7 @@ public class AcslContractWorker {
 		SimpleScope defiScope = new SimpleScope(scope);
 		SequenceNode<VariableDeclarationNode> binders;
 		Source source = parseTree.source(predicateClause);
+		ExpressionNode definition = null;
 
 		if (bindersTree.getType() != AcslParser.ABSENT)
 			binders = translateBinders(bindersTree,
@@ -401,10 +407,27 @@ public class AcslContractWorker {
 					parseTree.source(identifierTree), "ABSENT",
 					Arrays.asList());
 
-		ExpressionNode definition = translateExpression(bodyTree, defiScope);
+		FunctionTypeNode funcTypeNode = nodeFactory.newFunctionTypeNode(source,
+				nodeFactory.newBasicTypeNode(source, BasicTypeKind.BOOL),
+				binders, false);
+		FunctionDeclarationNode result;
 
-		return nodeFactory.newPredicateNode(source, identifier, binders,
-				definition);
+		if (bodyTree.getType() != AcslParser.ABSENT) {
+			definition = translateExpression(bodyTree, defiScope);
+
+			StatementNode expressionBody = nodeFactory
+					.newReturnNode(definition.getSource(), definition);
+			CompoundStatementNode returnExpr = nodeFactory
+					.newCompoundStatementNode(expressionBody.getSource(),
+							Arrays.asList(expressionBody));
+
+			result = nodeFactory.newFunctionDefinitionNode(source, identifier,
+					funcTypeNode, null, returnExpr);
+		} else
+			result = nodeFactory.newAbstractFunctionDefinitionNode(source,
+					identifier, funcTypeNode, null, 0, null);
+		result.setIsLogicFunction(true);
+		return result;
 	}
 
 	/**

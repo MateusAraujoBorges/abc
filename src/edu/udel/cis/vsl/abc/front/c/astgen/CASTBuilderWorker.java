@@ -23,7 +23,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.PragmaNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.StaticAssertionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignationNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.DesignatorNode;
@@ -2969,28 +2968,9 @@ public class CASTBuilderWorker extends ASTBuilderWorker {
 
 		ACSLSpecTranslation acslSpec = acslHandler
 				.translateAcslAnnotation(source, tokenSource, newScope, config);
-		SequenceNode<ContractNode> contracts = acslSpec.contractNodes;
-		int numChild = contracts.numChildren();
 
-		// filter out translations that can be directly map to existing ABC
-		// nodes that put at the current location:
-		List<BlockItemNode> directMapping = new LinkedList<>();
-		List<ContractNode> remaining = new LinkedList<>();
-
-		for (int i = 0; i < numChild; i++) {
-			ContractNode contract = (ContractNode) contracts.child(i);
-
-			if (contract instanceof PredicateNode)
-				// predicate node is a sub-class of function decl node:
-				directMapping.add((FunctionDeclarationNode) contract);
-			else
-				remaining.add(contract);
-			contract.remove();
-		}
-		this.scopeAndContracts.peek().right = nodeFactory
-				.newSequenceNode(contracts.getSource(), "contracts", remaining);
-		directMapping.addAll(acslSpec.blockItemNodes);
-		return directMapping;
+		this.scopeAndContracts.peek().right = acslSpec.contractNodes;
+		return acslSpec.blockItemNodes;
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.ast.node.IF.declaration;
 
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 
@@ -30,8 +31,16 @@ public interface FunctionDefinitionNode extends FunctionDeclarationNode {
 
 	@Override
 	FunctionDefinitionNode copy();
-	
+
 	@Override
 	FunctionTypeNode getTypeNode();
 
+	/**
+	 * <b>Pre-condition: call to {@link #isLogicFunction()} returns true.</b>
+	 * 
+	 * @return The logic function definition, which is a side-effect free
+	 *         expression, if this funciton is a logic function. Otherwise,
+	 *         null.
+	 */
+	ExpressionNode getLogicDefinition();
 }

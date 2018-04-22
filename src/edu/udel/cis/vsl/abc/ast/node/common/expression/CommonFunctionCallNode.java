@@ -134,9 +134,10 @@ public class CommonFunctionCallNode extends CommonExpressionNode
 			if (functionEntity instanceof Function) {
 				Function function = (Function) functionEntity;
 
-				isAtomicPureFunction = function.isAbstract() || (function
-						.isSystemFunction()
-						&& (function.isPure() || function.isStateFunction()));
+				isAtomicPureFunction = function.isLogic()
+						|| function.isAbstract()
+						|| (function.isSystemFunction() && (function.isPure()
+								|| function.isStateFunction()));
 			}
 			if (isAtomicPureFunction) {
 				for (int i = 0; i < getNumberOfContextArguments(); i++) {

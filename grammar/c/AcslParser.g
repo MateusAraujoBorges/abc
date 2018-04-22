@@ -216,10 +216,14 @@ assert_contract
     : assert_key term SEMI -> ^(ASSERT_ACSL term)
     ;
 
+/* ACSL predicate declaration, either binder is absent or body is
+ * absent. They cannot be both absent. */
 /* binders (optional) = predicate-body */
 predicate_definition
     : LPAREN binders RPAREN ASSIGN term 
       -> ^(PREDICATE_DEFINITION binders term) 
+    | LPAREN binders RPAREN 
+      -> ^(PREDICATE_DEFINITION binders ABSENT)
     | ASSIGN term 
       -> ^(PREDICATE_DEFINITION ABSENT term) 
     ;

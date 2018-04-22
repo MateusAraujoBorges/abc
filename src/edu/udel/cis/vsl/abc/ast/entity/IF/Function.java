@@ -56,6 +56,26 @@ public interface Function extends OrdinaryEntity {
 	void setStateFunction(boolean value);
 
 	/**
+	 * @return true iff this function is a logic function. The definition of a
+	 *         logic function is optional but if it exists it must be a (return
+	 *         of a) side-effect free expression. A logic function can be
+	 *         recursively defined since a call to a logic function is
+	 *         side-effect free as well.
+	 *         <p>A logic function currently can only be defined in ACSL 
+	 *         annotations</p>
+	 */
+	boolean isLogic();
+
+	/**
+	 * Set weather this function is a logic function.
+	 * 
+	 * @param value
+	 *            true, to set the function as a logic function; false,
+	 *            otherwise.
+	 */
+	void setLogic(boolean value);
+
+	/**
 	 * Is the function declared with the <code>$pure</code> specifier,
 	 * indicating that this is a pure function?
 	 * 

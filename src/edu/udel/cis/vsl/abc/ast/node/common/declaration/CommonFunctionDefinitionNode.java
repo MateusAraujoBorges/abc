@@ -6,12 +6,15 @@ import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.FunctionDefinitionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.statement.CompoundStatementNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.statement.ReturnNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonFunctionDefinitionNode extends CommonFunctionDeclarationNode
-		implements FunctionDefinitionNode {
+		implements
+			FunctionDefinitionNode {
 
 	public CommonFunctionDefinitionNode(Source source,
 			IdentifierNode identifier, FunctionTypeNode type,
@@ -63,5 +66,12 @@ public class CommonFunctionDefinitionNode extends CommonFunctionDeclarationNode
 	@Override
 	public FunctionTypeNode getTypeNode() {
 		return (FunctionTypeNode) super.getTypeNode();
+	}
+
+	@Override
+	public ExpressionNode getLogicDefinition() {
+		if (!isLogicFunction())
+			return null;
+		return ((ReturnNode) getBody().getSequenceChild(0)).getExpression();
 	}
 }

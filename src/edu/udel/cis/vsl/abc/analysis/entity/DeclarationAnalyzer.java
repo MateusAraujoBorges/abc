@@ -17,7 +17,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.acsl.ContractNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.acsl.PredicateNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.compound.CompoundInitializerNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.AbstractFunctionDefinitionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -282,12 +281,12 @@ public class DeclarationAnalyzer {
 		}
 		node.setEntity(result);
 		identifier.setEntity(result);
-
 		addDeclarationToFunction(result, node);
-		if (node instanceof FunctionDefinitionNode) {
-			CompoundStatementNode body = ((FunctionDefinitionNode) node)
-					.getBody();
 
+		CompoundStatementNode body = null;
+
+		if (node instanceof FunctionDefinitionNode) {
+			body = ((FunctionDefinitionNode) node).getBody();
 			node.setIsDefinition(true);
 			entityAnalyzer.statementAnalyzer.processCompoundStatement(body);
 			processGotos(body);
@@ -297,21 +296,8 @@ public class DeclarationAnalyzer {
 
 		if (contract != null)
 			acslAnalyzer.processContractNodes(contract, result);
-		if (node instanceof PredicateNode) {
-			// check if all arguments have scalar(and non-pointer) type:
-			PredicateNode predNode = (PredicateNode) node;
-
-			for (VariableDeclarationNode varDecl : predNode.getParameters()) {
-				Type varType = varDecl.getTypeNode().getType();
-
-				if (!varType.isScalar() || varType.kind() == TypeKind.POINTER)
-					throw error(
-							"Currently we do not support specifying non-scalar or"
-									+ " pointer type arguments for ACSL predicates.",
-							varDecl);
-			}
-			result.setAbstract(true);
-		}
+		if (node.isLogicFunction())
+			result.setLogic(true);
 		return result;
 	}
 
