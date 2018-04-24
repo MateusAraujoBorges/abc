@@ -185,4 +185,20 @@ $atomic_f void $output_assign(void * output,const void * value, int size);
 
 $system $atomic_f size_t $heap_size($scope scope);
 
+/* The base address q of a pointer p is: 
+ *    
+ * 1. q := p, if p points anything other than an array element.
+ *
+ * 2. q := a pointer to the first element of the array referred by p,
+ * if p points an array element.
+ *
+ * Note that an "array" here means the physical array which is always
+ * one-dimensional. And a sequence of memory spaces allocated by
+ * malloc will be seen as an array.
+ */
+/*@ depends_on \nothing;
+  @ executes_when \true;
+  @*/
+$system $state_f void * $array_base_address_of(const void *ptr);
+
 #endif
