@@ -235,7 +235,7 @@ public class SpecifierAnalysis {
 				typeNameKind = TypeNodeKind.BASIC;
 				basicTypeKind = BasicTypeKind.INT;
 			} else
-				error("Declaration is missing a type name", specifierListNode);
+				throw error("Declaration is missing a type name", specifierListNode.parent);
 		} else {
 			for (int i = 0; i < numChildren; i++) {
 				CommonTree node = (CommonTree) specifierListNode.getChild(i);

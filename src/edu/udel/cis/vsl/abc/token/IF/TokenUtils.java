@@ -296,6 +296,15 @@ public class TokenUtils {
 				}
 				line = sBuilder.toString();
 				lines.close();
+			} else if (filePath.endsWith("predefined macros")) {
+				StringBuilder sBuilder = new StringBuilder();
+				MacroExpansion macro_expansion = (MacroExpansion) token.getFormation();
+				
+				sBuilder.append("-D");
+				sBuilder.append(macro_expansion.getMacro().getName());
+				sBuilder.append("=");
+				sBuilder.append(token.getText());
+				line = token.toString();
 			} else {
 				Stream<String> lines = Files.lines(Paths.get(filePath));
 				line = lines.skip(token.getLine() - 1).findFirst().get();

@@ -81,8 +81,10 @@ public class CivlcTokenSubSequence implements CivlcTokenSequence {
 		this.rootSource = rootSource;
 		this.startTokenIndex = startTokenIndex;
 		this.lastTokenIndex = lastTokenIndex;
-		this.eofToken = rootSource.getTokenFactory()
-				.newCivlcToken(CivlcTokenConstant.EOF, "EOF", null);
+		this.eofToken = rootSource.getTokenFactory().newCivlcToken(
+				CivlcTokenConstant.EOF, "EOF",
+				rootSource.getTokenFactory().newSystemFormation(
+						"CivlcTokenSubSequence Constructor"));
 	}
 
 	@Override
