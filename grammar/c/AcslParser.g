@@ -1,12 +1,14 @@
 parser grammar AcslParser;
 
 /*
- * Grammar for programming ACSL specification, 
+ * Grammar for ACSL: an ANSI/ISO C Specification Language,
  * with additional CIVL-C extensions.
- * Based on ACSL 1.9.
+ * Based on ACSL 1.12.
+ * https://frama-c.com/acsl.html
  * 
  * Author: Manchun Zheng, University of Delaware
- * Last changed: Jan 2016
+ * Author: Stephen F. Siegel, University of Delaware
+ * Last changed: May 2018
  */
 
 options
@@ -335,7 +337,6 @@ directAbstractDeclaratorSuffix
 
 logic_type_expr
     : built_in_logic_type ->^(TYPE_BUILTIN built_in_logic_type)
-    //| IDENTIFIER ->^(TYPE_ID IDENTIFIER)
     ;
 
 c_basic_type
@@ -441,7 +442,8 @@ mpi_collective_block
 
 /* sec. 2.3.3 contracts with named behaviors */
 named_behavior
-    : behavior_key IDENTIFIER COLON behavior_body ->^(BEHAVIOR behavior_key IDENTIFIER behavior_body)
+    : behavior_key IDENTIFIER COLON behavior_body
+        -> ^(BEHAVIOR behavior_key IDENTIFIER behavior_body)
     ;
 
 behavior_body
@@ -459,13 +461,15 @@ assumes_clause
     ;
 
 completeness_clause
-    : completes_key behaviors_key id_list ->^(BEHAVIOR_COMPLETE completes_key behaviors_key id_list)
-    | disjoint_key behaviors_key id_list ->^(BEHAVIOR_DISJOINT disjoint_key behaviors_key id_list)
+    : completes_key behaviors_key id_list
+        -> ^(BEHAVIOR_COMPLETE completes_key behaviors_key id_list)
+    | disjoint_key behaviors_key id_list
+        -> ^(BEHAVIOR_DISJOINT disjoint_key behaviors_key id_list)
     ;
 
 id_list
     :
-    | IDENTIFIER (COMMA IDENTIFIER)* ->^(ID_LIST IDENTIFIER+)
+    | IDENTIFIER (COMMA IDENTIFIER)* -> ^(ID_LIST IDENTIFIER+)
     ;
 
 /* C11 section 6.5 Expressions: Grammar here is organized with a
@@ -473,17 +477,25 @@ id_list
  * because it's a more viewful way to illustrate how expressions will
  * be derived
  */
+ 
+ /* ****************************** Expressions ******************************* */
 
-/* 6.5.17 
- * expression:
- *    assignment-expression 
- *    expression list (connected by COMMAs)
- */
+// SFS: why is this called a "term"?  Why not "formula"?
 term
-    : assignmentExpression
+    : quantifierExpression | assignmentExpression 
     ;
+    
+quantifierExpression
+	: forall_key binders SEMI term
+	   -> ^(QUANTIFIED forall_key binders term) 
+    | exists_key binders SEMI term
+       -> ^(QUANTIFIED exists_key binders term) 
+	| lambda_key binders SEMI term
+	   -> ^(LAMBDA_ACSL lambda_key binders term)
+	;
 
-/* 6.5.16 
+/* SFS: Does ACSL have an assignment expression?
+ * 6.5.16 
  * assignment-expression
  *   conditional-expression
  *   unary-expression assignment-operator assignment-expression
@@ -496,125 +508,113 @@ term
  * Child 1.1: assignmentExpression
  */
 assignmentExpression
-	: (unaryExpression ASSIGN)=>
-	  unaryExpression ASSIGN assignmentExpression
+	: (unaryExpression ASSIGN)=> unaryExpression ASSIGN assignmentExpression
 	  -> ^(OPERATOR ASSIGN
-	       ^(ARGUMENT_LIST unaryExpression assignmentExpression))
+            ^(ARGUMENT_LIST unaryExpression assignmentExpression))
 	| conditionalExpression
 	;
 
-/*
- * Tree: assignmentExpression or ABSENT
- */
 assignmentExpression_opt
     : -> ABSENT
     | assignmentExpression
     ;
 
-/* 6.5.15 *
+/* 6.5.15
  * In C11 it is
  * conditional-expression:
  *   logical-OR-expression
  *   logical-OR-expression ? expression : conditional-expression
  * 
- * CIVL-C ACSL parser extends the grammer. see. logical-implies-expression.
- * conditional-expression:
- *   logical-implies-expression
- *   logical-implies-expression ? expression : conditional-expression
+ * Note:  "a?b:c?d:e".  Is it (1) "(a?b:c)?d:e"  or (2) "a?b:(c?d:e)".
+ * Answer is (2), it is "right associative".
+ *
+ * Note: the order matters in the two alternatives below.
+ * The alternatives are tried in order from first to last.
+ * Therefore it is necessary for the non-empty to appear first.
+ * Else the empty will always be matched.
  */
 conditionalExpression
-	: quantifierExpression
-	( -> quantifierExpression
-    	| QMARK term COLON conditionalExpression
-    	  -> ^(OPERATOR QMARK
-    	       ^(ARGUMENT_LIST
-    	         quantifierExpression
-    	         term
-    	         conditionalExpression))
+	: a=logicalEquivExpression
+        ( QMARK b=conditionalExpression COLON 
+            (c=quantifierExpression | c=conditionalExpression)
+            -> ^(OPERATOR QMARK ^(ARGUMENT_LIST $a $b $c))
+        | -> $a
     	)
 	;
 
-/* DEV: put quantifiedExpression a higher precedence than logicalImpliesExpression */
-quantifierExpression
-	: logicalEquivExpression
-    | forall_key binders SEMI a=logicalOrExpression IMPLIES_ACSL b=logicalOrExpression
-	   -> ^(QUANTIFIED forall_key binders $a $b) 
-    | exists_key binders SEMI a=logicalOrExpression
-       -> ^(QUANTIFIED exists_key binders $a) 
-	| lambda_key binders SEMI logicalOrExpression
-	   -> ^(LAMBDA_ACSL lambda_key binders logicalOrExpression)
-	;
-
+/* ACSL Logical equivalence: a<==>b.
+ * Left associative: a<==>b<==>c means (a<==>b)<==>c.
+ */
 logicalEquivExpression
-	: ( logicalImpliesExpression -> logicalImpliesExpression )
-	  ( EQUIV_ACSL y=logicalImpliesExpression
-	    -> ^(OPERATOR EQUIV_ACSL ^(ARGUMENT_LIST $logicalEquivExpression $y))
-	  )*
-    	;
+	: (a=logicalImpliesExpression -> $a)
+        ( EQUIV_ACSL (b=quantifierExpression | b=logicalImpliesExpression)
+            -> ^(OPERATOR EQUIV_ACSL ^(ARGUMENT_LIST $logicalEquivExpression $b))
+        )*
+    ;
 
-
-/* 6.5.14.5. Extended by CIVL-C and ACSL. *
- * logical-implies-expression:
- *   logical-or-expression
- *   logical-or-expression IMPLY logical-or-expression
+/* ACSL logical implies expression: a==>b.
+ * NOTE: *RIGHT* associative: a==>b==>c is a==>(b==>c).
  */
 logicalImpliesExpression
-	: ( logicalOrExpression -> logicalOrExpression )
-	  ( op=(IMPLIES|IMPLIES_ACSL) y=logicalOrExpression
-	    -> ^(OPERATOR $op ^(ARGUMENT_LIST $logicalImpliesExpression $y))
-	  )*
-    	;
+	: a=logicalOrExpression
+        ( op=(IMPLIES|IMPLIES_ACSL) (b=quantifierExpression | b=logicalImpliesExpression)
+            -> ^(OPERATOR $op ^(ARGUMENT_LIST $a $b))
+        | -> $a
+        )
+    ;
 
-/* 6.5.14 *
- * logical-OR-expression:
- *   logical-XOR-expression 
- *   logical-XOR-expression || logical-XOR-expression
+/* logical-OR-expression: a||b.
+ * Left associative: a||b||c is (a||b)||c.
  */
 logicalOrExpression
-	: ( logicalXorExpression -> logicalXorExpression )
-	  ( OR y=logicalXorExpression
-	    -> ^(OPERATOR OR ^(ARGUMENT_LIST $logicalOrExpression $y))
-	  )*
-	;	
+	: (a=logicalXorExpression -> $a)
+        ( OR (b=quantifierExpression | b=logicalXorExpression)
+            -> ^(OPERATOR OR ^(ARGUMENT_LIST $logicalOrExpression $b))
+        )*
+	;
 	
-/* ACSL operator
- * logical-XOR-expression:
- *   logical-AND-expression
- *   logical-AND-expression ^^ logical-AND-expression:
+/* ACSL logical exclusive or: a^^b.
+ * Left associative.
  */
 logicalXorExpression
-	: ( logicalAndExpression -> logicalAndExpression )
-	  ( XOR_ACSL y=logicalAndExpression
-	    -> ^(OPERATOR XOR_ACSL ^(ARGUMENT_LIST $logicalXorExpression $y))
-	  )*
-	;	
+	: (a=logicalAndExpression -> $a)
+        ( XOR_ACSL (b=quantifierExpression | b=logicalAndExpression)
+            -> ^(OPERATOR XOR_ACSL ^(ARGUMENT_LIST $logicalXorExpression $b))
+        )*
+	;
 
-/* 6.5.13 *
- * logical-AND-expression:
- *   inclusive-OR-expression
- *   logical-AND-expression && inclusive-OR-expression
+/* 6.5.13, logical and: a && b.
+ * Left associative.
  */
 logicalAndExpression
-	: ( bitwiseEquivExpression -> bitwiseEquivExpression )
-	  ( AND y=bitwiseEquivExpression
-	    -> ^(OPERATOR AND ^(ARGUMENT_LIST $logicalAndExpression $y))
-	  )*
-	;
-	
-bitwiseEquivExpression
-	: ( bitwiseImpliesExpression -> bitwiseImpliesExpression )
-	  ( bitequiv_op y=bitwiseImpliesExpression
-	    -> ^(OPERATOR BEQUIV_ACSL ^(ARGUMENT_LIST $bitwiseEquivExpression $y))
-	  )*
-	;
-	
-bitwiseImpliesExpression
-	: ( inclusiveOrExpression -> inclusiveOrExpression )
-	  ( bitimplies_op y=inclusiveOrExpression
-	    -> ^(OPERATOR BIMPLIES_ACSL ^(ARGUMENT_LIST $bitwiseImpliesExpression $y))
-	  )*
+	: (a=bitwiseEquivExpression -> $a)
+        ( AND (b=quantifierExpression | b=bitwiseEquivExpression)
+            -> ^(OPERATOR AND ^(ARGUMENT_LIST $logicalAndExpression $b))
+        )*
 	;
 
+/* ACSL bitwise equivalence: a <--> b. 
+ * Left associative.
+ */
+bitwiseEquivExpression
+	: (a=bitwiseImpliesExpression -> $a)
+        ( bitequiv_op b=bitwiseImpliesExpression
+            -> ^(OPERATOR BEQUIV_ACSL ^(ARGUMENT_LIST $bitwiseEquivExpression $b))
+        )*
+	;
+
+/* ACSL bitwise implies: a-->b.
+ * RIGHT associative
+ */
+bitwiseImpliesExpression
+	: a=inclusiveOrExpression
+        ( op=bitimplies_op b=bitwiseImpliesExpression
+            -> ^(OPERATOR BIMPLIES_ACSL ^(ARGUMENT_LIST $a $b))
+        | -> $a
+        )
+	;
+
+// TODO: SFS: look at this, it doesn't make sense...
 /* 6.5.12 *
  * Bitwise inclusive OR
  * inclusive-OR-expression:
@@ -883,35 +883,6 @@ remoteExpression
 	;
     
     
-
-/* CIVL $spawn expression */
-//spawnExpression
-//	: SPAWN postfixExpressionRoot LPAREN 
-	 // argumentExpressionList RPAREN 
-	 // -> ^(SPAWN LPAREN postfixExpressionRoot ABSENT
-	   //    argumentExpressionList RPAREN)
-	//;
-
-/* One of the CIVL-C first-order quantifiers.
- * UNIFORM represents uniform continuity.  
- */	
-quantifier
-	: forall_key
-	| exists_key
-	;
-
-/* 6.5.17
- * assignmentExpression or
- * Root: OPERATOR
- * Child 0: COMMA
- * Child 1: ARGUMENT_LIST
- * Child 1.0: arg0
- * Child 1.1: arg1
- *
-term
-	: assignmentExpression
-    ;*/
-			
 /* 6.6 */
 constantExpression
 	: conditionalExpression 

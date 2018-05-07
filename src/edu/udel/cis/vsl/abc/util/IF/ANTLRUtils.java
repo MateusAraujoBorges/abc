@@ -20,6 +20,14 @@ import org.antlr.runtime.tree.Tree;
 
 public class ANTLRUtils {
 
+	/**
+	 * Pretty-prints a parse tree.
+	 * 
+	 * @param out
+	 *            the stream to which output should be sent
+	 * @param tree
+	 *            the tree to print. May be null.
+	 */
 	public static void printTree(PrintStream out, Tree tree) {
 		if (tree == null) {
 			out.println("null");
@@ -171,8 +179,7 @@ public class ANTLRUtils {
 				out.println("TOKEN[0]");
 				out.flush();
 				break;
-			}
-			else
+			} else
 				out.println(t);
 			out.flush();
 			if (t.getType() == Token.EOF)

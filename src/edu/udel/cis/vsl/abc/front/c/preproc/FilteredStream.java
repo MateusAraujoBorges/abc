@@ -40,7 +40,6 @@ public class FilteredStream implements CharStream {
 	 * Note that the size does NOT include any EOFs (despite what the misleading
 	 * ANTLR documentation says).
 	 */
-
 	private char[] data;
 
 	/**

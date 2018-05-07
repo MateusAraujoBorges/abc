@@ -40,6 +40,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GTE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.HASH;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IDENTIFIER;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLIES_ACSL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLIES;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INDEX;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER_CONSTANT;
@@ -89,6 +90,7 @@ import java.util.List;
 
 import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.CommonTree;
+import org.antlr.runtime.tree.Tree;
 
 import edu.udel.cis.vsl.abc.ast.node.IF.IdentifierNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
@@ -1077,8 +1079,12 @@ public class AcslContractWorker {
 			throws SyntaxException {
 		SimpleScope newScope = new SimpleScope(scope);
 		CommonTree quantifierTree = (CommonTree) expressionTree.getChild(0);
+		// The children of the quantifierTree are as follows:
+		// arg0: the keyword "\forall", "\exists", or "\lambda"
+		// arg1: the binders tree
+		// arg2: the formula
 		CommonTree bindersTree = (CommonTree) expressionTree.getChild(1);
-		CommonTree restrictTree, predTree;
+		CommonTree predTree = (CommonTree) expressionTree.getChild(2);
 		ExpressionNode restrict, pred;
 		SequenceNode<VariableDeclarationNode> binders;
 		Quantifier quantifier;
@@ -1091,21 +1097,39 @@ public class AcslContractWorker {
 
 		if (quantifierTree.getType() == AcslParser.FORALL_ACSL) {
 			quantifier = Quantifier.FORALL;
-			restrictTree = (CommonTree) expressionTree.getChild(2);
-			predTree = (CommonTree) expressionTree.getChild(3);
-			restrict = translateExpression(restrictTree, newScope);
+			restrict = null;
+			// if the expression has the form "forall ... ; p==>q",
+			// the type of predicate will be OPERATOR, arg0 will be IMPLIES
+			// or IMPLIES_ACSL, and arg1 will be an ARGUMENT_LIST with 2
+			// children, p and q.
+			if (predTree.getType() == OPERATOR) {
+				Tree predOperatorTree = predTree.getChild(0);
+				int predOperatorType = predOperatorTree.getType();
+
+				if (predOperatorType == IMPLIES_ACSL
+						|| predOperatorType == IMPLIES) {
+					Tree predArgTree = predTree.getChild(1);
+
+					assert predArgTree.getChildCount() == 2;
+
+					CommonTree restrictTree = (CommonTree) predArgTree
+							.getChild(0);
+
+					predTree = (CommonTree) predArgTree.getChild(1);
+					restrict = translateExpression(restrictTree, newScope);
+				}
+			}
 			pred = translateExpression(predTree, newScope);
 		} else if (quantifierTree.getType() == AcslParser.EXISTS_ACSL) {
 			quantifier = Quantifier.EXISTS;
-			predTree = (CommonTree) expressionTree.getChild(2);
 			pred = translateExpression(predTree, newScope);
 			restrict = null;
-		} else
+		} else {
 			throw error("Unexpexted quantifier " + quantifierTree.getType(),
 					quantifierTree);
+		}
 		binders = translateBinders(bindersTree, source, newScope);
 		boundVariableList.add(nodeFactory.newPairNode(source, binders, null));
-
 		return nodeFactory.newQuantifiedExpressionNode(source, quantifier,
 				nodeFactory.newSequenceNode(source,
 						"bound variable declaration list", boundVariableList),
