@@ -184,12 +184,53 @@ public interface TokenFactory {
 
 	// Source objects...
 
+	/**
+	 * Returns a {@link Source} consisting of a single {@link Token}.
+	 * 
+	 * @param token
+	 *            a non-{@code null} {@link Token}
+	 * @return a {@link Source} consisting of the single given token
+	 */
 	Source newSource(CivlcToken token);
 
+	/**
+	 * Computes a {@link Source} comprising all {@link Token}s from
+	 * {@code first} to {@code last}, inclusive.
+	 * 
+	 * @param first
+	 *            a non-{@code null} {@link Token}
+	 * @param last
+	 *            a non-{@code null} {@link Token} from the same token sequence
+	 *            as {@code first}
+	 * @return a {@link Source} comprising all {@link Token}s from {@code first}
+	 *         to {@code last}, inclusive
+	 */
 	Source newSource(CivlcToken first, CivlcToken last);
 
+	/**
+	 * Computes a minimal {@link Source} containing the given source and token.
+	 * The given source and token must come from the same token sequence. This
+	 * is useful when you want to increase a source by one token.
+	 * 
+	 * @param source
+	 *            a non-{@code null} {@link Source}
+	 * @param token
+	 *            a non-{@code null} {@link Token} from the same token sequence
+	 *            as {@code source}
+	 * @return a minimal {@code Source} containing the given source and token
+	 */
 	Source join(Source source, CivlcToken token);
 
+	/**
+	 * Computes a minimal {@link Source} containing the two given sources.
+	 * 
+	 * @param source1
+	 *            a non-{@code null} {@link Source}
+	 * @param source2
+	 *            a non-{@code null} {@link Source} from the same token sequence
+	 *            as {@code source1}
+	 * @return a minimal source containing the two given ones
+	 */
 	Source join(Source source1, Source source2);
 
 	// Exceptions...

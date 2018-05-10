@@ -50,18 +50,8 @@ public class CommonSourceFactory {
 		return new CommonSource(newFirst, newLast);
 	}
 
-
-	// public SyntaxException newSyntaxException(String message, CommonTree
-	// tree,
-	// CTokenSource tokenSource) {
-	// Source source = newSource(tree, tokenSource);
-	//
-	// return new SyntaxException(message, source);
-	// }
-
 	public UnsourcedException newUnsourcedException(String message) {
 		return new UnsourcedException(message);
 	}
 
-	
 }

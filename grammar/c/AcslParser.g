@@ -113,6 +113,7 @@ tokens{
     READ_ACSL;
     READS_ACSL;
     REAL_ACSL;
+    RELCHAIN; // a chain of relational expressions
     RESULT_ACSL;
     REMOTE_ACCESS;
     REQUIRES_ACSL;
@@ -656,43 +657,67 @@ exclusiveOrExpression
  *   AND-expression & equality-expression
  */
 andExpression
-	: ( equalityExpression -> equalityExpression )
-	  ( AMPERSAND y=equalityExpression
+	: ( relationalExpression -> relationalExpression )
+	  ( AMPERSAND y=relationalExpression
 	    -> ^(OPERATOR AMPERSAND ^(ARGUMENT_LIST $andExpression $y))
 	  )*
 	;
 
-/* 6.5.9 *
- * equality-expression:
- *   relational-expression
- *   equality-expression ==/!= relational-expression
- */
-equalityExpression
-	: ( relationalExpression -> relationalExpression )
-	  ( equalityOperator y=relationalExpression
-	    -> ^(OPERATOR equalityOperator ^(ARGUMENT_LIST $equalityExpression $y))
-	  )*
-	;
 
-equalityOperator
-	: EQUALS | NEQ
-	;
+/*
+  Note on ACSL relational expressions, from the ACSL manual:
+  The construct t1 relop1 t2 relop2 t3 · · · tk
+  with several consecutive comparison operators is a shortcut
+  (t1 relop1 t2) && (t2 relop2 t3) && ···.
+  It is required that the relopi operators must be in the same “direction”,
+  i.e. they must all belong either to {<, <=, ==} or to {>,>=,==}.
+  Expressions such as x < y > z or x != y != z are not allowed.
 
-/* 6.5.8 *
- * relational-expression:
- *   shift-expression
- *   relational-expression relationalOperator shift-expression
+  Also, <,<=,>=,> have higher precedence than == and !=.  Though
+  not sure what that means, so ignoring it.
+
+  "a<b==c" means "a<b && b==c".
+
+   a<b<c<d : (and (a<b) (and (b<c) (c<d)))
+
+  Grammar:  The following works but doesn't check for illegal expressions.
+  Better: create a new node RELCHAIN
+  args: a < b <= c < d, in order, then check and assemble in Java code.
+
+relationalExpression
+    : x=shiftExpression
+        ( r=relChain[(Tree)$x.tree] -> $r
+        | -> $x
+        )
+    ;
+
+// t is the tree of a single shiftExpression,  t < y (< ...) 
+relChain[Tree t]
+    : r=relOp y=shiftExpression
+        ( z=relChain[(Tree)$y.tree]
+            -> ^(OPERATOR AND ^(ARGUMENT_LIST
+                    ^(OPERATOR $r ^(ARGUMENT_LIST {$t} $y))
+            $z))
+        | -> ^(OPERATOR $r ^(ARGUMENT_LIST {$t} $y))
+        )
+    ;
+*/
+
+/* A relational operator */
+relOp: EQUALS | NEQ | LT | LTE | GT | GTE ;
+
+/* A relational expression or chain of such expressions.
+ * Returns a tree with root RELCHAIN and then the sequence
+ * that alternates shiftExpression, relational operator,
+ * and begins and ends with a shiftExpression.
  */
 relationalExpression
-	: ( shiftExpression -> shiftExpression )
-	  ( relationalOperator y=shiftExpression
-	    -> ^(OPERATOR relationalOperator ^(ARGUMENT_LIST $relationalExpression $y))
-	  )* 
-	;
+    : x=shiftExpression
+        ( (s+=relOp s+=shiftExpression)+ -> ^(RELCHAIN $x $s*)
+        | -> $x
+        )
+    ;
 
-relationalOperator
-	: LT | GT | LTE | GTE
-	;
 
 /* 6.5.7 *
  * In C11:

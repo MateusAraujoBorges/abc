@@ -39,8 +39,8 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GT;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.GTE;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.HASH;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IDENTIFIER;
-import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLIES_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLIES;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.IMPLIES_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INDEX;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.INTEGER_CONSTANT;
@@ -60,6 +60,7 @@ import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QMARK;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.QUANTIFIED;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.READ_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REAL_ACSL;
+import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RELCHAIN;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.REMOTE_ACCESS;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.RESULT_ACSL;
 import static edu.udel.cis.vsl.abc.front.c.parse.AcslParser.SELF;
@@ -157,6 +158,7 @@ import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.StringToken;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
+import jdk.nashorn.internal.runtime.regexp.joni.exception.InternalException;
 
 /**
  * This is responsible for translating a CParseTree that represents an ACSL
@@ -922,6 +924,8 @@ public class AcslContractWorker {
 			case OPERATOR :
 				return translateOperatorExpression(source, expressionTree,
 						scope);
+			case RELCHAIN :
+				return translateRelationalChain(source, expressionTree, scope);
 			case TRUE_ACSL :
 				return translateTrue(source);
 			case FALSE_ACSL :
@@ -1624,6 +1628,137 @@ public class AcslContractWorker {
 	}
 
 	/**
+	 * Translates an ACSL relational chain expression. An example is "x < y < z"
+	 * , which is ACSL short-hand for "x<y && y<z". Here are some notes from the
+	 * ACSL spec:
+	 * 
+	 * <pre>
+	 * The construct t1 relop1 t2 relop2 t3 · · · tk
+	 * with several consecutive comparison operators is a shortcut
+	 * (t1 relop1 t2) && (t2 relop2 t3) && ···.
+	 * It is required that the relopi operators must be in the same "direction",
+	 * i.e. they must all belong either to {<, <=, ==} or to {>,>=,==}.
+	 * Expressions such as x < y > z or x != y != z are not allowed.
+	 * </pre>
+	 * 
+	 * @param source
+	 *            source for the token sequence which makes up the expression
+	 * @param expressionTree
+	 *            the parse tree resulting from parsing the expression token
+	 *            sequence
+	 * @param scope
+	 *            the scope in which the expression occurs
+	 * @return the root of an AST tree representing this expression
+	 * @throws SyntaxException
+	 *             if the operators are not all in the same "direction"
+	 */
+	private OperatorNode translateRelationalChain(Source source,
+			CommonTree tree, SimpleScope scope) throws SyntaxException {
+		assert tree.getType() == RELCHAIN;
+
+		int numChildren = tree.getChildCount();
+
+		if (numChildren < 3)
+			throw new SyntaxException(
+					"relational chain has fewer than 3 arguments", source);
+		if (numChildren % 2 == 0)
+			throw new SyntaxException(
+					"relational chain has even number of arguments", source);
+
+		// direction: 0=equality or unknown, 1=increasing, -1=decreasing,
+		// -2=inequality
+		int direction = 0;
+		CommonTree arg1 = (CommonTree) tree.getChild(0), arg2;
+		Source source1 = newSource(arg1), source2;
+		int i = 1;
+		OperatorNode result = null;
+		Source resultSource = null;
+
+		while (i < numChildren) {
+			CommonTree rel = (CommonTree) tree.getChild(i);
+			Operator operator;
+
+			if (i > 1 && direction == -2)
+				throw error("'!=' prohibited in a relational chain", rel);
+			i++;
+			switch (rel.getType()) {
+				case LT :
+					operator = Operator.LT;
+					if (direction == 0)
+						direction = 1;
+					else if (direction < 0)
+						throw error(
+								"'<' prohibited in a decreasing relational chain",
+								rel);
+					break;
+				case LTE :
+					operator = Operator.LTE;
+					if (direction == 0)
+						direction = 1;
+					else if (direction < 0)
+						throw error(
+								"'<=' prohibited in a decreasing relational chain",
+								rel);
+					break;
+				case EQUALS :
+					operator = Operator.EQUALS;
+					break;
+				case GTE :
+					operator = Operator.GTE;
+					if (direction == 0)
+						direction = -1;
+					else if (direction > 0)
+						throw error(
+								"'>=' prohibited in an increasing relational chain",
+								rel);
+					break;
+				case GT :
+					operator = Operator.GT;
+					if (direction == 0)
+						direction = -1;
+					else if (direction > 0)
+						throw error(
+								"'>' prohibited in an increasing relational chain",
+								rel);
+					break;
+				case NEQ :
+					if (i > 2)
+						throw error("'!=' prohibited in a relational chain",
+								rel);
+					operator = Operator.NEQ;
+					direction = -2;
+					break;
+				default :
+					throw new InternalException(
+							"unknown relational operator: " + rel);
+			}
+			arg2 = (CommonTree) tree.getChild(i);
+			i++;
+
+			ExpressionNode node1 = translateExpression(arg1, scope);
+			ExpressionNode node2 = translateExpression(arg2, scope);
+
+			source2 = node2.getSource();
+
+			Source clauseSource = tokenFactory.join(source1, source2);
+			OperatorNode clause = nodeFactory.newOperatorNode(clauseSource,
+					operator, node1, node2);
+
+			if (result == null) {
+				resultSource = clauseSource;
+				result = clause;
+			} else {
+				resultSource = tokenFactory.join(resultSource, source2);
+				result = nodeFactory.newOperatorNode(resultSource,
+						Operator.LAND, result, clause);
+			}
+			arg1 = arg2;
+			source1 = source2;
+		}
+		return result;
+	}
+
+	/**
 	 * 
 	 * @param expressionTree
 	 * @return
@@ -1734,7 +1869,7 @@ public class AcslContractWorker {
 				operator = Operator.BITIMPLIES;
 				break;
 			case EQUIV_ACSL :
-				operator = Operator.LEQ;
+				operator = Operator.LEQ; // TODO: Huh???? Do this right.
 				break;
 			default :
 				throw error("Unknown operator : " + operatorTree.getText(),
