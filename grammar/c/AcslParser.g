@@ -16,7 +16,7 @@ options
 	language=Java;
 	tokenVocab=PreprocessorLexer;
 	output=AST;
-   	backtrack=true;
+    backtrack = true; // TODO: get rid of this
 }
 
 tokens{
@@ -746,21 +746,21 @@ shiftExpression
  * (*,/,%) > (+,-) > range > shift > ...
  */
 rangeExpression
-	: (additiveExpression -> additiveExpression)
-      ( DOTDOT y=additiveExpression
-        ( -> ^(DOTDOT $rangeExpression $y)
-        | HASH z=additiveExpression
-          -> ^(DOTDOT $rangeExpression $y $z)
+	: x=additiveExpression
+        ( DOTDOT s=rangeSuffix -> ^(DOTDOT $x $s)
+        | -> $x
         )
-      )?
+    ;
+
+rangeSuffix
+    : additiveExpression (HASH! additiveExpression)?
     ;
 
 /* 6.5.6 *
  * additive-expression:
  *   multiplicative-expression
  *   additive-expression +/- multiplicative-expression
- *
- **/
+ */
 additiveExpression
 	: (multiplicativeExpression -> multiplicativeExpression)
         ( PLUS y=multiplicativeExpression
@@ -775,7 +775,6 @@ additiveExpression
  * multiplicative-expression:
  *   cast-expression
  *   multiplicative-expression STAR/DIV/MOD cast-expression
- *
  */
 multiplicativeExpression
 	: (castExpression -> castExpression)
@@ -808,39 +807,39 @@ castExpression
  *   ++/--/sizeof unary-expression
  *   unary-operator cast-expression
  *   sizeof (type-name)
- **/
+ */
 unaryExpression
 	: postfixExpression
-	| unary_op castExpression
-	  -> ^(OPERATOR unary_op ^(ARGUMENT_LIST castExpression))
+	| unary_op (b=castExpression | b=quantifierExpression)
+        -> ^(OPERATOR unary_op ^(ARGUMENT_LIST $b))
 	| (SIZEOF LPAREN type_expr)=> SIZEOF LPAREN type_expr RPAREN
-	  -> ^(SIZEOF_TYPE type_expr)
+        -> ^(SIZEOF_TYPE type_expr)
 	| SIZEOF unaryExpression
-	  -> ^(SIZEOF_EXPR unaryExpression)
-    	| union_key LPAREN argumentExpressionList RPAREN
-          -> ^(UNION_ACSL union_key argumentExpressionList RPAREN)
-    	| inter_key LPAREN argumentExpressionList RPAREN
-          -> ^(INTER inter_key argumentExpressionList RPAREN)
-   	    | valid_key LPAREN term RPAREN
-       	  -> ^(VALID valid_key term RPAREN)
-       	| extendedQuantification ->^(QUANTIFIED_EXT extendedQuantification)
-       	| object_of_key LPAREN term RPAREN -> ^(OBJECT_OF object_of_key LPAREN term RPAREN)
-    	| mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
-    	| old_key LPAREN term RPAREN 
-    	  -> ^(OLD old_key term RPAREN)
+        -> ^(SIZEOF_EXPR unaryExpression)
+    | union_key LPAREN argumentExpressionList RPAREN
+        -> ^(UNION_ACSL union_key argumentExpressionList RPAREN)
+    | inter_key LPAREN argumentExpressionList RPAREN
+        -> ^(INTER inter_key argumentExpressionList RPAREN)
+    | valid_key LPAREN term RPAREN
+        -> ^(VALID valid_key term RPAREN)
+    | extendedQuantification ->^(QUANTIFIED_EXT extendedQuantification)
+    | object_of_key LPAREN term RPAREN -> ^(OBJECT_OF object_of_key LPAREN term RPAREN)
+    | mpi_expression -> ^(MPI_EXPRESSION mpi_expression)
+    | old_key LPAREN term RPAREN 
+        -> ^(OLD old_key term RPAREN)
 	;
-	
+
 extendedQuantification
 	: sum_key LPAREN term COMMA term COMMA term RPAREN
-       	  -> ^(SUM sum_key term+)
-       	| max_key LPAREN term COMMA term COMMA term RPAREN
-       	  -> ^(MAX max_key term+)
-       	| min_key LPAREN term COMMA term COMMA term RPAREN
-       	  -> ^(MIN min_key term+)
-       	| product_key LPAREN term COMMA term COMMA term RPAREN
-       	  -> ^(PROD product_key term+)
-       	| numof_key LPAREN term COMMA term COMMA term RPAREN
-       	  -> ^(NUMOF numof_key term+)
+        -> ^(SUM sum_key term+)
+    | max_key LPAREN term COMMA term COMMA term RPAREN
+        -> ^(MAX max_key term+)
+    | min_key LPAREN term COMMA term COMMA term RPAREN
+        -> ^(MIN min_key term+)
+    | product_key LPAREN term COMMA term COMMA term RPAREN
+        -> ^(PROD product_key term+)
+    | numof_key LPAREN term COMMA term COMMA term RPAREN
+        -> ^(NUMOF numof_key term+)
 	;
 
 /* 6.5.2 *
@@ -854,7 +853,7 @@ extendedQuantification
  *   postfix-expression --
  *   (type-name) {initializer-list}
  *   (type-name) {initializer-list, }
- **/
+ */
 postfixExpression
 	: (primaryExpression -> primaryExpression)
 		// array index operator:
@@ -884,12 +883,12 @@ argumentExpressionList
 /* 6.5.1 */
 primaryExpression
 	: constant
-    	| IDENTIFIER
+    | IDENTIFIER
 	| STRING_LITERAL
-    	| LCURLY term BITOR binders (SEMI term)? RCURLY
-        	->^(SET_BINDERS term binders term?)
-    	| LCURLY term RCURLY
-       	 	->^(SET_SIMPLE term)
+    | LCURLY term BITOR binders (SEMI term)? RCURLY
+        ->^(SET_BINDERS term binders term?)
+    | LCURLY term RCURLY
+        ->^(SET_SIMPLE term)
 	| LPAREN term RPAREN 
 	  	-> ^(TERM_PARENTHESIZED term)
 	| remoteExpression
@@ -904,9 +903,8 @@ primaryExpression
  */
 remoteExpression
     : remote_key LPAREN a=shiftExpression COMMA b=term RPAREN
-	  -> ^(REMOTE_ACCESS remote_key  $a $b)
+        -> ^(REMOTE_ACCESS remote_key  $a $b)
 	;
-    
     
 /* 6.6 */
 constantExpression
@@ -918,37 +916,37 @@ constant
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
 	| true_key | false_key  | result_key | nothing_key | ELLIPSIS
-    	| SELF | null_key
-    	| mpi_constant -> ^(MPI_CONSTANT mpi_constant)
+    | SELF | null_key
+    | mpi_constant -> ^(MPI_CONSTANT mpi_constant)
 	;
 
 /* ACSL-MPI extensions Expressions and Constants  */
 mpi_expression
-    	: mpiemptyin_key LPAREN term RPAREN
-      	  -> ^(MPI_EMPTY_IN mpiemptyin_key term)
-        | mpiemptyout_key LPAREN term RPAREN
-      	  -> ^(MPI_EMPTY_OUT mpiemptyout_key term)
-    	| mpiagree_key LPAREN a=term RPAREN 
-      	  -> ^(MPI_AGREE mpiagree_key $a) 
-    	| mpiregion_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
-      	  -> ^(MPI_REGION mpiregion_key $a $b $c)
-    	| mpiequals_key LPAREN a=term COMMA b=term RPAREN
-      	  -> ^(MPI_EQUALS mpiequals_key $a $b)
-        | mpiextent_key LPAREN a=primaryExpression RPAREN
-          -> ^(MPI_EXTENT mpiextent_key $a)
-        | mpioffset_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
-          -> ^(MPI_OFFSET mpioffset_key $a $b $c)
-        | mpivalid_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
-          -> ^(MPI_VALID mpivalid_key $a $b $c)
-    	;
+    : mpiemptyin_key LPAREN term RPAREN
+        -> ^(MPI_EMPTY_IN mpiemptyin_key term)
+    | mpiemptyout_key LPAREN term RPAREN
+        -> ^(MPI_EMPTY_OUT mpiemptyout_key term)
+    | mpiagree_key LPAREN a=term RPAREN 
+        -> ^(MPI_AGREE mpiagree_key $a) 
+    | mpiregion_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
+        -> ^(MPI_REGION mpiregion_key $a $b $c)
+    | mpiequals_key LPAREN a=term COMMA b=term RPAREN
+        -> ^(MPI_EQUALS mpiequals_key $a $b)
+    | mpiextent_key LPAREN a=primaryExpression RPAREN
+        -> ^(MPI_EXTENT mpiextent_key $a)
+    | mpioffset_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
+        -> ^(MPI_OFFSET mpioffset_key $a $b $c)
+    | mpivalid_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
+        -> ^(MPI_VALID mpivalid_key $a $b $c)
+    ;
 
 mpi_constant
-    	: mpicommrank_key |  mpicommsize_key
-    	;
+    : mpicommrank_key |  mpicommsize_key
+    ;
 	
 mpi_collective_kind
-    	: col_key | p2p_key | both_key
-    	;
+    : col_key | p2p_key | both_key
+    ;
 
 bitimplies_op
 	: MINUSMINUS GT
@@ -959,8 +957,8 @@ bitequiv_op
 	;	
 
 unary_op
-    	: PLUS | SUB | NOT | TILDE | STAR | AMPERSAND
-    	;
+    : PLUS | SUB | NOT | TILDE | STAR | AMPERSAND
+    ;
     
 /* rules for ACSL types */
 boolean_type
@@ -1107,12 +1105,10 @@ true_key
 
 union_key
     : {input.LT(1).getText().equals("\\union")}? EXTENDED_IDENTIFIER
-//    -> ^(UNION_ACSL EXTENDED_IDENTIFIER)
     ;
 
 valid_key
     : {input.LT(1).getText().equals("\\valid")}? EXTENDED_IDENTIFIER
-//    -> ^(VALID EXTENDED_IDENTIFIER)
     ;
 
 with_key
@@ -1122,7 +1118,6 @@ with_key
 /* ACSL CIVL extension */
 executeswhen_key
     : {input.LT(1).getText().equals("executes_when")}? IDENTIFIER
-//    -> ^(EXECUTES_WHEN IDENTIFIER)
     ; 
 
 pure_key
@@ -1132,12 +1127,10 @@ pure_key
 
 reads_key
     : {input.LT(1).getText().equals("reads")}? IDENTIFIER
-//    -> ^(READS_ACSL IDENTIFIER)
     ;
     
 remote_key
     : {input.LT(1).getText().equals("\\on")}? EXTENDED_IDENTIFIER
-//    -> ^(REMOTE_ACCESS EXTENDED_IDENTIFIER)
     ;
 
 /* ACSL dependence-specification extension */
@@ -1155,12 +1148,10 @@ anyact_key
 
 call_key
     : {input.LT(1).getText().equals("\\call")}? EXTENDED_IDENTIFIER
-//    -> ^(CALL_ACSL EXTENDED_IDENTIFIER)
     ;
 
 dependson_key
     : {input.LT(1).getText().equals("depends_on")}? IDENTIFIER
-//    -> ^(DEPENDSON IDENTIFIER)
     ;
     
 object_of_key

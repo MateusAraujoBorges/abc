@@ -19,6 +19,7 @@ options
 	language=Java;
 	tokenVocab=PreprocessorParser;
 	output=AST;
+    //backtrack=true;
 }
 
 tokens
@@ -148,68 +149,120 @@ import edu.udel.cis.vsl.abc.front.IF.RuntimeParseException;
 	    throw new RuntimeParseException(msg);
 	}
 
+    // Is name the name of a type defined by an earlier typedef?
+    // Look through the symbol stack to find out.
 	boolean isTypeName(String name) {
 		for (Object scope : Symbols_stack)
 			if (((Symbols_scope)scope).types.contains(name)) return true;
 		return false;
 	}
 
+    // Looks in the symbol stack to determine whether name is the name
+    // of an enumeration constant.
 	boolean isEnumerationConstant(String name) {
 		boolean answer = false;
 
-		// System.err.print("Is "+name+" an enumeration constant: ");
 		for (Object scope : Symbols_stack) {
 			if (((Symbols_scope)scope).enumerationConstants.contains(name)) {
 				answer=true;
 				break;
 			}
 		}
-		// System.err.println(answer);
-		// System.err.flush();
 		return answer;
 	}
 }
 
-/* ***** A.2.1: Expressions ***** */
+/* ************************* A.2.1: Expressions ************************* */
 
-/* Constants from A.1.5 */
+/*
+  Operator precedence is dealt with in the usual way by creating
+  a "chain" of rules.  This defines an increasing sequence of
+  languages, culminating in the language for all expressions.
 
+  Quantified expressions are kind of special and we start with them.
+  They are not included in the "chain".  The problem is that we want
+  them to have the lowest precedence, so for example
+       $forall (int i) p && q
+  is parsed as
+       $forall (int i) (p && q)
+  However we also want to allow expressions such as
+       p && $forall (int i) q
+  This means that a quantified expression can occur as the right
+  argument of &&, but not as the left argument.
+ */
+
+
+/* One of the CIVL-C first-order quantifiers.
+ * UNIFORM represents uniform continuity.
+ */
+quantifier
+	: FORALL | EXISTS | UNIFORM
+	;
+
+/* A CIVL-C quantified expression using $exists, $forall, or $uniform.
+ * Examples:
+ *   $forall (int i) a[i]==i
+ *   $forall (int i | 0<=i && i<n) a[i]==b[i]
+ * An optional interval sequence is allowed for $uniform.  That's
+ * an experimental feature that may go away.
+ */
+quantifiedExpression
+	: quantifier intervalSeq LPAREN boundVariableDeclarationList
+        ( BITOR
+            (restrict=conditionalExpression | restrict=quantifiedExpression)
+            RPAREN
+            body1=expression
+            -> ^(QUANTIFIED quantifier boundVariableDeclarationList
+                $body1 $restrict intervalSeq)
+        | RPAREN
+            body2=expression
+            -> ^(QUANTIFIED quantifier boundVariableDeclarationList
+                $body2 ABSENT intervalSeq)
+        )
+	;
+
+/* Constants from A.1.5.  
+ * Includes several CIVL-C constants: $self, $proc_null, $state_null,
+ * $result, $here.
+ * TODO: why does this include ELLIPSIS?
+ */
 constant
 	: enumerationConstant
 	| INTEGER_CONSTANT
 	| FLOATING_CONSTANT
 	| CHARACTER_CONSTANT
-	| SELF | PROCNULL | STATE_NULL
-	// TRUE | FALSE |
+	| SELF
+    | PROCNULL
+    | STATE_NULL
 	| RESULT
-	| HERE | ELLIPSIS
+	| HERE
+    | ELLIPSIS
 	;
 
+/* Enumeration constants: an identifier that occurs in the current symbol
+ * stack's enumerationConstants fields */
 enumerationConstant
 	: {isEnumerationConstant(input.LT(1).getText())}? IDENTIFIER ->
 	  ^(ENUMERATION_CONSTANT IDENTIFIER)
 	;
 
-/* 6.5.1 */
+/* 6.5.1. C primary expressions.  */
 primaryExpression
 	: constant
 	| IDENTIFIER
 	| STRING_LITERAL
-    	| LPAREN compoundStatement RPAREN
-      	  -> ^(STATEMENT_EXPRESSION LPAREN compoundStatement RPAREN)
+    | LPAREN compoundStatement RPAREN
+        -> ^(STATEMENT_EXPRESSION LPAREN compoundStatement RPAREN)
 	| LPAREN expression RPAREN
-	  -> ^(PARENTHESIZED_EXPRESSION LPAREN expression RPAREN)
+        -> ^(PARENTHESIZED_EXPRESSION LPAREN expression RPAREN)
 	| genericSelection
 	| derivativeExpression
-	| ORIGINAL LPAREN expression RPAREN
-	  -> ^(ORIGINAL LPAREN expression RPAREN)
 	;
 
 /* 6.5.1.1 */
 genericSelection
-	: GENERIC LPAREN assignmentExpression COMMA genericAssocList
-	  RPAREN
-	  -> ^(GENERIC assignmentExpression genericAssocList)
+	: GENERIC LPAREN assignmentExpression COMMA genericAssocList RPAREN
+        -> ^(GENERIC assignmentExpression genericAssocList)
 	;
 
 /* A CIVL-C derivative expression.  Some sequence
@@ -217,68 +270,65 @@ genericSelection
  */
 derivativeExpression
 	: DERIV LSQUARE IDENTIFIER COMMA partialList RSQUARE
-	  LPAREN argumentExpressionList RPAREN
-	  -> ^(DERIVATIVE_EXPRESSION IDENTIFIER partialList
-	       argumentExpressionList RPAREN)
+        LPAREN argumentExpressionList RPAREN
+        -> ^(DERIVATIVE_EXPRESSION IDENTIFIER partialList
+            argumentExpressionList RPAREN)
 	;
 
-/* A list of partial derivative operators.
+/* A list of partial derivative operators.  This is a CIVL-C addition.
  */
 partialList
 	: partial (COMMA partial)* -> ^(PARTIAL_LIST partial+)
 	;
 
-/* A partial-derivative operator */
+/* A CIVL-C partial-derivative operator */
 partial
 	: LCURLY IDENTIFIER COMMA INTEGER_CONSTANT RCURLY
-	  -> ^(PARTIAL IDENTIFIER INTEGER_CONSTANT)
+        -> ^(PARTIAL IDENTIFIER INTEGER_CONSTANT)
 	;
 
 /* 6.5.1.1 */
 genericAssocList
 	: genericAssociation (COMMA genericAssociation)*
-	  -> ^(GENERIC_ASSOC_LIST genericAssociation+)
+        -> ^(GENERIC_ASSOC_LIST genericAssociation+)
 	;
 
 /* 6.5.1.1 */
 genericAssociation
 	: typeName COLON assignmentExpression
-	  -> ^(GENERIC_ASSOCIATION typeName assignmentExpression)
+        -> ^(GENERIC_ASSOCIATION typeName assignmentExpression)
 	| DEFAULT COLON assignmentExpression
-	  -> ^(GENERIC_ASSOCIATION DEFAULT assignmentExpression)
+        -> ^(GENERIC_ASSOCIATION DEFAULT assignmentExpression)
 	;
 
 /* 6.5.2 */
 postfixExpression
 	: (postfixExpressionRoot -> postfixExpressionRoot)
-		// array index operator:
-	  ( l=LSQUARE expression RSQUARE
-	    -> ^(OPERATOR
-	           INDEX[$l]
-	           ^(ARGUMENT_LIST $postfixExpression expression)
-	           RSQUARE)
-	  |	// function call:
-	    LPAREN argumentExpressionList RPAREN
-	    -> ^(CALL LPAREN $postfixExpression ABSENT argumentExpressionList
-	    	 RPAREN ABSENT)
-	  |	// CUDA kernel function call:
-	    LEXCON args1=argumentExpressionList REXCON
-	    LPAREN args2=argumentExpressionList RPAREN
-	    -> ^(CALL LPAREN $postfixExpression $args1 $args2 RPAREN ABSENT)
-	  | DOT IDENTIFIER
-	    -> ^(DOT $postfixExpression IDENTIFIER)
-	  | ARROW IDENTIFIER
-	    -> ^(ARROW $postfixExpression IDENTIFIER)
-	  | p=PLUSPLUS
-	    -> ^(OPERATOR POST_INCREMENT[$p]
-	         ^(ARGUMENT_LIST $postfixExpression))
-	  //| // CIVL-C @ operator: remote reference like x@f
-	    //AT IDENTIFIER
-	    //-> ^(AT $postfixExpression IDENTIFIER)
-	  | m=MINUSMINUS
-	    -> ^(OPERATOR POST_DECREMENT[$m]
-	         ^(ARGUMENT_LIST $postfixExpression))
-	  )*
+        ( // array index operator:
+            l=LSQUARE expression RSQUARE
+            -> ^(OPERATOR
+                INDEX[$l]
+                ^(ARGUMENT_LIST $postfixExpression expression)
+                RSQUARE)
+        | // function call:
+            LPAREN argumentExpressionList RPAREN
+            -> ^(CALL LPAREN $postfixExpression ABSENT argumentExpressionList
+                RPAREN ABSENT)
+        | // CUDA kernel function call:
+            LEXCON args1=argumentExpressionList REXCON
+            LPAREN args2=argumentExpressionList RPAREN
+            -> ^(CALL LPAREN $postfixExpression $args1 $args2 RPAREN ABSENT)
+        | DOT IDENTIFIER
+            -> ^(DOT $postfixExpression IDENTIFIER)
+        | ARROW IDENTIFIER
+            -> ^(ARROW $postfixExpression IDENTIFIER)
+        | p=PLUSPLUS
+            -> ^(OPERATOR POST_INCREMENT[$p]
+                ^(ARGUMENT_LIST $postfixExpression))
+        | m=MINUSMINUS
+            -> ^(OPERATOR POST_DECREMENT[$m]
+                ^(ARGUMENT_LIST $postfixExpression))
+        )*
 	;
 
 /*
@@ -296,22 +346,23 @@ postfixExpression
  */
 postfixExpressionRoot
 	: (LPAREN typeName RPAREN LCURLY)=>
-	  LPAREN typeName RPAREN LCURLY initializerList
+        LPAREN typeName RPAREN LCURLY initializerList
 		( RCURLY
 		| COMMA RCURLY
 		)
-	  -> ^(COMPOUND_LITERAL LPAREN typeName initializerList RCURLY)
+        -> ^(COMPOUND_LITERAL LPAREN typeName initializerList RCURLY)
 	| primaryExpression
 	;
 
-/* 6.5.2 */
+/* 6.5.2.  A (possibly empty) comma-separated list of expressions. */
 argumentExpressionList
-	: -> ^(ARGUMENT_LIST)
-	| assignmentExpression (COMMA assignmentExpression)*
-	  -> ^(ARGUMENT_LIST assignmentExpression+)
-	 ;
+	: (a+=assignmentExpression | a+=quantifiedExpression)
+        (COMMA (a+=assignmentExpression | a+=quantifiedExpression))*
+        -> ^(ARGUMENT_LIST $a+)
+    | -> ^(ARGUMENT_LIST)
+    ;
 
-/* 6.5.3 */
+/* 6.5.3. A unary expression, including many added by CIVL-C  */
 unaryExpression
 scope DeclarationScope;
 @init {
@@ -320,268 +371,263 @@ scope DeclarationScope;
 }
 	: postfixExpression
 	| p=PLUSPLUS unaryExpression
-	  -> ^(OPERATOR PRE_INCREMENT[$p]
-	       ^(ARGUMENT_LIST unaryExpression))
+        -> ^(OPERATOR PRE_INCREMENT[$p]
+            ^(ARGUMENT_LIST unaryExpression))
 	| m=MINUSMINUS unaryExpression
-	  -> ^(OPERATOR PRE_DECREMENT[$m]
-	       ^(ARGUMENT_LIST unaryExpression))
-	| unaryOperator castExpression
-	  -> ^(OPERATOR unaryOperator ^(ARGUMENT_LIST castExpression))
+        -> ^(OPERATOR PRE_DECREMENT[$m]
+            ^(ARGUMENT_LIST unaryExpression))
+	| unaryOperator (a=castExpression | a=quantifiedExpression)
+        -> ^(OPERATOR unaryOperator ^(ARGUMENT_LIST $a))
 	| (SIZEOF LPAREN typeName)=> SIZEOF LPAREN typeName RPAREN
-	  -> ^(SIZEOF TYPE typeName)
+        -> ^(SIZEOF TYPE typeName)
 	| SIZEOF unaryExpression
-	  -> ^(SIZEOF EXPR unaryExpression)
+        -> ^(SIZEOF EXPR unaryExpression)
 	| SCOPEOF unaryExpression
-	  -> ^(SCOPEOF unaryExpression)
+        -> ^(SCOPEOF unaryExpression)
 	| ALIGNOF LPAREN typeName RPAREN
-	  -> ^(ALIGNOF typeName)
-	| VALUE_AT LPAREN assignmentExpression COMMA assignmentExpression COMMA assignmentExpression RPAREN
-	  -> ^(VALUE_AT assignmentExpression+ RPAREN)
+        -> ^(ALIGNOF typeName)
+	| VALUE_AT LPAREN
+        b+=assignmentExpression COMMA
+        b+=assignmentExpression COMMA
+        (b+=assignmentExpression | b+=quantifiedExpression) RPAREN
+        -> ^(VALUE_AT $b+ RPAREN)
 	| spawnExpression
-    	| callsExpression
+    | callsExpression
 	;
 
-
-/* CIVL $spawn expression */
+/* CIVL-C $spawn expression: $spawn f(...). */
 spawnExpression
-	: SPAWN postfixExpressionRoot LPAREN
-	  argumentExpressionList RPAREN
-	  -> ^(SPAWN LPAREN postfixExpressionRoot ABSENT
-	       argumentExpressionList RPAREN)
+	: SPAWN postfixExpressionRoot LPAREN argumentExpressionList RPAREN
+        -> ^(SPAWN LPAREN postfixExpressionRoot ABSENT
+            argumentExpressionList RPAREN)
 	;
 
-/* CIVL $calls expression */
+/* A CIVL-C $calls expression, part of a function contract. */
 callsExpression
 	: CALLS LPAREN postfixExpressionRoot LPAREN
-	  argumentExpressionList RPAREN RPAREN
-	  -> ^(CALLS LPAREN postfixExpressionRoot ABSENT
-	       argumentExpressionList RPAREN)
+        argumentExpressionList RPAREN RPAREN
+        -> ^(CALLS LPAREN postfixExpressionRoot ABSENT
+            argumentExpressionList RPAREN)
 	;
 
-
-/* 6.5.3 */
+/* 6.5.3.  The unary operators &, *, +, -, ~, !, and $O.   The $O
+ * is a CIVL-C addition used for big-O "order of" specification. */
 unaryOperator
 	: AMPERSAND | STAR | PLUS | SUB | TILDE | NOT | BIG_O
 	;
 
-/* 6.5.4 */
-// ambiguity 1: (expr) is a unary expression and looks like (typeName).
-// ambiguity 2: (typeName){...} is a compound literal and looks like cast
+/* 6.5.4: cast expressions: (typename)expr.
+ * Need to distinguish from other constructs that look like cast expressions,
+ * but aren't.
+ * ambiguity 1: (expr) is a unary expression and looks like (typeName).
+ * ambiguity 2: (typeName){...} is a compound literal and looks like cast.
+ */
 castExpression
 scope DeclarationScope;
 @init{
 	$DeclarationScope::isTypedef = false;
 	$DeclarationScope::typedefNameUsed=false;
 }
-	: (LPAREN typeName RPAREN ~LCURLY)=> l=LPAREN typeName RPAREN castExpression
-	  -> ^(CAST typeName castExpression $l)
+	: (LPAREN typeName RPAREN ~LCURLY)=>
+        l=LPAREN typeName RPAREN castExpression
+        -> ^(CAST typeName castExpression $l)
 	| unaryExpression
 	;
 
-// TODO
+/* A CIVL-C "remote" expression: a@b. This is used in contracts in MPI
+ * programs to refer to the value of a variable on another process. */
 remoteExpression
-	:(castExpression -> castExpression)
-	( AT y=castExpression
-	  -> ^(OPERATOR AT ^(ARGUMENT_LIST $remoteExpression $y))
-    )*
+	: (castExpression -> castExpression)
+        ( (AT)=> AT y=castExpression
+            -> ^(OPERATOR AT ^(ARGUMENT_LIST $remoteExpression $y))
+        )*
 	;
 
-/* 6.5.5 */
+/* 6.5.5.  Multiplicative expressions: a*b, a/b, and a%b. */
 multiplicativeExpression
 	: (remoteExpression -> remoteExpression)
-	( STAR y=remoteExpression
-	  -> ^(OPERATOR STAR ^(ARGUMENT_LIST $multiplicativeExpression $y))
-	| DIV y=remoteExpression
-	  -> ^(OPERATOR DIV ^(ARGUMENT_LIST $multiplicativeExpression $y))
-    | MOD y=remoteExpression
-	  -> ^(OPERATOR MOD ^(ARGUMENT_LIST $multiplicativeExpression $y))
-    )*
+        ( (STAR)=> STAR y=remoteExpression
+            -> ^(OPERATOR STAR ^(ARGUMENT_LIST $multiplicativeExpression $y))
+        | (DIV)=> DIV y=remoteExpression
+            -> ^(OPERATOR DIV ^(ARGUMENT_LIST $multiplicativeExpression $y))
+        | (MOD)=> MOD y=remoteExpression
+            -> ^(OPERATOR MOD ^(ARGUMENT_LIST $multiplicativeExpression $y))
+        )*
 	;
 
-/* 6.5.6 */
+/* 6.5.6.  Additive expression: a+b or a-b. */
 additiveExpression
 	: (multiplicativeExpression -> multiplicativeExpression)
-        ( PLUS y=multiplicativeExpression
+        ( (PLUS)=> PLUS y=multiplicativeExpression
           -> ^(OPERATOR PLUS ^(ARGUMENT_LIST $additiveExpression $y))
-        | SUB y=multiplicativeExpression
+        | (SUB)=> SUB y=multiplicativeExpression
           -> ^(OPERATOR SUB ^(ARGUMENT_LIST $additiveExpression $y))
         )*
 	;
 
-/* CIVL-C range expression "lo .. hi" or "lo .. hi # step" */
-// a + b .. c + d is equivalent to (a + b) .. (c + d)
+/* CIVL-C range expression "lo .. hi" or "lo .. hi # step"
+ * a + b .. c + d is equivalent to (a + b) .. (c + d). */
 rangeExpression
-	: (additiveExpression -> additiveExpression)
-      ( DOTDOT y=additiveExpression
-        ( -> ^(DOTDOT $rangeExpression $y)
-        | HASH z=additiveExpression
-          -> ^(DOTDOT $rangeExpression $y $z)
+	: x=additiveExpression
+        ( (DOTDOT)=> DOTDOT s=rangeSuffix -> ^(DOTDOT $x $s)
+        | -> $x
         )
-      )?
     ;
 
-/* 6.5.7 */
+rangeSuffix
+    : x=additiveExpression
+        ( (HASH)=> HASH y=additiveExpression -> $x $y
+        | -> $x
+        )
+    ;
+
+/* 6.5.7.  A bitwise shift operation: a<<b or a>>b. */
 shiftExpression
 	: (rangeExpression -> rangeExpression)
-        ( SHIFTLEFT y=rangeExpression
+        ( (SHIFTLEFT)=> SHIFTLEFT y=rangeExpression
           -> ^(OPERATOR SHIFTLEFT ^(ARGUMENT_LIST $shiftExpression $y))
-        | SHIFTRIGHT y=rangeExpression
+        | (SHIFTRIGHT)=> SHIFTRIGHT y=rangeExpression
           -> ^(OPERATOR SHIFTRIGHT ^(ARGUMENT_LIST $shiftExpression $y))
         )*
 	;
 
-/* 6.5.8 */
+/* 6.5.8.  A relational expression involving <, >, <=, or >=. */
 relationalExpression
 	: ( shiftExpression -> shiftExpression )
-	  ( relationalOperator y=shiftExpression
-	    -> ^(OPERATOR relationalOperator ^(ARGUMENT_LIST $relationalExpression $y))
-	  )*
+        ( (relationalOperator)=> relationalOperator
+            (y=shiftExpression)
+            -> ^(OPERATOR relationalOperator
+                ^(ARGUMENT_LIST $relationalExpression $y))
+        )*
 	;
 
+/* A relational operator other than == and !=, i.e., <, >, <=, >=. */
 relationalOperator
 	: LT | GT | LTE | GTE
 	;
 
-/* 6.5.9 */
+/* 6.5.9.  Equality and inequality: a==b and a!=b. */
 equalityExpression
 	: ( relationalExpression -> relationalExpression )
-	  ( equalityOperator y=relationalExpression
-	    -> ^(OPERATOR equalityOperator ^(ARGUMENT_LIST $equalityExpression $y))
-	  )*
+        ( (equalityOperator)=>equalityOperator
+            (y=relationalExpression | y=quantifiedExpression)
+            -> ^(OPERATOR equalityOperator
+                ^(ARGUMENT_LIST $equalityExpression $y))
+        )*
 	;
 
+/* Either == or !=. */
 equalityOperator
 	: EQUALS | NEQ
 	;
 
-/* 6.5.10 */
+/* 6.5.10.   Bitwise and: a&b. */
 andExpression
 	: ( equalityExpression -> equalityExpression )
-	  ( AMPERSAND y=equalityExpression
-	    -> ^(OPERATOR AMPERSAND ^(ARGUMENT_LIST $andExpression $y))
-	  )*
+        ( (AMPERSAND)=> AMPERSAND y=equalityExpression
+            -> ^(OPERATOR AMPERSAND ^(ARGUMENT_LIST $andExpression $y))
+        )*
 	;
 
-/* 6.5.11 */
+/* 6.5.11.  Bitwise exclusive or: a^b. */
 exclusiveOrExpression
 	: ( andExpression -> andExpression )
-	  ( BITXOR y=andExpression
-	    -> ^(OPERATOR BITXOR ^(ARGUMENT_LIST $exclusiveOrExpression $y))
-	  )*
+        ( (BITXOR)=> BITXOR y=andExpression
+            -> ^(OPERATOR BITXOR ^(ARGUMENT_LIST $exclusiveOrExpression $y))
+        )*
 	;
 
-/* 6.5.12 */
+/* 6.5.12.  Bitwise or: a|b. */
 inclusiveOrExpression
 	: ( exclusiveOrExpression -> exclusiveOrExpression )
-	  ( BITOR y=exclusiveOrExpression
-	    -> ^(OPERATOR BITOR ^(ARGUMENT_LIST $inclusiveOrExpression $y))
-	  )*
+        ( (BITOR)=> BITOR y=exclusiveOrExpression
+            -> ^(OPERATOR BITOR ^(ARGUMENT_LIST $inclusiveOrExpression $y))
+        )*
 	;
 
-/* 6.5.13 */
+/* 6.5.13.  Logical and: a && b. */
 logicalAndExpression
 	: ( inclusiveOrExpression -> inclusiveOrExpression )
-	  ( AND y=inclusiveOrExpression
-	    -> ^(OPERATOR AND ^(ARGUMENT_LIST $logicalAndExpression $y))
-	  )*
+        ( (AND)=> AND (y=inclusiveOrExpression | y=quantifiedExpression)
+            -> ^(OPERATOR AND ^(ARGUMENT_LIST $logicalAndExpression $y))
+        )*
 	;
 
-/* 6.5.14 */
+/* 6.5.14. Logical or: a || b. */
 logicalOrExpression
 	: ( logicalAndExpression -> logicalAndExpression )
-	  ( OR y=logicalAndExpression
-	    -> ^(OPERATOR OR ^(ARGUMENT_LIST $logicalOrExpression $y))
-	  )*
+        ( (OR)=> OR (y=logicalAndExpression | y=quantifiedExpression)
+            -> ^(OPERATOR OR ^(ARGUMENT_LIST $logicalOrExpression $y))
+        )*
 	;
 
-/* Added for CIVL-C.  Usually 6.5.15 would use logicalOrExpression. */
+/* Logical implication: a => b.  Added for CIVL-C.
+ *  Usually 6.5.15 would use logicalOrExpression. */
 logicalImpliesExpression
-	: ( x=logicalOrExpression -> logicalOrExpression )
-	  ( IMPLIES y=logicalImpliesExpression
-	    -> ^(OPERATOR IMPLIES ^(ARGUMENT_LIST $x $y))
-	  )?
-    	;
+	: ( x=logicalOrExpression -> $x )
+        ( (IMPLIES)=> IMPLIES (y=logicalImpliesExpression | y=quantifiedExpression)
+            -> ^(OPERATOR IMPLIES ^(ARGUMENT_LIST $x $y))
+        )?
+    ;
 
-/* 6.5.15 */
+/* 6.5.15.  A conditional expression, also known as if-then-else (ite)
+ * expression: a?b:c. */
 conditionalExpression
 	: logicalImpliesExpression
-	( -> logicalImpliesExpression
-    	| QMARK expression COLON conditionalExpression
-    	  -> ^(OPERATOR QMARK
-    	       ^(ARGUMENT_LIST
-    	         logicalImpliesExpression
-    	         expression
-    	         conditionalExpression))
+        ( (QMARK)=> QMARK expression COLON
+            (y=conditionalExpression | y=quantifiedExpression)
+            -> ^(OPERATOR QMARK
+                ^(ARGUMENT_LIST
+                    logicalImpliesExpression
+                    expression
+                    $y))
+        | -> logicalImpliesExpression
     	)
-	;
-
-
-quantifiedExpressionOLD
-	:
-	 ((quantifier LPAREN boundVariableDeclarationList BITOR) =>
-     	  quantifier LPAREN boundVariableDeclarationList BITOR
-     	  restrict=conditionalExpression RPAREN cond1=assignmentExpression)
-	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond1 $restrict)
-   	| quantifier LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression
-	  -> ^(QUANTIFIED quantifier boundVariableDeclarationList $cond2)
-	;
-
-/* A CIVL-C quantified expression using $exists, $forall, or $uniform. */
-quantifiedExpression
-	: quantifier intervalSeq LPAREN boundVariableDeclarationList
-     	  ( BITOR restrict=conditionalExpression RPAREN body1=assignmentExpression
-	    -> ^(QUANTIFIED quantifier boundVariableDeclarationList
-                 $body1 $restrict intervalSeq)
-          | RPAREN body2=assignmentExpression
-	    -> ^(QUANTIFIED quantifier boundVariableDeclarationList
-                 $body2 ABSENT intervalSeq)
-          )
 	;
 
 /* A closed interval of real numbers [a,b].  Used in a $uniform expression. */
 interval
-        : LSQUARE conditionalExpression COMMA conditionalExpression RSQUARE
-          -> ^(INTERVAL conditionalExpression conditionalExpression)
-        ;
+    : LSQUARE conditionalExpression COMMA conditionalExpression RSQUARE
+        -> ^(INTERVAL conditionalExpression conditionalExpression)
+    ;
 
-/* A (possibly empty) sequence of interval. */
+/* A (possibly empty) sequence of interval */
 intervalSeq
-        : -> ABSENT
-        | i+= interval i+= interval* -> ^(INTERVAL_SEQ $i+)
-        ;
+    : i+= interval i+= interval* -> ^(INTERVAL_SEQ $i+)
+    | -> ABSENT
+    ;
 
-/* A CIVL-C lambda expression */
+/* A CIVL-C array lambda expression.  Examples:
+ *   (int[])$lambda(int i,j | i<j && j<n) 2*i+j
+ *   (int[])$lambda(int i,j) 2*i+j
+ */
 arrayLambdaExpression
-	:
-	 ((LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList BITOR) =>
-     	  LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList BITOR
-     	  restrict=conditionalExpression RPAREN cond1=assignmentExpression)
-	  -> ^(LAMBDA typeName boundVariableDeclarationList $cond1 $restrict)
-   	| LPAREN typeName RPAREN LAMBDA LPAREN boundVariableDeclarationList RPAREN cond2=assignmentExpression
-	  -> ^(LAMBDA typeName boundVariableDeclarationList $cond2)
+	: ((LPAREN typeName RPAREN LAMBDA LPAREN
+                boundVariableDeclarationList BITOR) =>
+            LPAREN typeName RPAREN LAMBDA LPAREN
+            boundVariableDeclarationList BITOR
+            (restrict=conditionalExpression | restrict=quantifiedExpression)
+            RPAREN
+            (cond1=assignmentExpression | cond1=quantifiedExpression))
+        -> ^(LAMBDA typeName boundVariableDeclarationList $cond1 $restrict)
+   	| LPAREN typeName RPAREN LAMBDA LPAREN
+        boundVariableDeclarationList RPAREN
+        (cond2=assignmentExpression | cond2=quantifiedExpression)
+        -> ^(LAMBDA typeName boundVariableDeclarationList $cond2)
 	;
 
 boundVariableDeclarationSubList
-	:
-	  typeName IDENTIFIER (COMMA IDENTIFIER)* (COLON rangeExpression)?
-	  -> ^(BOUND_VARIABLE_DECLARATION typeName ^(BOUND_VARIABLE_NAME_LIST IDENTIFIER+) rangeExpression?)
+	: typeName IDENTIFIER (COMMA IDENTIFIER)* (COLON rangeExpression)?
+        -> ^(BOUND_VARIABLE_DECLARATION typeName
+            ^(BOUND_VARIABLE_NAME_LIST IDENTIFIER+) rangeExpression?)
 	;
 
 boundVariableDeclarationList
-	:
-	  boundVariableDeclarationSubList (SEMI boundVariableDeclarationSubList)*
-	  -> ^(BOUND_VARIABLE_DECLARATION_LIST boundVariableDeclarationSubList+)
+	: boundVariableDeclarationSubList (SEMI boundVariableDeclarationSubList)*
+        -> ^(BOUND_VARIABLE_DECLARATION_LIST boundVariableDeclarationSubList+)
 	;
 
 
-
-
-/* One of the CIVL-C first-order quantifiers.
- * UNIFORM represents uniform continuity.
- */
-quantifier
-	: FORALL | EXISTS | UNIFORM
-	;
 
 /* 6.5.16
  * conditionalExpression or
@@ -592,16 +638,13 @@ quantifier
  * Child 1.1: assignmentExpression
  */
 assignmentExpression
-	:
-	  (arrayLambdaExpression)
-	  =>
-	  arrayLambdaExpression
+	: (arrayLambdaExpression)=> arrayLambdaExpression
 	| (unaryExpression assignmentOperator)=>
-	  unaryExpression assignmentOperator assignmentExpression
-	  -> ^(OPERATOR assignmentOperator
-	       ^(ARGUMENT_LIST unaryExpression assignmentExpression))
+        lhs=unaryExpression
+        op=assignmentOperator
+        (rhs=assignmentExpression | rhs=quantifiedExpression)
+        -> ^(OPERATOR $op ^(ARGUMENT_LIST $lhs $rhs))
 	| conditionalExpression
-	| quantifiedExpression
 	;
 
 /* 6.5.16 */
@@ -620,30 +663,27 @@ assignmentOperator
  */
 commaExpression
 	: ( assignmentExpression -> assignmentExpression )
-	  ( COMMA y=assignmentExpression
+	  ( (COMMA)=> COMMA y=assignmentExpression
 	    -> ^(OPERATOR COMMA ^(ARGUMENT_LIST $commaExpression $y))
 	  )*
 	;
 
-/* The most general class of expressions.
- * Includes a CIVL-C "collective" expression,
- * and all expressions defined previously.
- */
+/* The most general class of expressions. This is the end of the chain. */
 expression
-	: COLLECTIVE LPAREN proc=conditionalExpression
-	   RPAREN body=conditionalExpression
-	  -> ^(COLLECTIVE $proc $body)
-	| commaExpression
+    : quantifiedExpression | commaExpression
 	;
 
-
-/* 6.6 */
+/* 6.6.   Certain constructs require constant expressions.
+ * However it's too hard to recognize constant expressions in this
+ * grammar, so instead the grammar will accept any conditional
+ * expression as a constant expression, and the application will have to
+ * check whether those expressions are constant. */
 constantExpression
 	: conditionalExpression
 	;
 
 
-/* ***** A.2.2: Declarations ***** */
+/* ************************* A.2.2: Declarations ************************ */
 
 /* 6.7.
  *
@@ -1625,6 +1665,9 @@ runStatement
     	: RUN statement -> ^(RUN statement)
     ;
 
+/* CIVL-C $with statement.    This statement is used to execute
+ * a statement in an alternative state.
+ */
 withStatement
 	: WITH LPAREN assignmentExpression RPAREN statement
             -> ^(WITH assignmentExpression statement)

@@ -48,9 +48,4 @@ public class ContractTest {
 	public void por2() throws ABCException, IOException {
 		check("por2");
 	}
-
-	@Test
-	public void contracts() throws ABCException, IOException {
-		check("contracts");
-	}
 }

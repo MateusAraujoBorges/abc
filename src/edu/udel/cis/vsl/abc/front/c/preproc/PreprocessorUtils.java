@@ -16,7 +16,6 @@ import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CHOOSE;
 import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CIVLATOM;
 import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CIVLATOMIC;
 import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CIVLFOR;
-import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.COLLECTIVE;
 import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.COMPLEX;
 import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CONST;
 import static edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorLexer.CONTIN;
@@ -123,20 +122,19 @@ public class PreprocessorUtils {
 	private static boolean[] identifierPredicate = initIdentifierPredicate();
 
 	private static boolean[] initIdentifierPredicate() {
-		int[] identifierIndexes = new int[] { ABSTRACT, ALIGNAS, ALIGNOF,
-				ASSIGNS, ATOMIC, AUTO, BIG_O, BOOL, BREAK, CALLS, CASE, CHAR,
-				CHOOSE, CIVLATOM, CIVLATOMIC, CIVLFOR, COLLECTIVE, COMPLEX,
-				CONST, CONTIN, CONTINUE, DEFAULT, DEFINE, DEFINED, DEPENDS,
-				DERIV, DEVICE, DO, DOMAIN, DOUBLE, ELIF, ELSE, ENDIF, ENSURES,
-				ENUM, ERROR, EXISTS, EXTERN, FATOMIC, FLOAT, FOR, FORALL,
-				GENERIC, GLOBAL, GOTO, GUARD, HERE, IF, IFDEF, IFNDEF,
-				IMAGINARY, INCLUDE, INLINE, INPUT, INT, INVARIANT, LAMBDA, LINE,
-				LONG, NORETURN, OUTPUT, PARFOR, PRAGMA, PROCNULL, RANGE, READS,
-				REAL, REGISTER, REQUIRES, RESTRICT, RESULT, RETURN, SCOPEOF,
-				SELF, SHARED, SHORT, SIGNED, SIZEOF, SPAWN, STATIC,
-				STATICASSERT, STRUCT, SWITCH, SYSTEM, THREADLOCAL, TYPEDEF,
-				TYPEOF, UNDEF, UNIFORM, UNION, UNSIGNED, VOID, VOLATILE, WHEN,
-				WHILE };
+		int[] identifierIndexes = new int[]{ABSTRACT, ALIGNAS, ALIGNOF, ASSIGNS,
+				ATOMIC, AUTO, BIG_O, BOOL, BREAK, CALLS, CASE, CHAR, CHOOSE,
+				CIVLATOM, CIVLATOMIC, CIVLFOR, COMPLEX, CONST, CONTIN, CONTINUE,
+				DEFAULT, DEFINE, DEFINED, DEPENDS, DERIV, DEVICE, DO, DOMAIN,
+				DOUBLE, ELIF, ELSE, ENDIF, ENSURES, ENUM, ERROR, EXISTS, EXTERN,
+				FATOMIC, FLOAT, FOR, FORALL, GENERIC, GLOBAL, GOTO, GUARD, HERE,
+				IF, IFDEF, IFNDEF, IMAGINARY, INCLUDE, INLINE, INPUT, INT,
+				INVARIANT, LAMBDA, LINE, LONG, NORETURN, OUTPUT, PARFOR, PRAGMA,
+				PROCNULL, RANGE, READS, REAL, REGISTER, REQUIRES, RESTRICT,
+				RESULT, RETURN, SCOPEOF, SELF, SHARED, SHORT, SIGNED, SIZEOF,
+				SPAWN, STATIC, STATICASSERT, STRUCT, SWITCH, SYSTEM,
+				THREADLOCAL, TYPEDEF, TYPEOF, UNDEF, UNIFORM, UNION, UNSIGNED,
+				VOID, VOLATILE, WHEN, WHILE};
 		boolean[] result;
 		int length;
 		int min = identifierIndexes[0], max = identifierIndexes[0];
@@ -284,19 +282,19 @@ public class PreprocessorUtils {
 		int tokenType = token.getType();
 
 		switch (tokenType) {
-		case DEFINE:
-		case DEFINED:
-		case ELIF:
-		case ENDIF:
-		case ERROR:
-		case IFDEF:
-		case IFNDEF:
-		case INCLUDE:
-		case LINE:
-		case PRAGMA:
-		case UNDEF:
-			token.setType(IDENTIFIER);
-		default:
+			case DEFINE :
+			case DEFINED :
+			case ELIF :
+			case ENDIF :
+			case ERROR :
+			case IFDEF :
+			case IFNDEF :
+			case INCLUDE :
+			case LINE :
+			case PRAGMA :
+			case UNDEF :
+				token.setType(IDENTIFIER);
+			default :
 		}
 	}
 
