@@ -67,7 +67,7 @@ public class TokenUtils {
 			if (abbreviated)
 				return file.getIndexName();
 			else
-				return file.getName();
+				return file.getNickname();
 		} else {
 			CharStream stream = token.getInputStream();
 
@@ -298,8 +298,9 @@ public class TokenUtils {
 				lines.close();
 			} else if (filePath.endsWith("predefined macros")) {
 				StringBuilder sBuilder = new StringBuilder();
-				MacroExpansion macro_expansion = (MacroExpansion) token.getFormation();
-				
+				MacroExpansion macro_expansion = (MacroExpansion) token
+						.getFormation();
+
 				sBuilder.append("-D");
 				sBuilder.append(macro_expansion.getMacro().getName());
 				sBuilder.append("=");

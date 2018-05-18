@@ -326,8 +326,8 @@ public class FrontEnd {
 	 */
 	public AST parse(Language language, File[] sourceUnit,
 			File[] systemIncludePaths, File[] userIncludePaths,
-			Map<String, String> predefinedMacros) throws PreprocessorException,
-					SyntaxException, ParseException {
+			Map<String, String> predefinedMacros)
+			throws PreprocessorException, SyntaxException, ParseException {
 		Preprocessor preprocessor = getPreprocessor(language);
 		CivlcTokenSource tokens = preprocessor.preprocess(systemIncludePaths,
 				userIncludePaths, predefinedMacros, sourceUnit);
@@ -373,8 +373,8 @@ public class FrontEnd {
 	 */
 	public AST compile(File[] sourceUnit, Language language,
 			File[] systemIncludePaths, File[] userIncludePaths,
-			Map<String, String> implicitMacros) throws PreprocessorException,
-					SyntaxException, ParseException {
+			Map<String, String> implicitMacros)
+			throws PreprocessorException, SyntaxException, ParseException {
 		AST result = parse(language, sourceUnit, systemIncludePaths,
 				userIncludePaths, implicitMacros);
 		Analyzer analyzer = getStandardAnalyzer(language);
@@ -440,93 +440,6 @@ public class FrontEnd {
 		return result;
 	}
 
-	// /**
-	// * Compiles the given files and links the resulting translation units to
-	// * form a complete program. This is the method that "does everything".
-	// *
-	// * @param sourceUnits
-	// * the source files to compile
-	// * @param language
-	// * the language to use when compiling the source files
-	// * @param systemIncludePaths
-	// * the system include paths to search for included system
-	// * headers; may use {@link ABC#DEFAULT_SYSTEM_INCLUDE_PATHS}
-	// * @param userIncludePaths
-	// * the user include paths to search for included user headers;
-	// * may use {@link ABC#DEFAULT_USER_INCLUDE_PATHS}
-	// * @param implicitMacros
-	// * map from macro names to macros that are to be incorporated
-	// * before preprocessing each file; such macros might be defined
-	// * on the command line via -DMACRO=VALUE, for example; may use
-	// * {@link ABC#DEFAULT_IMPLICIT_MACROS}
-	// * @return the Program that results from compiling and linking
-	// * @throws PreprocessorException
-	// * if any file contains a preprocessor error
-	// * @throws ParseException
-	// * if the token stream emanating from the preprocessing of a
-	// * file does not satisfy the grammar of the language
-	// * @throws SyntaxException
-	// * if any file violates some aspect of the syntax of the
-	// * language or the translation units cannot be linked for some
-	// * reason
-	// */
-	// public Program compileAndLink(File[][] sourceUnits, Language language,
-	// File[] systemIncludePaths, File[] userIncludePaths,
-	// Map<String, String> implicitMacros) throws PreprocessorException,
-	// SyntaxException, ParseException {
-	// Preprocessor preprocessor;
-	// Analyzer analyzer;
-	// ProgramFactory programFactory;
-	// int numUnits = sourceUnits.length;
-	// AST[] asts = new AST[numUnits];
-	// Program result;
-	// Parser parser = this.getParser(language);
-	// ASTBuilder builder = this.getASTBuilder(language);
-	//
-	// preprocessor = getPreprocessor(language);
-	// analyzer = getStandardAnalyzer(language);
-	// programFactory = getProgramFactory(analyzer);
-	// for (int i = 0; i < numUnits; i++) {
-	// CivlcTokenSource tokens = preprocessor.outputTokenSource(
-	// systemIncludePaths, userIncludePaths, implicitMacros,
-	// sourceUnits[i]);
-	// ParseTree parseTree = parser.parse(tokens);
-	//
-	// asts[i] = builder.getTranslationUnit(parseTree);
-	// }
-	// result = programFactory.newProgram(asts);
-	// return result;
-	// }
-
-	// /**
-	// * Compiles and links the specified files. Equivalent to invoking
-	// * {@link #compileAndLink(File[], Language, File[], File[], Map)} with the
-	// * default values {@link ABC#DEFAULT_SYSTEM_INCLUDE_PATHS},
-	// * {@link ABC#DEFAULT_USER_INCLUDE_PATHS},
-	// * {@link ABC#DEFAULT_IMPLICIT_MACROS} for the last three arguments.
-	// *
-	// * @param sourceUnits
-	// * the source files to compile
-	// * @param language
-	// * the language to use when compiling the source files
-	// * @return the Program that results from compiling and linking
-	// * @throws PreprocessorException
-	// * if any file contains a preprocessor error
-	// * @throws ParseException
-	// * if the token stream emanating from the preprocessing of a
-	// * file does not satisfy the grammar of the language
-	// * @throws SyntaxException
-	// * if any file violates some aspect of the syntax of the
-	// * language or the translation units cannot be linked for some
-	// * reason
-	// */
-	// public Program compileAndLink(File[][] sourceUnits, Language language)
-	// throws PreprocessorException, SyntaxException, ParseException {
-	// return compileAndLink(sourceUnits, language,
-	// ABC.DEFAULT_SYSTEM_INCLUDE_PATHS,
-	// ABC.DEFAULT_USER_INCLUDE_PATHS, ABC.DEFAULT_IMPLICIT_MACROS);
-	// }
-
 	/**
 	 * Prints the program, symbol table, and type information to the given
 	 * output stream in a plain-text, human-readable format.
@@ -566,5 +479,4 @@ public class FrontEnd {
 	public Configuration getConfiguration() {
 		return this.configuration;
 	}
-
 }

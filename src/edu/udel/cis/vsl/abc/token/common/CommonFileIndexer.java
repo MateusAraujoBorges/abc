@@ -5,15 +5,29 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
 public class CommonFileIndexer implements FileIndexer {
 
+	/**
+	 * Mapping from {@link File}s to {@link SourceFile}s for the files
+	 * maintained by this indexer. There is a 1-1 correspondence between them.
+	 */
 	private Map<File, SourceFile> sourceFileMap = new LinkedHashMap<>();
 
+	/**
+	 * All {@link SourceFile}s maintained by this indexer, in order.
+	 */
 	private ArrayList<SourceFile> sourceFiles = new ArrayList<>();
+
+	/**
+	 * Map from filenames of files occurring in this indexer to the ordered list
+	 * of {@link SourceFile}s with that filename.
+	 */
+	private Map<String, ArrayList<SourceFile>> nameMap = new LinkedHashMap<>();
 
 	public CommonFileIndexer() {
 	}
@@ -33,9 +47,22 @@ public class CommonFileIndexer implements FileIndexer {
 		SourceFile result = sourceFileMap.get(file);
 
 		if (result == null) {
-			result = new SourceFile(file, sourceFiles.size());
+			String filename = file.getName();
+			ArrayList<SourceFile> sublist = nameMap.get(filename);
+			String nickname;
+
+			if (sublist == null) {
+				sublist = new ArrayList<>();
+				nameMap.put(filename, sublist);
+				nickname = filename;
+			} else {
+				nickname = filename + "<" + (sublist.size() + 1) + ">";
+			}
+			// int subindex = sublist.size();
+			result = new SourceFile(file, sourceFiles.size(), nickname);
 			sourceFiles.add(result);
 			sourceFileMap.put(file, result);
+			sublist.add(result);
 		}
 		return result;
 	}
@@ -43,8 +70,10 @@ public class CommonFileIndexer implements FileIndexer {
 	@Override
 	public void print(PrintStream out) {
 		for (SourceFile sourceFile : sourceFiles) {
-			out.println(
-					sourceFile.getIndexName() + "\t: " + sourceFile.getPath());
+			out.print(sourceFile.getIndexName() + "\t: "
+					+ sourceFile.getNickname());
+			out.print(" (" + sourceFile.getPath() + ")");
+			out.println();
 		}
 		out.println();
 		out.flush();
@@ -53,6 +82,16 @@ public class CommonFileIndexer implements FileIndexer {
 	@Override
 	public SourceFile get(File file) {
 		return sourceFileMap.get(file);
+	}
+
+	@Override
+	public ArrayList<SourceFile> getSourceFilesWithName(String name) {
+		return nameMap.get(name);
+	}
+
+	@Override
+	public Set<String> getFilenames() {
+		return nameMap.keySet();
 	}
 
 }
