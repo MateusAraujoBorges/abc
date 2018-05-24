@@ -305,16 +305,52 @@ public class TokenUtils {
 				sBuilder.append(macro_expansion.getMacro().getName());
 				sBuilder.append("=");
 				sBuilder.append(token.getText());
-				line = token.toString();
-			} else {
+				sBuilder.append("\n");
+				sBuilder.append(token.toString());
+				line = sBuilder.toString();
+			} else if (Files.exists(Paths.get(filePath))) {
 				Stream<String> lines = Files.lines(Paths.get(filePath));
 				line = lines.skip(token.getLine() - 1).findFirst().get();
 				lines.close();
+			} else {
+				// If the file related with the 'filePath' does not exist.
+				// A warning will be given
+				// And the info of 'token' will be returned.
+				StringBuilder sBuilder = new StringBuilder();
+
+				sBuilder.append("Warning: Cannot find source file: '");
+				sBuilder.append(filePath);
+				sBuilder.append("' for token: '");
+				sBuilder.append(token.toString());
+				sBuilder.append("'!");
+				System.err.println(sBuilder.toString());
+				line = token.toString();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		return line;
+	}
+
+	private static String genLocInfo(int sLine, int sPos, int eLine, int ePos) {
+		if (sPos < 0 && ePos < 0)
+			// Dummy token: Both sPos and ePos are negative.
+			return "";
+
+		StringBuilder sb = new StringBuilder();
+
+		assert (sLine >= 0 && sLine >= 0);
+		sb.append(":");
+		sb.append(sLine);
+		sb.append(".");
+		sb.append(sPos);
+		sb.append("-");
+		if (sLine != eLine) {
+			sb.append(eLine);
+			sb.append(".");
+		}
+		sb.append(ePos >= 0 ? ePos : "EOL");
+		return sb.toString();
 	}
 
 	/**
@@ -346,70 +382,32 @@ public class TokenUtils {
 		CivlcToken tempToken = null;
 
 		if (filename1.equals(filename2)) {
-			if (startLine == endLine) {
-				// Construct file and location
-				sBuilder.append(getShortFilename(first, false));
-				sBuilder.append(":");
-				sBuilder.append(startLine);
-				sBuilder.append(".");
-				sBuilder.append(startIndex);
-				sBuilder.append("-");
-				sBuilder.append(endIndex);
-				sBuilder.append("\n");
-				// Construct content
-				lineContent = getLineContentFromToken(first);
-				sBuilder.append(lineContent);
-				// Calculate the position of highlights.
-				tempToken = first;
-				while (tempToken != null && tempToken != last) {
-					highlightCount += tempToken.getText().length();
-					tempToken = tempToken.getNext();
-				}
-				otherCount = first.getCharPositionInLine();
-				// Construct highlight
-				sBuilder.append("\n");
-				for (int i = 0; i < otherCount; i++)
-					if (lineContent.charAt(i) == '\t')
-						sBuilder.append("\t");
-					else
-						sBuilder.append(" ");
-				while (highlightCount > 0) {
-					sBuilder.append("^");
-					highlightCount--;
-				}
-			} else {
-				// Construct file and location
-				sBuilder.append(getShortFilename(first, false));
-				sBuilder.append(":");
-				sBuilder.append(startLine);
-				sBuilder.append(".");
-				sBuilder.append(startIndex);
-				sBuilder.append("-");
-				sBuilder.append(endLine);
-				sBuilder.append(".");
-				sBuilder.append(endIndex >= 0 ? endIndex : "EOL");
-				sBuilder.append("\n\t");
-				// Construct content
-				lineContent = getLineContentFromToken(first);
-				sBuilder.append(lineContent);
-				// Calculate the position of highlights.
-				tempToken = first;
-				while (tempToken != null && tempToken.getLine() == startLine) {
-					highlightCount += tempToken.getText().length();
-					tempToken = tempToken.getNext();
-				}
-				otherCount = first.getCharPositionInLine();
-				// Construct highlight
-				sBuilder.append("\n");
-				for (int i = 0; i < otherCount; i++)
-					if (lineContent.charAt(i) == '\t')
-						sBuilder.append("\t");
-					else
-						sBuilder.append(" ");
-				while (highlightCount > 0) {
-					sBuilder.append("^");
-					highlightCount--;
-				}
+			// Construct file and location
+			sBuilder.append(getShortFilename(first, false));
+			sBuilder.append(
+					genLocInfo(startLine, startIndex, endLine, endIndex));
+			sBuilder.append("\n\t");
+			// Construct content
+			lineContent = getLineContentFromToken(first);
+			sBuilder.append(lineContent);
+			// Calculate the position of highlights.
+			tempToken = first;
+			while (tempToken != null && tempToken != last
+					&& tempToken.getLine() == startLine) {
+				highlightCount += tempToken.getText().length();
+				tempToken = tempToken.getNext();
+			}
+			otherCount = first.getCharPositionInLine();
+			// Construct highlight
+			sBuilder.append("\n");
+			for (int i = 0; i < otherCount; i++)
+				if (lineContent.charAt(i) == '\t')
+					sBuilder.append("  ");
+			while (highlightCount > 0) {
+				sBuilder.append("^");
+				highlightCount--;
+			}
+			if (startLine != endLine) {
 				// Construct multi-line abbreviation
 				sBuilder.append("\n\t...\n");
 				// Construct content
@@ -427,9 +425,7 @@ public class TokenUtils {
 				otherCount = lineContent.length();
 				for (int i = 0; i < otherCount; i++)
 					if (lineContent.charAt(i) == '\t')
-						sBuilder.append("\t");
-					else
-						sBuilder.append(" ");
+						sBuilder.append("  ");
 				while (highlightCount > 0) {
 					sBuilder.append("^");
 					highlightCount--;
@@ -439,19 +435,13 @@ public class TokenUtils {
 			String lastFileName = last.getSourceFile().getName();
 			String tempFileName = first.getSourceFile().getName();
 
-			assert lastFileName.equals(tempFileName);
+			assert !lastFileName.equals(tempFileName);
 			// Construct file and location
 			sBuilder.append(getShortFilename(first, false));
-			sBuilder.append(":");
-			sBuilder.append(startLine);
-			sBuilder.append(".");
-			sBuilder.append(startIndex);
-			sBuilder.append("-");
-			sBuilder.append(getShortFilename(last, false));
-			sBuilder.append(":");
-			sBuilder.append(endLine);
-			sBuilder.append(".");
-			sBuilder.append(endIndex >= 0 ? endIndex >= 0 : "EOL");
+			sBuilder.append(
+					genLocInfo(startLine, startIndex, startLine, startIndex));
+			sBuilder.append(" -- ");
+			sBuilder.append(genLocInfo(endLine, endIndex, endLine, endIndex));
 			sBuilder.append("\n\t");
 			/* Note that this situation is rarely happened */
 
@@ -469,9 +459,7 @@ public class TokenUtils {
 			sBuilder.append("\n");
 			for (int i = 0; i < otherCount; i++)
 				if (lineContent.charAt(i) == '\t')
-					sBuilder.append("\t");
-				else
-					sBuilder.append(" ");
+					sBuilder.append("  ");
 			while (highlightCount > 0) {
 				sBuilder.append("^");
 				highlightCount--;
