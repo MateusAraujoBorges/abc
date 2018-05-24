@@ -183,6 +183,7 @@ $system void $unidirectional_when(_Bool condition);
   @*/
 $atomic_f void $output_assign(void * output,const void * value, int size);
 
+/* returns the size (in bytes) of the heap of the given scope */
 $system $atomic_f size_t $heap_size($scope scope);
 
 /* The base address q of a pointer p is: 
@@ -201,4 +202,24 @@ $system $atomic_f size_t $heap_size($scope scope);
   @*/
 $system $state_f void * $array_base_address_of(const void *ptr);
 
+/* Obtains scope values of the scopes in the given state that is
+ * reachable by the process of the given place, where 'place' is the
+ * PID of the process in the state, it is a value that is senseless
+ * when used for any other states. The scope values are assigned to
+ * the given scope array. The array must be big enough for containing
+ * all scope values in the give state.
+ *
+ * state:  a $state object
+ * scopes: a pointer to an array which is big enough for the
+ * scope values in the given state
+ */
+//$system void $get_reachable_scopes($state state, int place, $scope (*scopes)[]);
+
+/* returns the number of scopes in the given state */
+//$system int $get_num_scopes($state state);
+
 #endif
+
+
+
+
