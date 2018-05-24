@@ -58,7 +58,6 @@ import edu.udel.cis.vsl.abc.transform.IF.Transformer;
  * </p>
  * 
  * @author siegel
- * 
  */
 public class FrontEnd {
 
@@ -105,6 +104,11 @@ public class FrontEnd {
 	 */
 	public FrontEnd(Configuration configuration) {
 		this.configuration = configuration;
+	}
+
+	public FrontEnd(Configuration configuration, FileIndexer fileIndexer) {
+		this(configuration);
+		this.fileIndexer = fileIndexer;
 	}
 
 	public TokenFactory getTokenFactory() {

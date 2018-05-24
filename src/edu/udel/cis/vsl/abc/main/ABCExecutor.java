@@ -27,6 +27,7 @@ import edu.udel.cis.vsl.abc.front.c.preproc.PreprocessorParser;
 import edu.udel.cis.vsl.abc.main.TranslationTask.TranslationStage;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
+import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.transform.IF.TransformRecord;
 import edu.udel.cis.vsl.abc.transform.IF.Transformer;
 import edu.udel.cis.vsl.abc.util.IF.ANTLRUtils;
@@ -350,6 +351,15 @@ public class ABCExecutor {
 		this.configuration.setArchitecture(task.getArchitecture());
 		this.configuration.setGNUC(task.getGNUC());
 		this.frontEnd = new FrontEnd(configuration);
+		initialize(task);
+	}
+
+	public ABCExecutor(TranslationTask task, FileIndexer fileIndexer) {
+		this.configuration = Configurations.newMinimalConfiguration();
+		this.configuration.setSVCOMP(task.getSVCOMP());
+		this.configuration.setArchitecture(task.getArchitecture());
+		this.configuration.setGNUC(task.getGNUC());
+		this.frontEnd = new FrontEnd(configuration, fileIndexer);
 		initialize(task);
 	}
 

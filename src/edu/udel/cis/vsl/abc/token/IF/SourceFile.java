@@ -7,10 +7,6 @@ import java.io.File;
  * with a unique integer index that can be used to identify that file in this
  * ABC invocation, and possibly other information.
  * 
- * An instance of {@link SourceFile} may be owned by a {@link FileIndexer} or
- * free (not owned). The instance can be owned by at most one
- * {@link FileIndexer}.
- * 
  * @author siegel
  */
 public class SourceFile implements Comparable<SourceFile> {
@@ -28,30 +24,24 @@ public class SourceFile implements Comparable<SourceFile> {
 	 */
 	private int index;
 
+	/**
+	 * A short name that will be used to identify this file, typically the
+	 * filename (with no path) with a possible suffix such as "<2>" to make the
+	 * name unique.
+	 */
 	private String nickname;
 
-	// /**
-	// * The {@link FileIndexer} containing this {@link SourceFile} object.
-	// * Exactly one such {@link FileIndexer} exists. Will be {@code null} if
-	// this
-	// * {@link SourceFile} is not owned by an indexer.
-	// */
-	// private FileIndexer fileIndexer;
-
-	// /**
-	// * The index of this {@link SourceFile} in the ordered list of all
-	// * {@link SourceFile}s which are managed by the {@link FileIndexer} and
-	// * which have the same filename as this one. Value is ignore if this is
-	// free
-	// * (now owned).
-	// */
-	// private int indexInName;
-
-	// // temporary hack. get rid of this method and fix the code that calls it
-	// public SourceFile(File file, int index) {
-	// this(null, file, index, -1);
-	// }
-
+	/**
+	 * Constructs new indexer in which the nickname is just the name of the
+	 * given file (without path).
+	 * 
+	 * @param file
+	 *            the {@link File} object wrapped by this {@link SourceFile}
+	 * @param index
+	 *            the index of this {@link SourceFile} in the ordered list of
+	 *            all {@link SourceFile}s managed by the {@link FileIndexer}
+	 *            that is managing this {@link SourceFile}
+	 */
 	public SourceFile(File file, int index) {
 		this(file, index, file.getName());
 	}
@@ -59,109 +49,94 @@ public class SourceFile implements Comparable<SourceFile> {
 	/**
 	 * Constructs new {@link SourceFile} with given fields.
 	 * 
-	 * @param fileIndexer
-	 *            the file indexer creating this object *
 	 * @param file
 	 *            the {@link File} object wrapped by this {@link SourceFile}
 	 * @param index
 	 *            the index of this {@link SourceFile} in the ordered list of
 	 *            all {@link SourceFile}s managed by the {@link FileIndexer}
 	 *            that is managing this {@link SourceFile}
-	 * @param indexInName
-	 *            the index of this {@link SourceFile} in the ordered list of
-	 *            all {@link SourceFile}s which are managed by the
-	 *            {@link FileIndexer} and which have the same filename as this
+	 * @param nickname
+	 *            a short name that will be used to identify this file,
+	 *            typically the filename (with no path) with a possible suffix
+	 *            such as "<2>" to make the name unique
 	 */
-	// public SourceFile(FileIndexer fileIndexer, File file, int index,
-	// int indexInName) {
-	// this.fileIndexer = fileIndexer;
-	// this.file = file;
-	// this.index = index;
-	// this.indexInName = indexInName;
-	// }
-
 	public SourceFile(File file, int index, String nickname) {
 		this.file = file;
 		this.index = index;
 		this.nickname = nickname;
 	}
 
+	/**
+	 * Returns the {@link File} wrapped by this object.
+	 * 
+	 * @return the file
+	 */
 	public File getFile() {
 		return file;
 	}
 
+	/**
+	 * Returns the index,the index of this {@link SourceFile} in the ordered
+	 * list of all {@link SourceFile}s managed by the {@link FileIndexer} that
+	 * is managing this {@link SourceFile}
+	 * 
+	 * @return the index
+	 */
 	public int getIndex() {
 		return index;
 	}
 
-	// TODO: or get rid of reference to fileIndexer?
-	// provide a way for the indexer to declare that this is a multiple file.
-	// also allow for "system" and "transformer" files which are not indexed.
-
 	/**
-	 * If there is only one file in the indexer with this filename, returns the
-	 * filename. Otherwise, returns a modified version of the filename in which
-	 * the integer index-in-name of this source file has been inserted.
-	 * 
-	 * @see #getIndexInName()
-	 * 
-	 * @return a modified version of the filename of this sourcefile that is
-	 *         unique among all source files controlled by the indexer
+	 * Returns the "nickname" that has been associated to this file. A short
+	 * name that will be used to identify this file, typically the filename
+	 * (with no path) with a possible suffix such as "<2>" to make the name
+	 * unique.
 	 */
 	public String getNickname() {
-//		String filename = getFilename();
-//
-//		if (fileIndexer == null)
-//			return filename;
-//
-//		int numWithSameName = fileIndexer.getSourceFilesWithName(filename)
-//				.size();
-//
-//		if (numWithSameName == 1)
-//			return filename;
-//		return filename + "<" + indexInName + ">";
 		return nickname;
 	}
 
+	/**
+	 * Constructs a human-readable string representation of this object, showing
+	 * values of all fields.
+	 * 
+	 * @return a human-readable string representation of this object, showing
+	 *         values of all fields.
+	 */
 	public String toString() {
 		return "SourceFile[" + index + "," + nickname + "," + file.getPath()
 				+ "]";
 	}
 
+	/**
+	 * Constructs a string of the form "f"+index, which can be used to
+	 * distinguish this sourcefile from all sourcefiles controlled by an
+	 * indexer.
+	 * 
+	 * @return "f"+index
+	 */
 	public String getIndexName() {
 		return "f" + index;
 	}
 
+	/**
+	 * Returns the filename (without the path prefix). This is the last element
+	 * in the path sequence specifying the file.
+	 * 
+	 * @return the filename
+	 */
 	public String getName() {
 		return file.getName();
 	}
 
+	/**
+	 * Returns the complete path for the file, including the filename.
+	 * 
+	 * @return the complete path
+	 */
 	public String getPath() {
 		return file.getPath();
 	}
-
-	/**
-	 * Returns the file name only, i.e., the last element in the path sequence
-	 * specifying the file.
-	 * 
-	 * @return the file name
-	 */
-	public String getFilename() {
-		return getFile().getName();
-	}
-
-	// /**
-	// * Returns the index of this source file in the ordered set of source
-	// files
-	// * with the same filename as this. These are also numbered from 0.
-	// *
-	// * @return the index of this source file in the ordered set of source
-	// files
-	// * with the same filename as this source file
-	// */
-	// public int getIndexInName() {
-	// return indexInName;
-	// }
 
 	@Override
 	public boolean equals(Object object) {
@@ -185,9 +160,7 @@ public class SourceFile implements Comparable<SourceFile> {
 
 		if (result != 0)
 			return result;
-
 		result = file.compareTo(o.file);
-
 		return result;
 	}
 
