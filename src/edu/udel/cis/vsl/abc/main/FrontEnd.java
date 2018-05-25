@@ -23,6 +23,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.Nodes;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
 import edu.udel.cis.vsl.abc.ast.type.IF.Types;
+import edu.udel.cis.vsl.abc.ast.value.IF.Value;
 import edu.udel.cis.vsl.abc.ast.value.IF.ValueFactory;
 import edu.udel.cis.vsl.abc.ast.value.IF.Values;
 import edu.udel.cis.vsl.abc.config.IF.Configuration;
@@ -38,8 +39,10 @@ import edu.udel.cis.vsl.abc.front.c.ptree.CParseTree;
 import edu.udel.cis.vsl.abc.program.IF.Program;
 import edu.udel.cis.vsl.abc.program.IF.ProgramFactory;
 import edu.udel.cis.vsl.abc.program.IF.Programs;
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
+import edu.udel.cis.vsl.abc.token.IF.Source;
 import edu.udel.cis.vsl.abc.token.IF.SyntaxException;
 import edu.udel.cis.vsl.abc.token.IF.TokenFactory;
 import edu.udel.cis.vsl.abc.token.IF.Tokens;
@@ -61,32 +64,96 @@ import edu.udel.cis.vsl.abc.transform.IF.Transformer;
  */
 public class FrontEnd {
 
+	/**
+	 * The configuration object specifying configuration options for this ABC
+	 * session
+	 */
 	private Configuration configuration;
 
+	/**
+	 * The {@link TokenFactory} used by this {@link FrontEnd} to create
+	 * {@link CivlcToken}s, {@link Source}s and related objects.
+	 */
 	private TokenFactory tokenFactory;
 
+	/**
+	 * The {@link TypeFactory} used by this {@link FrontEnd} to create
+	 * {@link Type}s.
+	 */
 	private TypeFactory typeFactory;
 
+	/**
+	 * The {@link ValueFactory} used by this {@link FrontEnd} to create
+	 * {@link Value}s. The {@link Value}s are used to represent the result of
+	 * evaluating a constant expression.
+	 */
 	private ValueFactory valueFactory;
 
+	/**
+	 * The {@link NodeFactory} used by this {@link FrontEnd} to create new
+	 * {@link ASTNode}s.
+	 */
 	private NodeFactory nodeFactory;
 
+	/**
+	 * The {@link ASTFactory} used by this {@link FrontEnd} to produce all
+	 * objects related to ASTs. It wraps a {@link NodeFactory},
+	 * {@link TypeFactory}, and other factories.
+	 */
 	private ASTFactory astFactory;
 
+	/**
+	 * The {@link EntityFactory} used by this {@link FrontEnd}.
+	 */
 	private EntityFactory entityFactory;
 
+	/**
+	 * The {@link ConversionFactory} used by this {@link FrontEnd}.
+	 */
 	private ConversionFactory conversionFactory;
 
+	/**
+	 * The {@link FileIndexer} used by this {@link FrontEnd} to keep track of
+	 * all files opened.
+	 */
 	private FileIndexer fileIndexer;
 
+	/**
+	 * For each programming {@link Language}, an {@link Analyzer} for that
+	 * language that performs basic analysis on the AST and leaves behind
+	 * important information in the AST nodes. These are created as needed and
+	 * entered into this table.
+	 */
 	private Map<Language, Analyzer> analyzers = new HashMap<>();
 
+	/**
+	 * For each programming {@link Language}, a {@link Parser} for that language
+	 * used to parse the source code and create a {@link ParseTree}. These are
+	 * created as needed and entered into this table.
+	 */
 	private Map<Language, Parser> parsers = new HashMap<>();
 
+	/**
+	 * For each programming {@link Language}, a {@link Preprocessor}, used to
+	 * preprocess a source file (and files included by that source file), to
+	 * create a stream of {@link CivlcToken}s. These are created as needed and
+	 * entered into this table.
+	 */
 	private Map<Language, Preprocessor> preprocessors = new HashMap<>();
 
+	/**
+	 * For each programming {@link Language}, an {@link ASTBuilder} used to
+	 * construct {@link AST}s from {@link ParseTree}s. These are created as
+	 * needed and entered into this table.
+	 */
 	private Map<Language, ASTBuilder> astBuilders = new HashMap<>();
 
+	/**
+	 * For each programming {@link Language}, a {@link ProgramFactory} used to
+	 * construct a whole {@link Program} from a set of {@link AST}s representing
+	 * individual translation units. This is commonly known as "linking" or "AST
+	 * merging." These are created as needed and entered into this table.
+	 */
 	private Map<Language, ProgramFactory> programFactories = new HashMap<>();
 
 	// TODO: where does this belong?
@@ -100,29 +167,70 @@ public class FrontEnd {
 	 * 
 	 * @param configuration
 	 *            the configuration object specifying configuration options for
-	 *            this ABS session
+	 *            this ABC session
 	 */
 	public FrontEnd(Configuration configuration) {
 		this.configuration = configuration;
 	}
 
+	/**
+	 * Constructs a new front end, using an existing {@link FileIndexer}. The
+	 * front end can be used repeatedly to perform multiple translation tasks.
+	 * The factories used by this front end will persist throughout its
+	 * lifetime, i.e., new factories are not created for each task.
+	 * 
+	 * @param configuration
+	 *            the configuration object specifying configuration options for
+	 *            this ABC session
+	 * @param fileIndexer
+	 *            the object used to keep track of all files opened in the
+	 *            course of this ABC session
+	 */
 	public FrontEnd(Configuration configuration, FileIndexer fileIndexer) {
 		this(configuration);
 		this.fileIndexer = fileIndexer;
 	}
 
+	/**
+	 * Gets the {@link Configuration} object for this ABC Front-end.
+	 *
+	 * @return the {@link Configuration} object
+	 */
+	public Configuration getConfiguration() {
+		return this.configuration;
+	}
+
+	/**
+	 * Returns the {@link TokenFactory} used by this {@link FrontEnd} to create
+	 * {@link CivlcToken}s, {@link Source}s and related objects.
+	 * 
+	 * @return the {@link TokenFactory} used by this {@link FrontEnd}
+	 */
 	public TokenFactory getTokenFactory() {
 		if (tokenFactory == null)
 			tokenFactory = Tokens.newTokenFactory();
 		return tokenFactory;
 	}
 
+	/**
+	 * Returns the {@link TypeFactory} used by this {@link FrontEnd} to create
+	 * {@link Type}s.
+	 * 
+	 * @return the {@link TypeFactory} used by this {@link FrontEnd}
+	 */
 	public TypeFactory getTypeFactory() {
 		if (typeFactory == null)
 			typeFactory = Types.newTypeFactory();
 		return typeFactory;
 	}
 
+	/**
+	 * Returns the {@link ValueFactory} used by this {@link FrontEnd} to create
+	 * {@link Value}s. The {@link Value}s are used to represent the result of
+	 * evaluating a constant expression.
+	 * 
+	 * @return the {@link ValueFactory} used by this {@link FrontEnd}
+	 */
 	public ValueFactory getValueFactory() {
 		if (valueFactory == null)
 			valueFactory = Values.newValueFactory(configuration,
@@ -130,6 +238,12 @@ public class FrontEnd {
 		return valueFactory;
 	}
 
+	/**
+	 * Returns the {@link FileIndexer} used by this {@link FrontEnd} to keep
+	 * track of all files opened.
+	 * 
+	 * @return the {@link FileIndexer} used by this {@link FrontEnd}
+	 */
 	public FileIndexer getFileIndexer() {
 		if (fileIndexer == null)
 			fileIndexer = getTokenFactory().newFileIndexer();
@@ -163,12 +277,22 @@ public class FrontEnd {
 		return astFactory;
 	}
 
+	/**
+	 * Returns the {@link EntityFactory} used by this {@link FrontEnd}.
+	 * 
+	 * @return the {@link EntityFactory} used by this {@link FrontEnd}
+	 */
 	public EntityFactory getEntityFactory() {
 		if (entityFactory == null)
 			entityFactory = Entities.newEntityFactory();
 		return entityFactory;
 	}
 
+	/**
+	 * Returns the {@link ConversionFactory} used by this {@link FrontEnd}.
+	 * 
+	 * @return the {@link ConversionFactory} used by this {@link FrontEnd}
+	 */
 	public ConversionFactory getConversionFactory() {
 		if (conversionFactory == null)
 			conversionFactory = Conversions
@@ -244,7 +368,7 @@ public class FrontEnd {
 	 * 
 	 * @param language
 	 *            language of the requested analyzer
-	 * @return a standard Analyzer for that language
+	 * @return a standard {@link Analyzer} for that language
 	 */
 	public Analyzer getStandardAnalyzer(Language language) {
 		Analyzer result = analyzers.get(language);
@@ -473,14 +597,5 @@ public class FrontEnd {
 		}
 		out.println();
 		out.flush();
-	}
-
-	/**
-	 * Gets the {@link Configuration} object for this ABC Front-end.
-	 *
-	 * @return the {@link Configuration} object.
-	 */
-	public Configuration getConfiguration() {
-		return this.configuration;
 	}
 }

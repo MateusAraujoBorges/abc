@@ -10,7 +10,6 @@ import edu.udel.cis.vsl.abc.token.IF.SourceFile;
  * "system" means, instead of token derived from a source file.
  * 
  * @author siegel
- * 
  */
 public class SystemFormation implements Formation {
 

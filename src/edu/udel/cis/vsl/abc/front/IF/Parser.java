@@ -1,7 +1,14 @@
 package edu.udel.cis.vsl.abc.front.IF;
 
+import edu.udel.cis.vsl.abc.token.IF.CivlcToken;
 import edu.udel.cis.vsl.abc.token.IF.CivlcTokenSource;
 
+/**
+ * A {@link Parser} is used to parse a {@link CivlcTokenSource} --- a stream of
+ * {@link CivlcToken}s --- and create a {@link ParseTree}.
+ * 
+ * @author siegel
+ */
 public interface Parser {
 
 	/**

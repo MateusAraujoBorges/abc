@@ -23,9 +23,9 @@ public class Tokens {
 	}
 
 	/**
-	 * Creates a new fileIndexer.
+	 * Creates a new, empty {@link FileIndexer}.
 	 * 
-	 * @return
+	 * @return a new {@link FileIndexer}
 	 */
 	public static FileIndexer newFileIndexer() {
 		return new CommonFileIndexer();

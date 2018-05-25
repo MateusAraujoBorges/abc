@@ -340,7 +340,8 @@ public class ABCExecutor {
 	 * Constructs new executor for performing the specified translation task.
 	 * The constructor does not perform the tasks, but it creates a new
 	 * {@link FrontEnd} and initializes data structures. The task itself will be
-	 * executed by invoking method {@link #execute()}.
+	 * executed by invoking method {@link #execute()}. A new empty
+	 * {@link FileIndexer} is created.
 	 * 
 	 * @param task
 	 *            a translation task to execute
@@ -354,6 +355,19 @@ public class ABCExecutor {
 		initialize(task);
 	}
 
+	/**
+	 * Constructs new executor for performing the specified translation task and
+	 * using the given {@link FileIndexer}. The constructor does not perform the
+	 * tasks, but it creates a new {@link FrontEnd} and initializes data
+	 * structures. The task itself will be executed by invoking method
+	 * {@link #execute()}.
+	 * 
+	 * @param task
+	 *            a translation task to execute
+	 * @param fileIndexer
+	 *            an existing non-{@code null} {@link FileIndexer} to use for
+	 *            keeping track of all openened files
+	 */
 	public ABCExecutor(TranslationTask task, FileIndexer fileIndexer) {
 		this.configuration = Configurations.newMinimalConfiguration();
 		this.configuration.setSVCOMP(task.getSVCOMP());

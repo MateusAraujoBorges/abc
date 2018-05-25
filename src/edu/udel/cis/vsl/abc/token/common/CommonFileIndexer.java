@@ -10,6 +10,11 @@ import java.util.Set;
 import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
 
+/**
+ * Straightforward implementation of {@link FileIndexer}.
+ * 
+ * @author siegel
+ */
 public class CommonFileIndexer implements FileIndexer {
 
 	/**
