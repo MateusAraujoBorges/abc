@@ -22,38 +22,43 @@ typedef struct _mem $mem;
  *              stack belong to the calling process.  Each process has
  *              a specific stack for manageing memory location sets.
  */
-/*@ depends_on \nothing; */
-/*@ executes_when \true; */
+/*@ depends_on \nothing; 
+  @ executes_when \true; 
+  @*/
 $system void $write_set_push();
 
 /* Description: Pop an memory location set out of the specific stack
  *              belong to the calling process.  Returns the popped
  *              memory location set
  */
-/*@ depends_on \nothing; */
-/*@ executes_when \true; */
+/*@ depends_on \nothing; 
+  @ executes_when \true; 
+  @*/
 $system $mem $write_set_pop();
 
 /* Description: Returns a copy of the memory location set at the top
  *              frame of the specific stack belong to the calling
  *              process.
  */
-/*@ depends_on \nothing; */
-/*@ executes_when \true; */
+/*@ depends_on \nothing; 
+  @ executes_when \true; 
+  @*/
 $state_f $system $mem $write_set_peek();
 
 /* Description: Flush a given set of memory locations into the memory
  *              location set on the top frame of the stack of the
  *              calling process.  No-op if the stack is empty.
  */
-/*@ depends_on \nothing; */
-/*@ executes_when \true; */
+/*@ depends_on \nothing; 
+  @ executes_when \true; 
+  @*/
 $system void $write_set_flush($mem m);
 
 /* Description: Returns a new empty memory location set.
  */
-/*@ depends_on \nothing; */
-/*@ executes_when \true; */
+/*@ depends_on \nothing; 
+  @ executes_when \true; 
+  @*/
 $state_f $system $mem $mem_new();
 
 /* Description: Havocing all the memory locations in the given memory
@@ -67,20 +72,23 @@ $state_f $system $mem $mem_new();
  *              where the function just returns.
  */
 /*@ depends_on \nothing; 
-  @ executes_when \true; */
+  @ executes_when \true; 
+  @*/
 $system _Bool $mem_havoc($mem mem, $state pre_state);
 
 /* Description: Unions two memory location sets.
  */
 /*@ depends_on \nothing; 
-  @ executes_when \true; */
+  @ executes_when \true; 
+  @*/
 $system $state_f $mem $mem_union($mem mem0, $mem mem1);
 
 /* Description: Performs a widening operation on a memory location
  *              set.
  */
 /*@ depends_on \nothing; 
-  @ executes_when \true; */
+  @ executes_when \true; 
+  @*/
 $system $state_f $mem $mem_widening($mem mem);
 
 /* Description: Returns true if and only if the two memory location
