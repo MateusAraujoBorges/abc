@@ -65,7 +65,6 @@ public class CommonFileIndexer implements FileIndexer {
 			} else {
 				nickname = filename + "<" + (sublist.size() + 1) + ">";
 			}
-			// int subindex = sublist.size();
 			result = new SourceFile(file, sourceFiles.size(), nickname);
 			sourceFiles.add(result);
 			sourceFileMap.put(file, result);
