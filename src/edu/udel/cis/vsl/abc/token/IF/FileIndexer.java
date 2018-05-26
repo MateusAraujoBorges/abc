@@ -3,6 +3,7 @@ package edu.udel.cis.vsl.abc.token.IF;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -90,5 +91,20 @@ public interface FileIndexer {
 	 *            the {@link PrintStream} where the output shall be sent
 	 */
 	void print(PrintStream out);
+
+	/**
+	 * Prints the list of {@link Files}s managed by this indexer, leaving out
+	 * any file for which the path begins with a string in
+	 * {@code ignoredPrefixes}. For example, if {@code ignoredPrefixes} contains
+	 * "/include", then no file with path starting with "/include" will be
+	 * printed.
+	 * 
+	 * @param out
+	 *            the {@link PrintStream} where the output shall be sent
+	 * @param ignoredPrefixes
+	 *            a collection of prefixes specifying the files that should not
+	 *            be printed
+	 */
+	void printFiltered(PrintStream out, Collection<String> ignoredPrefixes);
 
 }

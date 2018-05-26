@@ -3,12 +3,14 @@ package edu.udel.cis.vsl.abc.token.common;
 import java.io.File;
 import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import edu.udel.cis.vsl.abc.token.IF.FileIndexer;
 import edu.udel.cis.vsl.abc.token.IF.SourceFile;
+import edu.udel.cis.vsl.sarl.util.EmptySet;
 
 /**
  * Straightforward implementation of {@link FileIndexer}.
@@ -74,14 +76,7 @@ public class CommonFileIndexer implements FileIndexer {
 
 	@Override
 	public void print(PrintStream out) {
-		for (SourceFile sourceFile : sourceFiles) {
-			out.print(sourceFile.getIndexName() + "\t: "
-					+ sourceFile.getNickname());
-			out.print(" (" + sourceFile.getPath() + ")");
-			out.println();
-		}
-		out.println();
-		out.flush();
+		printFiltered(out, new EmptySet<String>());
 	}
 
 	@Override
@@ -97,6 +92,29 @@ public class CommonFileIndexer implements FileIndexer {
 	@Override
 	public Set<String> getFilenames() {
 		return nameMap.keySet();
+	}
+
+	@Override
+	public void printFiltered(PrintStream out,
+			Collection<String> ignoredPrefixes) {
+		for (SourceFile sourceFile : sourceFiles) {
+			String path = sourceFile.getPath();
+			boolean ignore = false;
+
+			for (String prefix : ignoredPrefixes) {
+				if (path.startsWith(prefix)) {
+					ignore = true;
+					break;
+				}
+			}
+			if (ignore)
+				continue;
+			out.print(sourceFile.getNickname());
+			out.print("  (" + sourceFile.getPath() + ")");
+			out.println();
+		}
+		out.println();
+		out.flush();
 	}
 
 }
