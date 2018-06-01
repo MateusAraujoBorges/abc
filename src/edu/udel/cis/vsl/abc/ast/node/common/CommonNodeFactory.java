@@ -1,5 +1,6 @@
 package edu.udel.cis.vsl.abc.ast.node.common;
 
+import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -246,8 +247,10 @@ import edu.udel.cis.vsl.abc.ast.node.common.type.CommonStructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonTypedefNameNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonTypeofNode;
 import edu.udel.cis.vsl.abc.ast.node.common.type.CommonVoidTypeNode;
+import edu.udel.cis.vsl.abc.ast.type.IF.IntegerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.ObjectType;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardBasicType.BasicTypeKind;
+import edu.udel.cis.vsl.abc.ast.type.IF.StandardSignedIntegerType.SignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardUnsignedIntegerType;
 import edu.udel.cis.vsl.abc.ast.type.IF.StandardUnsignedIntegerType.UnsignedIntKind;
 import edu.udel.cis.vsl.abc.ast.type.IF.TypeFactory;
@@ -426,6 +429,16 @@ public class CommonNodeFactory implements NodeFactory {
 	public IntegerConstantNode newIntegerConstantNode(Source source,
 			String representation) throws SyntaxException {
 		return literalInterpreter.integerConstant(source, representation);
+	}
+
+	@Override
+	public IntegerConstantNode newIntConstantNode(Source source, int value) {
+		IntegerType type = typeFactory.signedIntegerType(SignedIntKind.INT);
+		IntegerValue intValue = valueFactory.integerValue(type,
+				BigInteger.valueOf(value));
+
+		return new CommonIntegerConstantNode(source, String.valueOf(value),
+				intValue);
 	}
 
 	@Override

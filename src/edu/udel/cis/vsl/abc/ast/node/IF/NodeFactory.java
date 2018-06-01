@@ -547,6 +547,19 @@ public interface NodeFactory {
 			String representation) throws SyntaxException;
 
 	/**
+	 * A special case of {@link #newIntegerConstantNode(Source, String)} where
+	 * the 2nd arg is an integer, and the type of this
+	 * {@link IntegerConstantNode} is int.
+	 * 
+	 * @param source
+	 *            The source information for the integer constant
+	 * @param value
+	 *            The value of the integer constant.
+	 * @return The new integer constant node
+	 */
+	IntegerConstantNode newIntConstantNode(Source source, int value);
+
+	/**
 	 * Constructs a new floating constant node. A floating constant is an
 	 * occurrence of a literal floating point number in the source, which
 	 * encodes a concrete floating point value. The C11 Standard specifies the
