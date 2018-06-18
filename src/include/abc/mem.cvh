@@ -74,7 +74,7 @@ $state_f $system $mem $mem_new();
 /*@ depends_on \nothing; 
   @ executes_when \true; 
   @*/
-$system _Bool $mem_havoc($mem mem, $state pre_state);
+$system _Bool $mem_havoc($mem mem);
 
 /* Description: Unions two memory location sets.
  */

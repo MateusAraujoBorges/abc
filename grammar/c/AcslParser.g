@@ -95,6 +95,7 @@ tokens{
     MPI_OFFSET;
     MPI_VALID;
     MPI_REGION;
+    MPI_REDUCE;
     NOTHING;
     NULL_ACSL;
     NUMOF;
@@ -930,6 +931,8 @@ mpi_expression
         -> ^(MPI_AGREE mpiagree_key $a) 
     | mpiregion_key LPAREN a=term COMMA b=term COMMA c=term RPAREN
         -> ^(MPI_REGION mpiregion_key $a $b $c)
+    | mpireduce_key LPAREN a=term COMMA b=term COMMA c=term COMMA d=term RPAREN
+        -> ^(MPI_REDUCE mpireduce_key $a $b $c $d)
     | mpiequals_key LPAREN a=term COMMA b=term RPAREN
         -> ^(MPI_EQUALS mpiequals_key $a $b)
     | mpiextent_key LPAREN a=primaryExpression RPAREN
@@ -1240,6 +1243,10 @@ mpivalid_key
 
 mpiregion_key
 	: {input.LT(1).getText().equals("\\mpi_region")}? EXTENDED_IDENTIFIER
+	;
+
+mpireduce_key
+	: {input.LT(1).getText().equals("\\mpi_reduce")}? EXTENDED_IDENTIFIER
 	;
 
 /** ACSL higher-order keywords */

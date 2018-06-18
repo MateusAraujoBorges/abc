@@ -37,7 +37,7 @@ $state_f $loop_write_set $loop_write_set_union($loop_write_set ws, $mem iter_mem
 /*@ depends_on \nothing;
   @ executes_when \true;
   @*/
-$atomic_f _Bool $loop_write_set_havoc($loop_write_set ws, $state pre_state);
+$atomic_f _Bool $loop_write_set_havoc($loop_write_set ws);
 
 /* Description: Attempt to widening all the memory location references in the
  *              given $loop_write_set object. Returns true if and only
