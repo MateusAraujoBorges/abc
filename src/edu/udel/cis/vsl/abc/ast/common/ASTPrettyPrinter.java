@@ -64,7 +64,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.MemoryBlockReferenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
@@ -3101,37 +3100,11 @@ public class ASTPrettyPrinter {
 				result.append(
 						valueAt2Pretty((ValueAtNode) expression, maxLength));
 				break;
-			case MEMORY_BLOCK :
-				result.append(memBlock2Pretty(
-						(MemoryBlockReferenceNode) expression, maxLength));
-				break;
 			default :
 				throw new ABCUnsupportedException(
 						"pretty print of expression node of " + kind + " kind");
 		}
 		return trimStringBuffer(result, maxLength);
-	}
-
-	/**
-	 * Pretty printing a {@link MemoryBlockReferenceNode}
-	 * 
-	 * @param memBlock
-	 * @param maxLength
-	 * @return
-	 */
-	private static StringBuffer memBlock2Pretty(
-			MemoryBlockReferenceNode memBlock, int maxLength) {
-		if (maxLength == 0)
-			return EMPTY_STRING_BUFFER;
-
-		StringBuffer result = new StringBuffer();
-
-		result.append("$memBlockRef");
-		result.append("(");
-		result.append(expression2Pretty(memBlock.baseAddress(),
-				vacantLength(maxLength, result)));
-		result.append(")");
-		return result;
 	}
 
 	private static StringBuffer valueAt2Pretty(ValueAtNode valueAt,

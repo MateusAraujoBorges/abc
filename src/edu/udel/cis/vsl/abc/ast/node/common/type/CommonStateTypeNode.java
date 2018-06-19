@@ -6,13 +6,13 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 /**
- * Type node representing the type "$scope". This is used to give a scope a
+ * Type node representing the type "$state". This is used to give a state a
  * name. It is very much like a variable declaration and is treated as such.
  * 
- * "$scope s;" is translated as a variable declaration of a variable named "s",
+ * "$state s;" is translated as a variable declaration of a variable named "s",
  * with type node an instances of this class.
  * 
- * @author siegel
+ * @author ziqingluo
  * 
  */
 public class CommonStateTypeNode extends CommonTypeNode {

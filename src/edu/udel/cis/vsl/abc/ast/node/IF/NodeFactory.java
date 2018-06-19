@@ -67,7 +67,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.expression.FunctionCallNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.LambdaNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.MemoryBlockReferenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.QuantifiedExpressionNode;
@@ -121,7 +120,6 @@ import edu.udel.cis.vsl.abc.ast.node.IF.type.DomainTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.EnumerationTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.FunctionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.LambdaTypeNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.type.MemTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.PointerTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.StructureOrUnionTypeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.type.TypeNode;
@@ -435,8 +433,6 @@ public interface NodeFactory {
 
 	LambdaTypeNode newLambdaTypeNode(Source source, TypeNode freeVariableType,
 			TypeNode lambdaFunctionType);
-
-	MemTypeNode newMemTypeNode(Source source);
 
 	/**
 	 * Returns a new instance of the domain type node with given integer
@@ -2713,19 +2709,6 @@ public interface NodeFactory {
 	 */
 	ValueAtNode newValueAtNode(Source source, ExpressionNode state,
 			ExpressionNode pid, ExpressionNode expression);
-
-	/**
-	 * Creates a new {@link MemoryBlockReferenceNode} for
-	 * <code>$mem_block (base_addr) </code>.
-	 * 
-	 * @param source
-	 *            the source of the new node
-	 * @param expression
-	 *            the base address of the memory block
-	 * @return the new <code>$mem_block</code> expression node
-	 */
-	MemoryBlockReferenceNode newMemoryBlockNode(Source source,
-			ExpressionNode baseAddr);
 
 	/**
 	 * Creates a new {@link PredicateNode} for ACSL predicates

@@ -137,11 +137,6 @@ public interface ExpressionNode
 		 */
 		OPERATOR,
 		/**
-		 * An intermediate memory block expression, can be cast to
-		 * {@link MemoryBlockNode}
-		 */
-		MEMORY_BLOCK,
-		/**
 		 * A CIVL-C expression formed using a quantifier, such as the universal
 		 * quantifier <code>$forall</code> or the existential quantifier
 		 * <code>$exists</code>. Can be cast to {@link QuantifiedExpressionNode}
