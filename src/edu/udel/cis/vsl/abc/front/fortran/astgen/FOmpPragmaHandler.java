@@ -14,14 +14,20 @@ import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.DATA_CLAUSE;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.DEFAULT;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.DYNAMIC;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.END;
+import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.EQ;
+import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.EQV;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.FLUSH;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.FOR;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.FST_PRIVATE;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.GUIDED;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.IDENTIFIER;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.IF;
+import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.LAND;
+import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.LOR;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.LST_PRIVATE;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.MASTER;
+import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.NE;
+import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.NEQV;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.NONE;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.NOWAIT;
 import static edu.udel.cis.vsl.abc.front.fortran.parse.FOmpParser.NUM_THREADS;
@@ -65,13 +71,13 @@ import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.ExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IntegerConstantNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpExecutableNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpForNode.OmpScheduleKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpParallelNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpReductionNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpReductionNode.OmpReductionOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpSyncNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode.OmpWorksharingNodeKind;
@@ -256,9 +262,8 @@ public class FOmpPragmaHandler extends PragmaHandler {
 					} else {
 						throw new ABCRuntimeException(
 								"At most one nowait directive is allowed in an OpenMP construct.",
-								(tokenFactory
-										.newSource((CivlcToken) sectionsClause
-												.getToken())
+								(tokenFactory.newSource(
+										(CivlcToken) sectionsClause.getToken())
 										.getSummary(false, true)));
 					}
 					workshareNode.setNowait(true);
@@ -552,7 +557,8 @@ public class FOmpPragmaHandler extends PragmaHandler {
 	}
 
 	private OmpReductionNode translateReductionClause(CommonTree reduction) {
-		int operatorType = reduction.getChild(0).getType();
+		CommonTree opNode = (CommonTree) reduction.getChild(0);
+		int operatorType = opNode.getType();
 		List<IdentifierExpressionNode> list = translateIdentifierList(
 				(CommonTree) reduction.getChild(1));
 		Source rootSource = tokenFactory
@@ -561,14 +567,33 @@ public class FOmpPragmaHandler extends PragmaHandler {
 				.newSequenceNode(rootSource, "reductionList", list);
 
 		if (operatorType == IDENTIFIER) {
-			IdentifierExpressionNode function = this
-					.translateIdentifierExpression(
-							(CommonTree) reduction.getChild(0));
+			String id = opNode.getText().toLowerCase();
 
-			return this.nodeFactory.newOmpFunctionReductionNode(rootSource,
-					function, nodes);
-		} else {
-			Operator operator = translateOperator(
+			if (id.equals("max")) {
+				return this.nodeFactory.newOmpSymbolReductionNode(rootSource,
+						OmpReductionOperator.MAX, nodes);
+			} else if (id.equals("min")) {
+				return this.nodeFactory.newOmpSymbolReductionNode(rootSource,
+						OmpReductionOperator.MIN, nodes);
+			} else if (id.equals("iand")) {
+				return this.nodeFactory.newOmpSymbolReductionNode(rootSource,
+						OmpReductionOperator.BAND, nodes);
+			} else if (id.equals("ior")) {
+				return this.nodeFactory.newOmpSymbolReductionNode(rootSource,
+						OmpReductionOperator.BOR, nodes);
+			} else if (id.equals("ieor")) {
+				return this.nodeFactory.newOmpSymbolReductionNode(rootSource,
+						OmpReductionOperator.BXOR, nodes);
+			} else {// User Defined Functions
+				IdentifierExpressionNode function = this
+						.translateIdentifierExpression(
+								(CommonTree) reduction.getChild(0));
+
+				return this.nodeFactory.newOmpFunctionReductionNode(rootSource,
+						function, nodes);
+			}
+		} else { // Built-in Symbol Operators
+			OmpReductionOperator operator = translateOperator(
 					reduction.getChild(0).getType());
 
 			return this.nodeFactory.newOmpSymbolReductionNode(rootSource,
@@ -576,24 +601,30 @@ public class FOmpPragmaHandler extends PragmaHandler {
 		}
 	}
 
-	private Operator translateOperator(int type) {
+	private OmpReductionOperator translateOperator(int type) {
 		switch (type) {
 			case PLUS :
-				return Operator.PLUSEQ;
+				return OmpReductionOperator.SUM;
 			case STAR :
-				return Operator.TIMESEQ;
+				return OmpReductionOperator.PROD;
 			case SUB :
-				return Operator.MINUSEQ;
+				return OmpReductionOperator.MINUS;
 			case AMPERSAND :
-				return Operator.BITANDEQ;
+				return OmpReductionOperator.BAND;
 			case BITXOR :
-				return Operator.BITXOREQ;
+				return OmpReductionOperator.BXOR;
 			case BITOR :
-				return Operator.BITOREQ;
-			// case AND:
-			// return Operator.LANDEQ;
-			// case OR:
-			// return Operator.LOREQ;
+				return OmpReductionOperator.BOR;
+			case LAND :
+				return OmpReductionOperator.LAND;
+			case LOR :
+				return OmpReductionOperator.LOR;
+			case EQ :
+			case EQV :
+				return OmpReductionOperator.EQV;
+			case NE :
+			case NEQV :
+				return OmpReductionOperator.NEQ;
 			default :
 				throw new ABCUnsupportedException(
 						"reduction operator of type " + type);

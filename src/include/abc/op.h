@@ -17,7 +17,9 @@ typedef enum Operation{
   _BXOR,   // bit-wise exclusive or
   _MINLOC, // min value and location
   _MAXLOC, // max value and location
-  _REPLACE // replace ? TODO: Find definition for this operation
+  _REPLACE, // replace ? TODO: Find definition for this operation
+  _EQ, // Equal to (Fortran OpenMP only)
+  _NEQ, // Not Equal to (Fortran OpenMP only)
 }Operation;
 
 typedef enum Operation $operation;

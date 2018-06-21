@@ -23,15 +23,21 @@ public class FOmpParser implements OmpPragmaParser {
 	public static final int DATA_CLAUSE = OmpParserF08.T_DATA_CLAUSE;
 	public static final int DEFAULT = OmpParserF08.T_DEFAULT;
 	public static final int DYNAMIC = OmpParserF08.T_DYNAMIC;
+	public static final int EQ = OmpParserF08.T_EQ;
+	public static final int EQV = OmpParserF08.T_EQV;
 	public static final int FLUSH = OmpParserF08.T_FLUSH;
 	public static final int FOR = OmpParserF08.T_DO;
 	public static final int FST_PRIVATE = OmpParserF08.T_FST_PRIVATE;
 	public static final int GUIDED = OmpParserF08.T_GUIDED;
 	public static final int IDENTIFIER = OmpParserF08.T_IDENT;
 	public static final int IF = OmpParserF08.T_IF;
+	public static final int LAND = OmpParserF08.T_AND;
+	public static final int LOR = OmpParserF08.T_OR;
 	public static final int LST_PRIVATE = OmpParserF08.T_LST_PRIVATE;
 	public static final int MASTER = OmpParserF08.T_MASTER;
 	public static final int NONE = OmpParserF08.T_NONE;
+	public static final int NE = OmpParserF08.T_NE;
+	public static final int NEQV = OmpParserF08.T_NEQV;
 	public static final int NOWAIT = OmpParserF08.T_NOWAIT;
 	public static final int NUM_THREADS = OmpParserF08.T_NUM_THREADS;
 	public static final int ORDERED = OmpParserF08.T_ORDERED;
@@ -71,15 +77,16 @@ public class FOmpParser implements OmpPragmaParser {
 		}
 	}
 
-	//TODO: Transformation from CommonTree to FortranTree for 
-	//parsing the involved expression.
+	// TODO: Transformation from CommonTree to FortranTree for
+	// parsing the involved expression.
 	public FortranTree parseFortran(Source source, TokenStream tokens)
 			throws SyntaxException {
 		OmpParserF08 parser = new OmpParserF08(tokens);
-		
+
 		try {
-			CommonTree tempTree = (CommonTree) parser.openmp_construct().getTree();
-			
+			CommonTree tempTree = (CommonTree) parser.openmp_construct()
+					.getTree();
+
 			return commonTree2FortranTree(tempTree);
 		} catch (RecognitionException e) {
 			throw new SyntaxException(e.getMessage(), null);

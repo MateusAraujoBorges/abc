@@ -88,6 +88,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpDeclarativeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpFunctionReductionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpParallelNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpReductionNode.OmpReductionOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpSymbolReductionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpSyncNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpWorksharingNode;
@@ -2307,13 +2308,13 @@ public interface NodeFactory {
 	 * @param source
 	 *            The source code element of the new node.
 	 * @param operator
-	 *            The operator of the reduction node.
+	 *            The {@link OmpReductionOperator} of the reduction node.
 	 * @param variables
 	 *            The variables of the reduction clause.
 	 * @return The new OpenMP reduction node.
 	 */
 	OmpSymbolReductionNode newOmpSymbolReductionNode(Source source,
-			Operator operator,
+			OmpReductionOperator operator,
 			SequenceNode<IdentifierExpressionNode> variables);
 
 	/**

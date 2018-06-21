@@ -1996,22 +1996,22 @@ public class ASTPrettyPrinter {
 				OmpSymbolReductionNode symbol = (OmpSymbolReductionNode) reduction;
 
 				switch (symbol.operator()) {
-					case PLUSEQ :
+					case SUM :
 						result.append("+");
 						break;
-					case MINUSEQ :
+					case MINUS :
 						result.append("-");
 						break;
-					case TIMESEQ :
+					case PROD :
 						result.append("*");
 						break;
-					case BITANDEQ :
+					case BAND :
 						result.append("&");
 						break;
-					case BITOREQ :
+					case BOR :
 						result.append("|");
 						break;
-					case BITXOREQ :
+					case BXOR :
 						result.append("^");
 						break;
 					case LAND :
@@ -2019,6 +2019,12 @@ public class ASTPrettyPrinter {
 						break;
 					case LOR :
 						result.append("||");
+						break;
+					case EQV :
+						result.append("==");
+						break;
+					case NEQ :
+						result.append("!=");
 						break;
 					default :
 						throw new ABCRuntimeException(

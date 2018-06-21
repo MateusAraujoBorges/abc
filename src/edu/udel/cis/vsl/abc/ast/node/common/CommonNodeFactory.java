@@ -96,6 +96,7 @@ import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpDeclarativeNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpForNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpFunctionReductionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpParallelNode;
+import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpReductionNode.OmpReductionOperator;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpSymbolReductionNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpSyncNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpSyncNode.OmpSyncNodeKind;
@@ -971,7 +972,7 @@ public class CommonNodeFactory implements NodeFactory {
 
 	@Override
 	public OmpSymbolReductionNode newOmpSymbolReductionNode(Source source,
-			Operator operator,
+			OmpReductionOperator operator,
 			SequenceNode<IdentifierExpressionNode> variables) {
 		return new CommonOmpSymbolReductionNode(source, operator, variables);
 	}

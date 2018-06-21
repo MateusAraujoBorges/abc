@@ -7,16 +7,15 @@ import edu.udel.cis.vsl.abc.ast.IF.DifferenceObject.DiffKind;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.expression.IdentifierExpressionNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.expression.OperatorNode.Operator;
 import edu.udel.cis.vsl.abc.ast.node.IF.omp.OmpSymbolReductionNode;
 import edu.udel.cis.vsl.abc.token.IF.Source;
 
 public class CommonOmpSymbolReductionNode extends CommonOmpReductionNode
 		implements OmpSymbolReductionNode {
 
-	private Operator operator;
+	private OmpReductionOperator operator;
 
-	public CommonOmpSymbolReductionNode(Source source, Operator operator,
+	public CommonOmpSymbolReductionNode(Source source, OmpReductionOperator operator,
 			SequenceNode<IdentifierExpressionNode> variables) {
 		super(source);
 		this.operator = operator;
@@ -35,7 +34,7 @@ public class CommonOmpSymbolReductionNode extends CommonOmpReductionNode
 	}
 
 	@Override
-	public Operator operator() {
+	public OmpReductionOperator operator() {
 		return this.operator;
 	}
 

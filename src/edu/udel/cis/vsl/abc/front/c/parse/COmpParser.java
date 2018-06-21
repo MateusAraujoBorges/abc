@@ -28,6 +28,8 @@ public class COmpParser implements OmpPragmaParser {
 	public static final int GUIDED = OmpParser.GUIDED;
 	public static final int IDENTIFIER = OmpParser.IDENTIFIER;
 	public static final int IF = OmpParser.IF;
+	public static final int LAND = OmpParser.AND;
+	public static final int LOR = OmpParser.OR;
 	public static final int LST_PRIVATE = OmpParser.LST_PRIVATE;
 	public static final int MASTER = OmpParser.MASTER;
 	public static final int NONE = OmpParser.NONE;

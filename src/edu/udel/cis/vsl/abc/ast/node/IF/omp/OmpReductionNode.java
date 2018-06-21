@@ -24,15 +24,35 @@ public interface OmpReductionNode extends ASTNode {
 	 * The kind of this reduction clause, either
 	 * <ul>
 	 * <li>OPERATOR if the reduction-identifier is one of the following:+, -, *,
-	 * &, |, ^, && and ||;</li> or
-	 * <li>FUNCTION if the reduction-identifier is an identifier.</li>
+	 * &, |, ^, &&, ||, min and max;</li> or
+	 * <li>FUNCTION if the reduction-identifier is an identifier except "min"
+	 * and "max" (ignoring the letter case for these two strings).</li>
 	 * </ul>
 	 * 
 	 * @author Manchun Zheng
+	 * @author Wenhao Wu (wuwenhao@udel.edu)
 	 * 
 	 */
 	public enum OmpReductionNodeKind {
 		FUNCTION, OPERATOR
+	}
+
+	/**
+	 * The kind of this reduction operator, all (SUM, MINUS, MULTIPLY, MAX,
+	 * MINBAND, BOR, BXOR, LAND, LOR, UDEF) except for "UDEF" are OpenMP
+	 * built-in operators according to OpenMP Standard ver.4.5
+	 * (https://www.openmp.org/wp-content/uploads/openmp-4.5.pdf).
+	 * 
+	 * @author Wenhao Wu (wuwenhao@udel.edu)
+	 *
+	 */
+	public enum OmpReductionOperator {
+		SUM, MINUS, PROD, /* Arithmetical Symbol Operators */
+		MAX, MIN, /* Arithmetical Identifier Operators */
+		BAND, BOR, BXOR, /* Bit-wise Operators */
+		LAND, LOR, /* Logical Operators */
+		EQV, NEQ, /* Logical Operators for Fortran only */
+		UDEF /* User-Defined Reduce Function Identifier Operators */
 	}
 
 	/**
