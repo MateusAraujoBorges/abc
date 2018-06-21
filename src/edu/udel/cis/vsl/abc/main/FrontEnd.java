@@ -17,7 +17,6 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Entity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.EntityFactory;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.Nodes;
 import edu.udel.cis.vsl.abc.ast.type.IF.Type;
@@ -155,9 +154,6 @@ public class FrontEnd {
 	 * merging." These are created as needed and entered into this table.
 	 */
 	private Map<Language, ProgramFactory> programFactories = new HashMap<>();
-
-	// TODO: where does this belong?
-	private AttributeKey intDivAttributeKey;
 
 	/**
 	 * Constructs a new front end. The front end can be used repeatedly to
@@ -414,11 +410,6 @@ public class FrontEnd {
 		return Transform.newTransformer(code, getASTFactory());
 	}
 
-	// TODO: whoever created this method must add javadoc
-	public void setIntDivAttributeKey(AttributeKey intDivAttributeKey) {
-		this.intDivAttributeKey = intDivAttributeKey;
-	}
-
 	// Actions...
 
 	/**
@@ -562,8 +553,6 @@ public class FrontEnd {
 		Program result;
 
 		programFactory = getProgramFactory(language);
-		if (intDivAttributeKey != null)
-			programFactory.setIntDivMacroKey(intDivAttributeKey);
 		result = programFactory.newProgram(translationUnits);
 		return result;
 	}

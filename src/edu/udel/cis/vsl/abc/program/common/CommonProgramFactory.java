@@ -18,7 +18,6 @@ import edu.udel.cis.vsl.abc.ast.entity.IF.Scope;
 import edu.udel.cis.vsl.abc.ast.entity.IF.TaggedEntity;
 import edu.udel.cis.vsl.abc.ast.entity.IF.Typedef;
 import edu.udel.cis.vsl.abc.ast.node.IF.ASTNode;
-import edu.udel.cis.vsl.abc.ast.node.IF.AttributeKey;
 import edu.udel.cis.vsl.abc.ast.node.IF.NodeFactory;
 import edu.udel.cis.vsl.abc.ast.node.IF.SequenceNode;
 import edu.udel.cis.vsl.abc.ast.node.IF.declaration.DeclarationNode;
@@ -64,8 +63,6 @@ public class CommonProgramFactory implements ProgramFactory {
 	 * into a program.
 	 */
 	private Analyzer standardAnalyzer;
-
-	private AttributeKey intDivAttributeKey;
 
 	// Constructors...
 
@@ -353,16 +350,6 @@ public class CommonProgramFactory implements ProgramFactory {
 			}
 		}
 		newRoot = nodeFactory.newProgramNode(fakeSource, definitions);
-		if (intDivAttributeKey != null) {
-			for (ASTNode root : roots) {
-				Object value = root.getAttribute(intDivAttributeKey);
-
-				if (value != null) {
-					newRoot.setAttribute(intDivAttributeKey, value);
-					break;
-				}
-			}
-		}
 		result = astFactory.newAST(newRoot, allSourceFiles, true);
 		if (debug) {
 			out.println("Linked AST (raw):");
@@ -388,10 +375,5 @@ public class CommonProgramFactory implements ProgramFactory {
 	@Override
 	public Program newProgram(AST[] asts) throws SyntaxException {
 		return newProgram(link(asts));
-	}
-
-	@Override
-	public void setIntDivMacroKey(AttributeKey key) {
-		this.intDivAttributeKey = key;
 	}
 }
